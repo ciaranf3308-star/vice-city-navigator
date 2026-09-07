@@ -401,25 +401,24 @@
     return t.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   }
   function showCard(props) {
-    const card = document.getElementById('poi-card');
+    const detail = document.getElementById('poi-detail');
     const userPos = hooks.getUserPos ? hooks.getUserPos() : null;
     document.getElementById('poi-blip').src = blipUrl(props.blip || 'qmark');
     document.getElementById('poi-name').textContent = props.name || 'Unnamed place';
     document.getElementById('poi-type').textContent = prettyType(props.type);
     document.getElementById('poi-dist').textContent =
       (userPos && hooks.formatDist) ? hooks.formatDist(haversine(userPos, [props.lng, props.lat])) : '';
-    card.hidden = false;
+    // POI detail lives in the planning drawer; the hook opens it.
+    // Fallback unhides the detail block if the hook is unavailable.
+    if (hooks.openPlanning) hooks.openPlanning('poi');
+    else if (detail) detail.hidden = false;
     document.getElementById('poi-go').onclick = () => {
-      card.hidden = true;
       if (hooks.setDestination) hooks.setDestination({
         label: props.name, lnglat: [props.lng, props.lat], blip: props.blip || 'waypoint',
       });
     };
   }
   function wireCard() {
-    document.getElementById('poi-close').addEventListener('click', () => {
-      document.getElementById('poi-card').hidden = true;
-    });
     const layerIds = [POI_LAYER_ID];
     const onPoiClick = e => {
       const f = e.features && e.features[0];

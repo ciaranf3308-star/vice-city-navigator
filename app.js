@@ -25,7 +25,9 @@ let dest = null;               // {label, lnglat}
 let routeCoords = [];          // full route LineString coords
 let steps = [];                // nav steps
 let totalDist = 0, totalDur = 0;
-let navActive = false, followMode = true, voiceOn = true;
+let navActive = false, followMode = true;
+let uiMode = 'explore';      // explore | planning | drive
+let discoveryOn = false;     // fog-of-war view (explore only — never while driving)
 let stepIdx = 0, watchId = null, lastCamMove = 0, lastPos = null;
 let offRouteSince = 0, arrived = false, rerouting = false;
 
@@ -66,14 +68,11 @@ function etaString(remainSec) {
   const t = new Date(Date.now() + remainSec * 1000);
   return t.toLocaleTimeString('en-IE', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Dublin' });
 }
+/* Voice goes through the theme-aware voice engine (voice.js):
+   standard speechSynthesis, themed OpenAI TTS, or off.
+   The deterministic text stays on screen regardless. */
 function speak(text) {
-  if (!voiceOn || !('speechSynthesis' in window)) return;
-  try {
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.rate = 1.02; u.volume = 1;
-    speechSynthesis.speak(u);
-  } catch (e) { /* voice unavailable */ }
+  if (window.VCNVoice) window.VCNVoice.speakText(text);
 }
 
 /* ---------------- Vice City blips ----------------
@@ -113,6 +112,10 @@ function blipFor(it) {
 const blipUrl = name => `${BLIP_PATH}${name}.png`;
 
 /* ---------------- maneuver arrows (original SVG) ---------------- */
+function themeArrowColor() {
+  const t = window.VCNThemes && window.VCNThemes.current();
+  return (t && t.ui && t.ui.arrowColor) || VC.yellow;
+}
 function arrowSvg(kind) {
   const base = '<path d="M32 9 V45 M19 23 L32 9 L45 23"/>';
   const rot = d => `<g transform="rotate(${d} 32 32)">${base}</g>`;
@@ -126,7 +129,7 @@ function arrowSvg(kind) {
     'flag': '<path d="M22 52 V8 M22 11 H47 L40 18.5 L47 26 H22"/>'
   };
   const inner = bodies[kind] || bodies['straight'];
-  return `<svg viewBox="0 0 64 64" fill="none" stroke="${VC.yellow}" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
+  return `<svg viewBox="0 0 64 64" fill="none" stroke="${themeArrowColor()}" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
 }
 function arrowKind(m) {
   if (m.type === 'arrive') return 'flag';
@@ -180,10 +183,14 @@ async function initMap() {
   });
   map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
   map.on('load', () => {
+    if (window.VCNThemes) document.body.classList.add(window.VCNThemes.current().ui.bodyClass);
+    if (window.VCNVoice) VCNVoice.init();
+    if (window.VCNDiscovery) VCNDiscovery.init(map);
     if (window.VCNPlaces) VCNPlaces.init(map, {
       getUserPos: () => userPos,
       formatDist: fmtDist,
       setDestination: d => { dest = d; planRoute(); },
+      openPlanning: v => openPlanning(v || 'poi'),
     });
     locateUser(true);
   });
@@ -329,9 +336,10 @@ async function planRoute() {
     steps = buildSteps(route);
     totalDist = route.distance; totalDur = route.duration;
     drawRoute();
+    $('dest-label').textContent = (dest && dest.label) || 'Destination';
     $('route-dist').textContent = fmtDist(totalDist);
     $('route-time').textContent = `${Math.round(totalDur / 60)} min`;
-    $('route-card').hidden = false;
+    openPlanning('route');
   } catch (e) { toast('Could not find a route. Try again.'); }
 }
 function currentPosOnce() {
@@ -346,23 +354,34 @@ function currentPosOnce() {
 function startNav() {
   if (!steps.length) return;
   navActive = true; stepIdx = 0; arrived = false; offRouteSince = 0;
-  $('start-panel').hidden = true;
-  $('nav-banner').hidden = false;
-  $('nav-controls').hidden = false;
+  if (discoveryOn) setDiscovery(false); // fog never shows during navigation
+  setUiMode('drive');
   setFollow(true);
   updateBanner();
   const first = steps[0];
   speak(`Starting navigation. ${instrText(first)}. Total ${speakDist(totalDist)}.`);
+  // Pre-generate themed voice for upcoming maneuvers — background only,
+  // navigation never waits for it. Canonical texts are stable ("In 300
+  // meters, …") so they match exactly what maybeAnnounce will speak.
+  if (window.VCNVoice) VCNVoice.pregenerate(upcomingManeuverTexts());
   if (watchId !== null) navigator.geolocation.clearWatch(watchId);
   watchId = navigator.geolocation.watchPosition(onPos, onPosErr,
     { enableHighAccuracy: true, maximumAge: 1000, timeout: 15000 });
 }
+/* Stable canonical maneuver texts for the next few steps (voice pregen). */
+function upcomingManeuverTexts() {
+  const out = [];
+  for (let i = 1; i < Math.min(steps.length, 4); i++) {
+    const t = instrText(steps[i]);
+    out.push(`In 300 meters, ${t}.`, `${t}.`);
+  }
+  return out;
+}
 function endNav() {
   navActive = false;
   if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
-  try { speechSynthesis.cancel(); } catch (e) {}
-  $('nav-banner').hidden = true; $('nav-controls').hidden = true;
-  $('start-panel').hidden = false;
+  if (window.VCNVoice) VCNVoice.cancel();
+  setUiMode('explore');
   if (map) {
     if (map.getSource('vcn-route')) map.getSource('vcn-route').setData({ type: 'FeatureCollection', features: [] });
     if (destMarker) { destMarker.remove(); destMarker = null; }
@@ -375,6 +394,9 @@ function onPosErr() { /* keep last known position; toast once */ }
 function onPos(pos) {
   const p = [pos.coords.longitude, pos.coords.latitude];
   userPos = p; placeUserMarker();
+  // Passive discovery tracking — no network, runs in every mode.
+  // The fog itself is only *shown* in Discovery Mode (never while driving).
+  if (window.VCNDiscovery) VCNDiscovery.reveal(p);
   if (window.VCNPlaces) VCNPlaces.maybeRefresh(p); // ambient POIs, 750 m gated
   if (!navActive || !steps.length) return;
 
@@ -429,6 +451,11 @@ async function reroute() {
     stepIdx = 0; offRouteSince = 0; arrived = false;
     drawRouteKeepView();
     updateBanner();
+    // Regenerate themed voice for the new route; drop stale audio.
+    if (window.VCNVoice) {
+      VCNVoice.pruneCache([]);
+      VCNVoice.pregenerate(upcomingManeuverTexts());
+    }
     speak(`New route. ${instrText(steps[0])}.`);
   } catch (e) { toast('Reroute failed — staying on current route.'); }
   rerouting = false;
@@ -460,7 +487,9 @@ function maybeAnnounce(dMan) {
     if (!arrived && dMan < 40) { arrived = true; speak('You have arrived.'); }
     return;
   }
-  if (!next.ann300 && dMan < 300) { next.ann300 = true; speak(`In ${speakDist(dMan)}, ${instrText(next)}.`); }
+  // Stable canonical texts ("In 300 meters, …") so themed-voice
+  // pre-generation matches exactly what is spoken here.
+  if (!next.ann300 && dMan < 300) { next.ann300 = true; speak(`In 300 meters, ${instrText(next)}.`); }
   else if (!next.ann80 && dMan < 80) { next.ann80 = true; speak(`${instrText(next)}.`); }
 }
 
@@ -469,20 +498,70 @@ function setFollow(on) {
   $('follow-btn').classList.toggle('on', on);
 }
 
+/* ---------------- UI modes: explore / planning / drive ----------------
+   Explore:  full-screen map, minimal chrome (menu, search, locate).
+   Planning: slide-out drawer (desktop) / bottom sheet (mobile) with
+             search, results, destination, route preview, Start Drive.
+   Drive:    compact HUD only — maneuver card + trip bar.
+   The MapLibre instance is created once and never recreated. */
+function setUiMode(mode) {
+  uiMode = mode;
+  $('explore-ui').hidden = mode === 'drive';
+  $('drawer').hidden = mode !== 'planning';
+  $('drive-hud').hidden = mode !== 'drive';
+  if (mode === 'drive') closeMenu();
+}
+function openPlanning(view) {
+  closeMenu();
+  setUiMode('planning');
+  $('poi-detail').hidden = view !== 'poi';
+  if (view !== 'route') $('route-card').hidden = true;
+  if (view === 'search') setTimeout(() => $('search').focus(), 60);
+}
+function closeDrawer() {
+  setUiMode(navActive ? 'drive' : 'explore');
+}
+function openMenu() {
+  $('menu-panel').hidden = false;
+  syncDiscoveryStats();
+}
+function closeMenu() { $('menu-panel').hidden = true; }
+function toggleMenu() { $('menu-panel').hidden ? openMenu() : closeMenu(); }
+
+/* ---------------- discovery menu wiring ---------------- */
+function syncDiscoveryStats() {
+  if (!window.VCNDiscovery) return;
+  const s = VCNDiscovery.stats();
+  const km = s.km2 < 10 ? s.km2.toFixed(1) : Math.round(s.km2);
+  $('discovery-stats').textContent =
+    `${s.cells} areas · ${km} km² discovered (${s.pct.toFixed(2)}% of Ireland)`;
+}
+function setDiscovery(on) {
+  discoveryOn = on;
+  if (window.VCNDiscovery) VCNDiscovery.setFogVisible(on && !navActive);
+  $('discovery-toggle').checked = on;
+  if (on) { syncDiscoveryStats(); toast('Discovery Map — drive to reveal the fog'); }
+}
+
 /* ---------------- controls ---------------- */
 const ICONS = {
   voiceOn: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 13v6h5l6 5V8l-6 5H7z" fill="currentColor" stroke="none"/><path d="M22 12c2.6 2.6 2.6 5.4 0 8"/><path d="M25 9c4 4 4 10 0 14"/></svg>',
   voiceOff: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 13v6h5l6 5V8l-6 5H7z" fill="currentColor" stroke="none"/><path d="M23 13l8 8M31 13l-8 8"/></svg>',
   follow: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="16" cy="16" r="8"/><circle cx="16" cy="16" r="1.6" fill="currentColor"/><path d="M16 3v5M16 24v5M3 16h5M24 16h5"/></svg>'
 };
+function syncMuteIcon() {
+  const muted = window.VCNVoice ? VCNVoice.isMuted() : false;
+  $('mute-btn').innerHTML = muted ? ICONS.voiceOff : ICONS.voiceOn;
+}
 function wireControls() {
   $('mute-btn').innerHTML = ICONS.voiceOn;
   $('follow-btn').innerHTML = ICONS.follow;
   $('mute-btn').addEventListener('click', () => {
-    voiceOn = !voiceOn;
-    $('mute-btn').innerHTML = voiceOn ? ICONS.voiceOn : ICONS.voiceOff;
-    if (!voiceOn) { try { speechSynthesis.cancel(); } catch (e) {} }
-    else speak('Voice guidance on.');
+    if (!window.VCNVoice) return;
+    const muted = !VCNVoice.isMuted();
+    VCNVoice.setMuted(muted);
+    syncMuteIcon();
+    if (!muted) speak('Voice guidance on.');
   });
   $('follow-btn').addEventListener('click', () => {
     setFollow(!followMode);
@@ -492,7 +571,56 @@ function wireControls() {
   $('zoom-out').addEventListener('click', () => map && map.zoomOut());
   $('end-btn').addEventListener('click', endNav);
   $('start-btn').addEventListener('click', startNav);
-  $('origin-btn').addEventListener('click', () => { locateUser(true); toast('Origin: your location'); });
+  $('locate-btn').addEventListener('click', () => locateUser(true));
+
+  // explore chrome
+  $('menu-btn').addEventListener('click', toggleMenu);
+  $('menu-close').addEventListener('click', closeMenu);
+  $('search-bar').addEventListener('click', () => openPlanning('search'));
+
+  // planning drawer
+  $('drawer-close').addEventListener('click', closeDrawer);
+  $('drawer-handle').addEventListener('click', closeDrawer);
+
+  // drive HUD
+  $('drive-menu-btn').addEventListener('click', toggleMenu);
+  $('drive-search-btn').addEventListener('click', () => openPlanning('search'));
+
+  // menu: discovery
+  $('discovery-toggle').addEventListener('change', e => setDiscovery(e.target.checked));
+  $('discovery-reset').addEventListener('click', () => {
+    if (!window.VCNDiscovery) return;
+    if (confirm('Reset the discovered map? All fog-of-war progress will be erased.')) {
+      VCNDiscovery.reset();
+      syncDiscoveryStats();
+      toast('Discovery map reset.');
+    }
+  });
+
+  // menu: voice settings
+  if (window.VCNVoice) {
+    VCNVoice.init(); // load saved settings before populating controls
+    const cfg = VCNVoice.getConfig();
+    $('voice-mode').value = cfg.mode;
+    $('profanity-toggle').checked = !!cfg.profanity;
+    $('endpoint-url').value = cfg.endpoint || '';
+    syncMuteIcon();
+  }
+  $('voice-mode').addEventListener('change', e => {
+    if (window.VCNVoice) VCNVoice.setConfig({ mode: e.target.value });
+    syncMuteIcon();
+  });
+  $('profanity-toggle').addEventListener('change', e => {
+    if (window.VCNVoice) VCNVoice.setConfig({ profanity: e.target.checked });
+  });
+  $('endpoint-url').addEventListener('change', e => {
+    if (window.VCNVoice) {
+      VCNVoice.setConfig({ endpoint: e.target.value.trim() });
+      toast('Voice server saved.');
+    }
+  });
+
+  setUiMode('explore');
 }
 
 /* ---------------- boot ---------------- */
@@ -506,7 +634,11 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
 
 // debug / test hook
 window.VCN = {
-  state: () => ({ navActive, stepIdx, steps: steps.length, voiceOn, hasMap: !!map, hasRoute: routeCoords.length > 0 }),
+  state: () => ({ navActive, uiMode, stepIdx, steps: steps.length,
+    voiceMuted: window.VCNVoice ? VCNVoice.isMuted() : true,
+    voiceMode: window.VCNVoice ? VCNVoice.mode() : 'n/a',
+    discovery: window.VCNDiscovery ? VCNDiscovery.stats() : null,
+    hasMap: !!map, hasRoute: routeCoords.length > 0 }),
   _map: () => map,
   _setTestRoute(coords, testSteps) { routeCoords = coords; steps = testSteps; totalDist = 1000; totalDur = 300; }
 };

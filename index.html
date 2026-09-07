@@ -19,70 +19,110 @@
 <body>
 <div id="map"></div>
 
-<!-- vignette / scanline flavor -->
+<!-- vignette flavor -->
 <div id="fx" aria-hidden="true"></div>
 
-<!-- ============ START / SEARCH PANEL ============ -->
-<section id="start-panel" class="panel">
-  <h1 class="vc-title">Vice City <span>Navigator</span></h1>
-  <p class="tagline">your streets, but neon</p>
+<!-- ============ EXPLORE chrome: minimal controls, full-screen map ============ -->
+<div id="explore-ui">
+  <button id="menu-btn" class="ctl" aria-label="Menu">☰</button>
+  <button id="search-bar" aria-label="Search"><span>Where to?</span></button>
+  <div id="map-tools">
+    <button id="zoom-in" class="ctl" aria-label="Zoom in">+</button>
+    <button id="zoom-out" class="ctl" aria-label="Zoom out">−</button>
+    <button id="locate-btn" class="ctl" aria-label="My location">◎</button>
+  </div>
+</div>
 
-  <div class="field">
-    <label>From</label>
-    <button id="origin-btn" class="chip active">My location</button>
+<!-- ============ MENU panel: discovery, voice, settings ============ -->
+<aside id="menu-panel" hidden aria-label="Menu">
+  <div class="menu-head">
+    <h2 class="vc-title">Vice City <span>Navigator</span></h2>
+    <button id="menu-close" class="ctl" aria-label="Close menu">✕</button>
   </div>
 
-  <div class="field">
-    <label>Where to?</label>
+  <section class="menu-section">
+    <h3>Discovery Map</h3>
+    <label class="row"><input type="checkbox" id="discovery-toggle"> Fog of war</label>
+    <div id="discovery-stats" class="stats">—</div>
+    <button id="discovery-reset" class="ghost-btn">Reset discovered map</button>
+    <small class="hint">Drive to reveal the map. Fog never shows during navigation.</small>
+  </section>
+
+  <section class="menu-section">
+    <h3>Voice</h3>
+    <label class="stack">Mode
+      <select id="voice-mode">
+        <option value="standard">Standard navigation</option>
+        <option value="themed">Themed</option>
+        <option value="banter">Themed + banter</option>
+        <option value="off">Voice off</option>
+      </select>
+    </label>
+    <label class="row"><input type="checkbox" id="profanity-toggle"> Profanity</label>
+    <label class="stack">Themed voice server
+      <input id="endpoint-url" type="url" inputmode="url" placeholder="https://your-worker.workers.dev" autocomplete="off">
+    </label>
+    <small class="hint">Themed voice needs your own TTS server — the OpenAI key stays server-side. See VOICE_SETUP.md.</small>
+  </section>
+
+  <p class="attrib">Map © OpenStreetMap contributors · Tiles OpenFreeMap · Routing OSRM</p>
+</aside>
+
+<!-- ============ PLANNING drawer / bottom sheet ============ -->
+<aside id="drawer" hidden aria-label="Plan">
+  <div id="drawer-handle" aria-hidden="true"></div>
+  <button id="drawer-close" class="ctl" aria-label="Close">✕</button>
+
+  <div id="drawer-search">
     <input id="search" type="search" placeholder="Search places…" autocomplete="off" enterkeyhint="search">
     <ul id="results" hidden></ul>
   </div>
 
+  <div id="poi-detail" hidden>
+    <div class="poi-head">
+      <img id="poi-blip" alt="" width="40" height="40">
+      <div>
+        <strong id="poi-name">—</strong>
+        <small><span id="poi-type">—</span> · <span id="poi-dist">—</span></small>
+      </div>
+    </div>
+    <button id="poi-go" class="big-btn">Set destination</button>
+  </div>
+
   <div id="route-card" hidden>
+    <strong id="dest-label" class="dest-label">—</strong>
     <div class="route-meta">
       <strong id="route-dist"></strong><span>•</span><span id="route-time"></span>
     </div>
-    <button id="start-btn" class="big-btn">Start navigation</button>
+    <button id="start-btn" class="big-btn">Start Drive</button>
   </div>
+</aside>
 
-  <p class="attrib">Map © OpenStreetMap contributors · Tiles OpenFreeMap · Routing OSRM</p>
-</section>
-
-<!-- ============ NAV BANNER ============ -->
-<section id="nav-banner" hidden>
-  <div id="maneuver-arrow" aria-hidden="true"></div>
-  <div class="banner-text">
-    <div id="next-dist">—</div>
-    <div id="next-instr">—</div>
-    <div id="trip-meta">—</div>
-  </div>
-</section>
-
-<!-- ============ NAV CONTROLS ============ -->
-<div id="nav-controls" hidden>
-  <button id="mute-btn" class="ctl" title="Voice on/off" aria-label="Toggle voice"></button>
-  <button id="follow-btn" class="ctl on" title="Follow me" aria-label="Toggle follow"></button>
-  <button id="zoom-in" class="ctl" title="Zoom in" aria-label="Zoom in">+</button>
-  <button id="zoom-out" class="ctl" title="Zoom out" aria-label="Zoom out">−</button>
-  <button id="end-btn" class="ctl danger" title="End navigation" aria-label="End navigation">✕</button>
-</div>
-
-<!-- ============ AMBIENT POI CARD ============ -->
-<section id="poi-card" class="panel" hidden>
-  <button id="poi-close" class="ctl" aria-label="Close">✕</button>
-  <div class="poi-head">
-    <img id="poi-blip" alt="" width="40" height="40">
-    <div>
-      <strong id="poi-name">—</strong>
-      <small><span id="poi-type">—</span> · <span id="poi-dist">—</span></small>
+<!-- ============ DRIVE HUD: compact, full-screen map ============ -->
+<section id="drive-hud" hidden aria-label="Navigation">
+  <button id="drive-menu-btn" class="ctl" aria-label="Menu">☰</button>
+  <div id="maneuver-card">
+    <div id="maneuver-arrow" aria-hidden="true"></div>
+    <div class="banner-text">
+      <div id="next-dist">—</div>
+      <div id="next-instr">—</div>
     </div>
   </div>
-  <button id="poi-go" class="big-btn">Set destination</button>
+  <div id="drive-bar">
+    <span id="trip-meta">—</span>
+    <button id="drive-search-btn" class="ctl" aria-label="Search">⌕</button>
+    <button id="mute-btn" class="ctl" title="Voice on/off" aria-label="Toggle voice"></button>
+    <button id="follow-btn" class="ctl on" title="Recenter" aria-label="Recenter"></button>
+    <button id="end-btn" class="ctl danger" title="End navigation" aria-label="End navigation">✕</button>
+  </div>
 </section>
 
 <div id="toast" hidden></div>
 
 <script src="places-config.js"></script>
+<script src="themes/vice-city.js"></script>
+<script src="discovery.js"></script>
+<script src="voice.js"></script>
 <script src="places.js"></script>
 <script src="app.js"></script>
 </body>
