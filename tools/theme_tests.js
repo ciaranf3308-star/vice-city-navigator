@@ -108,17 +108,23 @@ for (const id of T.ids()) {
 
 /* ---------- PNG assets on disk ---------- */
 for (const id of T.ids()) {
+  // nominal blip size: 16px shared baseline; themes shipping larger art
+  // (gta-v: 32px) declare pois.blipScale and places.js compensates.
+  const scale = (T.get(id).pois && T.get(id).pois.blipScale) || 1;
+  const nominal = Math.round(16 / scale);
   for (const sem of SEMANTICS.concat(['waypoint', 'qmark'])) {
     const url = T.poiIconUrl(sem, id);
     const { w, h } = pngSize(path.join(REPO, url));
-    ok(w === 16 && h === 16, `${id} blip 16x16: ${sem}`);
+    ok(w === nominal && h === nominal, `${id} blip ${nominal}x${nominal}: ${sem}`);
   }
   const ps = pngSize(path.join(REPO, T.get(id).map.playerMarker));
   ok(ps.w === 32 && ps.h === 32, `${id} player marker 32x32`);
 }
+ok(T.get('gta-v').pois.blipScale === 0.5, 'gta-v declares blipScale 0.5');
 
 /* ---------- service worker classification ---------- */
 const swSrc = fs.readFileSync(path.join(REPO, 'sw.js'), 'utf8');
+const cssSrc = fs.readFileSync(path.join(REPO, 'styles.css'), 'utf8');
 const swBox = { self: { addEventListener() {} }, caches: undefined, console };
 vm.createContext(swBox);
 vm.runInContext(swSrc + '\nthis.__sw = { isShell, isThemeAsset, SHELL };', swBox, { filename: 'sw.js' });
@@ -136,9 +142,44 @@ ok(SW.isThemeAsset('/assets/themes/san-andreas/blips/fuel.png'), 'isThemeAsset: 
 ok(SW.isThemeAsset('/fonts/frontier/0-255.pbf'), 'isThemeAsset: frontier glyphs');
 ok(!SW.isThemeAsset('/vice-city-navigator/themes/vice-city/style.json'), 'VC style is shell, not on-demand');
 ok(!SW.isShell('/assets/themes/gta-v/blips/fuel.png'), 'V blip not in eager shell');
+ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter glyphs');
+ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
+ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
+ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
+ok(swSrc.includes("ws-shell-v24"), 'SW shell cache v24');
+ok(swSrc.includes("ws-theme-v3"), 'SW theme cache v3');
+
+/* ---------- per-theme typography (game-authentic fonts) ---------- */
+for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
+    'chalet-comprime.woff2', 'signpainter.woff2', 'pricedown-gta.woff2',
+    'rdr-lino.woff2', 'kirsty.woff2']) {
+  ok(fs.existsSync(path.join(REPO, 'fonts', f)), `UI font on disk: fonts/${f}`);
+}
+for (const fam of ['Bank Gothic', 'Beckett', 'Chalet London', 'Chalet Comprime',
+    'SignPainter', 'Pricedown GTA', 'RDR Lino', 'Kirsty']) {
+  ok(cssSrc.includes(`font-family:'${fam}'`), `styles.css @font-face: ${fam}`);
+}
+ok(/body\.theme-san-andreas\{[^}]*--vcfont:'Beckett'/.test(cssSrc), 'SA display font: Beckett');
+ok(/body\.theme-san-andreas\{[^}]*--vclabel:'Bank Gothic'/.test(cssSrc), 'SA label font: Bank Gothic');
+ok(/body\.theme-gta-v\{[^}]*--vcfont:'Chalet Comprime'/.test(cssSrc), 'V display font: Chalet Comprime');
+ok(/body\.theme-gta-v\{[^}]*--vclabel:'Chalet London'/.test(cssSrc), 'V label font: Chalet London');
+ok(/body\.theme-rdr2\{[^}]*--vcfont:'Kirsty'/.test(cssSrc), 'RDR2 display font: Kirsty');
+ok(/body\.theme-rdr2\{[^}]*--vclabel:'RDR Lino'/.test(cssSrc), 'RDR2 label font: RDR Lino');
+// map glyph stacks regenerated from the authentic typefaces
+ok(fs.existsSync(path.join(REPO, 'fonts', 'SignPainter', '0-255.pbf')), 'SignPainter glyph stack on disk');
+const vStyle = JSON.parse(fs.readFileSync(path.join(REPO, 'themes/gta-v/style.json'), 'utf8'));
+const vRoadFonts = new Set(vStyle.layers.filter(l => /label-road/.test(l.id)).map(l => l.layout['text-font'][0]));
+ok(vRoadFonts.size === 1 && vRoadFonts.has('SignPainter'), 'V road labels use SignPainter stack');
+const vPlaceFonts = new Set(vStyle.layers.filter(l => /label-place$/.test(l.id)).map(l => l.layout['text-font'][0]));
+ok(vPlaceFonts.size === 1 && vPlaceFonts.has('gta-v'), 'V place labels use Chalet (gta-v) stack');
+const rdrStyle = JSON.parse(fs.readFileSync(path.join(REPO, 'themes/rdr2/style.json'), 'utf8'));
+const rdrPlace = rdrStyle.layers.find(l => /label-place$/.test(l.id));
+ok(rdrPlace && rdrPlace.layout['text-letter-spacing'] === 0.18, 'RDR2 place labels tracked out');
 
 /* ---------- POI importance ordering + inverse sort key ---------- */
 const placesSrc = fs.readFileSync(path.join(REPO, 'places.js'), 'utf8');
+ok(placesSrc.includes('blipScale'), 'places.js honors pois.blipScale');
+ok(placesSrc.includes('iconSizeExpr'), 'places.js scales POI icon-size per theme');
 const impMatch = placesSrc.match(/const IMPORTANCE_BY_SEMANTIC = \{([\s\S]*?)\};/);
 ok(!!impMatch, 'IMPORTANCE_BY_SEMANTIC table found');
 const impBox = {};
@@ -160,7 +201,6 @@ const vcSkinJs = fs.readFileSync(path.join(REPO, 'themes/vice-city/spotify-skin.
 const vcSkinCss = fs.readFileSync(path.join(REPO, 'themes/vice-city/spotify-skin.css'), 'utf8');
 const appSrc = fs.readFileSync(path.join(REPO, 'app.js'), 'utf8');
 const indexSrc = fs.readFileSync(path.join(REPO, 'index.html'), 'utf8');
-const cssSrc = fs.readFileSync(path.join(REPO, 'styles.css'), 'utf8');
 
 // art crops exist at 2x with expected dimensions
 const crops = { 'header.png': [960, 346], 'album.png': [560, 666], 'stage.png': [960, 714], 'tube.png': [960, 30] };

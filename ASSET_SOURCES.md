@@ -5,6 +5,100 @@ runtime. This file records the exact source, original filename,
 WayStation filename, conversion, and license/source notes for each
 asset, per the project brief.
 
+## 2026-09-07 — Full-fidelity typography + GTA V blip pass
+
+This pass replaces every theme's approximate fonts with the actual
+game typefaces (or the closest documented match) and replaces GTA V's
+generic pixel-art blips with the v-hud HUD icon set. It supersedes the
+"no game-extracted textures" note below for GTA V fonts/blips.
+
+### GTA V fonts (actual game files)
+
+- Source: `https://github.com/gennariarmando/v-hud` (MIT License),
+  `resources/VHud/fonts/` — the v-hud author extracted these from
+  GTA V's Scaleform files.
+- Original → WayStation:
+  - `Chalet-LondonNineteenSixty.ttf` → `fonts/chalet-london.woff2`
+    (UI body, map place labels, `fonts/gta-v/` SDF glyphs)
+  - `ChaletComprime-CologneSixtyScale.ttf` → `fonts/chalet-comprime.woff2`
+    (condensed display titles)
+  - `SignPainter-HouseScript.ttf` → `fonts/signpainter.woff2`
+    (street-name labels on the map via `fonts/SignPainter/` SDF glyphs —
+    GTA V renders road names in this script)
+  - `PricedownGTA.ttf` → `fonts/pricedown-gta.woff2`
+    (V's HUD money typeface; wired as a family, used for numerals)
+- Conversion: TTF → woff2 via fontTools/brotli; SDF glyph PBFs
+  (256 ranges, 0–65535) via fontnik from the TTFs.
+- License note: the v-hud repo is MIT-licensed; the typefaces
+  themselves are Rockstar's, extracted by the mod author. Shipped as
+  game-authenticity assets for a personal project.
+
+### GTA V blips (v-hud HUD icon set)
+
+- Source: same v-hud repo, `resources/VHud/blips/` — 63 `radar_*.dds`
+  files (64×64 DXT, white V-style HUD pictograms; SA naming because
+  v-hud is a GTA V HUD for San Andreas).
+- WayStation filenames: `assets/themes/gta-v/blips/<semantic>.png`
+  (29 files, 32×32 RGBA) + `assets/themes/gta-v/player.png` (32×32,
+  from `radar_player.dds`).
+- Conversion: DDS → PNG via Pillow; white icon re-composited with a
+  soft dark outline (GTA V's blips are white with a dark edge) at 2×
+  the other themes' nominal size; `pois.blipScale: 0.5` in
+  `themes/gta-v/theme.js` keeps on-screen size consistent
+  (`places.js` multiplies the shared icon-size expression).
+- SA-stem → semantic mapping:
+  airport←airyard, atm/bank←cash, bar←datedrink, burger←burgershot,
+  car_wash←spray, chicken←chicken, fast_food←diner, garage←modgarage,
+  gym←gym, hospital←hospital, hotel←savegame, mall/shop←tshirt,
+  nightlife←datedisco, pizza←pizza, police←police, restaurant←datefood,
+  waypoint←waypoint, qmark←qmark; cafe/cinema/ev_charger/fuel/parking/
+  pharmacy/stadium/supermarket/train fall back to the qmark icon (no
+  corresponding V-style pictogram exists).
+- Replaces the generic pixel-art set from the multi-theme foundation
+  (old notes below retained for history).
+
+### San Andreas fonts (documented game typefaces)
+
+Per the GTA Wiki font table, SA uses Pricedown (mission text/HUD),
+Bank Gothic (menu items), and Beckett (menu titles).
+- `Bank Gothic` (menu items, HUD labels, map glyphs):
+  `https://fonts.cdnfonts.com/css/bank-gothic`
+  (ufonts.com rip, "BankGothic Medium") → `fonts/bank-gothic.woff`
+  and `fonts/san-andreas/` SDF glyphs (fontnik, woff→TTF via fontTools).
+  Freeware listing; metric-compatible with the SA menu face.
+- `Beckett` (menu screen titles — MAP/BRIEF/STATS blackletter):
+  `https://www.dafont.com/beckett.font` (`BECKETT_.TTF`, freeware) →
+  `fonts/beckett.woff2`.
+- Pricedown: existing `fonts/pricedown-bl.woff` (authentic, unchanged).
+
+### RDR2 / Frontier fonts (actual game typefaces)
+
+- `RDR Lino` (the RDR2 map serif — "SAINT DENIS" lettering — and menu
+  serif): served as a webfont by the fan site
+  `https://github.com/aulonajvazi/rdr2` via
+  `https://db.onlinewebfonts.com/t/ab21a97b9cae2e116d8d1473baefc9f0.ttf`
+  ("RDR Lino Regular"; community rip of the in-game font, also in the
+  mods.club "all RDR2 fonts" pack as RDRLino-Regular) →
+  `fonts/rdr-lino.woff2` and `fonts/frontier/` SDF glyphs (fontnik).
+  Map place labels also gain `text-letter-spacing: 0.18` to match the
+  game's tracked-out capitals.
+- `Kirsty` (RDR2 title slab — "ARTHUR MORGAN", money, presents cards;
+  identified via GTAForums font research):
+  `https://www.dafont.com/kirsty.font` (`Kirsty Rg.otf`, freeware) →
+  `fonts/kirsty.woff2`.
+- Replaces the previous `Rye` approximation for UI display type.
+
+### Map glyph stack summary (after this pass)
+
+- `fonts/PricedownBl/` — Vice City (unchanged, authentic)
+- `fonts/Oswald/`, `fonts/PricedownBl,Oswald/` — VC fallbacks (unchanged)
+- `fonts/san-andreas/` — regenerated from Bank Gothic
+- `fonts/gta-v/` — regenerated from Chalet London Nineteen Sixty
+- `fonts/SignPainter/` — new, SignPainter HouseScript (V road labels)
+- `fonts/frontier/` — regenerated from RDR Lino
+- `themes/gta-v/style.json` road layers use `["SignPainter"]`;
+  all other label layers use their theme's single stack.
+
 ## 2026-09-07 — Multi-theme foundation (San Andreas / GTA V / Frontier)
 
 ### Note on game-asset extraction

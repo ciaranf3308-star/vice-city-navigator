@@ -919,7 +919,8 @@
           "hamlet",
           10,
           10
-        ]
+        ],
+        "text-letter-spacing": 0.18
       },
       "paint": {
         "text-color": "#3a2d1c",

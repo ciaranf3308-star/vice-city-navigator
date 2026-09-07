@@ -9,8 +9,8 @@
      used. Nothing theme-specific is eagerly precached except the
      default Vice City set.
    Map tiles, routing and search always go to the network. */
-const CACHE = 'ws-shell-v23';
-const THEME_CACHE = 'ws-theme-v2';
+const CACHE = 'ws-shell-v24';
+const THEME_CACHE = 'ws-theme-v3';
 const VC_BLIPS = ['airYard','barbers','burgerShot','cash','chicken','dateDisco','dateDrink',
   'dateFood','diner','fuel','girlfriend','gym','hostpital','modGarage','north','parking',
   'pizza','police','propertyG','qmark','race','runway','saveGame','school','spray','tattoo','waypoint'];
@@ -47,7 +47,8 @@ function isShell(path) {
 function isThemeAsset(path) {
   return /themes\/(san-andreas|gta-v|rdr2)\/style\.json$/.test(path) ||
          /assets\/themes\/(san-andreas|gta-v|rdr2)\//.test(path) ||
-         /fonts\/(san-andreas|gta-v|frontier)\//.test(path);
+         /fonts\/(san-andreas|gta-v|frontier|SignPainter)\//.test(path) ||
+         /fonts\/(bank-gothic\.woff|beckett\.woff2|chalet-(london|comprime)\.woff2|signpainter\.woff2|pricedown-gta\.woff2|rdr-lino\.woff2|kirsty\.woff2)$/.test(path);
 }
 function staleWhileRevalidate(req) {
   return caches.match(req).then(cached => {

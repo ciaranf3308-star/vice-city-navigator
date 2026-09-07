@@ -16,6 +16,47 @@
   src:url('fonts/pricedown-bl.woff') format('woff');
   font-weight:900;font-style:normal;font-display:swap;
 }
+/* ---- WayStation per-theme typefaces (self-hosted, game-authentic) ---- */
+@font-face{
+  font-family:'Bank Gothic';
+  src:url('fonts/bank-gothic.woff') format('woff');
+  font-weight:500;font-style:normal;font-display:swap;
+}
+@font-face{
+  font-family:'Beckett';
+  src:url('fonts/beckett.woff2') format('woff2');
+  font-weight:400;font-style:normal;font-display:swap;
+}
+@font-face{
+  font-family:'Chalet London';
+  src:url('fonts/chalet-london.woff2') format('woff2');
+  font-weight:400;font-style:normal;font-display:swap;
+}
+@font-face{
+  font-family:'Chalet Comprime';
+  src:url('fonts/chalet-comprime.woff2') format('woff2');
+  font-weight:400;font-style:normal;font-display:swap;
+}
+@font-face{
+  font-family:'SignPainter';
+  src:url('fonts/signpainter.woff2') format('woff2');
+  font-weight:400;font-style:normal;font-display:swap;
+}
+@font-face{
+  font-family:'Pricedown GTA';
+  src:url('fonts/pricedown-gta.woff2') format('woff2');
+  font-weight:400;font-style:normal;font-display:swap;
+}
+@font-face{
+  font-family:'RDR Lino';
+  src:url('fonts/rdr-lino.woff2') format('woff2');
+  font-weight:400;font-style:normal;font-display:swap;
+}
+@font-face{
+  font-family:'Kirsty';
+  src:url('fonts/kirsty.woff2') format('woff2');
+  font-weight:400;font-style:normal;font-display:swap;
+}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;margin:0;overscroll-behavior:none}
 body{
@@ -278,12 +319,21 @@ body.dashboard-mode #drive-bar{left:720px;max-width:none}
 /* The map itself is fully re-skinned per theme via its own style.json;
    these rules just tint the app chrome's key accents and drop the neon
    title glow on non-Vice-City themes. */
-body.theme-san-andreas{ --pink:#e8a33d; --hot:#c07a1e; }
+body.theme-san-andreas{ --pink:#e8a33d; --hot:#c07a1e;
+  /* SA pause-menu type: Beckett blackletter titles, Bank Gothic items. */
+  --vcfont:'Beckett','Pricedown Bl',serif;
+  --vclabel:'Bank Gothic','Arial Narrow',sans-serif; }
 body.theme-san-andreas .vc-title,
 body.theme-gta-v .vc-title,
 body.theme-rdr2 .vc-title{ text-shadow:0 2px 0 rgba(0,0,0,.55); }
 body.theme-san-andreas .vc-title span{ color:#7ec850; text-shadow:0 2px 0 rgba(0,0,0,.55); }
-body.theme-gta-v{ --pink:#a86fd6; --hot:#7a4fb0; }
+body.theme-gta-v{ --pink:#a86fd6; --hot:#7a4fb0;
+  /* GTA V interface type: Chalet Comprime condensed titles, Chalet London body. */
+  --vcfont:'Chalet Comprime','Arial Narrow',sans-serif;
+  --vclabel:'Chalet London',system-ui,sans-serif; }
 body.theme-gta-v .vc-title span{ color:#8fd0ff; text-shadow:0 2px 0 rgba(0,0,0,.55); }
-body.theme-rdr2{ --pink:#b8352f; --hot:#8a2723; }
+body.theme-rdr2{ --pink:#b8352f; --hot:#8a2723;
+  /* RDR2 type: Kirsty slab titles, RDR Lino serif for menu/map-adjacent labels. */
+  --vcfont:'Kirsty',Georgia,serif;
+  --vclabel:'RDR Lino',Georgia,serif; }
 body.theme-rdr2 .vc-title span{ color:#d8b36a; text-shadow:0 2px 0 rgba(0,0,0,.55); }

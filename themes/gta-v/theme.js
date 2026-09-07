@@ -24,7 +24,10 @@
     pois: {
       assetPath: 'assets/themes/gta-v/blips/',
       fallbackIcon: 'qmark',
-      /* Blip files are named after the semantic category. */
+      /* Blip files are named after the semantic category. The v-hud art
+         ships at 32px (2x the other themes' 16px pixel art), so it is
+         scaled back to the shared on-screen size. */
+      blipScale: 0.5,
       semanticIconMap: {},
     },
 

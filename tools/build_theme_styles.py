@@ -65,6 +65,9 @@ GTA_V = {
     "label_water": "#5c7c8c", "label_water_halo": "#e9e9e7",
     "place_transform": "none",
     "road_dash_tunnel": [3, 3],
+    # GTA V renders street names in the SignPainter script on the pause
+    # map; place/water labels stay in Chalet London.
+    "road_font": "SignPainter",
 }
 
 RDR2 = {
@@ -87,6 +90,8 @@ RDR2 = {
     "label_water": "#4c6c72", "label_water_halo": "#e7dab9",
     "place_transform": "none",
     "road_dash_tunnel": [1.5, 2.5],
+    # RDR2's map sets place names in widely-tracked capitals.
+    "place_letter_spacing": 0.18,
 }
 
 # ---------------------------------------------------------------- builders
@@ -204,6 +209,9 @@ def build_layers(p, pal):
                    "line-width": line_width([[8, 1], [12, 2.5], [16, 6]])}})
     # labels
     font = [pal["font"]]
+    road_font = [pal.get("road_font", pal["font"])]
+    place_extra = ({"text-letter-spacing": pal["place_letter_spacing"]}
+                   if pal.get("place_letter_spacing") else {})
     add({"id": f"{p}-label-water", "type": "symbol",
          "source": "openmaptiles", "source-layer": "water_name",
          "layout": {"text-field": NAME_FIELD, "text-font": font,
@@ -221,6 +229,7 @@ def build_layers(p, pal):
                      "suburb", "hamlet"], True, False],
          "layout": {"text-field": NAME_FIELD, "text-font": font,
                     "text-max-width": 8, "text-size": place_size,
+                    **place_extra,
                     **({"text-transform": "uppercase"}
                        if pal["place_transform"] == "uppercase" else {})},
          "paint": {"text-color": pal["label_place"],
@@ -233,7 +242,7 @@ def build_layers(p, pal):
                     ["literal", ["motorway", "trunk", "primary",
                                  "secondary", "tertiary"]]],
          "layout": {"symbol-placement": "line", "text-field": NAME_FIELD,
-                    "text-font": font, "text-max-width": 8,
+                    "text-font": road_font, "text-max-width": 8,
                     "text-size": ["interpolate", ["linear"], ["zoom"],
                                   11, 10, 14, 11.5, 17, 13]},
          "paint": {"text-color": pal["label_road"],
@@ -246,7 +255,7 @@ def build_layers(p, pal):
                            ["literal", ["motorway", "trunk", "primary",
                                         "secondary", "tertiary"]]]],
          "layout": {"symbol-placement": "line", "text-field": NAME_FIELD,
-                    "text-font": font, "text-max-width": 8,
+                    "text-font": road_font, "text-max-width": 8,
                     "text-size": ["interpolate", ["linear"], ["zoom"],
                                   13.5, 9.5, 16, 11, 18, 12.5]},
          "paint": {"text-color": pal["label_road"],

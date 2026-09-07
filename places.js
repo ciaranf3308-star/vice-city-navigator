@@ -172,6 +172,18 @@
   }
   /* Namespaced MapLibre image id so four themes' blips can coexist. */
   function themeImageId(stem) { return 'poi-' + themeId() + '-' + stem; }
+  /* Per-theme blip art scale: themes whose blip PNGs ship larger than the
+     shared 16px nominal size declare pois.blipScale to compensate. */
+  function blipScale() {
+    const t = activeTheme();
+    const s = t && t.pois && t.pois.blipScale;
+    return typeof s === 'number' && s > 0 ? s : 1;
+  }
+  function iconSizeExpr() {
+    return ['*',
+      ['interpolate', ['linear'], ['zoom'], 10, 2.2, 14, 2.6, 16, 3.0, 18, 3.4],
+      blipScale()];
+  }
   function allIconStems() {
     const t = activeTheme();
     const stems = new Set(Object.values((t && t.pois && t.pois.semanticIconMap) || {}));
@@ -389,7 +401,7 @@
         // computed per feature in renderPois() — shared code never
         // names a blip file.
         'icon-image': ['get', 'icon'],
-        'icon-size': ['interpolate', ['linear'], ['zoom'], 10, 2.2, 14, 2.6, 16, 3.0, 18, 3.4],
+        'icon-size': iconSizeExpr(),
         'icon-anchor': 'center',
         'icon-allow-overlap': false,
         'icon-ignore-placement': false,
@@ -501,6 +513,11 @@
     rehydrate() {
       if (!map) return;
       ensureLayers();
+      try {
+        if (map.getLayer(POI_LAYER_ID)) {
+          map.setLayoutProperty(POI_LAYER_ID, 'icon-size', iconSizeExpr());
+        }
+      } catch (e) { /* layer not ready yet — ensureLayers set it */ }
       preloadBlipImages();
       renderPois();
     },
