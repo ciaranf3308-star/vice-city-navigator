@@ -188,6 +188,12 @@ async function initMap() {
     locateUser(true);
   });
   map.on('dragstart', () => { if (navActive) setFollow(false); });
+  // Fetch ambient POIs for wherever the map is looking — the 750 m
+  // gate inside maybeRefresh keeps this thrifty, so manual panning
+  // behaves like driving: new area = one refresh, then quiet.
+  map.on('moveend', () => {
+    if (window.VCNPlaces && map) VCNPlaces.maybeRefresh(map.getCenter().toArray());
+  });
 }
 
 function locateUser(center) {
