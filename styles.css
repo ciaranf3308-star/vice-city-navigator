@@ -317,9 +317,9 @@ body.dashboard-mode #spotify-pane[data-skin="vice-city"] #spotify-stage{
   left:0;right:0;top:0;bottom:0;width:auto;height:auto;pointer-events:none;
 }
 /* HUD chrome stays clear of the music pane, in canvas coordinates */
-body.dashboard-mode #search-bar{right:492px;top:calc(76px + env(safe-area-inset-top))}
-body.dashboard-mode #map-tools{display:none} /* zoom lives in the bottom bar */
-body.dashboard-mode #maneuver-card{right:492px;top:calc(76px + env(safe-area-inset-top))}
+body.dashboard-mode #search-bar{right:492px}
+body.dashboard-mode #map-tools{right:492px}
+body.dashboard-mode #maneuver-card{right:492px}
 body.dashboard-mode #drive-bar{left:720px;max-width:none}
 /* Vice City's floating HUD is ~643px wide: slide chrome left of it */
 body.dashboard-mode[data-spotskin="vice-city"] #search-bar{right:660px}
@@ -327,38 +327,77 @@ body.dashboard-mode[data-spotskin="vice-city"] #maneuver-card{right:660px}
 /* RADIO tab hides the music widget for a full-bleed map */
 body.dashboard-mode.radio-off #spotify-pane{display:none}
 
-/* ---------- dashboard car chrome: top status bar + bottom menu bar ----------
-   Authored in 1920×720 canvas coordinates; reparented into #dash-stage. */
+/* ---------- Vice City dashboard car chrome: angular HUD bars ----------
+   Vice City theme only (body.theme-vice-city). Early-2000s game-HUD
+   silhouette: clipped angular corners, hot-pink outer edge, dark
+   textured navy surface, cyan secondary detailing. Authored in
+   1920×720 canvas coordinates; reparented into #dash-stage so the
+   existing proportional scaling handles physical screens. The map
+   is never resized or inset — these are pure overlays. */
 #dash-topbar,#dash-bottombar{display:none}
-body.dashboard-mode #dash-topbar{
-  display:flex;position:absolute;left:0;right:0;top:0;height:64px;z-index:25;
-  align-items:center;gap:30px;padding:0 30px;pointer-events:none;
-  background:linear-gradient(180deg,rgba(10,2,20,.94),rgba(10,2,20,.55) 72%,transparent);
-  border-bottom:2px solid rgba(255,113,206,.6);
-  box-shadow:0 2px 22px rgba(255,46,136,.35);
+body.dashboard-mode.theme-vice-city #dash-topbar{
+  display:block;position:absolute;left:0;right:0;top:0;height:68px;z-index:25;
+  background:linear-gradient(180deg,#ff71ce,#ff2e88 55%,#b967ff);
+  clip-path:polygon(0 0,100% 0,100% 50%,96.6% 100%,3.4% 100%,0 50%);
+  filter:drop-shadow(0 2px 12px rgba(255,46,136,.5));
+  pointer-events:none;
 }
+body.dashboard-mode.theme-vice-city #dash-bottombar{
+  display:block;position:absolute;left:0;right:0;bottom:0;height:78px;z-index:25;
+  background:linear-gradient(0deg,#ff71ce,#ff2e88 55%,#b967ff);
+  clip-path:polygon(3.4% 0,96.6% 0,100% 50%,100% 100%,0 100%,0 50%);
+  filter:drop-shadow(0 -2px 12px rgba(255,46,136,.5));
+  pointer-events:auto;
+}
+/* inner layer: same silhouette inset by the edge width, so the pink
+   outer layer reads as a continuous angular border */
+#dash-topbar .dash-chrome{
+  position:absolute;inset:0 0 3px 0;
+  clip-path:polygon(0 0,100% 0,100% 50%,96.6% 100%,3.4% 100%,0 50%);
+  background:
+    repeating-linear-gradient(45deg,rgba(255,255,255,.022) 0 2px,transparent 2px 5px),
+    repeating-linear-gradient(-45deg,rgba(1,205,254,.02) 0 2px,transparent 2px 6px),
+    linear-gradient(180deg,#0b0518 0%,#150a28 72%,#1c0e36 100%);
+  display:flex;align-items:center;gap:30px;padding:0 40px;overflow:hidden;
+}
+#dash-bottombar .dash-chrome{
+  position:absolute;inset:3px 0 0 0;
+  clip-path:polygon(3.4% 0,96.6% 0,100% 50%,100% 100%,0 100%,0 50%);
+  background:
+    repeating-linear-gradient(45deg,rgba(255,255,255,.022) 0 2px,transparent 2px 5px),
+    repeating-linear-gradient(-45deg,rgba(1,205,254,.02) 0 2px,transparent 2px 6px),
+    linear-gradient(0deg,#0b0518 0%,#150a28 72%,#1c0e36 100%);
+  display:flex;align-items:stretch;overflow:hidden;
+}
+/* Vice City chrome owns the top/bottom of the canvas: keep HUD + drive
+   chrome clear of it, and give VC dashboard its zoom in the bottom bar */
+body.dashboard-mode.theme-vice-city #search-bar{top:calc(80px + env(safe-area-inset-top))}
+body.dashboard-mode.theme-vice-city #maneuver-card{top:calc(80px + env(safe-area-inset-top))}
+body.dashboard-mode.theme-vice-city #map-tools{display:none}
+body.dashboard-mode.theme-vice-city #drive-bar{bottom:calc(88px + env(safe-area-inset-bottom))}
 .dash-logo{
-  font-family:'SignPainter','Pricedown Bl',cursive;font-size:40px;line-height:1;
+  font-family:'SignPainter','Pricedown Bl',cursive;font-size:42px;line-height:1;
   color:#ff71ce;text-shadow:0 0 12px rgba(255,46,136,.9),0 0 30px rgba(255,46,136,.5);
   transform:rotate(-2deg);white-space:nowrap;
 }
 .dash-wx{display:flex;align-items:center;gap:10px;color:var(--cyan);font-family:var(--vclabel);
   font-size:26px;font-weight:600;letter-spacing:2px;text-shadow:0 0 10px rgba(1,205,254,.8)}
 .dash-wx svg{width:30px;height:30px;filter:drop-shadow(0 0 6px rgba(1,205,254,.8))}
-.dash-clock{margin-left:auto;display:flex;align-items:baseline;gap:18px;
+.dash-clock{margin-left:auto;display:flex;align-items:baseline;gap:18px;position:relative;z-index:1;
   font-family:var(--vclabel);letter-spacing:3px}
 #dash-date{color:var(--pink);font-size:24px;font-weight:600;text-shadow:0 0 10px rgba(255,113,206,.8)}
 #dash-time{color:var(--pink);font-size:30px;font-weight:700;text-shadow:0 0 12px rgba(255,46,136,.9)}
-body.dashboard-mode #dash-bottombar{
-  display:flex;position:absolute;left:0;right:0;bottom:0;height:72px;z-index:25;
-  align-items:stretch;gap:0;pointer-events:auto;
-  background:linear-gradient(0deg,rgba(10,2,20,.96),rgba(10,2,20,.6) 78%,transparent);
-  border-top:2px solid rgba(255,113,206,.6);
-  box-shadow:0 -2px 22px rgba(255,46,136,.35);
+/* skyline silhouette integrated into the chrome, behind the clock */
+.dash-skyline{
+  position:absolute;right:6px;top:0;height:100%;width:250px;opacity:.6;pointer-events:none;
 }
-.dash-tabs{display:flex;align-items:stretch;padding:10px 6px 10px 18px;gap:4px}
+.dash-skyline .sk-sun{fill:#ff2e88;opacity:.85}
+.dash-skyline .sk-sunhalo{fill:none;stroke:#ff71ce;stroke-width:1.5;opacity:.5}
+.dash-skyline .sk-b{fill:#04020a}
+.dash-skyline .sk-sea{fill:#01cdfe;opacity:.55}
+.dash-tabs{display:flex;align-items:stretch;padding:12px 6px 12px 34px;gap:4px}
 .dash-tabs button{
-  font-family:var(--vcfont);font-size:30px;letter-spacing:2px;text-transform:uppercase;
+  font-family:var(--vcfont);font-size:32px;letter-spacing:2px;text-transform:uppercase;
   color:var(--cyan);background:none;border:0;cursor:pointer;padding:0 20px;
   text-shadow:0 0 10px rgba(1,205,254,.7);opacity:.85;
 }
@@ -366,24 +405,26 @@ body.dashboard-mode #dash-bottombar{
   text-shadow:0 0 12px rgba(255,46,136,.95),0 0 34px rgba(255,46,136,.5)}
 .dash-dest{
   flex:1;display:flex;align-items:center;justify-content:center;min-width:0;
-  padding:10px 12px;
+  padding:12px;
 }
 #dash-dest{
   font-family:var(--vclabel);font-size:26px;font-weight:700;letter-spacing:6px;
   color:var(--pink);text-shadow:0 0 12px rgba(255,46,136,.9);
-  border:2px solid rgba(1,205,254,.65);border-radius:14px;padding:8px 34px;
+  border:2px solid rgba(1,205,254,.65);border-radius:4px;padding:8px 34px;
   box-shadow:0 0 14px rgba(1,205,254,.35),inset 0 0 18px rgba(1,205,254,.08);
+  clip-path:polygon(12px 0,100% 0,calc(100% - 12px) 100%,0 100%);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
 }
-.dash-zoom{display:flex;align-items:center;gap:10px;padding:10px 14px}
+.dash-zoom{display:flex;align-items:center;gap:10px;padding:12px 14px}
 .dash-zoom button{
-  width:52px;height:52px;border-radius:50%;cursor:pointer;
+  width:52px;height:52px;border-radius:8px;cursor:pointer;
   font-size:26px;line-height:1;color:var(--cyan);
   background:rgba(10,2,20,.7);border:2px solid rgba(1,205,254,.7);
   box-shadow:0 0 12px rgba(1,205,254,.4);text-shadow:0 0 8px rgba(1,205,254,.8);
+  clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
 }
 .dash-zoom button:active{transform:scale(.94)}
-.dash-trip{display:flex;align-items:center;gap:14px;padding:10px 30px 10px 14px}
+.dash-trip{display:flex;align-items:center;gap:14px;padding:12px 44px 12px 14px}
 #dash-compass{
   display:inline-block;font-size:30px;color:var(--cyan);
   text-shadow:0 0 10px rgba(1,205,254,.8);transition:transform .2s linear;

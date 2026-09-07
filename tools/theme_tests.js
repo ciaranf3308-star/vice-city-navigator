@@ -146,7 +146,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v33"), 'SW shell cache v33');
+ok(swSrc.includes("ws-shell-v34"), 'SW shell cache v34');
 ok(swSrc.includes("ws-theme-v10"), 'SW theme cache v10');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
@@ -337,11 +337,15 @@ ok(indexSrc.includes('data-dtab="phone"'), 'bottom bar has a PHONE tab');
 ok(indexSrc.includes('id="dash-temp"') && indexSrc.includes('id="dash-time"'), 'top bar has weather + clock slots');
 ok(indexSrc.includes('id="dash-zoom-in"') && indexSrc.includes('id="dash-zoom-out"') && indexSrc.includes('id="dash-locate"'), 'bottom bar carries zoom + locate');
 ok(appSrc.includes("'dash-topbar', 'dash-bottombar'"), 'bars are reparented into the dashboard stage');
-ok(/body\.dashboard-mode #map-tools\{display:none\}/.test(cssSrc), 'floating zoom tools hidden in dashboard (zoom lives in the bar)');
+ok(/body\.dashboard-mode\.theme-vice-city #map-tools\{display:none\}/.test(cssSrc), 'VC: floating zoom tools hidden (zoom lives in the bottom bar)');
 ok(appSrc.includes('open-meteo.com'), 'weather comes from keyless Open-Meteo');
 ok(appSrc.includes("setAppMode('normal')"), 'PHONE tab drops back to the phone UI');
 ok(appSrc.includes("classList.toggle('radio-off')"), 'RADIO tab toggles the music widget');
 ok(cssSrc.includes('top:64px') && cssSrc.includes('bottom:72px'), 'docked skins fit between the dash bars (chrome never covers the widget)');
+ok(cssSrc.includes('body.dashboard-mode.theme-vice-city #dash-topbar'), 'top bar is Vice City theme chrome only');
+ok(cssSrc.includes('body.dashboard-mode.theme-vice-city #dash-bottombar'), 'bottom bar is Vice City theme chrome only');
+ok(cssSrc.includes('clip-path:polygon(0 0,100% 0,100% 50%'), 'bars use the angular game-HUD silhouette');
+ok(indexSrc.includes('dash-skyline'), 'top bar integrates a skyline silhouette');
 ok(!cssSrc.includes('#spotify-close'), 'no close-button styles');
 ok(/\#spotify-pane\{[\s\S]*?background:transparent/.test(cssSrc), 'pane transparent');
 
