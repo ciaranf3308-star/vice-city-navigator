@@ -146,8 +146,8 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v26"), 'SW shell cache v24');
-ok(swSrc.includes("ws-theme-v6"), 'SW theme cache v4');
+ok(swSrc.includes("ws-shell-v28"), 'SW shell cache v28');
+ok(swSrc.includes("ws-theme-v8"), 'SW theme cache v8');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
@@ -281,7 +281,7 @@ ok(pngAlphaAt(gvAlbumPng, 280, 280) > 200, 'GV album opening opaque black (art l
 ok(gvSkinJs.includes("register('gta-v'"), 'GV skin registers as gta-v');
 ok(gvSkinJs.includes('data-lyrics-stage'), 'GV lyric stage hook present');
 ok(gvSkinJs.includes('setLyricsRenderer') && gvSkinJs.includes('clearLyrics'), 'GV lyric renderer hooks present');
-ok(gvSkinJs.includes('x0: 0.1125') && gvSkinJs.includes('x1: 0.8875'), 'GV art opening fractions 0.1125/0.8875');
+ok(gvSkinJs.includes('x0: 0.12') && gvSkinJs.includes('x1: 0.88'), 'GV art opening fractions 0.12/0.88 (inside the opaque frame)');
 ok(!gvSkinJs.includes('tube.png'), 'GV skin has no tube (no tube art shipped)');
 const gvSkinJsCode = stripComments(gvSkinJs), gvSkinCssCode = stripComments(gvSkinCss);
 for (const banned of ['miniviz', 'stagepeek', 'fullstage', 'gvsp-viz', 'spectrum', 'spotify-close', 'background-size: cover', 'vcsp-']) {
@@ -396,6 +396,28 @@ for (const [id, prefix] of [['vice-city', 'vc'], ['gta-v', 'v'], ['san-andreas',
 const vcRoad = styles['vice-city'].layers.find(l => l.id === 'vc-label-road-major').paint['text-color'];
 const vcPlace = styles['vice-city'].layers.find(l => l.id === 'vc-label-place').paint['text-color'];
 ok(vcRoad !== vcPlace, 'VC: road labels a different tone from place labels');
+
+
+/* ---------- Spotify skin album-frame openings (measured from the crop art) ---------- */
+const FRAME_EXPECTED = {
+  'vice-city':    [0.04, 0.032, 0.958, 0.665],
+  'gta-v':        [0.12, 0.12, 0.88, 0.88],
+  'san-andreas':  [0.07, 0.028, 0.97, 0.905],
+  'rdr2':         [0.3047, 0.14, 0.875, 0.86],
+};
+for (const [theme, exp] of Object.entries(FRAME_EXPECTED)) {
+  const js = fs.readFileSync(path.join(REPO, 'themes', theme, 'spotify-skin.js'), 'utf8');
+  const m = js.match(/const FRAME = \{ x0: ([\d.]+), y0: ([\d.]+), x1: ([\d.]+), y1: ([\d.]+) \}/);
+  ok(!!m, `${theme}: skin declares a FRAME opening`);
+  if (m) {
+    const got = [1, 2, 3, 4].map(i => parseFloat(m[i]));
+    const close = got.every((v, i) => Math.abs(v - exp[i]) < 0.005);
+    ok(close, `${theme}: FRAME opening matches measured art (got ${got.join(',')})`);
+  }
+  // art must size to the opening box (explicit height), not assume a square
+  ok(js.includes("'height:' + ((FRAME.y1 - FRAME.y0)"),
+    `${theme}: album art fills the measured opening box`);
+}
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

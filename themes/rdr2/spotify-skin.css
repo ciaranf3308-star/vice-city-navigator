@@ -32,13 +32,13 @@
 .rdsp-albumzone {
   position: relative;
   flex: none;
-  width: min(34cqh, 58cqw);
-  aspect-ratio: 1;
+  width: min(40cqh, 72cqw);
+  aspect-ratio: 640 / 500;
   margin: 1.2cqh auto 0;
 }
 .rdsp-art {
   position: absolute; z-index: 1;
-  object-fit: cover;
+  object-fit: cover; border-radius: 3%;
   opacity: 0; transition: opacity .45s ease;
   background: #0d0906;
 }

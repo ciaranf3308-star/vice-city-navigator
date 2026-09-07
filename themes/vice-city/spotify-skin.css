@@ -32,13 +32,13 @@
 .vcsp-albumzone {
   position: relative;
   flex: none;
-  width: min(36.2cqh, 62cqw);
+  width: min(46cqh, 78cqw);
   aspect-ratio: 500 / 595;
   margin: 0 auto;
 }
 .vcsp-art {
   position: absolute; z-index: 1;
-  object-fit: cover; border-radius: 3%;
+  object-fit: cover; border-radius: 4%;
   opacity: 0; transition: opacity .45s ease;
   background: #000;
 }

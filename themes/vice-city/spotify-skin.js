@@ -38,7 +38,7 @@
 
   /* Album-art placement: square, centered in the frame's measured
      interior opening, as fractions of album.png. */
-  const FRAME = { x0: 0.139, y0: 0.0454, x1: 0.861, y1: 0.6521 };
+  const FRAME = { x0: 0.04, y0: 0.032, x1: 0.958, y1: 0.665 };
 
   const SVG = {
     play: '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',
@@ -74,7 +74,7 @@
         'left:' + (FRAME.x0 * 100).toFixed(2) + '%;' +
         'top:' + (FRAME.y0 * 100).toFixed(2) + '%;' +
         'width:' + ((FRAME.x1 - FRAME.x0) * 100).toFixed(2) + '%;' +
-        'aspect-ratio:1;';
+        'height:' + ((FRAME.y1 - FRAME.y0) * 100).toFixed(2) + '%;';
       root.innerHTML =
         '<img class="vcsp-header" src="' + ART + 'header.png" alt="" aria-hidden="true">' +
 

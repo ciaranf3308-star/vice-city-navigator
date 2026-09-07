@@ -49,7 +49,7 @@
 }
 .gvsp-art {
   position: absolute; z-index: 3;
-  object-fit: cover;
+  object-fit: cover; border-radius: 2%;
   opacity: 0; transition: opacity .45s ease;
   background: #000;
 }

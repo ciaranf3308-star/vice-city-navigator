@@ -7,7 +7,7 @@ Album-frame interior openings were measured off grid overlays; the
 fractions below are consumed by each theme's spotify-skin.js so live
 album art sits exactly inside the art's frame.
 
-RDR2 (1254x1254): album opening (105,275)-(415,585)
+RDR2 (1254x1254): album opening (195,350)-(560,710)
 GTA V (1155x1362): album opening (75,485)-(385,795)
 SA   (1254x1254): album opening (65,385)-(575,875)
 """
@@ -22,11 +22,11 @@ JOBS = {
         'src': f'{LIB}/31/31dd4b29908afc388d318c4a0b727f97eb4e59ff8bdf4060cf8599a4965e2287.png',
         'crops': {
             'header.png': ((400, 190, 1254, 440), 960),
-            'album.png': ((55, 225, 475, 645), 560),
+            'album.png': ((0, 280, 640, 780), 640),  # full brass frame + strap; old box cut the frame's right/bottom
             'stage.png': ((180, 680, 1150, 950), 960),
         },
         # fractions of album.png
-        'frame': (0.119, 0.119, 0.857, 0.857),
+        'frame': (0.3047, 0.14, 0.875, 0.86),  # measured: opening (195,350)-(560,710) of the 640x500 crop
     },
     'gta-v': {
         'src': f'{LIB}/4e/4ea2940e0dbca559d705dc88fa4b800a62a84d3b8dde10e55181ff60dc216b1d.png',
@@ -44,7 +44,7 @@ JOBS = {
             'album.png': ((20, 340, 620, 920), 560),
             'stage.png': ((20, 880, 1230, 1230), 960),
         },
-        'frame': (0.075, 0.0776, 0.925, 0.922),
+        'frame': (0.07, 0.028, 0.97, 0.905),  # measured off the 560x541 crop (art goes UNDER)
     },
 }
 
