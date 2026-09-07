@@ -44,8 +44,8 @@
     return e;
   }
   function fmt(ms) {
-    ms = Math.max(0, Math.round(ms || 0) / 1000);
-    return Math.floor(ms / 60) + ':' + String(ms % 60).padStart(2, '0');
+    const s = Math.max(0, Math.floor((ms || 0) / 1000));
+    return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
   }
 
   function createSkin() {

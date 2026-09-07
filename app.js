@@ -695,6 +695,16 @@ function setSpotifyPane(open) {
     if (open) SpotifyCore.startPolling();
     else SpotifyCore.stopPolling();
   }
+  offsetMapForSpotify(open);
+}
+
+/* Shift the map's visual center left so it stays clear of the floating music widget. */
+function offsetMapForSpotify(open) {
+  try {
+    if (!map || !map.easeTo) return;
+    const w = (open && window.innerWidth > 700) ? ($('spotify-pane').offsetWidth + 28) : 0;
+    map.easeTo({ padding: { top: 0, bottom: 0, left: 0, right: w }, duration: 400 });
+  } catch (e) {}
 }
 
 function saveSpotifyPreAuth() {
@@ -745,6 +755,9 @@ function wireSpotifyButtons() {
   $('music-btn').addEventListener('click', toggle);
   $('drive-music-btn').addEventListener('click', toggle);
   $('spotify-close').addEventListener('click', () => setSpotifyPane(false));
+  window.addEventListener('resize', () => {
+    if (!$('spotify-pane').hidden) offsetMapForSpotify(true);
+  });
 }
 function toggleMenu() { $('menu-panel').hidden ? openMenu() : closeMenu(); }
 
