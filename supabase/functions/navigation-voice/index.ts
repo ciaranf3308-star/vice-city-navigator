@@ -1,19 +1,25 @@
 /* ============================================================================
    Vice City Navigator — navigation-voice Edge Function (Supabase / Deno)
 
-   The ONLY place the OpenAI API key exists: the OPENAI_API_KEY secret on the
-   Supabase project (Project Settings → Edge Functions → Secrets). It is read
-   here via Deno.env at runtime. It is NEVER committed to git, NEVER shipped
-   in the client bundle, and NEVER printed to logs.
+   Provider chain (first configured key wins):
+     1. Gemini Developer API (FREE tier) — GEMINI_API_KEY secret.
+        Rewrite: gemini-2.0-flash. Speech: gemini-2.5-flash-preview-tts
+        (free of charge on the free tier: text input + audio output).
+     2. OpenAI — OPENAI_API_KEY secret (optional fallback).
+        Rewrite: gpt-4o-mini. Speech: gpt-4o-mini-tts → MP3.
 
-   Contract:
+   API keys live ONLY as Supabase Edge Function secrets, read here via
+   Deno.env at runtime. They are NEVER committed to git, NEVER shipped in
+   the client bundle, and NEVER printed to logs.
+
+   Contract (unchanged — the PWA client needs no modifications):
      POST /functions/v1/navigation-voice
        Headers: apikey: <anon key>, Authorization: Bearer <anon key>
        Body:    { "text": "Turn left onto Main Street.",
                   "theme": "vice-city", "mode": "themed"|"banter",
                   "profanity": false }
        → 200  { "line": "Hang a left on Main Street, baby!",
-                "audio": "<base64 mp3>", "mime": "audio/mpeg" }
+                "audio": "<base64 wav|mp3>", "mime": "audio/wav"|"audio/mpeg" }
        → 400  { "error": "invalid_json" | "bad_text" }
        → 403  wrong Origin
        → 429  { "error": "daily_cap_reached" }   ← per-day request cap
@@ -23,14 +29,17 @@
    Pipeline per request:
      1. Rate limit — atomic daily counter in Postgres (navigation_voice_usage,
         bumped via the navigation_voice_bump() RPC with the service_role key).
-        Over VOICE_DAILY_CAP (default 1000) → 429. This is INDEPENDENT of the
-        Google Places quota: a client bug can never hammer the OpenAI balance.
-     2. Rewrite — gpt-4o-mini turns the canonical OSRM maneuver into themed
+        Over VOICE_DAILY_CAP (default 1000) → 429. On the Gemini free tier a
+        quota hit surfaces as a provider error → 502, and the client falls
+        back to standard voice. No billed account is attached, so the balance
+        can never be hammered.
+     2. Rewrite — the text model turns the canonical OSRM maneuver into themed
         dialogue using the server-side persona below. Never fatal: any failure
         falls back to the original text; navigation never waits and the
         deterministic instruction stays on screen.
-     3. Speak — gpt-4o-mini-tts renders the themed text to MP3, returned as
+     3. Speak — the TTS model renders the themed text to audio, returned as
         base64 JSON (Supabase functions + the PWA client both prefer JSON).
+        Gemini returns raw PCM → wrapped as WAV here.
 
    The LLM never decides navigation: OSRM maneuvers stay authoritative.
    Personas are ORIGINAL — energetic 80s Miami radio energy, not an
@@ -38,19 +47,29 @@
    ========================================================================== */
 
 const ALLOWED_ORIGIN = 'https://ciaranf3308-star.github.io';
+
+/* Gemini Developer API (free tier). */
+const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
+const GEMINI_TEXT_MODEL = 'gemini-2.0-flash';
+const GEMINI_TTS_MODEL = 'gemini-2.5-flash-preview-tts';
+const GEMINI_TTS_VOICE = 'Puck'; // upbeat prebuilt voice
+const GEMINI_TTS_RATE = 24000; // PCM is 24 kHz, 16-bit, mono
+
+/* OpenAI (optional paid fallback). */
 const OPENAI_CHAT_URL = 'https://api.openai.com/v1/chat/completions';
 const OPENAI_TTS_URL = 'https://api.openai.com/v1/audio/speech';
 
 interface Persona {
-  voice: string;
-  ttsInstructions: string;
+  voice: string; // OpenAI voice id (fallback path)
+  ttsInstructions: string; // OpenAI style instructions (fallback path)
+  geminiStyle: string; // natural-language voice direction, prepended for Gemini TTS
   rewrite: string;
   banter: string;
 }
 
 /* Server-side voice personas, keyed by the theme id the app sends.
    Kept here (not in client JS) so the spoken persona can't be swapped by
-   editing client code, and the prompts stay with the key they belong to. */
+   editing client code, and the prompts stay with the keys they belong to. */
 const PERSONAS: Record<string, Persona> = {
   'vice-city': {
     voice: 'echo',
@@ -58,6 +77,11 @@ const PERSONAS: Record<string, Persona> = {
       'Speak like an energetic 1980s Miami radio DJ doing traffic: punchy, ' +
       'playful, confident, medium-fast pace. Crisp enunciation on street ' +
       'names and numbers so the driver never misses a turn.',
+    geminiStyle:
+      'Say it in the voice of an energetic 1980s Miami radio DJ doing the ' +
+      'traffic report: punchy, playful, confident, medium-fast. Enunciate ' +
+      'street names and numbers crisply so the driver never misses a turn. ' +
+      'The line to speak is: ',
     rewrite:
       'You are the voice of a Vice City street guide — an energetic 1980s ' +
       'Miami radio DJ with playful swagger and the occasional sarcastic aside. ' +
@@ -102,7 +126,7 @@ function json(req: Request, data: unknown, status = 200): Response {
 /* ---- Daily usage counter. Atomic INSERT…ON CONFLICT via the
         navigation_voice_bump() RPC, called with the service_role key.
         Fail CLOSED: if the counter is unreachable we 500 rather than
-        serve uncapped OpenAI calls. ---- */
+        serve uncapped provider calls. ---- */
 async function bumpUsage(): Promise<number> {
   const url = Deno.env.get('SUPABASE_URL');
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -122,8 +146,8 @@ async function bumpUsage(): Promise<number> {
   return n;
 }
 
-function bufToBase64(buf: ArrayBuffer): string {
-  const bytes = new Uint8Array(buf);
+function bufToBase64(buf: ArrayBuffer | Uint8Array): string {
+  const bytes = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
   let binary = '';
   const CHUNK = 0x8000;
   for (let i = 0; i < bytes.length; i += CHUNK) {
@@ -132,12 +156,150 @@ function bufToBase64(buf: ArrayBuffer): string {
   return btoa(binary);
 }
 
+function writeAscii(view: DataView, offset: number, s: string): void {
+  for (let i = 0; i < s.length; i++) view.setUint8(offset + i, s.charCodeAt(i));
+}
+
+/* Gemini TTS returns raw 16-bit PCM — wrap it as WAV so browsers play it. */
+function pcmToWav(pcm: Uint8Array, sampleRate: number): Uint8Array {
+  const header = new ArrayBuffer(44);
+  const v = new DataView(header);
+  writeAscii(v, 0, 'RIFF');
+  v.setUint32(4, 36 + pcm.length, true);
+  writeAscii(v, 8, 'WAVE');
+  writeAscii(v, 12, 'fmt ');
+  v.setUint32(16, 16, true);
+  v.setUint16(20, 1, true); // PCM
+  v.setUint16(22, 1, true); // mono
+  v.setUint32(24, sampleRate, true);
+  v.setUint32(28, sampleRate * 2, true); // byte rate (16-bit mono)
+  v.setUint16(32, 2, true); // block align
+  v.setUint16(34, 16, true); // bits per sample
+  writeAscii(v, 36, 'data');
+  v.setUint32(40, pcm.length, true);
+  const out = new Uint8Array(44 + pcm.length);
+  out.set(new Uint8Array(header), 0);
+  out.set(pcm, 44);
+  return out;
+}
+
+/* ---------------- Gemini provider (free tier, default) ---------------- */
+function geminiHeaders(key: string): Record<string, string> {
+  return { 'x-goog-api-key': key, 'Content-Type': 'application/json' };
+}
+
+async function geminiRewrite(key: string, persona: Persona, mode: string, profanity: boolean, text: string): Promise<string> {
+  const prompt =
+    persona.rewrite +
+    (mode === 'banter' ? ' ' + persona.banter : '') +
+    (profanity
+      ? ' Mild profanity is allowed when it fits the persona.'
+      : ' No profanity or slurs, keep it clean.') +
+    '\n\nInstruction to rewrite: ' + text;
+  const res = await fetch(`${GEMINI_API_BASE}/${GEMINI_TEXT_MODEL}:generateContent`, {
+    method: 'POST',
+    headers: geminiHeaders(key),
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.8, maxOutputTokens: 140 },
+    }),
+  });
+  if (!res.ok) throw new Error(`gemini_rewrite_${res.status}`);
+  const data = await res.json();
+  const parts = data?.candidates?.[0]?.content?.parts;
+  const out = Array.isArray(parts) ? parts.map((p: { text?: unknown }) =>
+    typeof p.text === 'string' ? p.text : '').join('').trim() : '';
+  if (!out) throw new Error('gemini_rewrite_empty');
+  return out;
+}
+
+async function geminiSpeak(key: string, persona: Persona, text: string): Promise<{ audio: string; mime: string }> {
+  const res = await fetch(`${GEMINI_API_BASE}/${GEMINI_TTS_MODEL}:generateContent`, {
+    method: 'POST',
+    headers: geminiHeaders(key),
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: persona.geminiStyle + text }] }],
+      generationConfig: {
+        responseModalities: ['AUDIO'],
+        speechConfig: {
+          voiceConfig: { prebuiltVoiceConfig: { voiceName: GEMINI_TTS_VOICE } },
+        },
+      },
+    }),
+  });
+  if (!res.ok) throw new Error(`gemini_tts_${res.status}`);
+  const data = await res.json();
+  const b64 = data?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+  if (typeof b64 !== 'string' || !b64.length) throw new Error('gemini_tts_empty');
+  const bin = atob(b64);
+  const pcm = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) pcm[i] = bin.charCodeAt(i);
+  if (!pcm.length) throw new Error('gemini_tts_empty');
+  return { audio: bufToBase64(pcmToWav(pcm, GEMINI_TTS_RATE)), mime: 'audio/wav' };
+}
+
+/* ---------------- OpenAI provider (optional fallback) ---------------- */
+async function openaiRewrite(key: string, persona: Persona, mode: string, profanity: boolean, text: string): Promise<string> {
+  const system =
+    persona.rewrite +
+    (mode === 'banter' ? ' ' + persona.banter : '') +
+    (profanity
+      ? ' Mild profanity is allowed when it fits the persona.'
+      : ' No profanity or slurs, keep it clean.');
+  const res = await fetch(OPENAI_CHAT_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + key,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: system },
+        { role: 'user', content: text },
+      ],
+      temperature: 0.7,
+      max_tokens: 140,
+    }),
+  });
+  if (!res.ok) throw new Error(`openai_rewrite_${res.status}`);
+  const data = await res.json();
+  const out = data?.choices?.[0]?.message?.content;
+  if (typeof out !== 'string' || !out.trim()) throw new Error('openai_rewrite_empty');
+  return out.trim();
+}
+
+async function openaiSpeak(key: string, persona: Persona, text: string): Promise<{ audio: string; mime: string }> {
+  const res = await fetch(OPENAI_TTS_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + key,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini-tts',
+      voice: persona.voice,
+      input: text,
+      instructions: persona.ttsInstructions,
+      response_format: 'mp3',
+    }),
+  });
+  if (!res.ok) throw new Error(`openai_tts_${res.status}`);
+  const buf = await res.arrayBuffer();
+  if (!buf.byteLength) throw new Error('openai_tts_empty');
+  return { audio: bufToBase64(buf), mime: 'audio/mpeg' };
+}
+
+/* ---------------- request handler ---------------- */
 async function handleVoice(req: Request): Promise<Response> {
+  const geminiKey = Deno.env.get('GEMINI_API_KEY');
   const openAiKey = Deno.env.get('OPENAI_API_KEY');
-  if (!openAiKey) {
-    console.error('[navigation-voice] misconfigured: OPENAI_API_KEY secret not set');
+  const provider = geminiKey ? 'gemini' : openAiKey ? 'openai' : null;
+  if (!provider) {
+    console.error('[navigation-voice] misconfigured: no GEMINI_API_KEY or OPENAI_API_KEY secret set');
     return json(req, { error: 'server_misconfigured' }, 500);
   }
+  const providerKey = (provider === 'gemini' ? geminiKey : openAiKey) as string;
 
   let body: Record<string, unknown>;
   try {
@@ -154,7 +316,7 @@ async function handleVoice(req: Request): Promise<Response> {
   const mode = body.mode === 'banter' ? 'banter' : 'themed';
   const profanity = body.profanity === true;
 
-  /* 1. Rate limit — before spending a cent on OpenAI. */
+  /* 1. Rate limit — before any provider call. */
   let used: number;
   try {
     used = await bumpUsage();
@@ -169,67 +331,27 @@ async function handleVoice(req: Request): Promise<Response> {
   /* 2. Rewrite: canonical maneuver → themed dialogue. Never fatal. */
   let themed = text.trim();
   try {
-    const system =
-      persona.rewrite +
-      (mode === 'banter' ? ' ' + persona.banter : '') +
-      (profanity
-        ? ' Mild profanity is allowed when it fits the persona.'
-        : ' No profanity or slurs, keep it clean.');
-    const res = await fetch(OPENAI_CHAT_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + openAiKey,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: system },
-          { role: 'user', content: themed },
-        ],
-        temperature: 0.7,
-        max_tokens: 140,
-      }),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const out = data?.choices?.[0]?.message?.content;
-      if (typeof out === 'string' && out.trim()) themed = out.trim();
-    }
-  } catch {
+    themed = provider === 'gemini'
+      ? await geminiRewrite(providerKey, persona, mode, profanity, themed)
+      : await openaiRewrite(providerKey, persona, mode, profanity, themed);
+  } catch (e) {
+    // Status only — never the key, never response bodies that could echo it.
+    console.error('[navigation-voice] rewrite_failed, provider:', provider, (e as Error).message);
     /* fall through — themed stays the original deterministic text */
   }
 
-  /* 3. Speak: themed text → MP3. Failure here is a 502; the app's
+  /* 3. Speak: themed text → audio. Failure here is a 502; the app's
         standard voice has already spoken, so the driver loses nothing. */
-  let speechRes: Response | null = null;
   try {
-    speechRes = await fetch(OPENAI_TTS_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + openAiKey,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini-tts',
-        voice: persona.voice,
-        input: themed,
-        instructions: persona.ttsInstructions,
-        response_format: 'mp3',
-      }),
-    });
-  } catch {
-    speechRes = null;
-  }
-  if (!speechRes || !speechRes.ok) {
+    const spoken = provider === 'gemini'
+      ? await geminiSpeak(providerKey, persona, themed)
+      : await openaiSpeak(providerKey, persona, themed);
+    return json(req, { line: themed, audio: spoken.audio, mime: spoken.mime });
+  } catch (e) {
     // Status only — never the key, never response bodies that could echo it.
-    console.error('[navigation-voice] tts_failed, openai_status:', speechRes ? speechRes.status : 'network');
+    console.error('[navigation-voice] tts_failed, provider:', provider, (e as Error).message);
     return json(req, { error: 'tts_failed' }, 502);
   }
-
-  const audio = await speechRes.arrayBuffer();
-  if (!audio.byteLength) return json(req, { error: 'tts_failed' }, 502);
-  return json(req, { line: themed, audio: bufToBase64(audio), mime: 'audio/mpeg' });
 }
 
 Deno.serve(async (req: Request): Promise<Response> => {

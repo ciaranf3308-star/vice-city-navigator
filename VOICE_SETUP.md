@@ -1,9 +1,17 @@
-# Themed AI Voice — setup (Supabase)
+# Themed AI Voice — setup (Supabase + Gemini free tier)
 
 Themed / Themed + banter voice runs through your own Supabase Edge Function
-`navigation-voice`. Your OpenAI API key lives **only** as the `OPENAI_API_KEY`
-secret on the Supabase project — it never appears in the GitHub repo, the
-client JavaScript, or the PWA/APK bundle.
+`navigation-voice`. The provider is the **Gemini Developer API free tier** —
+rewrite (`gemini-2.0-flash`) + speech (`gemini-2.5-flash-preview-tts`), both
+free of charge on the free tier. Your Gemini API key lives **only** as the
+`GEMINI_API_KEY` secret on the Supabase project — it never appears in the
+GitHub repo, the client JavaScript, or the PWA/APK bundle.
+
+Use a **separate Google AI Studio project** for this key — NOT the billed
+Google Cloud project that holds your Places API key. AI Studio keys work on
+the free tier with no billing attached, so there is nothing to charge, ever:
+if the free quota is hit the function answers 502 and the app falls back to
+the standard voice.
 
 Without this setup the app works fine: voice modes fall back to the standard
 browser voice automatically.
@@ -11,11 +19,16 @@ browser voice automatically.
 ## Key boundary (the rule)
 
 - App → Supabase Edge Function: `{ text, theme, mode, profanity }`
-- Edge Function → OpenAI: rewrite (`gpt-4o-mini`) + speech (`gpt-4o-mini-tts`)
-- Edge Function → App: `{ line, audio (base64 mp3), mime }`
+- Edge Function → Gemini: rewrite (`gemini-2.0-flash`) + speech
+  (`gemini-2.5-flash-preview-tts`, WAV audio)
+- Edge Function → App: `{ line, audio (base64 wav), mime }`
 - The function enforces a **per-day request cap** (`VOICE_DAILY_CAP`, default
   1000) via a Postgres counter — independent of the Google Places quota — so
-  a client bug can never hammer your OpenAI balance.
+  a client bug can never hammer any provider.
+
+Provider chain: `GEMINI_API_KEY` (free, default) → `OPENAI_API_KEY`
+(optional paid fallback, kept in code) → `server_misconfigured` if neither
+is set.
 
 ## 1. Create the Supabase project
 
@@ -39,17 +52,22 @@ browser voice automatically.
    → **Run**. (Creates `navigation_voice_usage` + the `navigation_voice_bump()`
    RPC, executable by `service_role` only.)
 
-## 4. Store the OpenAI API key — the ONLY place it lives
+## 4. Store the Gemini API key — the ONLY place it lives
 
-1. Dashboard → **Project Settings** → **Edge Functions** → **Secrets** →
+1. Go to [Google AI Studio](https://aistudio.google.com) → **Get API key** →
+   **Create API key in new project** (a fresh project, separate from your
+   billed Places project — no billing needed for the free tier).
+2. Dashboard → **Project Settings** → **Edge Functions** → **Secrets** →
    **Add new secret**.
-2. Name: `OPENAI_API_KEY`, value: paste your OpenAI API key
-   ([platform.openai.com](https://platform.openai.com) → API keys).
-3. Optional second secret: `VOICE_DAILY_CAP` (e.g. `500`) to lower the
+3. Name: `GEMINI_API_KEY`, value: paste the AI Studio key.
+4. Optional second secret: `VOICE_DAILY_CAP` (e.g. `500`) to lower the
    per-day request cap from the default 1000.
 
 Do NOT put the key in this repo, in `supabase-config.js`, or in the app —
-anywhere. If it ever leaks into git history, rotate it at platform.openai.com.
+anywhere. If it ever leaks, delete/rotate it in AI Studio (free, 30 seconds).
+
+(The old `OPENAI_API_KEY` secret is now only an optional fallback; the
+function prefers Gemini whenever `GEMINI_API_KEY` is set.)
 
 ## 5. Point the app at Supabase
 
@@ -68,12 +86,13 @@ curl https://YOUR_PROJECT_REF.supabase.co/functions/v1/navigation-voice
 # Key-absence audit — must print NOTHING:
 git log -p --all | grep -iE "sk-(proj-)?[A-Za-z0-9]{20,}" | head
 grep -riE "sk-(proj-)?[A-Za-z0-9]{20,}" --exclude-dir=.git --exclude-dir=node_modules .
+grep -riE "AIza[A-Za-z0-9_-]{30,}" --exclude-dir=.git --exclude-dir=node_modules .
 ```
 
 Then drive with **Themed** voice: the first maneuver speaks in standard voice
 while themed audio generates in the background; from the second maneuver the
-persona voice takes over. If the daily cap is hit, the app answers 429 and
-keeps navigating with the standard voice — navigation never breaks.
+persona voice takes over. If the daily cap or the Gemini free quota is hit,
+the app keeps navigating with the standard voice — navigation never breaks.
 
 ## Files
 
