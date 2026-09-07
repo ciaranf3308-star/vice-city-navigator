@@ -12,7 +12,7 @@
    Setup: see VOICE_SETUP.md — then replace the two placeholders below.
    ========================================================================== */
 window.VCNSupabase = {
-  url: 'https://YOUR_PROJECT_REF.supabase.co',
-  anonKey: 'YOUR_SUPABASE_ANON_KEY',
+  url: 'https://fhhnlbqsqtdsvmrvquqb.supabase.co',
+  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoaG5sYnFzcXRkc3ZtcnZxdXFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3OTMyMTQsImV4cCI6MjEwNDM2OTIxNH0.miYv7L_wYmDD0Bgk0IDvYGYHBZF1GsFUb8McH_0oSW8',
   functionPath: '/functions/v1/navigation-voice',
 };
