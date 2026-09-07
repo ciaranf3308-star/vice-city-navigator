@@ -6,7 +6,7 @@
 
 const VC = {
   /* map colors live in vice-city-style.json; these are app-level accents */
-  routeCasing: '#ffffff', routeCore: '#f2a93b',
+  routeCasing: '#f5d020', routeCore: '#f5d020', // solid in-game mission-map yellow
   /* HUD accents (kept for the nav instruction icons) */
   yellow: '#fffb96'
 };
