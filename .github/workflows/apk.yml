@@ -57,7 +57,7 @@ jobs:
             "splashScreenFadeOutDuration": 300,
             "signingKey": { "path": "./android.keystore", "alias": "android" },
             "appVersionCode": ${{ github.run_number }},
-            "appVersionName": "1.0.${{ github.run_number }}",
+            "appVersionName": "${{ github.run_number }}",
             "shortcuts": [],
             "generatorApp": "bubblewrap-cli",
             "webManifestUrl": "https://ciaranf3308-star.github.io/vice-city-navigator/manifest.webmanifest",
