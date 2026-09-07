@@ -1,12 +1,14 @@
 /* Vice City Navigator service worker — caches the app shell only.
    Map tiles, routing and search always go to the network. */
-const CACHE = 'vcn-shell-v14';
+const CACHE = 'vcn-shell-v15';
 const BLIPS = ['airYard','barbers','burgerShot','cash','chicken','dateDisco','dateDrink',
   'dateFood','diner','fuel','girlfriend','gym','hostpital','modGarage','north','parking',
   'pizza','police','propertyG','qmark','race','runway','saveGame','school','spray','tattoo','waypoint'];
 const SHELL = [
   './', 'index.html', 'styles.css', 'app.js', 'places-config.js', 'places.js',
   'discovery.js', 'voice.js', 'supabase-config.js', 'themes/vice-city.js',
+  'spotify-core.js', 'spotify/skins.js', 'spotify/skin-vice-city.js',
+  'spotify/skin-vice-city.css', 'assets/spotify/vice_city_synthwave_music_widget.png',
   'vice-city-style.json',
   'manifest.webmanifest', 'icon.svg',
   'fonts/pricedown-bl.woff',

@@ -1,0 +1,173 @@
+/* Vice City Spotify skin — portrait automotive pane.
+   The .vcsp-stage keeps a strict 2:3 aspect so the artwork
+   (1448x1086, shown as cover anchored left-top) never shifts
+   under the DOM: the pink album frame stays at
+   left 15.9% / top 34.5% / 62% x 34.2% at any pane size. */
+
+.vcsp { position: absolute; inset: 0; overflow: hidden; background: #060a1e; }
+
+.vcsp-stage {
+  position: absolute; inset: 0; margin: auto;
+  aspect-ratio: 2 / 3; height: 100%; max-width: 100%;
+  container-type: size; overflow: hidden;
+  font-family: Oswald, 'Arial Narrow', sans-serif; color: #fff;
+}
+
+/* ---------- artwork shell ---------- */
+.vcsp-bg {
+  position: absolute; inset: 0;
+  background-image: url('../assets/spotify/vice_city_synthwave_music_widget.png');
+  background-size: cover; background-position: 0 0; background-repeat: no-repeat;
+}
+
+/* ---------- connect state ---------- */
+.vcsp-connect {
+  position: absolute; inset: 0; z-index: 5;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(180deg, rgba(6,10,30,.55), rgba(6,10,30,.88));
+}
+.vcsp-connect[hidden] { display: none; }
+.vcsp-connect-inner { text-align: center; padding: 0 10cqw; }
+.vcsp-connect-note svg { width: 16cqw; height: 16cqw; fill: #ff5fd2;
+  filter: drop-shadow(0 0 6px #ff2fb3); }
+.vcsp-connect-btn {
+  margin-top: 4cqh; padding: 2.2cqh 7cqw;
+  font-family: 'Pricedown Bl', Oswald, sans-serif; font-size: 5.2cqw; letter-spacing: .14em;
+  color: #fff; background: rgba(255,47,179,.14);
+  border: 2px solid #ff4fc3; border-radius: 999px; cursor: pointer;
+  text-shadow: 0 0 8px #ff2fb3; box-shadow: 0 0 18px rgba(255,47,179,.55), inset 0 0 12px rgba(255,47,179,.25);
+}
+.vcsp-connect-btn:active { transform: scale(.96); }
+.vcsp-connect-hint { margin-top: 3cqh; font-size: 3.6cqw; line-height: 1.5; color: #cfe6ff; opacity: .85; }
+
+/* ---------- now playing ---------- */
+.vcsp-main { position: absolute; inset: 0; z-index: 4; }
+.vcsp-main[hidden] { display: none; }
+
+.vcsp-album { position: absolute; left: 15.9%; top: 34.5%; width: 62%; height: 34.2%; }
+.vcsp-artimg {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; border-radius: 4px; opacity: 0; transition: opacity .45s ease;
+  background: #000;
+}
+.vcsp-artimg.on { opacity: 1; }
+
+.vcsp-track { position: absolute; top: 70%; left: 8%; right: 8%; text-align: center; }
+.vcsp-title {
+  font-family: 'Pricedown Bl', Oswald, sans-serif; font-size: 5.6cqw; letter-spacing: .06em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 0 10px rgba(255,47,179,.8), 0 2px 4px #000;
+}
+.vcsp-artist {
+  margin-top: .6cqh; font-size: 3.8cqw; color: #ffd7f2;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 1px 3px #000;
+}
+.vcsp-artist.vcsp-status { color: #35e0ff; }
+
+.vcsp-progress { position: absolute; top: 79.3%; left: 8%; right: 8%; }
+.vcsp-bar { position: relative; height: 1.6cqh; cursor: pointer; touch-action: none; }
+.vcsp-bar::before {
+  content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 6px; margin-top: -3px;
+  border-radius: 3px; background: rgba(255,255,255,.18);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.6);
+}
+.vcsp-bar-fill {
+  position: absolute; left: 0; top: 50%; height: 6px; margin-top: -3px; width: 0%;
+  border-radius: 3px; background: linear-gradient(90deg, #ff2fb3, #35e0ff);
+  box-shadow: 0 0 10px rgba(255,47,179,.8);
+}
+.vcsp-bar-knob {
+  position: absolute; top: 50%; width: 3.4cqw; height: 3.4cqw; margin: -1.7cqw 0 0 -1.7cqw;
+  border-radius: 50%; background: #fff; border: 2px solid #ff4fc3;
+  box-shadow: 0 0 12px #ff2fb3;
+}
+.vcsp-times { display: flex; justify-content: space-between; margin-top: .8cqh;
+  font-size: 3.4cqw; color: #9fd8ff; text-shadow: 0 1px 2px #000; }
+
+.vcsp-transport {
+  position: absolute; top: 85%; left: 0; right: 0; height: 8%;
+  display: flex; align-items: center; justify-content: center; gap: 6cqw;
+}
+.vcsp-tbtn {
+  width: 12cqw; height: 12cqw; border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(10,16,40,.72); border: 2px solid rgba(53,224,255,.85); color: #fff;
+  box-shadow: 0 0 14px rgba(53,224,255,.45), inset 0 0 8px rgba(53,224,255,.2);
+}
+.vcsp-tbtn.big { width: 16cqw; height: 16cqw; border-color: #ff4fc3;
+  box-shadow: 0 0 20px rgba(255,47,179,.6), inset 0 0 10px rgba(255,47,179,.3); }
+.vcsp-tbtn:active { transform: scale(.93); }
+.vcsp-tbtn svg { width: 55%; height: 55%; fill: currentColor;
+  filter: drop-shadow(0 0 4px currentColor); }
+
+/* ---------- stage peek strip ---------- */
+.vcsp-stagepeek {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 6.5%;
+  border: 0; border-top: 1px solid rgba(255,79,195,.5); padding: 0; cursor: pointer;
+  background: rgba(4,7,22,.82); overflow: hidden;
+  display: flex; align-items: center;
+}
+.vcsp-miniviz { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .8; }
+.vcsp-peek-label {
+  position: relative; margin-left: auto; margin-right: 4cqw;
+  display: flex; align-items: center; gap: 1.5cqw;
+  font-size: 3.4cqw; letter-spacing: .22em; color: #ffd7f2;
+  text-shadow: 0 0 8px #ff2fb3;
+}
+.vcsp-peek-label svg { width: 3.6cqw; height: 3.6cqw; fill: #ff5fd2; }
+
+/* ---------- full stage ---------- */
+.vcsp-fullstage { position: absolute; inset: 0; z-index: 6; overflow: hidden; background: #060a1e; }
+.vcsp-fullstage[hidden] { display: none; }
+.vcsp-fs-bg {
+  position: absolute; inset: 0;
+  background-image: url('../assets/spotify/vice_city_synthwave_music_widget.png');
+  background-repeat: no-repeat;
+  /* crop of the art's right-side sunset panel (art 590,250 - 1404,1045) */
+  background-size: 273.2% 136.7%; background-position: 79.7% 85.8%;
+}
+.vcsp-fs-bg::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(6,10,30,.35), rgba(6,10,30,.05) 40%, rgba(6,10,30,.55));
+}
+.vcsp-fs-top {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 3;
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 3cqh 5cqw;
+}
+.vcsp-fs-title { font-family: 'Pricedown Bl', Oswald, sans-serif; font-size: 6.4cqw;
+  letter-spacing: .05em; text-shadow: 0 0 12px rgba(255,47,179,.9), 0 2px 4px #000; }
+.vcsp-fs-artist { font-size: 4cqw; color: #ffd7f2; text-shadow: 0 1px 3px #000; }
+.vcsp-fs-close {
+  width: 11cqw; height: 11cqw; border-radius: 50%; cursor: pointer; flex: none;
+  background: rgba(10,16,40,.72); border: 2px solid rgba(53,224,255,.85); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 14px rgba(53,224,255,.45);
+}
+.vcsp-fs-close svg { width: 50%; height: 50%; fill: currentColor; }
+
+/* transparent DOM layer: future lyrics / karaoke hook. Empty by default. */
+.vcsp-lyrics {
+  position: absolute; z-index: 2; left: 6cqw; right: 6cqw; top: 20%; bottom: 32%;
+  overflow-y: auto; pointer-events: auto;
+}
+.vcsp-lyrics:empty { pointer-events: none; }
+
+/* ambient now-playing treatment shown while no lyrics provider exists */
+.vcsp-fs-now {
+  position: absolute; z-index: 2; left: 0; right: 0; top: 24%;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  padding: 0 8cqw;
+}
+.vcsp-fs-now[hidden] { display: none; }
+.vcsp-fs-art {
+  width: 44cqw; height: 44cqw; object-fit: cover; border-radius: 6px;
+  border: 2px solid rgba(255,79,195,.8);
+  box-shadow: 0 0 30px rgba(255,47,179,.55), 0 8px 24px rgba(0,0,0,.6);
+}
+.vcsp-fs-nt { margin-top: 2.4cqh; font-family: 'Pricedown Bl', Oswald, sans-serif;
+  font-size: 6cqw; letter-spacing: .05em; text-shadow: 0 0 12px rgba(255,47,179,.9), 0 2px 4px #000; }
+.vcsp-fs-na { margin-top: .8cqh; font-size: 4.2cqw; color: #ffd7f2; text-shadow: 0 1px 3px #000; }
+
+.vcsp-viz { position: absolute; z-index: 1; left: 0; right: 0; bottom: 0; width: 100%; height: 26%; opacity: .9; }

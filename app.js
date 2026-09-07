@@ -193,7 +193,17 @@ async function initMap() {
       navigateTo: d => { dest = d; showRoutePending(d && d.label); planRoute({ autostart: true }); },
       openPlanning: v => openPlanning(v || 'poi'),
     });
-    locateUser(true);
+    // Restore the pre-Spotify-OAuth view (the auth redirect reloads the page).
+    const rv = pendingSpotifyView;
+    pendingSpotifyView = null;
+    if (rv && rv.center) {
+      map.jumpTo({ center: rv.center, zoom: rv.zoom || 12, bearing: rv.bearing || 0 });
+      if (rv.uiMode === 'drive' && navActive) setUiMode('drive');
+      else if (rv.uiMode === 'planning') setUiMode('planning');
+      locateUser(false);
+    } else {
+      locateUser(true);
+    }
   });
   map.on('dragstart', () => { if (navActive) setFollow(false); });
   // Fetch ambient POIs for wherever the map is looking — the 750 m
@@ -658,6 +668,84 @@ function openMenu() {
   syncDiscoveryStats();
 }
 function closeMenu() { $('menu-panel').hidden = true; }
+
+/* ---------------- Spotify pane (WayStation music widget) ----------------
+   Theme-independent core (spotify-core.js) + per-theme skin mounted
+   into #spotify-stage. OAuth redirects reload the page, so the UI/map
+   state is stashed in sessionStorage before leaving and restored after
+   the callback — the map never visibly resets. */
+const SPOTIFY_CLIENT_ID = 'e15ad96d357849999f72380200c0e37d';
+const SPOTIFY_REDIRECT_URI = 'https://ciaranf3308-star.github.io/vice-city-navigator/';
+const SPOTIFY_SCOPES = [
+  'user-read-currently-playing',
+  'user-read-playback-state',
+  'user-modify-playback-state',
+];
+const SPOTIFY_PREAUTH = 'vcn.spotify.preAuth';
+const SPOTIFY_PANE_OPEN = 'vcn.spotify.paneOpen';
+let pendingSpotifyView = null;
+
+function setSpotifyPane(open) {
+  $('spotify-pane').hidden = !open;
+  try {
+    if (open) localStorage.setItem(SPOTIFY_PANE_OPEN, '1');
+    else localStorage.removeItem(SPOTIFY_PANE_OPEN);
+  } catch (e) {}
+  if (window.SpotifyCore && SpotifyCore.isConnected()) {
+    if (open) SpotifyCore.startPolling();
+    else SpotifyCore.stopPolling();
+  }
+}
+
+function saveSpotifyPreAuth() {
+  try {
+    const s = { uiMode, paneOpen: !$('spotify-pane').hidden };
+    if (map) {
+      const c = map.getCenter();
+      s.center = [c.lng, c.lat];
+      s.zoom = map.getZoom();
+      s.bearing = map.getBearing();
+    }
+    sessionStorage.setItem(SPOTIFY_PREAUTH, JSON.stringify(s));
+  } catch (e) {}
+}
+
+async function initSpotify() {
+  if (!window.SpotifyCore || !window.SpotifySkins) return;
+  SpotifyCore.onBeforeRedirect(saveSpotifyPreAuth);
+  const themeId = window.VCNThemes ? VCNThemes.currentId() : 'vice-city';
+  const skin = SpotifySkins.get(themeId) || SpotifySkins.get('vice-city');
+  if (skin) skin.mount($('spotify-stage'), SpotifyCore);
+  let hadCallback = false;
+  try {
+    hadCallback = await SpotifyCore.init({
+      clientId: SPOTIFY_CLIENT_ID,
+      redirectUri: SPOTIFY_REDIRECT_URI,
+      scopes: SPOTIFY_SCOPES,
+    });
+  } catch (e) { /* init is best-effort; widget shows connect state */ }
+  if (hadCallback) {
+    let s = null;
+    try { s = JSON.parse(sessionStorage.getItem(SPOTIFY_PREAUTH) || 'null'); } catch (e) {}
+    try { sessionStorage.removeItem(SPOTIFY_PREAUTH); } catch (e) {}
+    if (s) {
+      pendingSpotifyView = s; // applied once the map finishes loading
+      if (s.paneOpen) setSpotifyPane(true);
+      else setSpotifyPane(localStorage.getItem(SPOTIFY_PANE_OPEN) === '1');
+    }
+  } else {
+    try {
+      if (localStorage.getItem(SPOTIFY_PANE_OPEN) === '1') setSpotifyPane(true);
+    } catch (e) {}
+  }
+}
+
+function wireSpotifyButtons() {
+  const toggle = () => setSpotifyPane($('spotify-pane').hidden);
+  $('music-btn').addEventListener('click', toggle);
+  $('drive-music-btn').addEventListener('click', toggle);
+  $('spotify-close').addEventListener('click', () => setSpotifyPane(false));
+}
 function toggleMenu() { $('menu-panel').hidden ? openMenu() : closeMenu(); }
 
 /* ---------------- discovery menu wiring ---------------- */
@@ -759,7 +847,9 @@ function wireControls() {
 /* ---------------- boot ---------------- */
 wireSearch();
 wireControls();
+wireSpotifyButtons();
 initMap();
+initSpotify();
 
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
