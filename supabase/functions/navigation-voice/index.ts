@@ -151,6 +151,7 @@ async function bumpUsage(): Promise<number> {
       'Content-Type': 'application/json',
     },
     body: '{}',
+    signal: AbortSignal.timeout(15000),
   });
   if (!res.ok) throw new Error(`usage_bump_http_${res.status}`);
   const n = await res.json();
@@ -208,7 +209,10 @@ let cachedTextModel: string | null = null;
 
 async function discoverTextModel(key: string): Promise<string | null> {
   try {
-    const res = await fetch(GEMINI_MODELS_URL, { headers: geminiHeaders(key) });
+    const res = await fetch(GEMINI_MODELS_URL, {
+      headers: geminiHeaders(key),
+      signal: AbortSignal.timeout(15000),
+    });
     if (!res.ok) return null;
     const data = await res.json();
     const models: Array<{ name?: string; supportedGenerationMethods?: string[] }> =
@@ -259,6 +263,7 @@ async function geminiRewrite(key: string, persona: Persona, mode: string, profan
         method: 'POST',
         headers: geminiHeaders(key),
         body,
+        signal: AbortSignal.timeout(15000),
       });
     } catch (e) { lastErr = e as Error; continue; }
     if (res.status === 404 || res.status === 429) {
@@ -293,11 +298,15 @@ async function geminiSpeak(key: string, persona: Persona, text: string): Promise
   let lastErr: Error | null = null;
   for (let attempt = 0; attempt < 3; attempt++) {
     if (attempt > 0) await new Promise((r) => setTimeout(r, 1200 * attempt));
-    const res = await fetch(`${GEMINI_API_BASE}/${GEMINI_TTS_MODEL}:generateContent`, {
-      method: 'POST',
-      headers: geminiHeaders(key),
-      body,
-    });
+    let res: Response;
+    try {
+      res = await fetch(`${GEMINI_API_BASE}/${GEMINI_TTS_MODEL}:generateContent`, {
+        method: 'POST',
+        headers: geminiHeaders(key),
+        body,
+        signal: AbortSignal.timeout(15000),
+      });
+    } catch (e) { lastErr = e as Error; continue; } // timeout/network -> retry
     if (res.status === 429) { lastErr = new Error('gemini_tts_429'); continue; }
     if (!res.ok) throw new Error(`gemini_tts_${res.status}`);
     const data = await res.json();
