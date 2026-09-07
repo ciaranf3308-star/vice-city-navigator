@@ -474,6 +474,19 @@
         budgetToday: budget && budget.date === new Date().toISOString().slice(0, 10) ? budget.count : 0,
         queryHistory: queryHistory.length,
         layerOnMap: !!(map && map.getSource('vcn-pois')),
+        layerExists: !!(map && typeof map.getLayer === 'function' && map.getLayer('vcn-poi')),
+        zoom: map ? +map.getZoom().toFixed(2) : null,
+        featuresInSource: (() => {
+          try { const s = map.getSource('vcn-pois'); return s && s._data ? s._data.features.length : null; }
+          catch (e) { return 'err:' + e.message; }
+        })(),
+        blipImages: (() => {
+          try {
+            const names = [...new Set(Object.values(GOOGLE_TYPE_TO_BLIP).concat(['qmark']))];
+            const missing = names.filter(n => !map.hasImage('poi-' + n));
+            return { total: names.length, missing };
+          } catch (e) { return { error: String(e && e.message || e) }; }
+        })(),
         cooldownMsLeft: Math.max(0, failCooldownUntil - Date.now()),
       };
     },
