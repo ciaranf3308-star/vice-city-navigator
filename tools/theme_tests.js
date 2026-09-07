@@ -146,7 +146,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v32"), 'SW shell cache v32');
+ok(swSrc.includes("ws-shell-v33"), 'SW shell cache v33');
 ok(swSrc.includes("ws-theme-v10"), 'SW theme cache v10');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
@@ -341,6 +341,7 @@ ok(/body\.dashboard-mode #map-tools\{display:none\}/.test(cssSrc), 'floating zoo
 ok(appSrc.includes('open-meteo.com'), 'weather comes from keyless Open-Meteo');
 ok(appSrc.includes("setAppMode('normal')"), 'PHONE tab drops back to the phone UI');
 ok(appSrc.includes("classList.toggle('radio-off')"), 'RADIO tab toggles the music widget');
+ok(cssSrc.includes('top:64px') && cssSrc.includes('bottom:72px'), 'docked skins fit between the dash bars (chrome never covers the widget)');
 ok(!cssSrc.includes('#spotify-close'), 'no close-button styles');
 ok(/\#spotify-pane\{[\s\S]*?background:transparent/.test(cssSrc), 'pane transparent');
 

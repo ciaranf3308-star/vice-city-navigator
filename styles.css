@@ -304,11 +304,12 @@ body.dashboard-mode #spotify-pane{
   right:auto;bottom:auto;max-width:none;min-width:0;
   pointer-events:none;
 }
-/* Docked skins (gta-v, san-andreas, rdr2, default): keep their 480×720
-   pane, floating over the full-screen map at the right. */
+/* Docked skins (gta-v, san-andreas, rdr2, default): keep their 480-wide
+   pane, floating over the full-screen map at the right — fitted
+   between the dashboard top/bottom bars so no chrome covers it. */
 body.dashboard-mode #spotify-stage{
-  position:absolute;top:0;right:0;width:480px;height:720px;
-  left:auto;bottom:auto;pointer-events:auto;
+  position:absolute;top:64px;right:0;bottom:72px;width:480px;height:auto;
+  left:auto;pointer-events:auto;
 }
 /* Floating skins (vice-city): the stage is a full-canvas transparent
    layer; the skin's widget positions itself and owns its silhouette. */
