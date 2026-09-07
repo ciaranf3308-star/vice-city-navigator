@@ -146,8 +146,8 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v37"), 'SW shell cache v37');
-ok(swSrc.includes("ws-theme-v11"), 'SW theme cache v11');
+ok(swSrc.includes("ws-shell-v38"), 'SW shell cache v38');
+ok(swSrc.includes("ws-theme-v12"), 'SW theme cache v12');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
@@ -418,15 +418,18 @@ for (const [id, prefix] of [['vice-city', 'vc'], ['gta-v', 'v'], ['san-andreas',
   const minor = lay(`${prefix}-label-road-minor`).layout['text-size'];
   const town = textSizeAt(place, 'town', 14);
   const city = textSizeAt(place, 'city', 14);
-  ok(town >= 18, `${id}: town label >= 18px (got ${town})`);
-  ok(city >= 20, `${id}: city label >= 20px (got ${city})`);
+  ok(town >= 21, `${id}: town label >= 21px after the x1.2 pass (got ${town})`);
+  ok(city >= 24, `${id}: city label >= 24px after the x1.2 pass (got ${city})`);
+  // exact scaled match values lock the uniform pass in (declutter bands preserved)
+  ok(textSizeAt(place, 'village', 14) === 14.5, `${id}: village label == 14.5px (got ${textSizeAt(place, 'village', 14)})`);
+  ok(textSizeAt(place, 'hamlet', 14) === 12, `${id}: hamlet label == 12px (got ${textSizeAt(place, 'hamlet', 14)})`);
   for (const z of [12, 14, 16]) {
     const tz = textSizeAt(place, 'town', z);
     const rm = textSizeAt(major, null, z), rn = textSizeAt(minor, null, z);
     ok(tz / rm >= 1.4, `${id}: town dominates major roads at z${z} (${tz.toFixed(1)} vs ${rm.toFixed(1)})`);
     if (z >= 14) ok(tz / rn >= 1.4, `${id}: town dominates minor roads at z${z} (${tz.toFixed(1)} vs ${rn.toFixed(1)})`);
   }
-  ok(textSizeAt(major, null, 17) >= 11, `${id}: major roads still readable zoomed in`);
+  ok(textSizeAt(major, null, 17) >= 15, `${id}: major roads still readable zoomed in (got ${textSizeAt(major, null, 17).toFixed(1)})`);
 }
 const vcRoad = styles['vice-city'].layers.find(l => l.id === 'vc-label-road-major').paint['text-color'];
 const vcPlace = styles['vice-city'].layers.find(l => l.id === 'vc-label-place').paint['text-color'];
