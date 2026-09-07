@@ -226,7 +226,11 @@ ok(/\.vcsp\s*\{[^}]*background:\s*transparent/.test(vcSkinCss), 'VC skin root tr
 ok(appSrc.includes("get('dashboard')"), 'dashboard URL param read');
 ok(appSrc.includes('ws.appMode'), 'app mode persisted');
 ok(appSrc.includes('WayStation.setAppMode'), 'setAppMode exposed for hosts');
-ok(appSrc.includes('dashboardLayoutActive()'), 'wide-landscape gate exists');
+ok(appSrc.includes('dashboardLayoutActive()'), 'dashboardLayoutActive() exists');
+ok(!appSrc.includes('min-width: 900px'), 'no viewport gate: preview forces dashboard mode');
+ok(appSrc.includes('dash-stage') && appSrc.includes('1920'), 'fixed 1920x720 dashboard canvas');
+ok(appSrc.includes('fitDashboardStage'), 'canvas zoom-to-fit on resize');
+ok(indexSrc.includes('Dashboard Preview'), 'menu offers Dashboard Preview');
 ok(appSrc.includes('map.resize()'), 'mode switch resizes map (no recreate)');
 ok(!appSrc.includes('setSpotifyPane'), 'floating pane logic removed');
 ok(!appSrc.includes('music-btn'), 'music buttons removed from app.js');

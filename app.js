@@ -893,15 +893,19 @@ function closeMenu() { $('menu-panel').hidden = true; }
    The Spotify player is a DASHBOARD feature. In normal (mobile)
    mode the map is full-screen and Spotify lives only in the menu
    (connect / disconnect). Dashboard mode is an explicit app mode —
-   never inferred from screen width alone — activated with
-   ?dashboard=1 (persisted) or WayStation.setAppMode('dashboard')
-   so a future Android/Android Auto host can flip it directly.
+   never inferred from screen width alone — forced with the
+   "Dashboard Preview" menu option, ?dashboard=1 (persisted), or
+   WayStation.setAppMode('dashboard') so a future Android/Android
+   Auto host can flip it directly.
 
-   Dashboard layout is ~75% map / ~25% music. The wide-landscape
-   media gate keeps a phone or narrow window from accidentally
-   growing a music pane; the MapLibre instance is never recreated,
-   only resized. Route, markers, POIs, discovery, voice and the
-   Spotify session all survive the switch. */
+   The dashboard is ONE implementation: a fixed 1920×720 automotive
+   reference canvas (#dash-stage). On a real car display it renders at
+   zoom 1; everywhere else JS zooms the whole canvas proportionally to
+   fit the window, so Dashboard Preview on a phone or desktop shows the
+   exact same layout, Spotify pane, 75/25 split, HUD, theme, controls
+   and state. The MapLibre instance is never recreated, only resized.
+   Route, markers, POIs, discovery, voice and the Spotify session all
+   survive the switch. */
 const APP_MODE_KEY = 'ws.appMode';
 let appMode = 'normal'; // normal | dashboard
 
@@ -915,18 +919,70 @@ function initAppMode() {
   } catch (e) { appMode = 'normal'; }
 }
 
-/* True only when dashboard was explicitly requested AND the viewport
-   is a wide landscape surface (e.g. 1920x720 automotive). */
+/* True when dashboard was explicitly requested. No viewport detection:
+   forcing appMode='dashboard' is the whole point of Dashboard Preview. */
 function dashboardLayoutActive() {
-  if (appMode !== 'dashboard') return false;
-  try {
-    return window.matchMedia('(min-width: 900px) and (orientation: landscape)').matches;
-  } catch (e) { return false; }
+  return appMode === 'dashboard';
+}
+
+/* Fixed 1920×720 canvas. The dashboard surface (map, HUD chrome, music
+   pane) is reparented into #dash-stage and authored in 1920×720
+   coordinates; the stage is zoomed to fit the window. Menus, drawers
+   and toasts stay at body level so they remain usable at any scale. */
+const DASH_W = 1920, DASH_H = 720;
+const DASH_STAGE_NODES = ['map', 'fx', 'explore-ui', 'drive-hud', 'spotify-pane'];
+
+function buildDashboardStage() {
+  let stage = $('dash-stage');
+  if (stage) return stage;
+  stage = document.createElement('div');
+  stage.id = 'dash-stage';
+  document.body.appendChild(stage);
+  for (const id of DASH_STAGE_NODES) {
+    const n = $(id);
+    if (!n || n.parentNode === stage) continue;
+    n._dashHome = { parent: n.parentNode, next: n.nextSibling };
+    stage.appendChild(n);
+  }
+  return stage;
+}
+
+function teardownDashboardStage() {
+  const stage = $('dash-stage');
+  if (!stage) return;
+  for (const id of DASH_STAGE_NODES) {
+    const n = $(id);
+    const home = n && n._dashHome;
+    if (n && home && home.parent) {
+      home.parent.insertBefore(n, home.next);
+      delete n._dashHome;
+    }
+  }
+  stage.remove();
+}
+
+function fitDashboardStage() {
+  const stage = $('dash-stage');
+  if (!stage) return;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const s = Math.min(1, vw / DASH_W, vh / DASH_H);
+  if (s > 0 && 'zoom' in stage.style) {
+    stage.style.transform = '';
+    stage.style.zoom = String(s);
+  } else {
+    stage.style.zoom = '';
+    stage.style.transform = 'scale(' + s + ')';
+    stage.style.transformOrigin = 'top left';
+  }
+  stage.style.left = ((vw - DASH_W * s) / 2) + 'px';
+  stage.style.top = ((vh - DASH_H * s) / 2) + 'px';
 }
 
 function applyAppMode() {
   const on = dashboardLayoutActive();
   document.body.classList.toggle('dashboard-mode', on);
+  if (on) { buildDashboardStage(); fitDashboardStage(); }
+  else teardownDashboardStage();
   const pane = $('spotify-pane');
   if (pane) pane.hidden = !on;
   if (on) mountSpotifySkin(wsThemeId());
@@ -944,11 +1000,7 @@ function setAppMode(mode) {
   }
   appMode = next;
   try { localStorage.setItem(APP_MODE_KEY, appMode); } catch (e) {}
-  const on = applyAppMode();
-  if (appMode === 'dashboard' && !on) {
-    toast('Dashboard mode needs a wide landscape screen.');
-  }
-  return on;
+  return applyAppMode();
 }
 window.WayStation = window.WayStation || {};
 window.WayStation.setAppMode = setAppMode;
@@ -1076,10 +1128,14 @@ function wireSpotifyMenu() {
   });
   let rsT = null;
   window.addEventListener('resize', () => {
-    // Re-evaluate the wide-landscape gate after resizes; debounced and
-    // map-safe (applyAppMode only flips a class and calls map.resize()).
+    // Refit the 1920×720 dashboard canvas after resizes; debounced and
+    // map-safe (fitDashboardStage only zooms, then map.resize()).
     clearTimeout(rsT);
-    rsT = setTimeout(() => { if (appMode === 'dashboard') applyAppMode(); }, 150);
+    rsT = setTimeout(() => {
+      if (appMode !== 'dashboard') return;
+      fitDashboardStage();
+      if (window.map && map.resize) { try { map.resize(); } catch (e) {} }
+    }, 150);
   });
 }
 

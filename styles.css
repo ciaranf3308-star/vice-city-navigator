@@ -229,10 +229,9 @@ body.theme-rdr2 .dest-pin{ background-image:url('assets/themes/rdr2/blips/waypoi
 .wssp-default button{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);
   color:#fff;border-radius:10px;padding:10px 16px;font-size:16px;cursor:pointer}
 .wssp-default .wssp-connect{width:100%;padding:12px;font-size:15px;font-weight:600}
-/* ---------- dashboard mode: ~75% map / ~25% music, flush right ----------
-   The pane is a transparent mount point — the theme skin owns every
-   pixel. The MapLibre instance is never recreated: applyAppMode()
-   flips the class and calls map.resize(). */
+/* ---------- Spotify pane: transparent mount point, theme skin owns every pixel ----------
+   The pane only ever shows in dashboard mode (inside #dash-stage, fixed
+   at 480×720 there). container-type:size lets the skin use cqw/cqh units. */
 #spotify-pane{
   position:fixed;top:0;right:0;height:100dvh;width:25%;
   max-width:560px;min-width:300px;z-index:30;overflow:hidden;
@@ -240,12 +239,30 @@ body.theme-rdr2 .dest-pin{ background-image:url('assets/themes/rdr2/blips/waypoi
 }
 #spotify-pane[hidden]{display:none}
 #spotify-stage{position:absolute;inset:0;background:transparent}
-body.dashboard-mode #map{left:0;right:25%}
-/* keep chrome clear of the music pane */
-body.dashboard-mode #search-bar{right:calc(25% + 12px)}
-body.dashboard-mode #map-tools{right:calc(25% + 12px)}
-body.dashboard-mode #maneuver-card{right:calc(25% + 12px)}
-body.dashboard-mode #drive-bar{left:37.5%}
+
+/* ---------- dashboard: fixed 1920×720 automotive reference canvas ----------
+   The whole dashboard (map, HUD, music pane) is authored at exactly
+   1920×720 inside #dash-stage. JS sets `zoom` on the stage so the canvas
+   scales proportionally to fit any window — the internal layout never
+   changes with browser size. The real car display renders it at zoom 1.
+   Menus/overlays stay at body level (unscaled) so they remain usable. */
+#dash-stage{
+  position:fixed;width:1920px;height:720px;overflow:hidden;background:#000;
+}
+body.dashboard-mode{background:#000}
+body.dashboard-mode #map{position:absolute;left:0;top:0;width:1440px;height:720px;right:auto;bottom:auto}
+body.dashboard-mode #fx{position:absolute;inset:0}
+body.dashboard-mode #explore-ui{position:absolute;inset:0}
+body.dashboard-mode #drive-hud{position:absolute;inset:0}
+body.dashboard-mode #spotify-pane{
+  position:absolute;left:1440px;top:0;width:480px;height:720px;
+  right:auto;bottom:auto;max-width:none;min-width:0;
+}
+/* HUD chrome stays clear of the music pane, in canvas coordinates */
+body.dashboard-mode #search-bar{right:492px}
+body.dashboard-mode #map-tools{right:492px}
+body.dashboard-mode #maneuver-card{right:492px}
+body.dashboard-mode #drive-bar{left:720px;max-width:none}
 
 /* ---------- toast ---------- */
 #toast{
