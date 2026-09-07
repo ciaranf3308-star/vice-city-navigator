@@ -175,6 +175,22 @@ function recolorStyle(style) {
       paint['fill-color'] = VC.bg;
     }
   }
+  // The base style only draws houses + one park class, so suburbs render as
+  // flat grey. The VC map is full of green patches — inject layers for
+  // fields, meadows, gardens, pitches, etc. from the vector tiles.
+  const greenLandcover = ['farmland', 'grass', 'scrub'];
+  const greenLanduse = ['park', 'garden', 'pitch', 'playground', 'cemetery', 'stadium', 'golf'];
+  const mkGreen = (id, sourceLayer, classes) => ({
+    id, type: 'fill', source: 'openmaptiles', 'source-layer': sourceLayer,
+    filter: ['all',
+      ['match', ['geometry-type'], ['MultiPolygon', 'Polygon'], true, false],
+      ['match', ['get', 'class'], classes, true, false]],
+    paint: { 'fill-color': VC.park, 'fill-antialias': true }
+  });
+  const at = style.layers.findIndex(l => l.id === 'building');
+  style.layers.splice(at < 0 ? 0 : at, 0,
+    mkGreen('vcn-green-landcover', 'landcover', greenLandcover),
+    mkGreen('vcn-green-landuse', 'landuse', greenLanduse));
   return style;
 }
 
