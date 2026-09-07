@@ -1,8 +1,8 @@
 /* ============================================================
    WayStation theme: Grand Theft Auto V.
-   Modern minimal Atlas language: pale monochrome urban map,
-   clean white road hierarchy, dark blocks, muted terrain,
-   Chalet-style typography. GPS purple route.
+   GTA V minimap language: warm grey ground, white road hierarchy,
+   dark olive parks, blue-grey water, white labels with dark halos,
+   Chalet-style typography. GPS purple route (as in-game).
    ============================================================ */
 'use strict';
 

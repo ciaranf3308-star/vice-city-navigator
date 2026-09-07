@@ -280,8 +280,16 @@ function maybeShowPoiDebug() {
    route, POIs, fog, player marker, destination marker. All app
    state — GPS, destination, route, navigation, discovery data,
    Places cache, Spotify session, recents, voice settings — lives
-   outside the style and survives untouched. Safe while navigating. */
-let themeSwitching = false;
+   outside the style and survives untouched. Safe while navigating.
+
+   Switching is generation-guarded: rapid selections coalesce and the
+   latest request always wins; a stale in-flight switch can never
+   commit over a newer one. The target style JSON is fetched and
+   validated BEFORE the map is touched, applied with a full rebuild
+   ({diff:false}) — never a style diff, which does not reliably fire
+   style.load and caused false "failed to load" rollbacks — and the
+   new theme is only persisted once the style actually loads. */
+let themeSwitchGen = 0;
 function restoreRouteOverlay() {
   ensureRouteLayers();
   if (routeCoords.length) {
@@ -307,38 +315,86 @@ function applyBodyTheme(id) {
   const cur = VCNThemes.get(id);
   if (cur && cur.ui && cur.ui.bodyClass) document.body.classList.add(cur.ui.bodyClass);
 }
+async function fetchThemeStyle(theme) {
+  const res = await fetch(theme.map.styleUrl, { cache: 'no-cache' });
+  if (!res.ok) throw new Error('style HTTP ' + res.status);
+  const style = await res.json();
+  if (!style || !Array.isArray(style.layers) || !style.layers.length) {
+    throw new Error('style JSON has no layers');
+  }
+  return style;
+}
+/* Wait for a freshly applied full style rebuild to report loaded.
+   A generation token lets a superseding switch cancel the wait. */
+function waitForStyleLoad(isStale) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => { cleanup(); reject(new Error('style load timeout')); }, 30000);
+    const onLoad = () => { if (isStale()) { cleanup(); reject(new Error('superseded')); return; } cleanup(); resolve(); };
+    const onError = () => {};
+    function cleanup() { clearTimeout(timer); map.off('style.load', onLoad); map.off('error', onError); }
+    map.on('error', onError);
+    map.once('style.load', onLoad);
+  });
+}
 async function applyTheme(id) {
   if (!window.VCNThemes || !map) return;
-  if (VCNThemes.currentId() === id || themeSwitching) return;
+  if (VCNThemes.currentId() === id) { syncThemeSelector(); return; }
+  const theme = VCNThemes.get(id);
+  if (!theme) { syncThemeSelector(); return; }
+  const gen = ++themeSwitchGen;
+  const isStale = () => gen !== themeSwitchGen;
   const priorId = VCNThemes.currentId();
-  if (!VCNThemes.setCurrent(id)) return;
-  themeSwitching = true;
-  applyBodyTheme(id);
-  syncThemeSelector();
-  const theme = VCNThemes.current();
+  const priorTheme = VCNThemes.current();
+  // Show intent in the selector immediately; the persisted theme only
+  // changes once the new style has actually loaded.
+  const sel = document.getElementById('theme-select');
+  if (sel) sel.value = id;
+  let style = null, priorStyle = null;
   try {
-    await new Promise((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error('style load timeout')), 15000);
-      map.once('style.load', () => { clearTimeout(timer); resolve(); });
-      map.setStyle(theme.map.styleUrl);
-    });
+    // Fetch the target (and the prior, for exact rollback) before the
+    // map is touched, so a bad fetch can never leave a broken map.
+    [style, priorStyle] = await Promise.all([
+      fetchThemeStyle(theme),
+      fetchThemeStyle(priorTheme).catch(() => null),
+    ]);
   } catch (e) {
-    // Roll back: the map still shows the prior style, so the persisted
-    // theme, body class and selector must match it again.
-    VCNThemes.setCurrent(priorId);
-    applyBodyTheme(priorId);
+    if (isStale()) return;
     syncThemeSelector();
-    themeSwitching = false;
     toast('Could not load the ' + theme.name + ' map style.');
     return;
   }
+  if (isStale()) return;
+  try {
+    const loadP = waitForStyleLoad(isStale);
+    map.setStyle(style, { diff: false });
+    await loadP;
+  } catch (e) {
+    if (isStale() || (e && e.message === 'superseded')) return;
+    // Real load failure: restore the exact prior style, then roll the
+    // UI back to match what the map actually shows.
+    try {
+      if (priorStyle) {
+        const rp = waitForStyleLoad(() => false);
+        map.setStyle(priorStyle, { diff: false });
+        await rp;
+      }
+    } catch (e2) { console.error('[ws] prior-style restore failed', e2); }
+    if (isStale()) return;
+    syncThemeSelector();
+    toast('Could not load the ' + theme.name + ' map style.');
+    return;
+  }
+  if (isStale()) return;
+  // Commit only now that the style is live.
+  VCNThemes.setCurrent(id);
+  applyBodyTheme(id);
+  syncThemeSelector();
   // Rehydrate every custom overlay the style change dropped.
   try { restoreRouteOverlay(); paintRouteTheme(); } catch (e) { console.error('[ws] route rehydrate failed', e); }
   try { if (window.VCNPlaces) VCNPlaces.rehydrate(); } catch (e) { console.error('[ws] POI rehydrate failed', e); }
   try { if (window.VCNDiscovery) VCNDiscovery.rehydrate(); } catch (e) { console.error('[ws] fog rehydrate failed', e); }
   try { refreshPlayerMarkerArt(); } catch (e) { console.error('[ws] marker rehydrate failed', e); }
   try { mountSpotifySkin(id); } catch (e) { console.error('[ws] spotify skin swap failed', e); }
-  themeSwitching = false;
   toast(theme.name + ' theme active.');
 }
 function syncThemeSelector() {
@@ -987,7 +1043,7 @@ function applyAppMode() {
   if (pane) pane.hidden = !on;
   if (on) mountSpotifySkin(wsThemeId());
   else unmountSpotifySkin();
-  if (window.map && map.resize) { try { map.resize(); } catch (e) {} }
+  if (map && map.resize) { try { map.resize(); } catch (e) {} }
   syncDashboardToggle();
   return on;
 }
@@ -1143,7 +1199,7 @@ function wireSpotifyMenu() {
     rsT = setTimeout(() => {
       if (appMode !== 'dashboard') return;
       fitDashboardStage();
-      if (window.map && map.resize) { try { map.resize(); } catch (e) {} }
+      if (map && map.resize) { try { map.resize(); } catch (e) {} }
     }, 150);
   });
 }

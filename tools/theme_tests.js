@@ -146,8 +146,8 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v24"), 'SW shell cache v24');
-ok(swSrc.includes("ws-theme-v4"), 'SW theme cache v4');
+ok(swSrc.includes("ws-shell-v25"), 'SW shell cache v24');
+ok(swSrc.includes("ws-theme-v5"), 'SW theme cache v4');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
@@ -303,6 +303,28 @@ for (const p of ['themes/vice-city/spotify-skin.js', 'themes/vice-city/spotify-s
   ok(SW.SHELL.includes(p), `SW precaches ${p}`);
 }
 ok(!SW.SHELL.some(p => p.includes('skin-vice-city') || p.includes('synthwave')), 'SW drops old skin paths');
+
+/* ---------- theme switching robustness (no more false "failed to load") ---------- */
+ok(appSrc.includes('themeSwitchGen'), 'applyTheme uses a generation guard');
+ok(appSrc.includes('fetchThemeStyle'), 'target style JSON fetched+validated before map is touched');
+ok(appSrc.includes("setStyle(style, { diff: false })"), 'style applied with full rebuild, never a diff');
+ok(!/[^a-zA-Z]themeSwitching[^a-zA-Z]/.test(appSrc.replace(/themeSwitchGen/g, '')), 'brittle themeSwitching flag removed');
+ok(appSrc.includes('VCNThemes.setCurrent(id)') && /await loadP;[\s\S]*?VCNThemes\.setCurrent\(id\)/.test(appSrc),
+   'theme persisted only after the new style actually loads');
+ok(!appSrc.includes('window.map && map.resize'), 'no window.map/map null mismatch on resize guards');
+
+/* ---------- GTA V palette matches the in-game minimap reference ---------- */
+const vPaint = id => vStyle.layers.find(l => l.id === id).paint;
+ok(vPaint('v-land')['background-color'] === '#8b8578', 'V land: warm radar grey');
+ok(vPaint('v-water')['fill-color'] === '#5d8aa8', 'V water: blue-grey');
+for (const id of ['v-parks', 'v-grass', 'v-golf', 'v-gardens', 'v-recreation', 'v-park-areas', 'v-playing-fields'])
+  ok(vPaint(id)['fill-color'] === '#5c6b3c', `V ${id}: dark olive`);
+ok(vPaint('v-woods')['fill-color'] === '#4e5c33', 'V woods: deep olive');
+for (const id of ['v-road-minor', 'v-road-primary', 'v-road-motorway'])
+  ok(vPaint(id)['line-color'] === '#f4f2ec', `V ${id}: white road core`);
+ok(vPaint('v-label-road-major')['text-color'] === '#ffffff', 'V road labels: white like the radar');
+ok(vPaint('v-label-place')['text-halo-color'] === '#3a372f', 'V place labels: dark halo');
+ok(T.get('gta-v').map.routeColor === '#a86fd6', 'V route stays purple (as in-game)');
 
 
 console.log(`\n${pass} passed, ${fail} failed`);
