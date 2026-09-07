@@ -335,14 +335,17 @@ body.dashboard-mode.radio-off #spotify-pane{display:none}
    existing proportional scaling handles physical screens. The map
    is never resized or inset — these are pure overlays. */
 #dash-topbar,#dash-bottombar{display:none}
-body.dashboard-mode.theme-vice-city #dash-topbar{
+/* Drive-mode car chrome: visible for every theme while navigating
+   (body.nav-driving), never outside drive mode. Each theme re-skins
+   the shared markup below. */
+body.dashboard-mode.nav-driving.theme-vice-city #dash-topbar{
   display:block;position:absolute;left:0;right:0;top:0;height:68px;z-index:25;
   background:linear-gradient(180deg,#ff71ce,#ff2e88 55%,#b967ff);
   clip-path:polygon(0 0,100% 0,100% 50%,96.6% 100%,3.4% 100%,0 50%);
   filter:drop-shadow(0 2px 12px rgba(255,46,136,.5));
   pointer-events:none;
 }
-body.dashboard-mode.theme-vice-city #dash-bottombar{
+body.dashboard-mode.nav-driving.theme-vice-city #dash-bottombar{
   display:block;position:absolute;left:0;right:0;bottom:0;height:78px;z-index:25;
   background:linear-gradient(0deg,#ff71ce,#ff2e88 55%,#b967ff);
   clip-path:polygon(3.4% 0,96.6% 0,100% 50%,100% 100%,0 100%,0 50%);
@@ -369,10 +372,11 @@ body.dashboard-mode.theme-vice-city #dash-bottombar{
 }
 /* Vice City chrome owns the top/bottom of the canvas: keep HUD + drive
    chrome clear of it, and give VC dashboard its zoom in the bottom bar */
-body.dashboard-mode.theme-vice-city #search-bar{top:calc(80px + env(safe-area-inset-top))}
-body.dashboard-mode.theme-vice-city #maneuver-card{top:calc(80px + env(safe-area-inset-top))}
+/* Dash chrome owns the top/bottom of the canvas during drive mode:
+   keep the drive HUD clear of it on every theme. */
+body.dashboard-mode.nav-driving #maneuver-card{top:calc(80px + env(safe-area-inset-top))}
 body.dashboard-mode.theme-vice-city #map-tools{display:none}
-body.dashboard-mode.theme-vice-city #drive-bar{bottom:calc(88px + env(safe-area-inset-bottom))}
+body.dashboard-mode.nav-driving #drive-bar{bottom:calc(88px + env(safe-area-inset-bottom))}
 .dash-logo{
   font-family:'SignPainter','Pricedown Bl',cursive;font-size:42px;line-height:1;
   color:#ff71ce;text-shadow:0 0 12px rgba(255,46,136,.9),0 0 30px rgba(255,46,136,.5);
@@ -429,6 +433,161 @@ body.dashboard-mode.theme-vice-city #drive-bar{bottom:calc(88px + env(safe-area-
 #dash-eta{
   font-family:var(--vclabel);font-size:24px;font-weight:600;letter-spacing:2px;
   color:var(--cyan);text-shadow:0 0 10px rgba(1,205,254,.8);white-space:nowrap;
+}
+
+/* The Vice City sunset scene is VC artwork: never on other themes. */
+body.dashboard-mode:not(.theme-vice-city) .dash-scene{display:none}
+
+/* ---------- San Andreas dashboard chrome: 90s West Coast plate ----------
+   Deep olive-green bar, gold chamfered edge, cream ink, green accents.
+   Beckett wordmark, Bank Gothic labels (via the theme-mapped vars). */
+body.dashboard-mode.nav-driving.theme-san-andreas #dash-topbar{
+  display:block;position:absolute;left:0;right:0;top:0;height:68px;z-index:25;
+  background:linear-gradient(180deg,#e8a33d,#c07a1e 60%,#9a5f14);
+  clip-path:polygon(18px 0,100% 0,100% 100%,0 100%,0 18px);
+  filter:drop-shadow(0 2px 10px rgba(0,0,0,.55));
+  pointer-events:none;
+}
+body.dashboard-mode.nav-driving.theme-san-andreas #dash-bottombar{
+  display:block;position:absolute;left:0;right:0;bottom:0;height:78px;z-index:25;
+  background:linear-gradient(0deg,#e8a33d,#c07a1e 60%,#9a5f14);
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%);
+  filter:drop-shadow(0 -2px 10px rgba(0,0,0,.55));
+  pointer-events:auto;
+}
+body.dashboard-mode.nav-driving.theme-san-andreas #dash-topbar .dash-chrome{
+  inset:0 0 3px 0;clip-path:polygon(18px 0,100% 0,100% 100%,0 100%,0 18px);
+  background:
+    repeating-linear-gradient(45deg,rgba(255,255,255,.02) 0 2px,transparent 2px 6px),
+    linear-gradient(180deg,#16281b 0%,#101d14 70%,#0c160f 100%);
+}
+body.dashboard-mode.nav-driving.theme-san-andreas #dash-bottombar .dash-chrome{
+  inset:3px 0 0 0;clip-path:polygon(0 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%);
+  background:
+    repeating-linear-gradient(45deg,rgba(255,255,255,.02) 0 2px,transparent 2px 6px),
+    linear-gradient(0deg,#16281b 0%,#101d14 70%,#0c160f 100%);
+}
+body.dashboard-mode.theme-san-andreas .dash-logo{
+  font-family:var(--vcfont);color:#e8a33d;transform:none;
+  text-shadow:0 2px 0 rgba(0,0,0,.6);
+}
+body.dashboard-mode.theme-san-andreas .dash-wx{color:#f0e6c8;text-shadow:none}
+body.dashboard-mode.theme-san-andreas #dash-date{color:#e8a33d;text-shadow:0 2px 0 rgba(0,0,0,.6)}
+body.dashboard-mode.theme-san-andreas #dash-time{color:#f0e6c8;text-shadow:0 2px 0 rgba(0,0,0,.6)}
+body.dashboard-mode.theme-san-andreas .dash-tabs button{color:#f0e6c8;text-shadow:0 2px 0 rgba(0,0,0,.6)}
+body.dashboard-mode.theme-san-andreas .dash-tabs button.on{color:#e8a33d;
+  text-shadow:0 2px 0 rgba(0,0,0,.6)}
+body.dashboard-mode.theme-san-andreas #dash-dest{
+  color:#f0e6c8;border-color:rgba(232,163,61,.8);text-shadow:none;
+  box-shadow:inset 0 0 18px rgba(232,163,61,.08);
+}
+body.dashboard-mode.theme-san-andreas .dash-zoom button{
+  color:#f0e6c8;background:rgba(0,0,0,.45);border:2px solid rgba(232,163,61,.8);
+  box-shadow:none;text-shadow:none;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
+}
+body.dashboard-mode.theme-san-andreas #dash-compass{color:#7ec850;text-shadow:none}
+body.dashboard-mode.theme-san-andreas #dash-eta{color:#7ec850;text-shadow:none}
+body.dashboard-mode.theme-san-andreas .dash-tag{
+  font-family:var(--vcfont);color:#e8a33d;transform:none;
+  text-shadow:0 2px 0 rgba(0,0,0,.6);
+}
+
+/* ---------- GTA V dashboard chrome: Los Santos pause-menu ----------
+   Near-black green-tinted panel, thin neon-green edge, sharp rectangles,
+   Chalet type. No clip-path: V's pause menu is all right angles. */
+body.dashboard-mode.nav-driving.theme-gta-v #dash-topbar{
+  display:block;position:absolute;left:0;right:0;top:0;height:68px;z-index:25;
+  background:#0d1117;border-bottom:2px solid #7CFF6B;
+  box-shadow:0 2px 18px rgba(124,255,107,.22);
+  pointer-events:none;
+}
+body.dashboard-mode.nav-driving.theme-gta-v #dash-bottombar{
+  display:block;position:absolute;left:0;right:0;bottom:0;height:78px;z-index:25;
+  background:#0d1117;border-top:2px solid #7CFF6B;
+  box-shadow:0 -2px 18px rgba(124,255,107,.22);
+  pointer-events:auto;
+}
+body.dashboard-mode.nav-driving.theme-gta-v #dash-topbar .dash-chrome,
+body.dashboard-mode.nav-driving.theme-gta-v #dash-bottombar .dash-chrome{
+  clip-path:none;inset:0;background:rgba(255,255,255,.015);
+}
+body.dashboard-mode.theme-gta-v .dash-logo{
+  font-family:var(--vcfont);font-weight:700;letter-spacing:4px;text-transform:uppercase;
+  color:#f2f5f2;transform:none;text-shadow:none;
+}
+body.dashboard-mode.theme-gta-v .dash-wx{color:#c9d4c9;text-shadow:none}
+body.dashboard-mode.theme-gta-v #dash-date{color:#8a9a8c;text-shadow:none}
+body.dashboard-mode.theme-gta-v #dash-time{color:#f2f5f2;text-shadow:none}
+body.dashboard-mode.theme-gta-v .dash-tabs button{color:#aebbae;text-shadow:none}
+body.dashboard-mode.theme-gta-v .dash-tabs button.on{color:#7CFF6B;text-shadow:none}
+body.dashboard-mode.theme-gta-v #dash-dest{
+  color:#f2f5f2;border-color:rgba(124,255,107,.75);text-shadow:none;
+  box-shadow:none;clip-path:none;border-radius:2px;
+}
+body.dashboard-mode.theme-gta-v .dash-zoom button{
+  color:#7CFF6B;background:rgba(255,255,255,.05);border:2px solid #2f4a35;
+  box-shadow:none;text-shadow:none;clip-path:none;border-radius:2px;
+}
+body.dashboard-mode.theme-gta-v #dash-compass{color:#7CFF6B;text-shadow:none}
+body.dashboard-mode.theme-gta-v #dash-eta{color:#7CFF6B;text-shadow:none}
+body.dashboard-mode.theme-gta-v .dash-tag{
+  font-family:var(--vclabel);font-size:20px;letter-spacing:3px;text-transform:uppercase;
+  color:#8a9a8c;transform:none;text-shadow:none;
+}
+
+/* ---------- RDR2 dashboard chrome: frontier leather + parchment ----------
+   Dark leather bar, thin parchment edge, ink-red accents, parchment ink.
+   Kirsty wordmark, RDR Lino labels (via the theme-mapped vars). Flat
+   letterpress — no neon glow anywhere on this theme. */
+body.dashboard-mode.nav-driving.theme-rdr2 #dash-topbar{
+  display:block;position:absolute;left:0;right:0;top:0;height:68px;z-index:25;
+  background:linear-gradient(180deg,#d8b36a,#8a6f4d);
+  clip-path:polygon(0 0,100% 0,100% 100%,10px 100%,0 calc(100% - 10px));
+  filter:drop-shadow(0 2px 8px rgba(0,0,0,.6));
+  pointer-events:none;
+}
+body.dashboard-mode.nav-driving.theme-rdr2 #dash-bottombar{
+  display:block;position:absolute;left:0;right:0;bottom:0;height:78px;z-index:25;
+  background:linear-gradient(0deg,#d8b36a,#8a6f4d);
+  clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%,0 10px);
+  filter:drop-shadow(0 -2px 8px rgba(0,0,0,.6));
+  pointer-events:auto;
+}
+body.dashboard-mode.nav-driving.theme-rdr2 #dash-topbar .dash-chrome{
+  inset:0 0 2px 0;clip-path:polygon(0 0,100% 0,100% 100%,10px 100%,0 calc(100% - 10px));
+  background:
+    repeating-linear-gradient(90deg,rgba(0,0,0,.12) 0 3px,transparent 3px 7px),
+    linear-gradient(180deg,#33241a 0%,#241a12 70%,#1c140d 100%);
+}
+body.dashboard-mode.nav-driving.theme-rdr2 #dash-bottombar .dash-chrome{
+  inset:2px 0 0 0;clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%,0 10px);
+  background:
+    repeating-linear-gradient(90deg,rgba(0,0,0,.12) 0 3px,transparent 3px 7px),
+    linear-gradient(0deg,#33241a 0%,#241a12 70%,#1c140d 100%);
+}
+body.dashboard-mode.theme-rdr2 .dash-logo{
+  font-family:var(--vcfont);color:#e8d9b0;transform:none;
+  text-shadow:0 2px 0 rgba(0,0,0,.65);
+}
+body.dashboard-mode.theme-rdr2 .dash-wx{color:#e8d9b0;text-shadow:none}
+body.dashboard-mode.theme-rdr2 #dash-date{color:#d8b36a;text-shadow:0 2px 0 rgba(0,0,0,.65)}
+body.dashboard-mode.theme-rdr2 #dash-time{color:#e8d9b0;text-shadow:0 2px 0 rgba(0,0,0,.65)}
+body.dashboard-mode.theme-rdr2 .dash-tabs button{color:#e8d9b0;text-shadow:0 2px 0 rgba(0,0,0,.65)}
+body.dashboard-mode.theme-rdr2 .dash-tabs button.on{color:#d8b36a;
+  text-shadow:0 2px 0 rgba(0,0,0,.65)}
+body.dashboard-mode.theme-rdr2 #dash-dest{
+  color:#e8d9b0;border-color:rgba(216,179,106,.7);text-shadow:none;
+  box-shadow:inset 0 0 18px rgba(0,0,0,.35);clip-path:none;border-radius:2px;
+}
+body.dashboard-mode.theme-rdr2 .dash-zoom button{
+  color:#e8d9b0;background:rgba(0,0,0,.4);border:2px solid #8a6f4d;
+  box-shadow:none;text-shadow:none;clip-path:none;border-radius:2px;
+}
+body.dashboard-mode.theme-rdr2 #dash-compass{color:#d8b36a;text-shadow:none}
+body.dashboard-mode.theme-rdr2 #dash-eta{color:#d8b36a;text-shadow:none}
+body.dashboard-mode.theme-rdr2 .dash-tag{
+  font-family:var(--vcfont);color:#d8b36a;transform:none;
+  text-shadow:0 2px 0 rgba(0,0,0,.65);
 }
 
 /* ---------- toast ---------- */

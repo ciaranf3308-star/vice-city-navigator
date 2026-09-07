@@ -950,6 +950,10 @@ function setUiMode(mode) {
   $('explore-ui').hidden = mode === 'drive';
   $('drawer').hidden = mode !== 'planning';
   $('drive-hud').hidden = mode !== 'drive';
+  /* Dashboard car chrome (top/bottom bars) is drive-mode chrome only:
+     it shows for every theme while navigating, never outside drive mode. */
+  document.body.classList.toggle('nav-driving', mode === 'drive');
+  try { if (window.map) syncDashPadding(); } catch (e) {}
   if (mode === 'drive') closeMenu();
 }
 function openPlanning(view) {
@@ -1074,9 +1078,12 @@ function fitDashboardStage() {
    never resized; this only shifts the camera target point. */
 function syncDashPadding() {
   if (!window.map || !map.setPadding) return;
-  const vc = document.body.classList.contains('dashboard-mode') &&
-             document.body.classList.contains('theme-vice-city');
-  if (vc) map.setPadding({ top: 76, right: 780, bottom: 88, left: 8 });
+  const b = document.body.classList;
+  const driving = b.contains('dashboard-mode') && b.contains('nav-driving');
+  if (driving && b.contains('theme-vice-city'))
+    map.setPadding({ top: 76, right: 780, bottom: 88, left: 8 });
+  else if (driving)
+    map.setPadding({ top: 76, right: 8, bottom: 88, left: 8 });
   else map.setPadding({ top: 0, right: 0, bottom: 0, left: 0 });
 }
 
@@ -1210,8 +1217,7 @@ function queueDashLocality() {
 async function syncDashLocality() {
   const el = $('dash-dest');
   if (!el || !window.map) return;
-  if (!document.body.classList.contains('dashboard-mode') ||
-      !document.body.classList.contains('theme-vice-city')) return;
+  if (!document.body.classList.contains('dashboard-mode')) return;
   if (typeof navActive !== 'undefined' && navActive) return; /* nav shows the destination */
   let c; try { c = map.getCenter(); } catch (e) { return; }
   const key = c.lat.toFixed(3) + ',' + c.lng.toFixed(3);

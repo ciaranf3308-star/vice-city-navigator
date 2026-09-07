@@ -146,7 +146,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v39"), 'SW shell cache v39');
+ok(swSrc.includes("ws-shell-v40"), 'SW shell cache v40');
 ok(swSrc.includes("ws-theme-v12"), 'SW theme cache v12');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
@@ -343,8 +343,23 @@ ok(appSrc.includes('open-meteo.com'), 'weather comes from keyless Open-Meteo');
 ok(appSrc.includes("setAppMode('normal')"), 'PHONE tab drops back to the phone UI');
 ok(appSrc.includes("classList.toggle('radio-off')"), 'RADIO tab toggles the music widget');
 ok(cssSrc.includes('top:64px') && cssSrc.includes('bottom:72px'), 'docked skins fit between the dash bars (chrome never covers the widget)');
-ok(cssSrc.includes('body.dashboard-mode.theme-vice-city #dash-topbar'), 'top bar is Vice City theme chrome only');
-ok(cssSrc.includes('body.dashboard-mode.theme-vice-city #dash-bottombar'), 'bottom bar is Vice City theme chrome only');
+ok(cssSrc.includes('body.dashboard-mode.theme-vice-city #dash-topbar') === false, 'VC bar chrome is drive-gated, not always-on');
+// drive-mode car chrome: every theme gets top/bottom bars, shown only while driving
+for (const id of ['vice-city', 'san-andreas', 'gta-v', 'rdr2']) {
+  ok(cssSrc.includes(`body.dashboard-mode.nav-driving.theme-${id} #dash-topbar`), `${id} drive-mode top bar chrome`);
+  ok(cssSrc.includes(`body.dashboard-mode.nav-driving.theme-${id} #dash-bottombar`), `${id} drive-mode bottom bar chrome`);
+}
+ok(appSrc.includes("classList.toggle('nav-driving'"), 'nav-driving class toggles with drive mode');
+ok(appSrc.includes('nav-driving') && /setUiMode/.test(appSrc), 'drive-mode chrome state lives in setUiMode');
+ok(cssSrc.includes('body.dashboard-mode.nav-driving #maneuver-card'), 'drive HUD clears the top bar on every theme');
+ok(cssSrc.includes('body.dashboard-mode.nav-driving #drive-bar'), 'drive trip bar clears the bottom bar on every theme');
+ok(cssSrc.includes('body.dashboard-mode:not(.theme-vice-city) .dash-scene'), 'VC sunset art hidden on other themes');
+ok(/theme-san-andreas #dash-topbar\{[^}]*#e8a33d/.test(cssSrc), 'SA chrome uses gold, not neon');
+ok(/theme-gta-v #dash-topbar\{[^}]*#7CFF6B/.test(cssSrc), 'GTA V chrome uses pause-menu neon green');
+ok(/theme-rdr2 #dash-topbar\{[^}]*#d8b36a/.test(cssSrc), 'RDR2 chrome uses parchment tan, not neon');
+ok(!/theme-(san-andreas|gta-v|rdr2) #dash-(topbar|bottombar)\{[^}]*clip-path:polygon\(0 0,100% 0,100% 50%/.test(cssSrc),
+   'non-VC themes do not reuse the VC angular silhouette on the bar shells');
+ok(!/function syncDashLocality\(\)[\s\S]{0,400}theme-vice-city/.test(appSrc), 'bottom-bar locality plate is theme-agnostic');
 ok(cssSrc.includes('clip-path:polygon(0 0,100% 0,100% 50%'), 'bars use the angular game-HUD silhouette');
 ok(indexSrc.includes('dash-tag'), 'bottom bar carries the script tagline');
 ok(appSrc.includes('queueDashLocality'), 'locality plate reverse-geocodes the map centre');
