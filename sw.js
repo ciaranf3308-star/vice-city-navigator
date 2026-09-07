@@ -1,9 +1,10 @@
 /* Vice City Navigator service worker — caches the app shell only.
    Map tiles, routing and search always go to the network. */
-const CACHE = 'vcn-shell-v2';
+const CACHE = 'vcn-shell-v3';
 const SHELL = [
   './', 'index.html', 'styles.css', 'app.js',
-  'manifest.webmanifest', 'icon.svg'
+  'manifest.webmanifest', 'icon.svg',
+  'fonts/pricedown-bl.woff', 'assets/blips/radar_waypoint.png'
 ];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));

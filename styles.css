@@ -8,6 +8,12 @@
   --mint:#05ffa1;
   --ink:#ffd9f2;
   --panel:rgba(20,8,35,.88);
+  --vcfont:'Pricedown Bl','Arial Black',sans-serif;
+}
+@font-face{
+  font-family:'Pricedown Bl';
+  src:url('fonts/pricedown-bl.woff') format('woff');
+  font-weight:900;font-style:normal;font-display:swap;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;margin:0;overscroll-behavior:none}
@@ -37,8 +43,8 @@ body{
   padding:18px 16px 14px;max-height:62vh;overflow-y:auto;
 }
 .vc-title{
-  font-family:'Yellowtail',cursive;font-weight:400;
-  font-size:40px;line-height:1;margin:0;text-align:center;
+  font-family:var(--vcfont);font-weight:900;
+  font-size:48px;letter-spacing:4px;line-height:1;margin:0;text-align:center;
   color:var(--pink);
   text-shadow:0 0 6px rgba(255,113,206,.9),0 0 18px rgba(255,46,136,.75),0 0 42px rgba(255,46,136,.5);
 }
@@ -68,7 +74,7 @@ body{
 .route-meta{font-size:15px;margin-bottom:10px;color:var(--yellow);letter-spacing:.5px}
 .route-meta span{margin:0 6px;color:var(--purple)}
 .big-btn{
-  font:inherit;font-weight:700;font-size:18px;letter-spacing:1px;
+  font-family:var(--vcfont);font-weight:900;font-size:22px;letter-spacing:4px;
   color:#140823;background:linear-gradient(180deg,var(--pink),var(--hot));
   border:none;border-radius:16px;padding:16px;width:100%;cursor:pointer;
   box-shadow:0 0 22px rgba(255,46,136,.6);
@@ -89,7 +95,7 @@ body{
 #maneuver-arrow{flex:0 0 56px;width:56px;height:56px}
 #maneuver-arrow svg{width:100%;height:100%;filter:drop-shadow(0 0 6px rgba(255,251,150,.8))}
 .banner-text{min-width:0;flex:1}
-#next-dist{font-size:26px;font-weight:700;color:var(--yellow);text-shadow:0 0 10px rgba(255,251,150,.6)}
+#next-dist{font-family:var(--vcfont);font-weight:900;font-size:36px;letter-spacing:3px;color:var(--yellow);text-shadow:0 0 10px rgba(255,251,150,.6)}
 #next-instr{font-size:16px;font-weight:600;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #trip-meta{font-size:12px;color:var(--purple);margin-top:4px;letter-spacing:.5px}
 
@@ -121,12 +127,10 @@ body{
   50%{box-shadow:0 0 0 10px rgba(1,205,254,.12),0 0 26px rgba(1,205,254,.9)}
 }
 .dest-pin{
-  width:30px;height:30px;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);
-  background:linear-gradient(135deg,var(--pink),var(--hot));
-  border:3px solid #fff;box-shadow:0 0 18px rgba(255,46,136,.9);
-}
-.dest-pin::after{
-  content:"";position:absolute;inset:8px;border-radius:50%;background:#fff;
+  width:48px;height:48px;
+  background:url('assets/blips/radar_waypoint.png') center/contain no-repeat;
+  image-rendering:pixelated;
+  filter:drop-shadow(0 0 10px rgba(255,45,70,.95));
 }
 
 /* ---------- toast ---------- */
