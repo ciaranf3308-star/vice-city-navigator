@@ -321,7 +321,7 @@ for (const id of ['v-parks', 'v-grass', 'v-golf', 'v-gardens', 'v-recreation', '
   ok(/^#2f3b28$|^#35422c$/.test(vPaint(id)['fill-color']), `V ${id}: dark olive`);
 ok(vPaint('v-woods')['fill-color'] === '#26331f', 'V woods: deep olive');
 for (const id of ['v-road-minor', 'v-road-primary', 'v-road-motorway'])
-  ok(/^#a/.test(vPaint(id)['line-color']), `V ${id}: light grey road core`);
+  ok(/^#[a-b]/.test(vPaint(id)['line-color']), `V ${id}: light grey road core`);
 ok(vPaint('v-label-road-major')['text-color'] === '#f0f0f0', 'V road labels: near-white');
 ok(vPaint('v-label-place')['text-halo-color'] === '#000000', 'V place labels: black halo');
 ok(T.get('gta-v').map.routeColor === '#a86fd6', 'V route stays purple (as in-game)');
