@@ -376,7 +376,15 @@ async function runSearch(q) {
   const list = $('results');
   if (!q) return;
   try {
-    const url = `${NOMINATIM}?format=jsonv2&extratags=1&limit=6&accept-language=en&q=${encodeURIComponent(q)}`;
+    // Bias results toward the user's area (viewbox boosts nearby ranking
+    // without filtering out far-away matches entirely).
+    const anchor = userPos || (map ? map.getCenter().toArray() : null);
+    let vb = '';
+    if (anchor) {
+      const d = 0.75, [lng, lat] = anchor;
+      vb = `&viewbox=${lng - d},${lat + d},${lng + d},${lat - d}`;
+    }
+    const url = `${NOMINATIM}?format=jsonv2&extratags=1&limit=6${vb}&accept-language=en&q=${encodeURIComponent(q)}`;
     const res = await fetch(url);
     const items = await res.json();
     list.innerHTML = '';
