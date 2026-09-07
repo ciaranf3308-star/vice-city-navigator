@@ -92,6 +92,9 @@
     <h3>Display</h3>
     <label class="row"><input type="checkbox" id="dashboard-toggle"> Dashboard Preview</label>
     <small class="hint">Force the 1920×720 car UI on this device — same layout, Spotify pane and HUD the car uses. Also: ?dashboard=1</small>
+    <label class="row"><input type="checkbox" id="traffic-toggle"> Live traffic</label>
+    <small class="hint" id="traffic-key-hint" hidden>Add your TomTom API key to traffic-config.js — see TRAFFIC_SETUP.md.</small>
+    <small class="hint">Traffic flow overlay, incident markers and traffic-aware routing. Needs a free TomTom key.</small>
   </section>
 
   <p class="attrib">Map © OpenStreetMap contributors · Tiles OpenFreeMap · Routing OSRM</p>
@@ -152,6 +155,14 @@
 </section>
 
 <div id="toast" hidden></div>
+
+<!-- traffic incident card -->
+<aside id="incident-card" hidden aria-label="Traffic incident">
+  <button id="incident-close" class="ctl" aria-label="Close">✕</button>
+  <strong id="incident-title">Traffic</strong>
+  <p id="incident-desc"></p>
+  <small id="incident-meta"></small>
+</aside>
 
 <!-- ============ DASHBOARD chrome: car head-unit top + bottom bars ============ -->
 <header id="dash-topbar" aria-label="Status">
@@ -221,6 +232,7 @@
 
 <script src="places-config.js"></script>
 <script src="supabase-config.js"></script>
+<script src="traffic-config.js"></script>
 <script src="themes/registry.js"></script>
 <script src="themes/vice-city/theme.js"></script>
 <script src="themes/san-andreas/theme.js"></script>
@@ -235,6 +247,7 @@
 <script src="discovery.js"></script>
 <script src="voice.js"></script>
 <script src="places.js"></script>
+<script src="traffic.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

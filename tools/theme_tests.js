@@ -146,7 +146,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v38"), 'SW shell cache v38');
+ok(swSrc.includes("ws-shell-v39"), 'SW shell cache v39');
 ok(swSrc.includes("ws-theme-v12"), 'SW theme cache v12');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
@@ -606,6 +606,101 @@ for (const [theme, markers] of Object.entries(THEME_MARKERS)) {
 // Key hygiene: no OpenAI secret material in the client or repo
 ok(!/sk-(proj-)?[A-Za-z0-9]{20,}/.test(voiceClient), 'voice client ships no OpenAI key');
 ok(!/sk-(proj-)?[A-Za-z0-9]{20,}/.test(voiceFn), 'edge function ships no hardcoded OpenAI key');
+
+/* ---------- live traffic (TomTom) ---------- */
+vm.runInContext(fs.readFileSync(path.join(REPO, 'traffic-config.js'), 'utf8'), sandbox, { filename: 'traffic-config.js' });
+vm.runInContext(fs.readFileSync(path.join(REPO, 'traffic.js'), 'utf8'), sandbox, { filename: 'traffic.js' });
+const TTC = vm.runInContext('TOMTOM_TRAFFIC_CONFIG', sandbox);
+const TR = sandbox.window.VCNTraffic;
+ok(!!TR && typeof TR.routeFromTomTom === 'function', 'traffic module loads as window.VCNTraffic');
+ok(TTC && TTC.apiKey === 'PUT_YOUR_TOMTOM_KEY_HERE', 'traffic config ships the placeholder, not a real key');
+ok(!/['"]sk-|api[_-]?key['"]\s*:\s*['"][A-Za-z0-9]{16,}/.test(
+  fs.readFileSync(path.join(REPO, 'traffic-config.js'), 'utf8').replace('PUT_YOUR_TOMTOM_KEY_HERE', '')),
+  'traffic config: no real key material anywhere');
+ok(TR.hasKey() === false, 'traffic: hasKey() false with the placeholder');
+ok(TR.isOn() === false, 'traffic: off until explicitly enabled');
+const noKeyRes = TR.setOn(true);
+ok(noKeyRes && noKeyRes.ok === false && noKeyRes.reason === 'no-key', 'traffic: toggle refuses without a key');
+ok(TR.isOn() === false, 'traffic: still off after the refused enable');
+ok(TR.flowTileUrl().indexOf('traffic/map/4/tile/flow/relative-delay/{z}/{x}/{y}.png') >= 0,
+  'traffic: flow tiles use v4 relative-delay style');
+ok(fs.existsSync(path.join(REPO, 'TRAFFIC_SETUP.md')), 'TRAFFIC_SETUP.md exists');
+ok(fs.readFileSync(path.join(REPO, 'TRAFFIC_SETUP.md'), 'utf8').indexOf('https://ciaranf3308-star.github.io/*') >= 0,
+  'TRAFFIC_SETUP.md documents the github.io referrer restriction');
+const indexHtml = fs.readFileSync(path.join(REPO, 'index.html'), 'utf8');
+ok(indexHtml.indexOf('id="traffic-toggle"') >= 0, 'menu: single "Live traffic" toggle in index.html');
+ok(indexHtml.indexOf('traffic-config.js') >= 0 && indexHtml.indexOf('traffic.js') >= 0,
+  'index.html loads the traffic config + module');
+ok(indexHtml.indexOf('id="incident-card"') >= 0, 'index.html has the incident card element');
+ok(appSrc.indexOf('VCNTraffic.shouldRouteWithTraffic') >= 0, 'app.js: routes consult the traffic toggle');
+ok(appSrc.indexOf('VCNTraffic.route(') >= 0, 'app.js: traffic-aware routing call');
+ok(/tomtom routing failed/.test(appSrc) && /tomtom reroute failed/.test(appSrc),
+  'app.js: TomTom failures fall back to OSRM silently (plan + reroute)');
+ok(appSrc.indexOf('VCNTraffic.rehydrate()') >= 0, 'app.js: traffic overlays rehydrate after theme switch');
+ok(SW.SHELL.indexOf('traffic.js') >= 0 && SW.SHELL.indexOf('traffic-config.js') >= 0,
+  'SW precaches traffic.js + traffic-config.js');
+// incident parser fixtures (Incident Details v5 shapes)
+const incFixture = { incidents: [
+  { type: 'Jam', geometry: { type: 'Point', coordinates: [-6.26, 53.35] },
+    properties: { id: 'a1', iconCategory: 6, magnitudeOfDelay: 3,
+      events: [{ description: 'Queue on M50', code: 0 }], from: 'J1', to: 'J2',
+      length: 1200, delay: 480, roadNumbers: ['M50'] } },
+  { type: 'RoadWorks', geometry: { type: 'LineString',
+      coordinates: [[-6.3, 53.3], [-6.28, 53.32], [-6.26, 53.34]] },
+    properties: { id: 'b2', iconCategory: 9, magnitudeOfDelay: 2, events: [], roadNumbers: [] } },
+  { type: 'RoadClosed', geometry: null, properties: { id: 'c3' } }, // dropped: no geometry
+]};
+const incs = TR.parseIncidents(incFixture);
+ok(incs.length === 2, 'traffic: incident parser drops the geometry-less entry');
+ok(incs[0].description === 'Queue on M50', 'traffic: incident description comes from events');
+ok(incs[0].delaySec === 480 && incs[0].roadNames[0] === 'M50', 'traffic: incident delay + road numbers');
+ok(incs[0].category === 'Jam' && incs[0].severity.color === '#FB0000',
+  'traffic: jam category + major severity colour');
+ok(incs[1].description === 'Traffic incident', 'traffic: description fallback when no events');
+ok(incs[1].lng === -6.28 && incs[1].lat === 53.32, 'traffic: LineString marker at segment midpoint');
+ok(TR.parseIncidents({}).length === 0 && TR.parseIncidents(null).length === 0,
+  'traffic: incident parser tolerates empty payloads');
+// TomTom maneuver -> OSRM maneuver spot checks
+ok(JSON.stringify(TR.mapManeuver('TURN_LEFT')) === JSON.stringify({ type: 'turn', modifier: 'left' }),
+  'traffic: TURN_LEFT -> turn/left');
+ok(TR.mapManeuver('MAKE_UTURN').modifier === 'uturn', 'traffic: MAKE_UTURN -> uturn');
+ok(TR.mapManeuver('ROUNDABOUT_CROSS').type === 'roundabout', 'traffic: ROUNDABOUT_CROSS -> roundabout');
+ok(TR.mapManeuver('TAKE_EXIT').type === 'off ramp', 'traffic: TAKE_EXIT -> off ramp');
+ok(TR.mapManeuver('ARRIVE').type === 'arrive', 'traffic: ARRIVE -> arrive');
+ok(TR.mapManeuver('BOGUS_FUTURE_CODE').type === 'continue',
+  'traffic: unknown maneuver codes degrade to continue');
+// calculateRoute -> OSRM-shaped route fixtures
+const tomFixture = {
+  routes: [{
+    summary: { lengthInMeters: 5000, travelTimeInSeconds: 600, trafficDelayInSeconds: 120 },
+    legs: [{ points: [{ latitude: 53.35, longitude: -6.26 }, { latitude: 53.36, longitude: -6.25 }] }],
+    guidance: { instructions: [
+      { maneuver: 'DEPART', street: 'Main St', roadNumbers: ['R1'],
+        routeOffsetInMeters: 0, travelTimeInSeconds: 0, point: { latitude: 53.35, longitude: -6.26 } },
+      { maneuver: 'TURN_LEFT', street: 'Side Rd', roadNumbers: [],
+        routeOffsetInMeters: 3000, travelTimeInSeconds: 360, point: { latitude: 53.355, longitude: -6.255 } },
+      { maneuver: 'ARRIVE', street: 'Side Rd', roadNumbers: [],
+        routeOffsetInMeters: 5000, travelTimeInSeconds: 600, point: { latitude: 53.36, longitude: -6.25 } },
+    ] },
+  }],
+};
+const conv = TR.routeFromTomTom(tomFixture);
+ok(conv.distance === 5000 && conv.duration === 600, 'traffic: converter keeps route totals');
+ok(conv.geometry.coordinates[0][0] === -6.26 && conv.geometry.coordinates[0][1] === 53.35,
+  'traffic: converter geometry in [lon,lat]');
+ok(conv.legs[0].steps.length === 3, 'traffic: one OSRM-shaped step per guidance instruction');
+ok(conv.legs[0].steps[0].maneuver.type === 'depart', 'traffic: DEPART step maps to depart');
+ok(conv.legs[0].steps[1].maneuver.location[0] === -6.255, 'traffic: step maneuver.location is [lon,lat]');
+ok(conv.legs[0].steps[1].name === 'Side Rd', 'traffic: step keeps the street name');
+ok(conv.legs[0].steps[0].ref === 'R1', 'traffic: step keeps road numbers as ref');
+ok(conv.legs[0].steps[0].distance === 3000 && conv.legs[0].steps[0].duration === 360,
+  'traffic: step distance/duration derived from instruction offsets');
+ok(conv.legs[0].steps[2].distance === 0 && conv.legs[0].steps[2].duration === 0,
+  'traffic: final step consumes the remaining offsets');
+ok(conv.trafficDelaySec === 120, 'traffic: converter keeps trafficDelayInSeconds');
+let threw = false;
+try { TR.routeFromTomTom({}); } catch (e) { threw = true; }
+ok(threw, 'traffic: converter throws on empty payload (caller falls back to OSRM)');
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

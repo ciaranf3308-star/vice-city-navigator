@@ -441,6 +441,20 @@ body.dashboard-mode.theme-vice-city #drive-bar{bottom:calc(88px + env(safe-area-
 }
 #toast[hidden]{display:none}
 
+/* traffic incident card — compact, theme-agnostic */
+#incident-card{
+  position:absolute;left:12px;bottom:calc(90px + env(safe-area-inset-bottom));z-index:35;
+  max-width:min(320px,80vw);background:var(--panel);border:1.5px solid var(--yellow);
+  border-radius:14px;padding:12px 14px;color:#f4f2ea;
+  box-shadow:0 4px 24px rgba(0,0,0,.5);
+}
+#incident-card[hidden]{display:none}
+#incident-close{position:absolute;top:6px;right:6px;width:30px;height:30px;font-size:13px}
+#incident-title{display:block;font-family:var(--vclabel);font-size:16px;letter-spacing:.5px;color:var(--yellow);margin-bottom:6px}
+#incident-desc{margin:0 0 8px;font-size:14px;line-height:1.4}
+#incident-meta{color:rgba(244,242,234,.72);font-size:12.5px}
+
+
 /* ---------- WayStation per-theme chrome tints ---------- */
 /* The map itself is fully re-skinned per theme via its own style.json;
    these rules just tint the app chrome's key accents and drop the neon

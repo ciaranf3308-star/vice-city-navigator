@@ -210,6 +210,9 @@ async function initMap() {
     try { if (window.VCNDiscovery) VCNDiscovery.init(map); }
     catch (e) { console.error('[vcn] discovery init failed', e); }
     try {
+      if (window.VCNTraffic) { VCNTraffic.restore(); VCNTraffic.init(map); }
+    } catch (e) { console.error('[vcn] traffic init failed', e); }
+    try {
       if (window.VCNPlaces) VCNPlaces.init(map, {
         getUserPos: () => userPos,
         formatDist: fmtDist,
@@ -399,6 +402,7 @@ async function applyTheme(id) {
   try { restoreRouteOverlay(); paintRouteTheme(); } catch (e) { console.error('[ws] route rehydrate failed', e); }
   try { if (window.VCNPlaces) VCNPlaces.rehydrate(); } catch (e) { console.error('[ws] POI rehydrate failed', e); }
   try { if (window.VCNDiscovery) VCNDiscovery.rehydrate(); } catch (e) { console.error('[ws] fog rehydrate failed', e); }
+  try { if (window.VCNTraffic) VCNTraffic.rehydrate(); } catch (e) { console.error('[ws] traffic rehydrate failed', e); }
   try { refreshPlayerMarkerArt(); } catch (e) { console.error('[ws] marker rehydrate failed', e); }
   try { mountSpotifySkin(id); } catch (e) { console.error('[ws] spotify skin swap failed', e); }
   try { syncDashPadding(); } catch (e) {}
@@ -725,16 +729,27 @@ async function planRoute(opts) {
   if (!autostart) toast('Finding the neon route…', 1500);
   try {
     const from = userPos || await currentPosOnce().catch(() => DUBLIN);
-    const route = await osrmRoute(from, dest.lnglat);
+    // Live traffic routing when the toggle is ON and a TomTom key is set;
+    // any TomTom failure falls back to OSRM silently for that request.
+    let route = null, trafficDelayMin = 0;
+    const trafficOn = !!(window.VCNTraffic && VCNTraffic.shouldRouteWithTraffic());
+    if (trafficOn) {
+      try { route = await VCNTraffic.route(from, dest.lnglat); }
+      catch (e) { console.warn('[ws] tomtom routing failed, OSRM fallback', e); }
+    }
+    if (!route) route = await osrmRoute(from, dest.lnglat);
     routeCoords = route.geometry.coordinates;
     steps = buildSteps(route);
     totalDist = route.distance; totalDur = route.duration;
+    if (trafficOn && window.VCNTraffic) trafficDelayMin = Math.round((VCNTraffic.lastDelaySec() || 0) / 60);
     drawRoute();
     saveRecent(dest);
     if (autostart) { startNav(); return; }
     $('dest-label').textContent = (dest && dest.label) || 'Destination';
     $('route-dist').textContent = fmtDist(totalDist);
-    $('route-time').textContent = `${Math.round(totalDur / 60)} min`;
+    $('route-time').textContent = trafficDelayMin > 0
+      ? `${Math.round(totalDur / 60)} min (+${trafficDelayMin} traffic)`
+      : `${Math.round(totalDur / 60)} min`;
     openPlanning('route');
     const rc = $('route-card');
     if (rc && rc.scrollIntoView) rc.scrollIntoView({ block: 'nearest' });
@@ -862,7 +877,13 @@ async function reroute() {
   rerouting = true; speak('Rerouting.');
   toast('Rerouting…');
   try {
-    const route = await osrmRoute(userPos, dest.lnglat);
+    let route = null;
+    const trafficOn = !!(window.VCNTraffic && VCNTraffic.shouldRouteWithTraffic());
+    if (trafficOn) {
+      try { route = await VCNTraffic.route(userPos, dest.lnglat); }
+      catch (e) { console.warn('[ws] tomtom reroute failed, OSRM fallback', e); }
+    }
+    if (!route) route = await osrmRoute(userPos, dest.lnglat);
     routeCoords = route.geometry.coordinates;
     steps = buildSteps(route);
     totalDist = route.distance; totalDur = route.duration;
@@ -1468,6 +1489,23 @@ function wireControls() {
   $('profanity-toggle').addEventListener('change', e => {
     if (window.VCNVoice) VCNVoice.setConfig({ profanity: e.target.checked });
   });
+
+  // menu: live traffic (single master toggle)
+  if (window.VCNTraffic) {
+    const tt = $('traffic-toggle'), th = $('traffic-key-hint');
+    tt.checked = VCNTraffic.isOn();
+    th.hidden = VCNTraffic.hasKey();
+    tt.addEventListener('change', e => {
+      const r = VCNTraffic.setOn(e.target.checked);
+      if (!r.ok && r.reason === 'no-key') {
+        e.target.checked = false;
+        th.hidden = false;
+        toast('Live traffic needs a TomTom API key — see TRAFFIC_SETUP.md.');
+      } else {
+        toast(e.target.checked ? 'Live traffic on.' : 'Live traffic off.');
+      }
+    });
+  }
   $('endpoint-url').addEventListener('change', e => {
     if (window.VCNVoice) {
       VCNVoice.setConfig({ endpoint: e.target.value.trim() });
