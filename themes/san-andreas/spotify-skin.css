@@ -1,0 +1,226 @@
+/* ============================================================
+   San Andreas Spotify skin — dashboard portrait pane.
+   Grove-street garage wall: deep green panels, cream type,
+   Grove-green glow, gold accents.
+
+   Hard rules:
+   - album art sits UNDER the art's cream-bordered frame (the
+     frame PNG has a transparent interior; art is z-ordered
+     below it)
+   - titles in Beckett blackletter, labels in Bank Gothic
+   - live data only; no fake lyrics, no fake visualizer
+   ============================================================ */
+
+.sasp {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: stretch;
+  background: #0e1a12;
+  overflow: hidden;
+  container-type: size;
+  font-family: 'Bank Gothic', 'Arial Narrow', sans-serif; color: #f0e6c8;
+  user-select: none; -webkit-user-select: none;
+}
+.sasp img { display: block; }
+
+/* ---------- header: graffiti logo + palms + skyline band ---------- */
+.sasp-header {
+  flex: none;
+  width: 100%; height: 15cqh;
+  object-fit: cover; object-position: center top;
+  border-bottom: 2px solid rgba(240,230,200,.28);
+}
+
+/* ---------- album zone: art under the cream-bordered frame ---------- */
+.sasp-albumzone {
+  position: relative;
+  flex: none;
+  width: min(52cqh, 86cqw);
+  aspect-ratio: 560 / 541;
+  margin: 2cqh auto 0;
+}
+.sasp-art {
+  position: absolute; z-index: 1;
+  object-fit: cover;
+  opacity: 0; transition: opacity .45s ease;
+  background: #000;
+}
+.sasp-art.on { opacity: 1; }
+.sasp-albumframe {
+  position: absolute; z-index: 2; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+}
+
+/* ---------- track band on the dark green wall ---------- */
+.sasp-track {
+  flex: none;
+  text-align: center;
+  padding: 1.6cqh 8cqw 1.2cqh;
+  background: linear-gradient(180deg, #0e1a12, #14231a);
+  border-top: 1px solid rgba(126,200,80,.25);
+  border-bottom: 1px solid rgba(126,200,80,.25);
+}
+.sasp-title {
+  font-family: 'Beckett', 'Bank Gothic', serif;
+  font-size: 6.4cqw; letter-spacing: .04em; line-height: 1.15;
+  color: #f0e6c8;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 2px 0 #000, 0 0 12px rgba(232,163,61,.35);
+}
+.sasp-artist {
+  margin-top: .6cqh;
+  font-size: 3.8cqw; letter-spacing: .18em; text-transform: uppercase;
+  color: #b9c9a8;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 1px 2px #000;
+}
+.sasp-artist.sasp-status { color: #e8a33d; }
+
+.sasp-progress { margin-top: 1.2cqh; padding: 0 1%; }
+.sasp-bar { position: relative; height: 2.6cqh; cursor: pointer; touch-action: none; }
+.sasp-bar::before {
+  content: ''; position: absolute; left: 0; right: 0; top: 50%;
+  height: 6px; margin-top: -3px; border-radius: 3px;
+  background: rgba(240,230,200,.14);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,.7);
+  border: 1px solid rgba(240,230,200,.12);
+}
+.sasp-bar-fill {
+  position: absolute; left: 0; top: 50%; height: 6px; margin-top: -3px;
+  width: 0%; border-radius: 3px;
+  background: linear-gradient(90deg, #7ec850, #e8a33d);
+  box-shadow: 0 0 10px rgba(126,200,80,.7);
+}
+.sasp-bar-knob {
+  position: absolute; top: 50%;
+  width: 3.4cqw; height: 3.4cqw; margin: -1.7cqw 0 0 -1.7cqw;
+  border-radius: 50%; background: #7ec850; border: 2px solid #f0e6c8;
+  box-shadow: 0 0 12px rgba(126,200,80,.9);
+}
+.sasp-times {
+  display: flex; justify-content: space-between; margin-top: .5cqh;
+  font-size: 3.2cqw; letter-spacing: .1em; color: #8fa07c;
+  text-shadow: 0 1px 2px #000;
+}
+
+/* ---------- lyric / stage panel ---------- */
+.sasp-stagewrap {
+  position: relative;
+  flex: 1 1 auto; min-height: 0;
+  overflow: hidden;
+  background: #0e1a12;
+}
+.sasp-stagebg {
+  position: absolute; inset: 0; z-index: 1;
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center 18%;
+  opacity: .9;
+}
+/* ambient glow while no lyrics provider is attached — pure CSS,
+   no fake data, no fake FFT */
+.sasp-ambient {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background:
+    radial-gradient(60% 30% at 50% 30%, rgba(126,200,80,.18), transparent 70%),
+    radial-gradient(50% 26% at 50% 66%, rgba(232,163,61,.12), transparent 70%);
+  animation: sasp-breathe 8s ease-in-out infinite;
+  mix-blend-mode: screen;
+}
+@keyframes sasp-breathe {
+  0%, 100% { opacity: .55; transform: scale(1); }
+  50% { opacity: .9; transform: scale(1.06); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sasp-ambient { animation: none; }
+}
+
+/* transparent DOM layer for the future lyric engine (LRCLIB).
+   A renderer mounted via setLyricsRenderer() owns this node. */
+.sasp-lyrics {
+  position: absolute; z-index: 3;
+  left: 7%; right: 7%; top: 6%; bottom: 34%;
+  overflow: hidden;
+  display: flex; flex-direction: column; justify-content: center;
+  text-align: center; gap: 1.2cqh;
+  pointer-events: none;
+}
+.sasp-lyrics.has-lyrics { pointer-events: auto; }
+
+/* lyric line hooks for the future LRCLIB pass */
+.sa-lyric-line {
+  font-family: 'Bank Gothic', 'Arial Narrow', sans-serif;
+  font-size: 4.4cqw; line-height: 1.35; letter-spacing: .08em;
+  color: #f0e6c8; opacity: .6;
+  text-shadow: 0 0 8px rgba(126,200,80,.45), 0 2px 4px #000;
+  transition: opacity .3s ease, transform .3s ease;
+}
+.sa-lyric-line.ghost { opacity: .32; font-size: 3.8cqw; }
+.sa-lyric-line.next { opacity: .55; }
+.sa-lyric-line.active {
+  opacity: 1; color: #fff; font-size: 5.4cqw;
+  text-shadow: 0 0 14px rgba(126,200,80,.9), 0 0 34px rgba(126,200,80,.45), 0 2px 4px #000;
+}
+
+/* ---------- transport: chunky street-sign buttons ---------- */
+.sasp-controls {
+  position: absolute; z-index: 4; left: 0; right: 0; bottom: 0;
+  display: flex; align-items: center; justify-content: center;
+  gap: 4.5cqw; padding: 2.8cqh 0 3.6cqh;
+  background: linear-gradient(180deg, transparent, rgba(10,18,12,.55) 55%, rgba(10,18,12,.8));
+}
+.sasp-tbtn {
+  width: 15cqw; height: 11cqw; min-width: 64px; min-height: 48px;
+  border-radius: 10px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: #f0e6c8; background: #14231a;
+  border: 2px solid rgba(240,230,200,.55);
+  box-shadow: 0 3px 0 rgba(0,0,0,.55), 0 0 14px rgba(126,200,80,.35), inset 0 0 10px rgba(126,200,80,.15);
+  -webkit-tap-highlight-color: transparent;
+}
+.sasp-tbtn.big {
+  width: 18cqw; height: 13cqw; min-width: 76px; min-height: 58px;
+  color: #1a1206; background: #e8a33d;
+  border-color: #f0e6c8;
+  box-shadow: 0 3px 0 rgba(0,0,0,.55), 0 0 20px rgba(232,163,61,.6), inset 0 0 10px rgba(255,255,255,.2);
+}
+.sasp-tbtn:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,.55); }
+.sasp-tbtn svg {
+  width: 48%; height: 52%; fill: currentColor;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.6));
+}
+
+/* ---------- themed reconnect (no dark takeover) ---------- */
+.sasp-connect {
+  position: absolute; inset: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent;
+  pointer-events: none;
+}
+.sasp-connect[hidden] { display: none; }
+.sasp-connect-pill {
+  pointer-events: auto;
+  text-align: center; padding: 4cqh 8cqw;
+  background: rgba(14,26,18,.78);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  border: 2px solid rgba(240,230,200,.5); border-radius: 14px;
+  box-shadow: 0 0 26px rgba(126,200,80,.35), inset 0 0 18px rgba(126,200,80,.12);
+}
+.sasp-connect-note svg {
+  width: 11cqw; height: 11cqw; fill: #7ec850;
+  filter: drop-shadow(0 0 6px rgba(126,200,80,.8));
+}
+.sasp-connect-btn {
+  margin-top: 2.4cqh; padding: 1.8cqh 6cqw;
+  font-family: 'Beckett', 'Bank Gothic', serif;
+  font-size: 5.4cqw; letter-spacing: .08em;
+  color: #1a1206; background: #e8a33d;
+  border: 2px solid #f0e6c8; border-radius: 10px; cursor: pointer;
+  box-shadow: 0 3px 0 rgba(0,0,0,.5), 0 0 18px rgba(232,163,61,.55);
+}
+.sasp-connect-btn:active { transform: translateY(2px); }
+.sasp-connect-hint {
+  margin-top: 2cqh; font-size: 3.5cqw; line-height: 1.5;
+  font-family: 'Bank Gothic', 'Arial Narrow', sans-serif;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: #b9c9a8; opacity: .9; text-shadow: 0 1px 3px #000;
+}

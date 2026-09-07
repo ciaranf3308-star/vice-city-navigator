@@ -268,6 +268,30 @@ for (const banned of ['miniviz', 'stagepeek', 'fullstage', 'vcsp-viz', 'spectrum
 }
 ok(/\.vcsp\s*\{[^}]*background:\s*transparent/.test(vcSkinCss), 'VC skin root transparent');
 
+/* ---------- GTA V Spotify skin ---------- */
+const gvSkinJs = fs.readFileSync(path.join(REPO, 'themes/gta-v/spotify-skin.js'), 'utf8');
+const gvSkinCss = fs.readFileSync(path.join(REPO, 'themes/gta-v/spotify-skin.css'), 'utf8');
+const gvCrops = { 'header.png': [960, 287], 'album.png': [560, 560], 'stage.png': [960, 471] };
+for (const [f, [ew, eh]] of Object.entries(gvCrops)) {
+  const { w, h } = pngSize(path.join(REPO, 'themes/gta-v/spotify', f));
+  ok(w === ew && h === eh, `GV spotify art ${f} ${ew}x${eh}`);
+}
+const gvAlbumPng = path.join(REPO, 'themes/gta-v/spotify/album.png');
+ok(pngAlphaAt(gvAlbumPng, 280, 280) > 200, 'GV album opening opaque black (art layers over the frame)');
+ok(gvSkinJs.includes("register('gta-v'"), 'GV skin registers as gta-v');
+ok(gvSkinJs.includes('data-lyrics-stage'), 'GV lyric stage hook present');
+ok(gvSkinJs.includes('setLyricsRenderer') && gvSkinJs.includes('clearLyrics'), 'GV lyric renderer hooks present');
+ok(gvSkinJs.includes('x0: 0.1125') && gvSkinJs.includes('x1: 0.8875'), 'GV art opening fractions 0.1125/0.8875');
+ok(!gvSkinJs.includes('tube.png'), 'GV skin has no tube (no tube art shipped)');
+const gvSkinJsCode = stripComments(gvSkinJs), gvSkinCssCode = stripComments(gvSkinCss);
+for (const banned of ['miniviz', 'stagepeek', 'fullstage', 'gvsp-viz', 'spectrum', 'spotify-close', 'background-size: cover', 'vcsp-']) {
+  ok(!gvSkinJsCode.includes(banned) && !gvSkinCssCode.includes(banned), `GV skin has no ${banned}`);
+}
+ok(gvSkinJsCode.includes('gvsp-') && gvSkinCssCode.includes('.gvsp'), 'GV skin uses gvsp- prefix');
+ok(gvSkinCssCode.includes('#7CFF6B') && gvSkinCssCode.includes('#0d1117'), 'GV skin neon-green on dark panel');
+ok(gvSkinCssCode.includes("'Chalet Comprime'") && gvSkinCssCode.includes("'Chalet London'"), 'GV skin Chalet typefaces');
+ok(!/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(gvSkinJsCode) && !/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(gvSkinCssCode), 'GV skin has no emojis');
+
 // app mode system
 ok(appSrc.includes("get('dashboard')"), 'dashboard URL param read');
 ok(appSrc.includes('ws.appMode'), 'app mode persisted');
@@ -326,6 +350,52 @@ ok(vPaint('v-label-road-major')['text-color'] === '#f0f0f0', 'V road labels: nea
 ok(vPaint('v-label-place')['text-halo-color'] === '#000000', 'V place labels: black halo');
 ok(T.get('gta-v').map.routeColor === '#a86fd6', 'V route stays purple (as in-game)');
 
+
+
+/* ---------- label hierarchy: place names must dominate road names ---------- */
+// evaluate a match/interpolate text-size expression to a concrete number
+function textSizeAt(expr, cls, zoom) {
+  if (typeof expr === 'number') return expr;
+  if (Array.isArray(expr)) {
+    if (expr[0] === 'match') {
+      for (let i = 2; i + 1 < expr.length; i += 2) if (expr[i] === cls) return textSizeAt(expr[i + 1], cls, zoom);
+      return textSizeAt(expr[expr.length - 1], cls, zoom);
+    }
+    if (expr[0] === 'interpolate') {
+      const stops = expr.slice(3);
+      const val = v => (Array.isArray(v) ? textSizeAt(v, cls, zoom) : v);
+      for (let i = 0; i + 3 < stops.length; i += 2) {
+        if (zoom <= stops[i + 2]) {
+          const t = (zoom - stops[i]) / (stops[i + 2] - stops[i]);
+          return val(stops[i + 1]) + t * (val(stops[i + 3]) - val(stops[i + 1]));
+        }
+      }
+      return val(stops[stops.length - 1]);
+    }
+  }
+  return 0;
+}
+for (const [id, prefix] of [['vice-city', 'vc'], ['gta-v', 'v'], ['san-andreas', 'sa'], ['rdr2', 'rdr']]) {
+  const st = styles[id];
+  const lay = n => st.layers.find(l => l.id === n);
+  const place = lay(`${prefix}-label-place`).layout['text-size'];
+  const major = lay(`${prefix}-label-road-major`).layout['text-size'];
+  const minor = lay(`${prefix}-label-road-minor`).layout['text-size'];
+  const town = textSizeAt(place, 'town', 14);
+  const city = textSizeAt(place, 'city', 14);
+  ok(town >= 18, `${id}: town label >= 18px (got ${town})`);
+  ok(city >= 20, `${id}: city label >= 20px (got ${city})`);
+  for (const z of [12, 14, 16]) {
+    const tz = textSizeAt(place, 'town', z);
+    const rm = textSizeAt(major, null, z), rn = textSizeAt(minor, null, z);
+    ok(tz / rm >= 1.4, `${id}: town dominates major roads at z${z} (${tz.toFixed(1)} vs ${rm.toFixed(1)})`);
+    if (z >= 14) ok(tz / rn >= 1.4, `${id}: town dominates minor roads at z${z} (${tz.toFixed(1)} vs ${rn.toFixed(1)})`);
+  }
+  ok(textSizeAt(major, null, 17) >= 11, `${id}: major roads still readable zoomed in`);
+}
+const vcRoad = styles['vice-city'].layers.find(l => l.id === 'vc-label-road-major').paint['text-color'];
+const vcPlace = styles['vice-city'].layers.find(l => l.id === 'vc-label-place').paint['text-color'];
+ok(vcRoad !== vcPlace, 'VC: road labels a different tone from place labels');
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

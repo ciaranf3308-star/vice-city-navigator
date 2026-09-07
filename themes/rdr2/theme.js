@@ -64,6 +64,6 @@
         'instead of it.',
     },
 
-    spotify: { skin: null },
+    spotify: { skin: 'rdr2' },
   });
 })();

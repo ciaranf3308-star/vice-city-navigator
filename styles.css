@@ -337,3 +337,52 @@ body.theme-rdr2{ --pink:#b8352f; --hot:#8a2723;
   --vcfont:'Kirsty',Georgia,serif;
   --vclabel:'RDR Lino',Georgia,serif; }
 body.theme-rdr2 .vc-title span{ color:#d8b36a; text-shadow:0 2px 0 rgba(0,0,0,.55); }
+
+/* ---------- per-theme left menu: the whole panel re-skins ---------- */
+/* GTA V: near-black green-tinted panel, neon-green edge (pause-menu). */
+body.theme-gta-v #menu-panel{
+  background:rgba(13,17,23,.96);border-right:2px solid #7CFF6B;
+  box-shadow:0 0 30px rgba(124,255,107,.25), inset 0 0 40px rgba(124,255,107,.05);
+}
+body.theme-gta-v .menu-section{border-top:1px solid rgba(124,255,107,.3)}
+body.theme-gta-v .menu-section h3{color:#7CFF6B}
+body.theme-gta-v .menu-section .stack{color:#8a9a8c}
+body.theme-gta-v .menu-section select,body.theme-gta-v .menu-section input[type="url"]{
+  background:rgba(255,255,255,.05);border:1.5px solid #2f4a35;color:#f0f0f0}
+body.theme-gta-v .menu-section input[type="checkbox"]{accent-color:#7CFF6B}
+body.theme-gta-v .stats{color:#7CFF6B}
+body.theme-gta-v .hint{color:rgba(138,154,140,.85)}
+body.theme-gta-v .ghost-btn{color:#7CFF6B;border-color:#7CFF6B}
+body.theme-gta-v .attrib{color:rgba(124,255,107,.5)}
+/* San Andreas: deep green panel, cream ink, gold accents. */
+body.theme-san-andreas #menu-panel{
+  background:rgba(14,26,18,.96);border-right:2px solid #e8a33d;
+  box-shadow:0 0 30px rgba(232,163,61,.25), inset 0 0 40px rgba(126,200,80,.06);
+}
+body.theme-san-andreas .menu-section{border-top:1px solid rgba(232,163,61,.3)}
+body.theme-san-andreas .menu-section h3{color:#e8a33d}
+body.theme-san-andreas .menu-section .stack{color:#f0e6c8}
+body.theme-san-andreas .menu-section .row{color:#f0e6c8}
+body.theme-san-andreas .menu-section select,body.theme-san-andreas .menu-section input[type="url"]{
+  background:rgba(255,255,255,.06);border:1.5px solid #7ec850;color:#f0e6c8}
+body.theme-san-andreas .menu-section input[type="checkbox"]{accent-color:#7ec850}
+body.theme-san-andreas .stats{color:#7ec850}
+body.theme-san-andreas .hint{color:rgba(240,230,200,.7)}
+body.theme-san-andreas .ghost-btn{color:#e8a33d;border-color:#e8a33d}
+body.theme-san-andreas .attrib{color:rgba(232,163,61,.5)}
+/* RDR2: dark leather panel, parchment ink, ink-red accents. */
+body.theme-rdr2 #menu-panel{
+  background:rgba(42,31,22,.97);border-right:2px solid #b8352f;
+  box-shadow:0 0 30px rgba(184,53,47,.3), inset 0 0 40px rgba(0,0,0,.4);
+}
+body.theme-rdr2 .menu-section{border-top:1px solid rgba(216,179,106,.35)}
+body.theme-rdr2 .menu-section h3{color:#d8b36a}
+body.theme-rdr2 .menu-section .stack{color:#e8d9b0}
+body.theme-rdr2 .menu-section .row{color:#e8d9b0}
+body.theme-rdr2 .menu-section select,body.theme-rdr2 .menu-section input[type="url"]{
+  background:rgba(0,0,0,.3);border:1.5px solid #8a6f4d;color:#e8d9b0}
+body.theme-rdr2 .menu-section input[type="checkbox"]{accent-color:#b8352f}
+body.theme-rdr2 .stats{color:#d8b36a}
+body.theme-rdr2 .hint{color:rgba(232,217,176,.7)}
+body.theme-rdr2 .ghost-btn{color:#d8b36a;border-color:#8a6f4d}
+body.theme-rdr2 .attrib{color:rgba(216,179,106,.5)}

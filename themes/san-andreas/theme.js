@@ -54,6 +54,6 @@
         'instruction when it feels natural — never before it, never instead of it.',
     },
 
-    spotify: { skin: null },
+    spotify: { skin: 'san-andreas' },
   });
 })();

@@ -846,7 +846,7 @@
         "text-font": [
           "gta-v"
         ],
-        "text-size": 11,
+        "text-size": 13.5,
         "text-max-width": 8
       },
       "paint": {
@@ -905,15 +905,15 @@
             "class"
           ],
           "country",
-          13,
+          14,
           "state",
           12,
           "city",
-          18,
+          20,
           "town",
-          14,
+          18,
           "village",
-          11,
+          12,
           "suburb",
           11,
           "hamlet",
@@ -924,7 +924,7 @@
       "paint": {
         "text-color": "#ffffff",
         "text-halo-color": "#000000",
-        "text-halo-width": 2
+        "text-halo-width": 2.2
       }
     },
     {
@@ -980,9 +980,9 @@
             "zoom"
           ],
           11,
-          10,
+          12,
           14,
-          11.5,
+          12.5,
           17,
           13
         ]
@@ -1049,9 +1049,9 @@
             "zoom"
           ],
           13.5,
-          9.5,
-          16,
           11,
+          16,
+          12,
           18,
           12.5
         ]

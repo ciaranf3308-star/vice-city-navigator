@@ -1,0 +1,224 @@
+/* ============================================================
+   GTA V Spotify skin — dashboard portrait pane.
+   Art: themes/gta-v/spotify/ (Los Santos concept).
+
+   Hard rules (same as the VC skin):
+   - the frame interior is an opaque black opening: live art
+     layers OVER the frame, sized to the measured interior, so
+     the neon-green double border stays visible around it
+   - live data only; no fake lyrics, no fake visualizer
+   - no emojis anywhere
+
+   GTA V visual language: near-black green-tinted panels
+   (#0d1117, #10161a), neon-green accent (#7CFF6B), white text
+   (#f0f0f0), muted grey-green secondary (#8a9a8c).
+   Titles: 'Chalet Comprime'. Body/labels: 'Chalet London'.
+   ============================================================ */
+
+.gvsp {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: stretch;
+  background: #0d1117;
+  overflow: hidden;
+  container-type: size;
+  font-family: 'Chalet London', 'Helvetica Neue', Arial, sans-serif;
+  color: #f0f0f0;
+  user-select: none; -webkit-user-select: none;
+}
+.gvsp img { display: block; }
+
+/* ---------- header: skyline + Los Santos freeway-sign band ---------- */
+.gvsp-header {
+  flex: none;
+  width: 100%; aspect-ratio: 960 / 287;
+  object-fit: cover; object-position: center top;
+  border-bottom: 2px solid rgba(124,255,107,.55);
+  box-shadow: 0 2px 18px rgba(124,255,107,.18);
+}
+
+/* ---------- album zone: art under the neon-green frame ---------- */
+.gvsp-albumzone {
+  position: relative;
+  flex: none;
+  width: min(40cqh, 78cqw);
+  margin: 1.6cqh auto 0;
+}
+.gvsp-framesq {
+  position: relative;
+  aspect-ratio: 1;
+}
+.gvsp-art {
+  position: absolute; z-index: 3;
+  object-fit: cover;
+  opacity: 0; transition: opacity .45s ease;
+  background: #000;
+}
+.gvsp-art.on { opacity: 1; }
+.gvsp-albumframe {
+  position: absolute; z-index: 2; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  filter: drop-shadow(0 0 14px rgba(124,255,107,.35));
+}
+/* track sits on the pane's dark panel, below the frame */
+.gvsp-track {
+  padding: 1.2cqh 4% 0;
+  text-align: center;
+}
+.gvsp-title {
+  font-family: 'Chalet Comprime', 'Arial Narrow', sans-serif;
+  font-size: 5.6cqw; letter-spacing: .04em; line-height: 1.15;
+  color: #f0f0f0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 0 12px rgba(124,255,107,.45), 0 2px 4px #000;
+}
+.gvsp-artist {
+  margin-top: .6cqh;
+  font-size: 3.8cqw; color: #8a9a8c;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 1px 3px #000;
+}
+.gvsp-artist.gvsp-status { color: #7CFF6B; }
+
+.gvsp-progress { margin-top: 1.2cqh; padding: 0 2%; }
+.gvsp-bar { position: relative; height: 2.6cqh; cursor: pointer; touch-action: none; }
+.gvsp-bar::before {
+  content: ''; position: absolute; left: 0; right: 0; top: 50%;
+  height: 5px; margin-top: -2.5px; border-radius: 3px;
+  background: rgba(138,154,140,.22);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.7);
+}
+.gvsp-bar-fill {
+  position: absolute; left: 0; top: 50%; height: 5px; margin-top: -2.5px;
+  width: 0%; border-radius: 3px;
+  background: linear-gradient(90deg, #3f7d3a, #7CFF6B);
+  box-shadow: 0 0 10px rgba(124,255,107,.7);
+}
+.gvsp-bar-knob {
+  position: absolute; top: 50%;
+  width: 3.2cqw; height: 3.2cqw; margin: -1.6cqw 0 0 -1.6cqw;
+  border-radius: 50%; background: #f0f0f0; border: 2px solid #7CFF6B;
+  box-shadow: 0 0 12px rgba(124,255,107,.8);
+}
+.gvsp-times {
+  display: flex; justify-content: space-between; margin-top: .5cqh;
+  font-size: 3.2cqw; color: #8a9a8c; text-shadow: 0 1px 2px #000;
+}
+
+/* ---------- lyric / music-video stage: palm-sunset scene ---------- */
+.gvsp-stagewrap {
+  position: relative;
+  flex: 1 1 auto; min-height: 0;
+  margin-top: 1.6cqh;
+  overflow: hidden;
+  border-top: 2px solid rgba(124,255,107,.4);
+}
+.gvsp-stagebg {
+  position: absolute; inset: 0; z-index: 1;
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center 30%;
+}
+/* ambient glow while no lyrics provider is attached — pure CSS,
+   no fake data, no fake FFT */
+.gvsp-ambient {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background:
+    radial-gradient(60% 30% at 50% 28%, rgba(124,255,107,.16), transparent 70%),
+    radial-gradient(50% 26% at 50% 60%, rgba(255,150,60,.10), transparent 70%);
+  animation: gvsp-breathe 7s ease-in-out infinite;
+  mix-blend-mode: screen;
+}
+@keyframes gvsp-breathe {
+  0%, 100% { opacity: .55; transform: scale(1); }
+  50% { opacity: .9; transform: scale(1.06); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gvsp-ambient { animation: none; }
+}
+
+/* transparent DOM layer for the future lyric engine (LRCLIB).
+   A renderer mounted via setLyricsRenderer() owns this node. */
+.gvsp-lyrics {
+  position: absolute; z-index: 3;
+  left: 7%; right: 7%; top: 7%; bottom: 34%;
+  overflow: hidden;
+  display: flex; flex-direction: column; justify-content: center;
+  text-align: center; gap: 1.2cqh;
+  pointer-events: none;
+}
+.gvsp-lyrics.has-lyrics { pointer-events: auto; }
+
+/* lyric line hooks for the future LRCLIB pass */
+.gv-lyric-line {
+  font-size: 4.4cqw; line-height: 1.35; color: #8a9a8c; opacity: .6;
+  text-shadow: 0 0 8px rgba(124,255,107,.4), 0 2px 4px #000;
+  transition: opacity .3s ease, transform .3s ease;
+}
+.gv-lyric-line.ghost { opacity: .32; font-size: 3.8cqw; }
+.gv-lyric-line.next { opacity: .55; }
+.gv-lyric-line.active {
+  opacity: 1; color: #f0f0f0; font-size: 5.4cqw;
+  text-shadow: 0 0 14px rgba(124,255,107,.9), 0 0 34px rgba(124,255,107,.45), 0 2px 4px #000;
+}
+
+/* ---------- transport: dark chips, neon-green icons ---------- */
+.gvsp-controls {
+  position: absolute; z-index: 4; left: 0; right: 0; bottom: 0;
+  display: flex; align-items: center; justify-content: center;
+  gap: 5cqw; padding: 3.2cqh 0 4.6cqh;
+  background: linear-gradient(180deg, transparent, rgba(13,17,23,.55) 55%, rgba(13,17,23,.8));
+}
+.gvsp-tbtn {
+  width: 13cqw; height: 13cqw; min-width: 56px; min-height: 56px;
+  border-radius: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: #7CFF6B; background: #10161a;
+  border: 2px solid rgba(124,255,107,.7);
+  box-shadow: 0 0 16px rgba(124,255,107,.35), inset 0 0 10px rgba(124,255,107,.15);
+  -webkit-tap-highlight-color: transparent;
+}
+.gvsp-tbtn.big {
+  width: 16.5cqw; height: 16.5cqw; min-width: 68px; min-height: 68px;
+  color: #0d1117; background: #7CFF6B;
+  border-color: #7CFF6B;
+  box-shadow: 0 0 26px rgba(124,255,107,.65), inset 0 0 12px rgba(0,0,0,.2);
+}
+.gvsp-tbtn:active { transform: scale(.93); }
+.gvsp-tbtn svg {
+  width: 52%; height: 52%; fill: currentColor;
+  filter: drop-shadow(0 0 4px currentColor);
+}
+.gvsp-tbtn.big svg { filter: none; }
+
+/* ---------- themed reconnect ---------- */
+.gvsp-connect {
+  position: absolute; inset: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(13,17,23,.72);
+  pointer-events: none;
+}
+.gvsp-connect[hidden] { display: none; }
+.gvsp-connect-pill {
+  pointer-events: auto;
+  text-align: center; padding: 4cqh 8cqw;
+  background: #10161a;
+  border: 2px solid rgba(124,255,107,.65); border-radius: 14px;
+  box-shadow: 0 0 26px rgba(124,255,107,.35), inset 0 0 18px rgba(124,255,107,.1);
+}
+.gvsp-connect-note svg {
+  width: 11cqw; height: 11cqw; fill: #7CFF6B;
+  filter: drop-shadow(0 0 6px rgba(124,255,107,.8));
+}
+.gvsp-connect-btn {
+  margin-top: 2.4cqh; padding: 1.8cqh 6cqw;
+  font-family: 'Chalet Comprime', 'Arial Narrow', sans-serif;
+  font-size: 5cqw; letter-spacing: .1em;
+  color: #0d1117; background: #7CFF6B;
+  border: 2px solid #7CFF6B; border-radius: 10px; cursor: pointer;
+  box-shadow: 0 0 20px rgba(124,255,107,.55);
+}
+.gvsp-connect-btn:active { transform: scale(.96); }
+.gvsp-connect-hint {
+  margin-top: 2cqh; font-size: 3.5cqw; line-height: 1.5;
+  color: #8a9a8c; opacity: .9; text-shadow: 0 1px 3px #000;
+}
