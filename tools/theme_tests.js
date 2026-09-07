@@ -146,7 +146,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v35"), 'SW shell cache v35');
+ok(swSrc.includes("ws-shell-v36"), 'SW shell cache v36');
 ok(swSrc.includes("ws-theme-v10"), 'SW theme cache v10');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
@@ -347,7 +347,10 @@ ok(cssSrc.includes('body.dashboard-mode.theme-vice-city #dash-bottombar'), 'bott
 ok(cssSrc.includes('clip-path:polygon(0 0,100% 0,100% 50%'), 'bars use the angular game-HUD silhouette');
 ok(indexSrc.includes('dash-tag'), 'bottom bar carries the script tagline');
 ok(appSrc.includes('queueDashLocality'), 'locality plate reverse-geocodes the map centre');
-ok(cssSrc.includes("themes/vice-city/dashboard/topbar.jpg"), 'top bar uses the generated neon plate');
+ok(indexSrc.includes('dash-scene'), 'top bar uses a crisp vector sunset scene (no stretched raster)');
+const vcSkinSrc = fs.readFileSync(path.join(REPO, 'themes/vice-city/spotify-skin.css'), 'utf8');
+ok(vcSkinSrc.includes('width: 38cqw'), 'VC widget is the larger size');
+ok(appSrc.includes('syncDashPadding'), 'camera viewport offsets left of the VC widget');
 ok(cssSrc.includes("themes/vice-city/dashboard/bottombar.jpg"), 'bottom bar uses the generated neon plate');
 ok(!cssSrc.includes('#spotify-close'), 'no close-button styles');
 ok(/\#spotify-pane\{[\s\S]*?background:transparent/.test(cssSrc), 'pane transparent');

@@ -159,6 +159,39 @@
     <div class="dash-brand"><span class="dash-logo">WayStation</span></div>
     <div class="dash-wx"><span id="dash-temp">--°C</span><span id="dash-wxicon" aria-hidden="true"></span></div>
     <div class="dash-clock"><span id="dash-date">—</span><span id="dash-time">--:--</span></div>
+    <svg class="dash-scene" viewBox="0 0 1920 68" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="dsc-sun" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#ffd319"/><stop offset=".55" stop-color="#ff2975"/><stop offset="1" stop-color="#ff2e88"/>
+        </linearGradient>
+        <mask id="dsc-stripes">
+          <rect x="1610" y="0" width="170" height="68" fill="#fff"/>
+          <rect x="1610" y="30" width="170" height="4" fill="#000"/>
+          <rect x="1610" y="39" width="170" height="5" fill="#000"/>
+          <rect x="1610" y="49" width="170" height="6" fill="#000"/>
+          <rect x="1610" y="60" width="170" height="7" fill="#000"/>
+        </mask>
+      </defs>
+      <circle cx="1695" cy="32" r="36" fill="url(#dsc-sun)" mask="url(#dsc-stripes)"/>
+      <path fill="#05030c" d="M1370 68 V46 h22 V38 h14 v8 h18 V34 h20 v12 h12 V42 h16 V30 h12 v12 h18 V38 h14 v8 h22 V32 h16 v14 h12 V44 h20 V28 h14 v16 h18 V40 h12 v6 h24 V34 h18 v12 h12 V46 h16 V36 h14 v10 h22 V44 h18 V68 Z"/>
+      <g transform="translate(1462,68)" stroke="#05030c" stroke-width="5" stroke-linecap="round" fill="none">
+        <path d="M0 0 C -3 -14 -5 -26 -3 -38"/>
+        <path d="M-3 -38 C -18 -44 -30 -42 -40 -34"/>
+        <path d="M-3 -38 C -14 -50 -26 -52 -38 -48"/>
+        <path d="M-3 -38 C -6 -54 -14 -62 -22 -66"/>
+        <path d="M-3 -38 C 8 -52 18 -56 28 -54"/>
+        <path d="M-3 -38 C 12 -46 24 -44 34 -36"/>
+      </g>
+      <g transform="translate(1908,68) scale(-1,1)" stroke="#05030c" stroke-width="5" stroke-linecap="round" fill="none">
+        <path d="M0 0 C -3 -14 -5 -26 -3 -38"/>
+        <path d="M-3 -38 C -18 -44 -30 -42 -40 -34"/>
+        <path d="M-3 -38 C -14 -50 -26 -52 -38 -48"/>
+        <path d="M-3 -38 C -6 -54 -14 -62 -22 -66"/>
+        <path d="M-3 -38 C 8 -52 18 -56 28 -54"/>
+        <path d="M-3 -38 C 12 -46 24 -44 34 -36"/>
+      </g>
+      <rect x="1370" y="62" width="550" height="2" fill="#01cdfe" opacity=".45"/>
+    </svg>
   </div>
 </header>
 <nav id="dash-bottombar" aria-label="Car menu">

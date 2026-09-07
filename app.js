@@ -200,6 +200,7 @@ async function initMap() {
   map.on('load', () => {
     try { map.on('move', syncDashCompass); } catch (e) {}
     try { map.on('moveend', queueDashLocality); } catch (e) {}
+    try { syncDashPadding(); } catch (e) {}
     // Each module init is isolated: one failing module must never
     // silently prevent the others (e.g. POIs) from starting.
     try { if (window.VCNThemes) applyBodyTheme(VCNThemes.currentId()); }
@@ -397,6 +398,7 @@ async function applyTheme(id) {
   try { if (window.VCNDiscovery) VCNDiscovery.rehydrate(); } catch (e) { console.error('[ws] fog rehydrate failed', e); }
   try { refreshPlayerMarkerArt(); } catch (e) { console.error('[ws] marker rehydrate failed', e); }
   try { mountSpotifySkin(id); } catch (e) { console.error('[ws] spotify skin swap failed', e); }
+  try { syncDashPadding(); } catch (e) {}
   toast(theme.name + ' theme active.');
 }
 function syncThemeSelector() {
@@ -1041,6 +1043,19 @@ function fitDashboardStage() {
   stage.style.top = ((vh - DASH_H * s) / 2) + 'px';
 }
 
+/* The Vice City widget floats over the right of the map, so the camera's
+   effective viewport is offset left: "center on me" (and follow mode, and
+   route fit) targets the middle of the visible map — between the left
+   margin and the widget — never the raw screen center. The map itself is
+   never resized; this only shifts the camera target point. */
+function syncDashPadding() {
+  if (!window.map || !map.setPadding) return;
+  const vc = document.body.classList.contains('dashboard-mode') &&
+             document.body.classList.contains('theme-vice-city');
+  if (vc) map.setPadding({ top: 76, right: 780, bottom: 88, left: 8 });
+  else map.setPadding({ top: 0, right: 0, bottom: 0, left: 0 });
+}
+
 function applyAppMode() {
   const on = dashboardLayoutActive();
   document.body.classList.toggle('dashboard-mode', on);
@@ -1056,6 +1071,7 @@ function applyAppMode() {
     tickDashClock(); refreshDashWeather(); syncDashTrip(); queueDashLocality();
   }
   if (map && map.resize) { try { map.resize(); } catch (e) {} }
+  syncDashPadding();
   syncDashboardToggle();
   return on;
 }
