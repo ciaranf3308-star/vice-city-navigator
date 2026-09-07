@@ -211,12 +211,24 @@ body{
 .player-arrow img{width:100%;height:100%;transition:transform .25s ease-out}
 .dest-pin{
   width:48px;height:48px;
-  background:url('assets/blips/blip_waypoint.png') center/contain no-repeat;
+  background:center/contain no-repeat;
   image-rendering:pixelated;
   filter:drop-shadow(0 0 10px rgba(255,45,70,.95));
 }
+body.theme-vice-city .dest-pin{ background-image:url('assets/themes/vice-city/blips/blip_waypoint.png'); }
+body.theme-san-andreas .dest-pin{ background-image:url('assets/themes/san-andreas/blips/waypoint.png'); }
+body.theme-gta-v .dest-pin{ background-image:url('assets/themes/gta-v/blips/waypoint.png'); }
+body.theme-rdr2 .dest-pin{ background-image:url('assets/themes/rdr2/blips/waypoint.png'); }
 
 /* ---------- Spotify pane (WayStation music widget) ---------- */
+/* Default (non-VC-theme) Spotify skin: plain transport, neutral styling. */
+.wssp-default{padding:14px 16px;color:#f2f2f2;font-family:system-ui,sans-serif}
+.wssp-default .wssp-track{font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wssp-default .wssp-artist{opacity:.7;font-size:13px;margin:2px 0 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wssp-default .wssp-transport{display:flex;gap:10px;justify-content:center}
+.wssp-default button{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);
+  color:#fff;border-radius:10px;padding:10px 16px;font-size:16px;cursor:pointer}
+.wssp-default .wssp-connect{width:100%;padding:12px;font-size:15px;font-weight:600}
 #spotify-pane{
   position:fixed;top:14px;right:14px;height:calc(100dvh - 28px);aspect-ratio:2/3;
   max-width:calc(100vw - 28px);z-index:35;overflow:hidden;
@@ -242,3 +254,17 @@ body{
   box-shadow:0 0 16px rgba(255,251,150,.3);max-width:86vw;text-align:center;
 }
 #toast[hidden]{display:none}
+
+/* ---------- WayStation per-theme chrome tints ---------- */
+/* The map itself is fully re-skinned per theme via its own style.json;
+   these rules just tint the app chrome's key accents and drop the neon
+   title glow on non-Vice-City themes. */
+body.theme-san-andreas{ --pink:#e8a33d; --hot:#c07a1e; }
+body.theme-san-andreas .vc-title,
+body.theme-gta-v .vc-title,
+body.theme-rdr2 .vc-title{ text-shadow:0 2px 0 rgba(0,0,0,.55); }
+body.theme-san-andreas .vc-title span{ color:#7ec850; text-shadow:0 2px 0 rgba(0,0,0,.55); }
+body.theme-gta-v{ --pink:#a86fd6; --hot:#7a4fb0; }
+body.theme-gta-v .vc-title span{ color:#8fd0ff; text-shadow:0 2px 0 rgba(0,0,0,.55); }
+body.theme-rdr2{ --pink:#b8352f; --hot:#8a2723; }
+body.theme-rdr2 .vc-title span{ color:#d8b36a; text-shadow:0 2px 0 rgba(0,0,0,.55); }

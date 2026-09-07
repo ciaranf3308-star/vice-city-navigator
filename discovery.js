@@ -204,6 +204,32 @@
     }, before);
   }
 
+  /* ---------------- fog presentation per theme ----------------
+     Discovery DATA is pure geohashes and never changes; only the fog
+     paint follows the active theme (VC dark/gold, SA dark/tan,
+     GTA V muted grey, Frontier parchment/ink). */
+  function fogTheme() {
+    const t = (window.VCNThemes && VCNThemes.current()) || null;
+    const ui = (t && t.ui) || {};
+    return {
+      fill: ui.fogFill || FOG_FILL_COLOR,
+      fillOpacity: (ui.fogFillOpacity != null) ? ui.fogFillOpacity : FOG_FILL_OPACITY,
+      edge: ui.fogEdge || FOG_EDGE_COLOR,
+      edgeOpacity: (ui.fogEdgeOpacity != null) ? ui.fogEdgeOpacity : FOG_EDGE_OPACITY,
+    };
+  }
+  function applyFogTheme() {
+    if (!map) return;
+    const f = fogTheme();
+    if (map.getLayer(FILL_LAYER_ID)) {
+      map.setPaintProperty(FILL_LAYER_ID, 'fill-color', f.fill);
+      map.setPaintProperty(FILL_LAYER_ID, 'fill-opacity', f.fillOpacity);
+    }
+    if (map.getLayer(EDGE_LAYER_ID)) {
+      map.setPaintProperty(EDGE_LAYER_ID, 'line-color', f.edge);
+      map.setPaintProperty(EDGE_LAYER_ID, 'line-opacity', f.edgeOpacity);
+    }
+  }
   /* ---------------- fog rebuild (moveend only, never per-frame) ---------------- */
   function precisionForZoom(z) {
     if (z >= 14) return 7;
@@ -271,8 +297,20 @@
       map = m;
       loadPersisted();
       ensureLayers();
+      applyFogTheme();
       map.on('moveend', () => { if (fogVisible) refreshFog(); });
     },
+
+    /* Rebuild map-side fog state after a style change (setStyle drops
+       all custom sources/layers). Discovered cells are untouched. */
+    rehydrate() {
+      if (!map) return;
+      ensureLayers();
+      applyFogTheme();
+      if (fogVisible) { this.setFogVisible(true); }
+    },
+    /* Re-paint fog for the newly active theme (no style change). */
+    applyTheme() { applyFogTheme(); },
 
     /* Mark the ground around a GPS fix as discovered. The precision-7
        cell plus its 8 neighbours form a ~460 m square — roughly a

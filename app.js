@@ -1,16 +1,19 @@
-/* Vice City Navigator — client-side turn-by-turn PWA.
-   Map: dedicated vice-city-style.json built from the OpenMapTiles vector
-   source to match the original GTA Vice City pause-map.
+/* WayStation — client-side turn-by-turn PWA.
+   Map: per-theme MapLibre style JSON built from the OpenMapTiles vector
+   source (themes/<id>/style.json).
    Routing: OSRM demo server. Search: Nominatim. Voice: speechSynthesis. */
 'use strict';
 
-const VC = {
-  /* map colors live in vice-city-style.json; these are app-level accents */
-  routeCasing: '#f5d020', routeCore: '#f5d020', // solid in-game mission-map yellow
-  /* HUD accents (kept for the nav instruction icons) */
-  yellow: '#fffb96'
-};
-const STYLE_URL = 'vice-city-style.json';
+/* ---------------- theme ----------------
+   All game-specific visuals come from the active theme definition.
+   This file never hard-codes blip names, asset paths, colours or
+   fonts — everything flows through VCNThemes. */
+function wsTheme() {
+  return (window.VCNThemes && VCNThemes.current()) || null;
+}
+function wsThemeId() {
+  return (window.VCNThemes && VCNThemes.currentId()) || 'vice-city';
+}
 const OSRM = 'https://router.project-osrm.org/route/v1/driving';
 const NOMINATIM = 'https://nominatim.openstreetmap.org/search';
 const DUBLIN = [-6.2603, 53.3498]; // fallback centre (user is in Ireland)
@@ -75,46 +78,55 @@ function speak(text) {
   if (window.VCNVoice) window.VCNVoice.speakText(text);
 }
 
-/* ---------------- Vice City blips ----------------
-   Authentic radar blips extracted from ClassicHud's Vice City texture
-   packs (hud.txd), mapped to real-world Nominatim place categories. */
-const BLIP_PATH = 'assets/blips/blip_';
-function blipFor(it) {
+/* ---------------- WayStation semantic blips ----------------
+   Nominatim place categories map to game-agnostic semantic POI
+   categories; the active theme resolves each to its own icon art. */
+function semanticForNominatim(it) {
   const cat = (it.category || it.class || '').toLowerCase();
   const type = (it.type || '').toLowerCase();
   const cuisine = ((it.extratags && it.extratags.cuisine) || '').toLowerCase();
   const shop = cat === 'shop' ? type : '';
-  if (/aerodrome|airport/.test(type) || cat === 'aeroway') return 'airYard';
-  if (type === 'hospital' || type === 'clinic' || type === 'doctors') return 'hostpital';
+  if (/aerodrome|airport/.test(type) || cat === 'aeroway') return 'airport';
+  if (type === 'hospital' || type === 'clinic' || type === 'doctors') return 'hospital';
+  if (type === 'pharmacy' || shop === 'pharmacy') return 'pharmacy';
   if (type === 'police') return 'police';
-  if (type === 'bank' || type === 'atm' || type === 'bureau_de_change') return 'cash';
-  if (type === 'school' || type === 'university' || type === 'college' || type === 'kindergarten') return 'school';
-  if (type === 'gym' || type === 'sports_centre' || type === 'stadium' || type === 'pitch') return 'gym';
-  if (type === 'car_repair' || shop === 'car_repair' || shop === 'car') return 'modGarage';
-  if (type === 'car_wash') return 'spray';
-  if (type === 'barbers' || type === 'hairdresser' || type === 'beauty') return 'barbers';
-  if (shop === 'tattoo' || type === 'tattoo') return 'tattoo';
-  if (shop === 'estate_agent' || type === 'estate_agent') return 'propertyG';
-  if (type === 'bar' || type === 'pub' || type === 'biergarten') return 'dateDrink';
-  if (type === 'nightclub' || type === 'cinema' || type === 'theatre') return 'dateDisco';
-  if (type === 'hotel' || type === 'hostel' || type === 'guest_house' || type === 'motel') return 'saveGame';
-  if (type === 'house' || type === 'residential' || type === 'apartments') return 'saveGame';
+  if (type === 'bank' || type === 'atm' || type === 'bureau_de_change') return 'bank';
+  if (type === 'stadium') return 'stadium';
+  if (type === 'gym' || type === 'sports_centre' || type === 'pitch') return 'gym';
+  if (type === 'car_repair' || shop === 'car_repair' || shop === 'car') return 'garage';
+  if (type === 'car_wash') return 'car_wash';
+  if (type === 'fuel' || shop === 'fuel') return 'fuel';
+  if (/parking/.test(type) || /parking/.test(cat)) return 'parking';
+  if (/railway/.test(cat) && /station/.test(type)) return 'train';
+  if (type === 'bar' || type === 'pub' || type === 'biergarten') return 'bar';
+  if (type === 'nightclub') return 'nightlife';
+  if (type === 'cinema' || type === 'theatre') return 'cinema';
+  if (type === 'hotel' || type === 'hostel' || type === 'guest_house' || type === 'motel') return 'hotel';
   if (cat === 'amenity' && /restaurant|fast_food|cafe|food_court|ice_cream/.test(type)) {
     if (/pizza/.test(cuisine)) return 'pizza';
     if (/chicken/.test(cuisine)) return 'chicken';
-    if (/burger/.test(cuisine)) return 'burgerShot';
-    if (type === 'cafe' || type === 'ice_cream') return 'diner';
-    if (type === 'restaurant') return 'dateFood';
-    return 'burgerShot';
+    if (/burger/.test(cuisine)) return 'burger';
+    if (type === 'cafe' || type === 'ice_cream') return 'cafe';
+    if (type === 'restaurant') return 'restaurant';
+    return 'fast_food';
   }
-  return 'qmark';
+  if (shop === 'supermarket' || shop === 'grocery' || shop === 'convenience') return 'supermarket';
+  if (shop === 'mall' || shop === 'department_store') return 'mall';
+  if (cat === 'shop') return 'shop';
+  return null; // theme renders its fallback icon
 }
-const blipUrl = name => `${BLIP_PATH}${name}.png`;
+/* Semantic category -> active theme's blip PNG url. */
+const themeBlipUrl = semantic =>
+  (window.VCNThemes ? VCNThemes.poiIconUrl(semantic, wsThemeId()) : '');
+/* Destination marker art: the place's semantic blip when known,
+   otherwise the theme's waypoint marker (never the qmark fallback). */
+const destBlipUrl = () =>
+  themeBlipUrl(dest && dest.semantic ? dest.semantic : 'waypoint');
 
 /* ---------------- maneuver arrows (original SVG) ---------------- */
 function themeArrowColor() {
-  const t = window.VCNThemes && window.VCNThemes.current();
-  return (t && t.ui && t.ui.arrowColor) || VC.yellow;
+  const t = wsTheme();
+  return (t && t.ui && t.ui.arrowColor) || '#fffb96';
 }
 function arrowSvg(kind) {
   const base = '<path d="M32 9 V45 M19 23 L32 9 L45 23"/>';
@@ -168,13 +180,16 @@ function instrText(step) {
 
 /* ---------------- map init ---------------- */
 async function initMap() {
+  if (window.VCNThemes) VCNThemes.restore();
+  const theme = wsTheme();
+  const styleUrl = (theme && theme.map.styleUrl) || 'themes/vice-city/style.json';
   let style;
   try {
-    const res = await fetch(STYLE_URL);
+    const res = await fetch(styleUrl);
     if (!res.ok) throw new Error('style fetch failed');
     style = await res.json();
   } catch (e) {
-    toast('Could not load the Vice City map style. Check your connection.');
+    toast('Could not load the map style. Check your connection.');
     return;
   }
   map = new maplibregl.Map({
@@ -185,7 +200,7 @@ async function initMap() {
   map.on('load', () => {
     // Each module init is isolated: one failing module must never
     // silently prevent the others (e.g. POIs) from starting.
-    try { if (window.VCNThemes) document.body.classList.add(window.VCNThemes.current().ui.bodyClass); }
+    try { if (window.VCNThemes) applyBodyTheme(VCNThemes.currentId()); }
     catch (e) { console.error('[vcn] themes init failed', e); }
     try { if (window.VCNVoice) VCNVoice.init(); }
     catch (e) { console.error('[vcn] voice init failed', e); }
@@ -259,6 +274,90 @@ function maybeShowPoiDebug() {
   setInterval(tick, 2000);
 }
 
+/* ---------------- themes ----------------
+   Switching themes restyles the map via setStyle (which drops all
+   custom sources/layers/images) and then rehydrates every overlay:
+   route, POIs, fog, player marker, destination marker. All app
+   state — GPS, destination, route, navigation, discovery data,
+   Places cache, Spotify session, recents, voice settings — lives
+   outside the style and survives untouched. Safe while navigating. */
+let themeSwitching = false;
+function restoreRouteOverlay() {
+  ensureRouteLayers();
+  if (routeCoords.length) {
+    map.getSource('vcn-route').setData({
+      type: 'Feature',
+      geometry: { type: 'LineString', coordinates: routeCoords },
+      properties: {},
+    });
+  }
+  if (destMarker) { destMarker.remove(); destMarker = null; }
+  if (dest && dest.lnglat) {
+    const el = document.createElement('div'); el.className = 'dest-pin';
+    el.style.backgroundImage = `url('${destBlipUrl()}')`;
+    destMarker = new maplibregl.Marker({ element: el }).setLngLat(dest.lnglat).addTo(map);
+  }
+}
+function applyBodyTheme(id) {
+  if (!window.VCNThemes) return;
+  for (const tid of VCNThemes.ids()) {
+    const t = VCNThemes.get(tid);
+    if (t && t.ui && t.ui.bodyClass) document.body.classList.remove(t.ui.bodyClass);
+  }
+  const cur = VCNThemes.get(id);
+  if (cur && cur.ui && cur.ui.bodyClass) document.body.classList.add(cur.ui.bodyClass);
+}
+async function applyTheme(id) {
+  if (!window.VCNThemes || !map) return;
+  if (VCNThemes.currentId() === id || themeSwitching) return;
+  const priorId = VCNThemes.currentId();
+  if (!VCNThemes.setCurrent(id)) return;
+  themeSwitching = true;
+  applyBodyTheme(id);
+  syncThemeSelector();
+  const theme = VCNThemes.current();
+  try {
+    await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error('style load timeout')), 15000);
+      map.once('style.load', () => { clearTimeout(timer); resolve(); });
+      map.setStyle(theme.map.styleUrl);
+    });
+  } catch (e) {
+    // Roll back: the map still shows the prior style, so the persisted
+    // theme, body class and selector must match it again.
+    VCNThemes.setCurrent(priorId);
+    applyBodyTheme(priorId);
+    syncThemeSelector();
+    themeSwitching = false;
+    toast('Could not load the ' + theme.name + ' map style.');
+    return;
+  }
+  // Rehydrate every custom overlay the style change dropped.
+  try { restoreRouteOverlay(); paintRouteTheme(); } catch (e) { console.error('[ws] route rehydrate failed', e); }
+  try { if (window.VCNPlaces) VCNPlaces.rehydrate(); } catch (e) { console.error('[ws] POI rehydrate failed', e); }
+  try { if (window.VCNDiscovery) VCNDiscovery.rehydrate(); } catch (e) { console.error('[ws] fog rehydrate failed', e); }
+  try { refreshPlayerMarkerArt(); } catch (e) { console.error('[ws] marker rehydrate failed', e); }
+  try { mountSpotifySkin(id); } catch (e) { console.error('[ws] spotify skin swap failed', e); }
+  themeSwitching = false;
+  toast(theme.name + ' theme active.');
+}
+function syncThemeSelector() {
+  const sel = document.getElementById('theme-select');
+  if (sel && window.VCNThemes) sel.value = VCNThemes.currentId();
+}
+function buildThemeSelector() {
+  const sel = document.getElementById('theme-select');
+  if (!sel || !window.VCNThemes) return;
+  sel.innerHTML = '';
+  for (const id of VCNThemes.ids()) {
+    const opt = document.createElement('option');
+    opt.value = id; opt.textContent = VCNThemes.get(id).name;
+    sel.appendChild(opt);
+  }
+  sel.value = VCNThemes.currentId();
+  sel.addEventListener('change', () => applyTheme(sel.value));
+}
+
 function locateUser(center) {
   if (!('geolocation' in navigator)) return;
   navigator.geolocation.getCurrentPosition(
@@ -273,33 +372,51 @@ function locateUser(center) {
   );
 }
 
-let lastHeading = 0; // GPS travel heading, rotates the player arrow
-/* Device compass heading (degrees clockwise from north), when the phone
-   reports one. Lets the map/arrow follow the direction the user *faces*,
-   not just the direction GPS sees them move — crucial when stationary or
-   walking slowly, where GPS heading is unavailable. */
+let lastHeading = 0; // displayed heading, rotates the player arrow
+/* Heading sources, ranked by reliability:
+   - gpsCourse: travel direction from successive GPS fixes — best when
+     the car is clearly moving, immune to compass interference.
+   - compassHeading: device compass — best when stationary or slow,
+     and the fallback where GPS travel heading is unavailable.
+   The naïve `360 - alpha` is gone: GPS wins at speed, and the alpha
+   path is rotated into the screen frame so a landscape car mount
+   doesn't spin the map. */
 let compassHeading = null;
+let compassAt = 0;
+let gpsCourse = null;
+let gpsCourseAt = 0;
+let gpsSpeed = null; // m/s, from coords.speed or fix-to-fix
 let orientationListening = false;
 let lastBearingPush = 0;
+function screenAngle() {
+  try { return (screen.orientation && screen.orientation.angle) || 0; }
+  catch (e) { return 0; }
+}
+function clearlyMoving() { return gpsSpeed !== null && gpsSpeed > 2.5; }
 function onOrientation(e) {
   let h = null;
   if (typeof e.webkitCompassHeading === 'number' && !isNaN(e.webkitCompassHeading)) {
     h = e.webkitCompassHeading; // iOS: true compass heading
   } else if (e.absolute === true && typeof e.alpha === 'number' && !isNaN(e.alpha)) {
-    h = (360 - e.alpha) % 360; // Android absolute mode
+    // Alpha is measured in the device frame — rotate into the screen
+    // frame so landscape/portrait mounts agree on north.
+    h = (360 - e.alpha + screenAngle()) % 360;
   }
   if (h === null) return;
-  compassHeading = h;
-  // Arrow follows the compass when GPS has no travel heading for us.
-  if (!navActive) { lastHeading = h; updatePlayerArrow(); }
-  // Keep the map rotated to the direction faced while driving (follow mode).
+  compassHeading = (h + 360) % 360;
+  compassAt = Date.now();
+  if (clearlyMoving()) return; // GPS course owns the heading at speed
+  lastHeading = compassHeading;
+  updatePlayerArrow();
+  // Keep the map rotated to the direction faced while driving slowly
+  // or standing still (follow mode).
   if (navActive && followMode && map) {
     const now = Date.now();
-    let d = Math.abs(h - map.getBearing()) % 360;
+    let d = Math.abs(compassHeading - map.getBearing()) % 360;
     if (d > 180) d = 360 - d;
     if (now - lastBearingPush > 500 && d > 3) {
       lastBearingPush = now;
-      try { map.easeTo({ bearing: h, duration: 300 }); } catch (err) {}
+      try { map.easeTo({ bearing: compassHeading, duration: 300 }); } catch (err) {}
     }
   }
 }
@@ -328,26 +445,39 @@ function enableCompass() {
     }
   } catch (e) {}
 }
-/* Best available heading: compass first (faces direction), then GPS travel. */
+/* Best available heading: GPS course while clearly moving and fresh,
+   compass while stationary/slow, then the caller's fallback. */
 function bestBearing(fallback) {
-  if (compassHeading !== null) return compassHeading;
+  const now = Date.now();
+  if (gpsCourse !== null && now - gpsCourseAt < 8000 && clearlyMoving()) return gpsCourse;
+  if (compassHeading !== null && now - compassAt < 8000) return compassHeading;
   if (fallback !== undefined && fallback !== null) return fallback;
   return map ? map.getBearing() : 0;
 }
-/* Authentic player arrow extracted from ClassicHud's Vice City hud.txd
-   ("arrow" texture) — replaces the earlier hand-drawn SVG. */
+/* Player marker comes from the active theme (each game has its own
+   radar arrow/marker art). */
+function playerMarkerUrl() {
+  const t = wsTheme();
+  return (t && t.map.playerMarker) || '';
+}
 function placeUserMarker() {
   if (!map || !userPos) return;
   if (!userMarker) {
     const el = document.createElement('div');
     el.className = 'player-arrow';
     const img = document.createElement('img');
-    img.src = 'assets/player_arrow.png';
+    img.src = playerMarkerUrl();
     img.alt = '';
     el.appendChild(img);
     userMarker = new maplibregl.Marker({ element: el }).setLngLat(userPos).addTo(map);
   } else userMarker.setLngLat(userPos);
   updatePlayerArrow();
+}
+/* Swap the marker art when the theme changes (marker survives setStyle). */
+function refreshPlayerMarkerArt() {
+  if (!userMarker) return;
+  const img = userMarker.getElement().querySelector('img');
+  if (img) img.src = playerMarkerUrl();
 }
 function updatePlayerArrow() {
   if (!userMarker) return;
@@ -369,7 +499,7 @@ function saveRecent(d) {
   if (!d || !d.label || !Array.isArray(d.lnglat)) return;
   const key = r => `${r.label}|${r.lnglat[0].toFixed(4)},${r.lnglat[1].toFixed(4)}`;
   const list = loadRecents().filter(r => key(r) !== key(d));
-  list.unshift({ label: d.label, lnglat: d.lnglat.slice(), blip: d.blip || 'waypoint', t: Date.now() });
+  list.unshift({ label: d.label, lnglat: d.lnglat.slice(), semantic: d.semantic || null, t: Date.now() });
   try { localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, RECENT_MAX))); } catch (e) {}
 }
 function renderRecents() {
@@ -380,11 +510,11 @@ function renderRecents() {
   for (const r of recents) {
     const li = document.createElement('li');
     const img = document.createElement('img');
-    img.className = 'res-blip'; img.alt = ''; img.src = blipUrl(r.blip || 'waypoint');
+    img.className = 'res-blip'; img.alt = ''; img.src = themeBlipUrl(r.semantic);
     const strong = document.createElement('strong'); strong.textContent = r.label;
     li.append(img, strong);
     li.addEventListener('click', () => {
-      dest = { label: r.label, lnglat: r.lnglat.slice(), blip: r.blip };
+      dest = { label: r.label, lnglat: r.lnglat.slice(), semantic: r.semantic || null };
       $('search').value = r.label;
       $('results').hidden = true;
       $('recent-wrap').hidden = true;
@@ -437,17 +567,17 @@ async function runSearch(q) {
     for (const it of items) {
       const li = document.createElement('li');
       const name = (it.display_name || '').split(',').slice(0, 2).join(',');
-      const blip = blipFor(it);
+      const semantic = semanticForNominatim(it);
       const img = document.createElement('img');
       img.className = 'res-blip'; img.alt = '';
-      img.src = blipUrl(blip);
+      img.src = themeBlipUrl(semantic);
       const wrap = document.createElement('div');
       const strong = document.createElement('strong'); strong.textContent = name;
       const small = document.createElement('small'); small.textContent = it.display_name;
       wrap.append(strong, small);
       li.append(img, wrap);
       li.addEventListener('click', () => {
-        dest = { label: name, lnglat: [parseFloat(it.lon), parseFloat(it.lat)], blip };
+        dest = { label: name, lnglat: [parseFloat(it.lon), parseFloat(it.lat)], semantic };
         list.hidden = true; $('search').value = name;
         $('recent-wrap').hidden = true;
         showRoutePending(name);
@@ -467,26 +597,50 @@ async function osrmRoute(from, to) {
   if (data.code !== 'Ok' || !data.routes || !data.routes.length) throw new Error('no route');
   return data.routes[0];
 }
+function routeTheme() {
+  const t = wsTheme();
+  const m = (t && t.map) || {};
+  return {
+    core: m.routeColor || '#f5d020',
+    casing: m.routeCasingColor || '#f5d020',
+    width: m.routeWidth || 5,
+    casingWidth: m.routeCasingWidth || 9,
+    dash: m.routeDash || null,
+  };
+}
 function ensureRouteLayers() {
   if (map.getSource('vcn-route')) return;
+  const rt = routeTheme();
   map.addSource('vcn-route', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
   map.addLayer({
     id: 'vcn-route-casing', type: 'line', source: 'vcn-route',
     layout: { 'line-cap': 'round', 'line-join': 'round' },
-    paint: { 'line-color': VC.routeCasing, 'line-width': 9, 'line-opacity': 0.95 }
+    paint: { 'line-color': rt.casing, 'line-width': rt.casingWidth, 'line-opacity': 0.95 }
   });
   map.addLayer({
     id: 'vcn-route-core', type: 'line', source: 'vcn-route',
-    layout: { 'line-cap': 'round', 'line-join': 'round' },
-    paint: { 'line-color': VC.routeCore, 'line-width': 5 }
+    layout: {
+      'line-cap': 'round', 'line-join': 'round',
+      ...(rt.dash ? { 'line-dasharray': rt.dash } : {}),
+    },
+    paint: { 'line-color': rt.core, 'line-width': rt.width }
   });
+}
+/* Re-apply the active theme's route paint (used after theme switches). */
+function paintRouteTheme() {
+  if (!map || !map.getLayer('vcn-route-core')) return;
+  const rt = routeTheme();
+  map.setPaintProperty('vcn-route-casing', 'line-color', rt.casing);
+  map.setPaintProperty('vcn-route-casing', 'line-width', rt.casingWidth);
+  map.setPaintProperty('vcn-route-core', 'line-color', rt.core);
+  map.setPaintProperty('vcn-route-core', 'line-width', rt.width);
 }
 function drawRoute() {
   ensureRouteLayers();
   map.getSource('vcn-route').setData({ type: 'Feature', geometry: { type: 'LineString', coordinates: routeCoords }, properties: {} });
   if (destMarker) destMarker.remove();
   const el = document.createElement('div'); el.className = 'dest-pin';
-  el.style.backgroundImage = `url('${blipUrl((dest && dest.blip) || 'waypoint')}')`;
+  el.style.backgroundImage = `url('${destBlipUrl()}')`;
   destMarker = new maplibregl.Marker({ element: el }).setLngLat(dest.lnglat).addTo(map);
   const b = new maplibregl.LngLatBounds();
   routeCoords.forEach(c => b.extend(c));
@@ -583,22 +737,35 @@ function onPos(pos) {
   // The fog itself is only *shown* in Discovery Mode (never while driving).
   if (window.VCNDiscovery) VCNDiscovery.reveal(p);
   if (window.VCNPlaces) VCNPlaces.maybeRefresh(p); // ambient POIs, 750 m gated
-  if (!navActive || !steps.length) return;
 
-  // camera follow
+  // --- heading bookkeeping (every mode, not just navigation) ---
   const now = Date.now();
   let heading = null;
+  const cSpeed = pos.coords.speed;
   if (lastPos) {
     const dt = (pos.timestamp - lastPos.t) / 1000;
     const d = haversine(lastPos.p, p);
-    if (dt > 0 && d / dt > 1.5 && d > 4) {
-      heading = Math.atan2(p[0] - lastPos.p[0], p[1] - lastPos.p[1]) * 180 / Math.PI;
+    if (dt > 0 && d > 4) {
+      const v = d / dt;
+      gpsSpeed = (typeof cSpeed === 'number' && !isNaN(cSpeed)) ? cSpeed : v;
+      if (v > 1.5) {
+        heading = Math.atan2(p[0] - lastPos.p[0], p[1] - lastPos.p[1]) * 180 / Math.PI;
+        gpsCourse = heading; gpsCourseAt = now;
+      }
+    } else if (typeof cSpeed === 'number' && !isNaN(cSpeed)) {
+      gpsSpeed = cSpeed;
     }
+  } else if (typeof cSpeed === 'number' && !isNaN(cSpeed)) {
+    gpsSpeed = cSpeed;
   }
   lastPos = { p, t: pos.timestamp };
   if (heading !== null) lastHeading = heading; // GPS travel heading wins when moving
-  else if (compassHeading !== null) lastHeading = compassHeading; // else face direction
+  else if (!clearlyMoving() && compassHeading !== null) lastHeading = compassHeading; // compass when slow
   updatePlayerArrow();
+
+  if (!navActive || !steps.length) return;
+
+  // camera follow
   if (followMode && now - lastCamMove > 900 && map) {
     lastCamMove = now;
     map.easeTo({ center: p, zoom: 16.5, pitch: 55,
@@ -737,6 +904,22 @@ const SPOTIFY_SCOPES = [
 const SPOTIFY_PREAUTH = 'vcn.spotify.preAuth';
 const SPOTIFY_PANE_OPEN = 'vcn.spotify.paneOpen';
 let pendingSpotifyView = null;
+/* Mount the skin for a theme id (VC skin only on vice-city; the plain
+   default skin everywhere else). Swaps are presentational only — the
+   SpotifyCore session is never touched. */
+let spotifySkinId = null;
+function mountSpotifySkin(themeId) {
+  if (!window.SpotifySkins || !window.SpotifyCore || !$('spotify-stage')) return;
+  const want = SpotifySkins.get(themeId) ? themeId : 'default';
+  if (want === spotifySkinId) return;
+  const prev = spotifySkinId && SpotifySkins.get(spotifySkinId);
+  if (prev && prev.unmount) { try { prev.unmount(); } catch (e) {} }
+  const skin = SpotifySkins.get(want);
+  if (skin) {
+    try { skin.mount($('spotify-stage'), SpotifyCore); spotifySkinId = want; }
+    catch (e) { console.error('[ws] spotify skin mount failed', e); }
+  }
+}
 
 function setSpotifyPane(open) {
   $('spotify-pane').hidden = !open;
@@ -777,8 +960,7 @@ async function initSpotify() {
   if (!window.SpotifyCore || !window.SpotifySkins) return;
   SpotifyCore.onBeforeRedirect(saveSpotifyPreAuth);
   const themeId = window.VCNThemes ? VCNThemes.currentId() : 'vice-city';
-  const skin = SpotifySkins.get(themeId) || SpotifySkins.get('vice-city');
-  if (skin) skin.mount($('spotify-stage'), SpotifyCore);
+  mountSpotifySkin(themeId);
   let hadCallback = false;
   try {
     hadCallback = await SpotifyCore.init({
@@ -872,6 +1054,9 @@ function wireControls() {
   // drive HUD
   $('drive-menu-btn').addEventListener('click', toggleMenu);
   $('drive-search-btn').addEventListener('click', () => openPlanning('search'));
+
+  // menu: theme selector
+  buildThemeSelector();
 
   // menu: discovery
   $('discovery-toggle').addEventListener('change', e => setDiscovery(e.target.checked));

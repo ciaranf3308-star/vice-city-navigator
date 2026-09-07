@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>Vice City Navigator</title>
+<title>WayStation</title>
 <meta name="theme-color" content="#140823">
-<meta name="description" content="Turn-by-turn navigation with a Vice City neon soul.">
+<meta name="description" content="WayStation — turn-by-turn navigation dressed as your favourite game maps.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
@@ -38,9 +38,17 @@
 <!-- ============ MENU panel: discovery, voice, settings ============ -->
 <aside id="menu-panel" hidden aria-label="Menu">
   <div class="menu-head">
-    <h2 class="vc-title">Vice City <span>Navigator</span></h2>
+    <h2 class="vc-title">WayStation</h2>
     <button id="menu-close" class="ctl" aria-label="Close menu">✕</button>
   </div>
+
+  <section class="menu-section">
+    <h3>Map Theme</h3>
+    <label class="stack">Theme
+      <select id="theme-select"></select>
+    </label>
+    <small class="hint">Route, destination, discovery and music keep playing across themes.</small>
+  </section>
 
   <section class="menu-section">
     <h3>Discovery Map</h3>
@@ -138,7 +146,11 @@
 
 <script src="places-config.js"></script>
 <script src="supabase-config.js"></script>
-<script src="themes/vice-city.js"></script>
+<script src="themes/registry.js"></script>
+<script src="themes/vice-city/theme.js"></script>
+<script src="themes/san-andreas/theme.js"></script>
+<script src="themes/gta-v/theme.js"></script>
+<script src="themes/rdr2/theme.js"></script>
 <script src="spotify-core.js"></script>
 <script src="spotify/skins.js"></script>
 <script src="spotify/skin-vice-city.js"></script>

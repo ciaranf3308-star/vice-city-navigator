@@ -1,39 +1,77 @@
-/* Vice City Navigator service worker — caches the app shell only.
+/* WayStation service worker.
+   - App shell (HTML/CSS/JS, default Vice City theme art, UI fonts):
+     stale-while-revalidate. The cached shell loads instantly and the
+     network refresh lands in the background, so a changed shell file
+     is at most one load behind — predictable, no version-bump dance
+     for every edit. The CACHE name still bumps on structural changes.
+   - Other themes' assets (style JSON, blips, player marker, glyph PBFs):
+     cached on demand into a separate cache the first time a theme is
+     used. Nothing theme-specific is eagerly precached except the
+     default Vice City set.
    Map tiles, routing and search always go to the network. */
-const CACHE = 'vcn-shell-v18';
-const BLIPS = ['airYard','barbers','burgerShot','cash','chicken','dateDisco','dateDrink',
+const CACHE = 'ws-shell-v19';
+const THEME_CACHE = 'ws-theme-v1';
+const VC_BLIPS = ['airYard','barbers','burgerShot','cash','chicken','dateDisco','dateDrink',
   'dateFood','diner','fuel','girlfriend','gym','hostpital','modGarage','north','parking',
   'pizza','police','propertyG','qmark','race','runway','saveGame','school','spray','tattoo','waypoint'];
 const SHELL = [
-  './', 'index.html', 'styles.css', 'app.js', 'places-config.js', 'places.js',
-  'discovery.js', 'voice.js', 'supabase-config.js', 'themes/vice-city.js',
+  './', 'index.html', 'styles.css', 'app.js', 'places.js', 'places-config.js',
+  'discovery.js', 'voice.js', 'supabase-config.js',
+  'themes/registry.js',
+  'themes/vice-city/theme.js', 'themes/san-andreas/theme.js',
+  'themes/gta-v/theme.js', 'themes/rdr2/theme.js',
   'spotify-core.js', 'spotify/skins.js', 'spotify/skin-vice-city.js',
   'spotify/skin-vice-city.css', 'assets/spotify/vice_city_synthwave_music_widget.png',
-  'vice-city-style.json',
-  'manifest.webmanifest', 'icon.svg',
+  'themes/vice-city/style.json',
+  'manifest.webmanifest', 'icon.svg', 'icon-512.png', 'icon-maskable-512.png',
   'fonts/pricedown-bl.woff',
-  'assets/player_arrow.png',
-  ...BLIPS.map(b => `assets/blips/blip_${b}.png`)
+  'assets/themes/vice-city/player.png',
+  ...VC_BLIPS.map(b => `assets/themes/vice-city/blips/blip_${b}.png`)
 ];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(keys =>
-    Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    Promise.all(keys.filter(k => k !== CACHE && k !== THEME_CACHE).map(k => caches.delete(k)))
   ).then(() => self.clients.claim()));
 });
+function isShell(path) {
+  if (path === '/' || path.endsWith('/vice-city-navigator/')) return true;
+  return SHELL.some(p => p !== './' && (path === '/' + p || path.endsWith('/' + p)));
+}
+/* Theme assets cached on demand (never precached): the non-default
+   themes' style JSON, blip/player PNGs and self-hosted glyph PBFs. */
+function isThemeAsset(path) {
+  return /themes\/(san-andreas|gta-v|rdr2)\/style\.json$/.test(path) ||
+         /assets\/themes\/(san-andreas|gta-v|rdr2)\//.test(path) ||
+         /fonts\/(san-andreas|gta-v|frontier)\//.test(path);
+}
+function staleWhileRevalidate(req) {
+  return caches.match(req).then(cached => {
+    const network = fetch(req).then(res => {
+      if (res && res.ok) caches.open(CACHE).then(c => c.put(req, res.clone()));
+      return res;
+    }).catch(() => cached);
+    return cached || network;
+  });
+}
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET' || url.origin !== self.location.origin) return;
   const path = url.pathname;
-  const isShell = path === '/' || SHELL.some(p => p !== './' && (path === '/' + p || path.endsWith('/' + p)));
-  if (e.request.method === 'GET' && isShell) {
+  if (isShell(path)) {
+    e.respondWith(staleWhileRevalidate(e.request));
+    return;
+  }
+  if (isThemeAsset(path)) {
     e.respondWith(
-      caches.match(e.request).then(hit => hit || fetch(e.request).then(res => {
-        const copy = res.clone();
-        caches.open(CACHE).then(c => c.put(e.request, copy));
-        return res;
+      caches.open(THEME_CACHE).then(c => c.match(e.request).then(hit => {
+        if (hit) return hit;
+        return fetch(e.request).then(res => {
+          if (res && res.ok) c.put(e.request, res.clone());
+          return res;
+        });
       }))
     );
   }

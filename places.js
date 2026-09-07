@@ -43,24 +43,58 @@
      "Major" is inferred from type alone — the field mask
      deliberately stays minimal, so e.g. every airport scores
      100 (airports are rare enough that type is signal enough). */
-  const IMPORTANCE_BY_TYPE = {
+  /* WayStation semantic POI categories — the ONE mapping from Google
+     place types to game-agnostic categories. Each theme then maps a
+     semantic category to its own icon art, so four themes never need
+     four separate Google type tables.
+     Specific subtypes are listed so they win over generic types. */
+  const GOOGLE_TYPE_TO_SEMANTIC = {
+    /* automotive */
+    gas_station: 'fuel', electric_vehicle_charging_station: 'ev_charger',
+    car_repair: 'garage', tire_shop: 'garage', car_dealer: 'garage',
+    car_wash: 'car_wash', parking: 'parking',
+    airport: 'airport', train_station: 'train',
+    /* health & safety */
+    hospital: 'hospital', pharmacy: 'pharmacy',
+    police: 'police', bank: 'bank', atm: 'atm',
+    /* shopping */
+    supermarket: 'supermarket', shopping_mall: 'mall',
+    grocery_store: 'shop', convenience_store: 'shop', department_store: 'shop',
+    /* stay */
+    hotel: 'hotel', motel: 'hotel', hostel: 'hotel',
+    guest_house: 'hotel', inn: 'hotel',
+    /* food — specific kitchens first */
+    pizza_restaurant: 'pizza', hamburger_restaurant: 'burger',
+    chicken_restaurant: 'chicken', fast_food_restaurant: 'fast_food',
+    cafe: 'cafe', coffee_shop: 'cafe', bakery: 'cafe', tea_house: 'cafe',
+    ice_cream_shop: 'cafe', donut_shop: 'cafe',
+    restaurant: 'restaurant',
+    /* drink & nightlife */
+    bar: 'bar', pub: 'bar', irish_pub: 'bar',
+    sports_bar: 'bar', cocktail_bar: 'bar', wine_bar: 'bar', lounge_bar: 'bar',
+    night_club: 'nightlife', movie_theater: 'cinema',
+    /* sport */
+    gym: 'gym', fitness_center: 'gym', sports_club: 'gym',
+    stadium: 'stadium',
+  };
+  /* Importance-based visibility (GTA-style declutter), keyed by
+     semantic category. "Major" is inferred from category alone —
+     the field mask deliberately stays minimal, so e.g. every
+     airport scores 100 (airports are rare enough that the
+     category is signal enough). */
+  const IMPORTANCE_BY_SEMANTIC = {
     airport: 100,
     hospital: 90,
-    shopping_mall: 85,
-    department_store: 80, train_station: 80,
-    stadium: 75,
+    mall: 85, train: 80, stadium: 75,
     police: 70,
-    gas_station: 60, electric_vehicle_charging_station: 60, car_repair: 60,
+    fuel: 60, ev_charger: 60, garage: 60,
     car_wash: 55, parking: 55,
-    supermarket: 50, pharmacy: 50,
-    hotel: 50, motel: 50, hostel: 50, guest_house: 50, inn: 50,
-    grocery_store: 45, bank: 45,
-    atm: 40, convenience_store: 40,
-    gym: 35, fitness_center: 35, sports_club: 35,
-    restaurant: 30, fast_food_restaurant: 30,
-    cafe: 30, coffee_shop: 30, bakery: 30,
-    pizza_restaurant: 30, hamburger_restaurant: 30, chicken_restaurant: 30,
-    bar: 20, pub: 20, night_club: 20, movie_theater: 20,
+    supermarket: 50, pharmacy: 50, hotel: 50,
+    bank: 45, shop: 45,
+    atm: 40,
+    gym: 35,
+    restaurant: 30, fast_food: 30, pizza: 30, burger: 30, chicken: 30, cafe: 30,
+    bar: 20, nightlife: 20, cinema: 20,
   };
   const DEFAULT_IMPORTANCE = 30; // unknown types behave like ordinary food/shop POIs
 
@@ -83,44 +117,6 @@
     for (const b of ZOOM_BANDS) if (z >= b.minZoom) return b;
     return null; // below 10: hide everything
   }
-
-  /* Google place type -> Vice City blip asset (blip_<name>.png).
-     Specific subtypes are listed so they win over generic types. */
-  const GOOGLE_TYPE_TO_BLIP = {
-    /* automotive */
-    car_repair: 'modGarage', tire_shop: 'modGarage', car_dealer: 'modGarage',
-    car_wash: 'spray',
-    gas_station: 'fuel', electric_vehicle_charging_station: 'fuel',
-    parking: 'parking', airport: 'airYard',
-    /* health & safety */
-    hospital: 'hostpital', pharmacy: 'hostpital',
-    police: 'police',
-    bank: 'cash', atm: 'cash',
-    /* food — specific kitchens first */
-    pizza_restaurant: 'pizza',
-    hamburger_restaurant: 'burgerShot', chicken_restaurant: 'chicken',
-    fast_food_restaurant: 'burgerShot',
-    cafe: 'diner', coffee_shop: 'diner', bakery: 'diner', tea_house: 'diner',
-    ice_cream_shop: 'diner', donut_shop: 'diner',
-    restaurant: 'dateFood',
-    /* drink & nightlife */
-    bar: 'dateDrink', pub: 'dateDrink', irish_pub: 'dateDrink',
-    sports_bar: 'dateDrink', cocktail_bar: 'dateDrink', wine_bar: 'dateDrink',
-    lounge_bar: 'dateDrink',
-    night_club: 'dateDisco', movie_theater: 'dateDisco',
-    /* stay & sport */
-    hotel: 'saveGame', motel: 'saveGame', hostel: 'saveGame',
-    guest_house: 'saveGame', inn: 'saveGame',
-    gym: 'gym', fitness_center: 'gym', sports_club: 'gym',
-    stadium: 'race',
-    /* transport hubs */
-    train_station: 'waypoint',
-    /* shopping — commerce blip */
-    supermarket: 'cash', grocery_store: 'cash', convenience_store: 'cash',
-    department_store: 'cash', shopping_mall: 'cash',
-  };
-  const BLIP_PATH = 'assets/blips/blip_';
-  const blipUrl = n => `${BLIP_PATH}${n}.png`;
 
   /* ---------------- cache ---------------- */
   const memCache = new Map(); // placeId -> record
@@ -163,21 +159,38 @@
     const s = Math.sin(dLat / 2) ** 2 + Math.cos(toR(a[1])) * Math.cos(toR(b[1])) * Math.sin(dLng / 2) ** 2;
     return 2 * R * Math.asin(Math.sqrt(s));
   }
-  function blipForPlace(primaryType, types) {
-    const candidates = [primaryType, ...(types || [])].filter(Boolean);
-    for (const t of candidates) {
-      const b = GOOGLE_TYPE_TO_BLIP[t];
-      if (b) return b;
-    }
-    return 'qmark';
+  /* ---------------- theme helpers ----------------
+     Shared code never knows a blip filename — it works in semantic
+     categories and asks the active theme for art + image ids. */
+  function themeId() { return (window.VCNThemes && VCNThemes.currentId()) || 'vice-city'; }
+  function activeTheme() { return window.VCNThemes ? VCNThemes.get(themeId()) : null; }
+  /* Semantic category -> this theme's blip file stem. */
+  function iconStemFor(semantic) {
+    const t = activeTheme();
+    const m = (t && t.pois && t.pois.semanticIconMap) || {};
+    return m[semantic] || semantic || ((t && t.pois && t.pois.fallbackIcon) || 'qmark');
   }
-  function importanceForType(primaryType, types) {
+  /* Namespaced MapLibre image id so four themes' blips can coexist. */
+  function themeImageId(stem) { return 'poi-' + themeId() + '-' + stem; }
+  function allIconStems() {
+    const t = activeTheme();
+    const stems = new Set(Object.values((t && t.pois && t.pois.semanticIconMap) || {}));
+    Object.keys(IMPORTANCE_BY_SEMANTIC).forEach(s => stems.add(s));
+    stems.add((t && t.pois && t.pois.fallbackIcon) || 'qmark');
+    return [...stems];
+  }
+
+  function semanticForPlace(primaryType, types) {
     const candidates = [primaryType, ...(types || [])].filter(Boolean);
     for (const t of candidates) {
-      const imp = IMPORTANCE_BY_TYPE[t];
-      if (typeof imp === 'number') return imp;
+      const s = GOOGLE_TYPE_TO_SEMANTIC[t];
+      if (s) return s;
     }
-    return DEFAULT_IMPORTANCE;
+    return null;
+  }
+  function importanceForSemantic(semantic) {
+    return (typeof IMPORTANCE_BY_SEMANTIC[semantic] === 'number')
+      ? IMPORTANCE_BY_SEMANTIC[semantic] : DEFAULT_IMPORTANCE;
   }
 
   async function searchGroup(group, lnglat) {
@@ -214,8 +227,7 @@
         lat: loc.latitude, lng: loc.longitude,
         primaryType, types,
         displayName: (p.displayName && p.displayName.text) || 'Unnamed place',
-        blip: blipForPlace(primaryType, types),
-        importance: importanceForType(primaryType, types),
+        semantic: semanticForPlace(primaryType, types),
         fetchedAt: now,
       });
       added++;
@@ -350,9 +362,11 @@
     // silently fails for these assets on the user's mobile Safari while
     // plain <img> (player arrow) works fine. Decode via Image, register
     // the element directly with addImage.
-    const names = [...new Set(Object.values(GOOGLE_TYPE_TO_BLIP).concat(['qmark']))];
-    for (const name of names) {
-      const id = 'poi-' + name;
+    const t = activeTheme();
+    const assetPath = (t && t.pois && t.pois.assetPath) || '';
+    const filePrefix = (t && t.pois && t.pois.filePrefix) || '';
+    for (const stem of allIconStems()) {
+      const id = themeImageId(stem);
       if (map.hasImage(id)) continue;
       const img = new Image();
       img.onload = () => {
@@ -362,7 +376,7 @@
         renderPois(); // paint any features that were waiting on this blip
       };
       img.onerror = () => { lastImageError = id + ': <img> onerror for ' + img.src; };
-      img.src = blipUrl(name);
+      img.src = assetPath + filePrefix + stem + '.png';
     }
   }
   function ensureLayers() {
@@ -371,14 +385,19 @@
     map.addLayer({
       id: POI_LAYER_ID, type: 'symbol', source: 'vcn-pois',
       layout: {
-        'icon-image': ['concat', 'poi-', ['get', 'blip']],
+        // icon resolves to the ACTIVE theme's namespaced image id,
+        // computed per feature in renderPois() — shared code never
+        // names a blip file.
+        'icon-image': ['get', 'icon'],
         'icon-size': ['interpolate', ['linear'], ['zoom'], 10, 2.2, 14, 2.6, 16, 3.0, 18, 3.4],
         'icon-anchor': 'center',
         'icon-allow-overlap': false,
         'icon-ignore-placement': false,
         'icon-padding': 2,
-        // higher importance wins any residual icon collisions
-        'symbol-sort-key': ['get', 'importance'],
+        // MapLibre gives LOWER sort-key values placement priority, so
+        // the stored key is inverted: airports/hospitals win collisions
+        // over restaurants/bars. See sortKey in renderPois().
+        'symbol-sort-key': ['get', 'sortKey'],
       },
     });
   }
@@ -393,22 +412,27 @@
       const bounds = (band.cap !== Infinity && typeof map.getBounds === 'function') ? map.getBounds() : null;
       for (const rec of memCache.values()) {
         if (now - rec.fetchedAt > ttl) continue;
-        // older cached records predate importance scoring — derive it
-        const imp = (typeof rec.importance === 'number')
-          ? rec.importance : importanceForType(rec.primaryType, rec.types);
+        // older cached records predate semantic scoring — derive it
+        const sem = rec.semantic || semanticForPlace(rec.primaryType, rec.types);
+        const imp = importanceForSemantic(sem);
         if (imp < band.minImportance) continue;
         if (bounds && !bounds.contains([rec.lng, rec.lat])) continue;
-        picked.push([imp, rec]);
+        picked.push([imp, sem, rec]);
       }
       picked.sort((a, b) => b[0] - a[0]);
       if (picked.length > band.cap) picked.length = band.cap;
     }
-    const features = picked.map(([imp, rec]) => ({
+    const features = picked.map(([imp, sem, rec]) => ({
       type: 'Feature',
       geometry: { type: 'Point', coordinates: [rec.lng, rec.lat] },
       properties: {
         placeId: rec.placeId, name: rec.displayName,
-        type: rec.primaryType || '', blip: rec.blip, importance: imp,
+        type: rec.primaryType || '', semantic: sem || '',
+        icon: themeImageId(iconStemFor(sem)),
+        importance: imp,
+        // inverted: MapLibre prioritises LOWER sort-keys, so major
+        // landmarks (high importance) must carry the lowest keys
+        sortKey: 100 - imp,
       },
     }));
     map.getSource('vcn-pois').setData({ type: 'FeatureCollection', features });
@@ -422,7 +446,8 @@
   function showCard(props) {
     const detail = document.getElementById('poi-detail');
     const userPos = hooks.getUserPos ? hooks.getUserPos() : null;
-    document.getElementById('poi-blip').src = blipUrl(props.blip || 'qmark');
+    document.getElementById('poi-blip').src =
+      (window.VCNThemes ? VCNThemes.poiIconUrl(props.semantic) : '');
     document.getElementById('poi-name').textContent = props.name || 'Unnamed place';
     document.getElementById('poi-type').textContent = prettyType(props.type);
     document.getElementById('poi-dist').textContent =
@@ -433,12 +458,12 @@
     else if (detail) detail.hidden = false;
     document.getElementById('poi-go').onclick = () => {
       if (hooks.setDestination) hooks.setDestination({
-        label: props.name, lnglat: [props.lng, props.lat], blip: props.blip || 'waypoint',
+        label: props.name, lnglat: [props.lng, props.lat], semantic: props.semantic || null,
       });
     };
     document.getElementById('poi-drive').onclick = () => {
       if (hooks.navigateTo) hooks.navigateTo({
-        label: props.name, lnglat: [props.lng, props.lat], blip: props.blip || 'waypoint',
+        label: props.name, lnglat: [props.lng, props.lat], semantic: props.semantic || null,
       });
     };
   }
@@ -448,7 +473,7 @@
       const f = e.features && e.features[0];
       if (!f) return;
       const p = f.properties, c = f.geometry.coordinates;
-      showCard({ placeId: p.placeId, name: p.name, type: p.type, blip: p.blip, lng: c[0], lat: c[1] });
+      showCard({ placeId: p.placeId, name: p.name, type: p.type, semantic: p.semantic, lng: c[0], lat: c[1] });
     };
     for (const id of layerIds) map.on('click', id, onPoiClick);
   }
@@ -471,6 +496,14 @@
     maybeRefresh,
     renderPois,
     cacheSize: () => memCache.size,
+    /* Rebuild map-side state after a style change (setStyle drops all
+       custom sources/layers/images). Cache and data are untouched. */
+    rehydrate() {
+      if (!map) return;
+      ensureLayers();
+      preloadBlipImages();
+      renderPois();
+    },
     /* Diagnostic snapshot for the ?poi-debug panel and console probing. */
     status() {
       let budget = null;
@@ -491,9 +524,9 @@
         })(),
         blipImages: (() => {
           try {
-            const names = [...new Set(Object.values(GOOGLE_TYPE_TO_BLIP).concat(['qmark']))];
-            const missing = names.filter(n => !map.hasImage('poi-' + n));
-            return { total: names.length, missing, lastImageError };
+            const tid = themeId();
+            const missing = allIconStems().filter(s => !map.hasImage('poi-' + tid + '-' + s));
+            return { theme: tid, total: allIconStems().length, missing, lastImageError };
           } catch (e) { return { error: String(e && e.message || e) }; }
         })(),
         cooldownMsLeft: Math.max(0, failCooldownUntil - Date.now()),
