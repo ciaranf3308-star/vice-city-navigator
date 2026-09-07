@@ -1,0 +1,1 @@
+[{"relation": ["delegate_permission/common.handle_all_urls"], "target": {"namespace": "android_app", "package_name": "star.ciaranf3308.vicecitynavigator", "sha256_cert_fingerprints": ["C03126050FCB9DA538B90ABF672BB8E18335E2ABE582FE78260F5395BF6D8125"]}}]
