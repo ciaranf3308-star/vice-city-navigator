@@ -461,5 +461,41 @@ ok(/\.vcsp-art\s*\{[^}]*left:\s*7\.5%[^}]*top:\s*34\.3%[^}]*width:\s*31\.9%[^}]*
 ok(/\.vcsp-art-idle\s*\{[^}]*left:\s*7\.5%/.test(vcSkinCssCode),
   'vice-city: idle placeholder fills the same opening');
 
+/* ---------- navigation voice: San Andreas OpenAI-primary ---------- */
+const voiceFn = fs.readFileSync(path.join(REPO, 'supabase/functions/navigation-voice/index.ts'), 'utf8');
+const voiceClient = fs.readFileSync(path.join(REPO, 'voice.js'), 'utf8');
+// San Andreas persona exists and is OpenAI-only with the onyx voice
+ok(/'san-andreas':\s*\{[^}]*provider:\s*'openai'/.test(voiceFn), 'SA voice profile: provider openai (Gemini never attempted)');
+ok(/'san-andreas':\s*\{[^}]*voice:\s*'onyx'/.test(voiceFn), 'SA voice profile: onyx voice');
+ok(/'san-andreas':\s*\{[^}]*ttsModel:\s*'gpt-4o-mini-tts'/.test(voiceFn), 'SA voice profile: gpt-4o-mini-tts');
+ok(/'san-andreas':\s*\{[^}]*rewriteModel:\s*'gpt-4o-mini'/.test(voiceFn), 'SA voice profile: gpt-4o-mini rewrite');
+ok(/'san-andreas':\s*\{[^}]*cacheAudio:\s*true/.test(voiceFn), 'SA voice profile: server audio cache on');
+// SA rewrite hard rules: preserve facts, never invent, 1-2 sentences
+for (const rule of ['RULES: preserve EVERY', 'direction, EVERY street name', 'EVERY distance', 'never invent landmarks or',
+  'never alter left/right', '1-2 short spoken sentences', 'roundabout facts']) {
+  ok(voiceFn.includes(rule), `SA rewrite rule present: "${rule}"`);
+}
+// SA TTS persona: the West Coast OG delivery spec
+for (const marker of ['mid 40s. Heavy', 'baritone, warm low end', 'West Coast', 'AAVE', 'South Central', 'over-enunciate',
+  'calm power, never shouting', 'cartoon gangster']) {
+  ok(voiceFn.includes(marker), `SA TTS persona marker present: "${marker}"`);
+}
+// Server audio cache: keyed by profile + normalized instruction + model + voice
+ok(voiceFn.includes("VOICE_CACHE_BUCKET = 'voice-cache'"), 'voice cache bucket: voice-cache');
+ok(/canonical = \['v1', profile, mode, profanity \? 'p1' : 'p0', normalized, ttsModel, voice\]/.test(voiceFn),
+  'voice cache key: profile + mode + profanity + normalized instruction + tts model + voice');
+ok(voiceFn.includes('crypto.subtle.digest'), 'voice cache key: sha256-hashed');
+ok(voiceFn.includes('ensureVoiceCacheBucket'), 'voice cache bucket self-provisions on first use');
+// Global server deadline sits below the client timeout and covers disconnects
+const serverDeadline = Number((voiceFn.match(/SERVER_DEADLINE_MS = (\d+)/) || [])[1]);
+const clientTimeout = Number((voiceClient.match(/FETCH_TIMEOUT_MS = (\d+)/) || [])[1]);
+ok(Number.isFinite(serverDeadline) && Number.isFinite(clientTimeout) && serverDeadline < clientTimeout,
+  `server deadline (${serverDeadline}ms) below client timeout (${clientTimeout}ms)`);
+ok(/deadlineScope\(req\)/.test(voiceFn) && /req\.signal/.test(voiceFn),
+  'server deadline combines the client-disconnect signal');
+// Key hygiene: no OpenAI secret material in the client or repo
+ok(!/sk-(proj-)?[A-Za-z0-9]{20,}/.test(voiceClient), 'voice client ships no OpenAI key');
+ok(!/sk-(proj-)?[A-Za-z0-9]{20,}/.test(voiceFn), 'edge function ships no hardcoded OpenAI key');
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

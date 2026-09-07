@@ -26,9 +26,18 @@ browser voice automatically.
   1000) via a Postgres counter — independent of the Google Places quota — so
   a client bug can never hammer any provider.
 
-Provider chain: `GEMINI_API_KEY` (free, default) → `OPENAI_API_KEY`
-(optional paid fallback, kept in code) → `server_misconfigured` if neither
-is set.
+Provider chain (per theme — the server decides from the `theme` the app sends):
+
+- `san-andreas`: **OpenAI primary** (funded account). Gemini is never
+  attempted for this profile.
+  1. Server audio cache (`voice-cache` Storage bucket — self-provisioned
+     by the function on first use, private, service_role only).
+  2. OpenAI rewrite: `gpt-4o-mini` with the San Andreas persona.
+  3. OpenAI TTS: `gpt-4o-mini-tts`, voice `onyx` → MP3.
+  4. Browser/device speech fallback (client-side, on 502/429).
+- `vice-city` (default): `GEMINI_API_KEY` (free, default) → `OPENAI_API_KEY`
+  (optional paid fallback, kept in code) → `server_misconfigured` if neither
+  is set.
 
 ## 1. Create the Supabase project
 
@@ -66,8 +75,13 @@ is set.
 Do NOT put the key in this repo, in `supabase-config.js`, or in the app —
 anywhere. If it ever leaks, delete/rotate it in AI Studio (free, 30 seconds).
 
-(The old `OPENAI_API_KEY` secret is now only an optional fallback; the
-function prefers Gemini whenever `GEMINI_API_KEY` is set.)
+(The `OPENAI_API_KEY` secret is **required** for the San Andreas profile
+(OpenAI-primary); for Vice City it remains an optional fallback behind
+Gemini whenever `GEMINI_API_KEY` is set.)
+
+No Storage dashboard step is needed: the function creates the private
+`voice-cache` bucket itself on the first San Andreas request (it already
+has `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` for the usage counter).
 
 ## 5. Point the app at Supabase
 
