@@ -2,26 +2,31 @@
    Vice City Navigator — theme-aware navigation voice.
    ------------------------------------------------------------
    Pipeline: OSRM maneuver -> deterministic structured
-   instruction (built by app.js; the voice layer NEVER decides
-   navigation) -> themed line -> speechSynthesis.
+   instruction (built by app.js, the LLM never decides
+   navigation) -> Supabase Edge Function `navigation-voice`
+   (server-side theme persona + OpenAI gpt-4o-mini rewrite +
+   gpt-4o-mini-tts speech) -> audio playback.
 
-   Themed + banter modes are generated ON THE PHONE by the DJ
-   phrasebook below: an energetic 1980s Miami radio persona
-   (original, not an actor clone). No network, no API keys, no
-   cost, works in tunnels. The deterministic instruction stays
-   on screen regardless of what the DJ says.
+   The OpenAI key is NEVER in this client. The app sends only
+   { text, theme, mode, profanity } to the Edge Function and gets
+   back { line, audio }. The key lives solely as the OPENAI_API_KEY
+   secret on the Supabase project (see VOICE_SETUP.md).
+
+   The function enforces its own per-day request cap (VOICE_DAILY_CAP,
+   default 1000), independent of the Google Places quota.
 
    Modes: standard | themed | banter | off
-     standard — speechSynthesis, deterministic text, flat delivery
-     themed   — DJ phrasebook line, same structured content
-     banter   — themed + the DJ may add a very short quip
+     standard — browser speechSynthesis, deterministic text
+     themed   — AI persona voice, same structured content
+     banter   — themed + the persona may add a very short quip
      off      — silent
 
-   `endpoint` (menu > Voice) remains as an advanced override: if a
-   custom voice-server URL is set, themed audio is fetched from it
-   exactly as before (Supabase Edge Function contract
-   { text, theme, mode, profanity } -> { line, audio }). Empty by
-   default = fully on-device.
+   Pre-generation: when a route is calculated the app calls
+   pregenerate() with the next few maneuver texts; audio is
+   fetched in the background and cached. Speaking NEVER waits
+   for the network — if themed audio isn't cached yet, the
+   deterministic standard voice speaks immediately and the
+   themed audio warms the cache for next time.
    ============================================================ */
 'use strict';
 
@@ -31,10 +36,10 @@
   const FETCH_TIMEOUT_MS = 12000;
 
   const settings = { mode: 'standard', profanity: false, endpoint: '', muted: false };
-  const audioCache = new Map(); // key -> { url, text } (server path only)
+  const audioCache = new Map(); // key -> { url, text }
   const inflight = new Set();
   let audioEl = null;
-  let djVoice = null;
+  let endpointWarned = false;
 
   function loadSettings() {
     try {
@@ -54,194 +59,41 @@
   function themeId() {
     return (window.VCNThemes && window.VCNThemes.currentId()) || 'vice-city';
   }
-
-  /* Pick a fitting DJ voice when the platform offers one; otherwise the
-     default voice. Best-effort — voices load async on some platforms. */
-  function pickDjVoice() {
-    if (!('speechSynthesis' in window)) return;
-    try {
-      const vs = speechSynthesis.getVoices() || [];
-      if (!vs.length) return;
-      const want = vs.find(v => /daniel|david|alex|fred|jorge|diego/i.test(v.name) && /^en/i.test(v.lang))
-        || vs.find(v => /google us english/i.test(v.name))
-        || vs.find(v => /^en[-_]US/i.test(v.lang) && /male/i.test(v.name))
-        || null;
-      djVoice = want || null;
-    } catch (e) { djVoice = null; }
-  }
-
-  /* ---------------- standard deterministic voice ---------------- */
-  function synthSpeak(text, themed) {
-    if (!('speechSynthesis' in window)) return;
-    try {
-      speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.rate = themed ? 1.06 : 1.02;
-      u.pitch = themed ? 1.05 : 1;
-      u.volume = 1;
-      if (themed && djVoice) u.voice = djVoice;
-      speechSynthesis.speak(u);
-    } catch (e) { /* voice unavailable */ }
-  }
-
-  /* ============================================================
-     DJ PHRASEBOOK — on-device themed lines.
-     Every builder keeps the maneuver facts intact: direction,
-     distance and road name always survive the rewrite.
-     ============================================================ */
-  const lastPick = {};
-  function pick(arr, key) {
-    if (!arr.length) return '';
-    if (arr.length === 1) return arr[0];
-    let i = Math.floor(Math.random() * arr.length);
-    if (i === lastPick[key]) i = (i + 1) % arr.length;
-    lastPick[key] = i;
-    return arr[i];
-  }
-
-  const INTROS = [
-    'Alright Vice City,',
-    'Yo, check it —',
-    'Traffic report, hot off the wire:',
-    'Cruisers, listen up —',
-    'Coming at you live —',
-  ];
-  const OUTROS = [
-    'keep it smooth.',
-    'stay groovy.',
-    'easy does it.',
-    'nice and easy.',
-  ];
-  const QUIPS = [
-    'The neon looks good on you tonight.',
-    'No cops, no problems.',
-    'This city never sleeps, and neither do we.',
-    'Windows down, volume up.',
-    'Ocean Drive energy, baby.',
-  ];
-  const SPICY_QUIPS = [
-    'Damn, this city is beautiful at night.',
-    'Hell of a cruise so far.',
-  ];
-
-  /* Parse the canonical instruction into facts the DJ can riff on. */
-  function parseFacts(text) {
-    let t = String(text || '').trim().replace(/\s+/g, ' ');
-    let dist = '';
-    const dm = t.match(/^In\s+([^,]+),\s*/i);
-    if (dm) { dist = 'in ' + dm[1].trim(); t = t.slice(dm[0].length); }
-    const core = t.replace(/\.\s*$/, '');
-    const roadM = core.match(/onto\s+(.+)$/i);
-    const road = roadM ? roadM[1].trim() : '';
-    return { dist, road, onto: road ? ' onto ' + road : '', core };
-  }
-
-  function djLine(text) {
-    const profane = !!settings.profanity;
-    const banter = settings.mode === 'banter';
-    const F = parseFacts(text);
-    const core = F.core;
-    const intro = () => pick(INTROS, 'intro');
-    const outro = () => pick(OUTROS, 'outro');
-    const distBit = F.dist ? F.dist + ', ' : '';
-
-    /* Announcements first. */
-    let m;
-    if (/^starting navigation/i.test(core)) {
-      const total = (core.match(/total\s+(.+?)$/i) || [])[1] || '';
-      const first = core.replace(/^starting navigation\.?\s*/i, '').replace(/\s*total\s+.+?$/i, '').trim();
-      return `${intro()} we're rolling! ${first ? first + '. ' : ''}${total ? total + ' of open road ahead of us — ' : ''}let's cruise.`;
-    }
-    if (/^rerouting/i.test(core)) {
-      return pick([
-        `Whoa, missed that one — no sweat, I'm recalculating.`,
-        `Detour alert! Rerouting you now, stay cool.`,
-        `${intro()} slight change of plans — new route coming up.`,
-      ], 'reroute');
-    }
-    if (/^new route/i.test(core)) {
-      const rest = core.replace(/^new route\.?\s*/i, '').trim();
-      return `Fresh route locked in. ${rest ? rest + '.' : outro()}`;
-    }
-    if (/arrived/i.test(core)) {
-      return pick([
-        `And that's the spot — you've arrived. Welcome to Vice City, baby.`,
-        `We made it! You've arrived. Kill the engine and enjoy.`,
-        `Destination reached. ${intro()} what a cruise that was.`,
-      ], 'arrive');
-    }
-
-    /* Maneuvers — direction, distance and road always survive. */
-    let line = '';
-    if ((m = core.match(/at the end of the road,?\s*turn\s+(.+?)(?:\s+onto\s+.+)?$/i))) {
-      const dir = m[1].trim();
-      line = pick([
-        `${intro()} at the end of the road, swing a ${dir}${F.onto}.`,
-        `End of the road coming up — take a ${dir}${F.onto}, ${outro()}`,
-      ], 'endofroad');
-    } else if (/roundabout|rotary/i.test(core)) {
-      line = pick([
-        `${intro()} roundabout ahead — take the exit${F.onto}.`,
-        `Roundabout coming up ${distBit}take the exit${F.onto}, ${outro()}`,
-        `Easy through the roundabout — exit${F.onto}, ${distBit}${outro()}`,
-      ], 'roundabout');
-    } else if ((m = core.match(/turn\s+(.+?)(?:\s+onto\s+.+)?$/i))) {
-      const dir = m[1].trim();
-      line = pick([
-        `${intro()} ${distBit}hang a ${dir}${F.onto}.`,
-        `Heads up — ${dir} turn${F.onto} coming up ${distBit}${outro()}`,
-        `${distBit}take a ${dir}${F.onto} — nice and easy.`,
-        profane ? `Damn, slick ${dir} coming up${F.onto} ${distBit}— take it.` : `${intro()} ${distBit}we're going ${dir}${F.onto}.`,
-      ], 'turn');
-    } else if ((m = core.match(/keep\s+(left|right)/i))) {
-      const dir = m[1].toLowerCase();
-      line = pick([
-        `Keep ${dir}${F.onto}, ${outro()}`,
-        `${intro()} stay ${dir}${F.onto}.`,
-      ], 'fork');
-    } else if (/^merge/i.test(core)) {
-      line = pick([
-        `Merge${F.onto} — slide in smooth.`,
-        `${intro()} merge${F.onto}, ${outro()}`,
-      ], 'merge');
-    } else if ((m = core.match(/take the (ramp|exit)/i))) {
-      const which = m[1].toLowerCase();
-      line = pick([
-        `${intro()} take the ${which}${F.onto}.`,
-        `${distBit}take the ${which}${F.onto}, ${outro()}`,
-      ], 'ramp');
-    } else if (/^continue/i.test(core)) {
-      line = pick([
-        `Just cruise straight${F.onto}${F.dist ? ' — ' + F.dist + ' of open road' : ''}.`,
-        `${intro()} straight on${F.onto}, ${outro()}`,
-        `Hold your line${F.onto}.`,
-      ], 'continue');
-    } else if ((m = core.match(/^head\s+(\w+)/i))) {
-      const heading = m[1].toLowerCase();
-      line = pick([
-        `${intro()} head ${heading}${F.onto} — we're rolling.`,
-        `We move! Head ${heading}${F.onto}.`,
-      ], 'depart');
-    }
-
-    if (!line) return text; // unknown text: speak it flat, never drop info
-    if (banter && Math.random() < 0.4) {
-      const quips = profane ? QUIPS.concat(SPICY_QUIPS) : QUIPS;
-      line += ' ' + pick(quips, 'quip');
-    }
-    return line;
-  }
-
-  /* ---------------- server path (advanced override only) ---------------- */
+  /* The spoken persona now lives server-side in the Edge Function; the app
+     only sends the theme id. `settings.endpoint` remains as an advanced
+     override for a custom function URL. */
   const cacheKey = text => `${themeId()}|${settings.mode}|${settings.profanity ? 1 : 0}|${text}`;
   function functionUrl() {
     const custom = (settings.endpoint || '').trim().replace(/\/+$/, '');
     if (custom) return custom;
-    return ''; // on-device by default; no Supabase call unless overridden
+    const cfg = window.VCNSupabase || {};
+    const base = (cfg.url || '').trim().replace(/\/+$/, '');
+    if (!base || /^https:\/\/YOUR_PROJECT_REF/i.test(base)) return '';
+    return base + (cfg.functionPath || '/functions/v1/navigation-voice');
   }
-  function serverHeaders() {
-    return { 'Content-Type': 'application/json' };
+  function supabaseHeaders() {
+    const h = { 'Content-Type': 'application/json' };
+    const cfg = window.VCNSupabase || {};
+    const key = (cfg.anonKey || '').trim();
+    if (key && !/^YOUR_SUPABASE/i.test(key)) {
+      h['apikey'] = key;
+      h['Authorization'] = 'Bearer ' + key;
+    }
+    return h;
   }
+
+  /* ---------------- standard deterministic voice ---------------- */
+  function synthSpeak(text) {
+    if (!('speechSynthesis' in window)) return;
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 1.02; u.volume = 1;
+      speechSynthesis.speak(u);
+    } catch (e) { /* voice unavailable */ }
+  }
+
+  /* ---------------- themed voice ---------------- */
   function stopAudio() {
     if (audioEl) { try { audioEl.pause(); } catch (e) {} audioEl = null; }
   }
@@ -249,7 +101,7 @@
     stopAudio();
     try { speechSynthesis.cancel(); } catch (e) {}
     audioEl = new Audio(entry.url);
-    audioEl.play().catch(() => synthSpeak(entry.text, false));
+    audioEl.play().catch(() => synthSpeak(entry.text));
   }
   async function fetchTts(text) {
     const key = cacheKey(text);
@@ -262,7 +114,7 @@
     try {
       const res = await fetch(url, {
         method: 'POST',
-        headers: serverHeaders(),
+        headers: supabaseHeaders(),
         body: JSON.stringify({
           text,
           theme: themeId(),
@@ -271,6 +123,7 @@
         }),
         signal: ctrl.signal,
       });
+      if (res.status === 429) throw new Error('voice daily cap reached');
       if (!res.ok) throw new Error('voice ' + res.status);
       const data = await res.json();
       const b64 = data && data.audio;
@@ -293,31 +146,32 @@
     finally { clearTimeout(timer); inflight.delete(key); }
   }
 
-  /* ---------------- themed voice ---------------- */
   function themedSpeak(text) {
-    if (functionUrl()) {
-      // Advanced override: custom voice server.
-      const key = cacheKey(text);
-      const hit = audioCache.get(key);
-      if (hit) { playCached(hit); return; }
-      synthSpeak(text, false); // never wait for the network
-      fetchTts(text);
+    const url = functionUrl();
+    if (!url) {
+      if (!endpointWarned) {
+        endpointWarned = true;
+        console.info('[vcn-voice] themed mode needs the Supabase voice function — see VOICE_SETUP.md, then set supabase-config.js; using standard voice.');
+      }
+      synthSpeak(text);
       return;
     }
-    // On-device DJ: instant, free, offline.
-    synthSpeak(djLine(text), true);
+    const key = cacheKey(text);
+    const hit = audioCache.get(key);
+    if (hit) { playCached(hit); return; }
+    // Never wait: standard voice now, themed audio warms the cache.
+    synthSpeak(text);
+    fetchTts(text);
   }
 
   function speakInternal(text) {
     if (!text || settings.muted || settings.mode === 'off') return;
-    if (settings.mode === 'standard') synthSpeak(text, false);
+    if (settings.mode === 'standard') synthSpeak(text);
     else themedSpeak(text);
   }
 
   window.VCNVoice = {
-    init() { loadSettings(); pickDjVoice(); try {
-      if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = pickDjVoice;
-    } catch (e) {} },
+    init() { loadSettings(); },
 
     getConfig: () => ({ ...settings }),
     setConfig(patch) {
@@ -346,8 +200,8 @@
        built by app.js from the OSRM maneuver (the on-screen text). */
     speakManeuver: text => speakInternal(text),
 
-    /* Pre-generate themed audio for upcoming maneuvers (server path
-       only — the on-device DJ is instant). Fire-and-forget. */
+    /* Pre-generate themed audio for upcoming maneuvers. Fire-and-forget:
+       never awaited by navigation. */
     pregenerate(texts) {
       if (!Array.isArray(texts)) return;
       if (settings.mode !== 'themed' && settings.mode !== 'banter') return;
