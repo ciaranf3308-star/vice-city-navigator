@@ -686,3 +686,183 @@ body.theme-rdr2 .stats{color:#d8b36a}
 body.theme-rdr2 .hint{color:rgba(232,217,176,.7)}
 body.theme-rdr2 .ghost-btn{color:#d8b36a;border-color:#8a6f4d}
 body.theme-rdr2 .attrib{color:rgba(216,179,106,.5)}
+
+/* ============================================================
+   WayStation kinetic karaoke lyric engine (lyrics.js).
+   Shared engine, theme-defined styling ONLY. The engine mounts
+   .wslyr.wslyr-<theme> inside each skin's [data-lyrics-stage].
+   Three slots: ghost previous / hero current / next teaser.
+   Readable first, kinetic second, beautiful third.
+   ============================================================ */
+.wslyr{position:absolute;inset:0;overflow:hidden;pointer-events:none;
+  --lyr-ink:#fff;--lyr-dim:rgba(255,255,255,.34);
+  --lyr-accent:#fff;--lyr-glow:rgba(255,255,255,.6);
+  --lyr-cap:rgba(255,255,255,.55)}
+/* theme palettes */
+.wslyr-vice-city{--lyr-ink:#ffe9f7;--lyr-dim:rgba(255,233,247,.34);
+  --lyr-accent:#01cdfe;--lyr-glow:rgba(1,205,254,.8);--lyr-cap:rgba(255,180,230,.6)}
+.wslyr-san-andreas{--lyr-ink:#f2e8c9;--lyr-dim:rgba(242,232,201,.34);
+  --lyr-accent:#ffd34d;--lyr-glow:rgba(255,211,77,.7);--lyr-cap:rgba(242,232,201,.55)}
+.wslyr-gta-v{--lyr-ink:#f4f4f4;--lyr-dim:rgba(244,244,244,.32);
+  --lyr-accent:#a8e06b;--lyr-glow:rgba(168,224,107,.65);--lyr-cap:rgba(244,244,244,.5)}
+.wslyr-rdr2{--lyr-ink:#e8d9b0;--lyr-dim:rgba(232,217,176,.34);
+  --lyr-accent:#ffd98a;--lyr-glow:rgba(184,53,47,.85);--lyr-cap:rgba(216,179,106,.6)}
+
+/* ---------- slots ---------- */
+.wslyr-prev{position:absolute;top:3%;left:5%;right:5%;text-align:center;
+  font-size:3cqw;line-height:1.2;color:var(--lyr-ink);opacity:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wslyr-ghost-run{animation:wslyr-ghost 2.2s ease-out both}
+@keyframes wslyr-ghost{
+  0%{opacity:.15;filter:blur(1px);transform:translateY(0) scale(1)}
+  100%{opacity:.07;filter:blur(4px);transform:translateY(-12%) scale(.96)}}
+.wslyr-hero{position:absolute;left:4%;right:4%;top:30%;max-height:64%;
+  overflow:hidden;color:var(--lyr-ink);line-height:1.08;
+  text-wrap:balance;overflow-wrap:break-word}
+.wslyr-next{position:absolute;left:8%;right:8%;bottom:2.5%;text-align:center;
+  font-size:2.5cqw;line-height:1.25;color:var(--lyr-ink);opacity:.42;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-family:'Outfit',system-ui,sans-serif;font-weight:600;letter-spacing:.04em}
+.wslyr-state{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:1.2cqh}
+.wslyr-state[hidden]{display:none}
+.wslyr-wait{font-size:7cqw;color:var(--lyr-ink);opacity:.3;
+  animation:wslyr-breathe 3.2s ease-in-out infinite}
+.wslyr-cap{font-size:2.6cqw;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--lyr-cap);font-family:'Outfit',system-ui,sans-serif;font-weight:600}
+.wslyr-load{display:flex;gap:1.6cqw}
+.wslyr-load i{width:1.8cqw;height:1.8cqw;border-radius:50%;
+  background:var(--lyr-accent);opacity:.35;animation:wslyr-pulse 1.1s infinite}
+.wslyr-load i:nth-child(2){animation-delay:.18s}
+.wslyr-load i:nth-child(3){animation-delay:.36s}
+@keyframes wslyr-pulse{0%,100%{opacity:.25;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+@keyframes wslyr-breathe{0%,100%{opacity:.22;transform:scale(1)}50%{opacity:.38;transform:scale(1.06)}}
+
+/* ---------- composition axes (deterministic per line) ---------- */
+.wslyr-hero.a-left{text-align:left}.wslyr-hero.a-center{text-align:center}
+.wslyr-hero.a-right{text-align:right}
+.wslyr-hero.v-up{top:9%;max-height:76%}.wslyr-hero.v-mid{top:30%;max-height:58%}.wslyr-hero.v-low{top:53%;max-height:40%}
+.wslyr-hero.s-xl{font-size:9cqw}.wslyr-hero.s-lg{font-size:6.2cqw}
+.wslyr-hero.s-md{font-size:4.8cqw}.wslyr-hero.s-sm{font-size:3.6cqw}
+.wslyr-hero.c-upper{text-transform:uppercase}
+.wslyr-hero.c-lower{text-transform:lowercase}
+.wslyr-hero.sp-tight{letter-spacing:-.015em}
+.wslyr-hero.sp-normal{letter-spacing:.015em}
+.wslyr-hero.sp-wide{letter-spacing:.13em}
+
+/* ---------- karaoke words: one composition, progression inside it ---------- */
+.wslyr-w{display:inline-block;padding:0 .07em;
+  transition:opacity .16s ease,color .16s ease,transform .16s ease,text-shadow .16s ease}
+.wslyr-w.unsung{opacity:.36}
+.wslyr-w.sung{opacity:.95}
+.wslyr-w.active{opacity:1;font-weight:900;transform:scale(1.14);
+  color:var(--lyr-accent);-webkit-text-fill-color:var(--lyr-accent);
+  text-shadow:0 0 .45em var(--lyr-glow),0 2px 8px rgba(0,0,0,.85)}
+
+/* ---------- entrance animations (line is one composition) ---------- */
+.wslyr-hero.in-spring{animation:wslyr-in-spring .45s cubic-bezier(.2,1.25,.32,1) both}
+.wslyr-hero.in-blur{animation:wslyr-in-blur .4s ease-out both}
+.wslyr-hero.in-pop{animation:wslyr-in-pop .38s cubic-bezier(.2,1.4,.4,1) both}
+.wslyr-hero.in-sweep{animation:wslyr-in-sweep .42s cubic-bezier(.3,.7,.3,1) both}
+.wslyr-hero.in-snap{animation:wslyr-in-snap .16s ease-out both}
+.wslyr-hero.in-flicker{animation:wslyr-in-flicker .34s linear both}
+@keyframes wslyr-in-spring{0%{opacity:0;transform:translateY(38%) scale(.94)}
+  60%{opacity:1;transform:translateY(-4%) scale(1.02)}100%{opacity:1;transform:none}}
+@keyframes wslyr-in-blur{0%{opacity:0;filter:blur(14px);transform:scale(.96)}
+  100%{opacity:1;filter:blur(0);transform:none}}
+@keyframes wslyr-in-pop{0%{opacity:0;transform:scale(.55)}
+  60%{opacity:1;transform:scale(1.06)}100%{opacity:1;transform:scale(1)}}
+@keyframes wslyr-in-sweep{0%{opacity:0;transform:translateX(-14%);clip-path:inset(0 100% 0 0)}
+  100%{opacity:1;transform:none;clip-path:inset(0 0 0 0)}}
+@keyframes wslyr-in-snap{0%{opacity:0;transform:scale(1.07)}
+  100%{opacity:1;transform:scale(1)}}
+@keyframes wslyr-in-flicker{0%{opacity:0}25%{opacity:.7}40%{opacity:.15}
+  62%{opacity:.9}100%{opacity:1}}
+/* ambient drift: gentle, never implies sync */
+.wslyr-ambient-hero{animation:wslyr-in-blur .8s ease-out both,
+  wslyr-drift 7s ease-in-out 1s infinite alternate}
+@keyframes wslyr-drift{from{transform:translateY(-1.5%)}to{transform:translateY(1.5%)}}
+
+/* ============================================================
+   THEME TYPE FAMILIES — 5 deterministic voices per theme
+   ============================================================ */
+/* ---- Vice City: neon / expressive / glamorous music-video type ---- */
+.wslyr-vice-city .wslyr-hero{font-family:'Pricedown Bl','Pricedown GTA',cursive}
+.wslyr-vice-city .f0 .wslyr-w{background:linear-gradient(180deg,#ff71ce 5%,#ffd319 55%,#01cdfe 95%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  -webkit-text-fill-color:transparent;
+  text-shadow:none;filter:drop-shadow(0 0 .18em rgba(255,46,136,.55))}
+.wslyr-vice-city .f0.wslyr-ambient-hero{background:linear-gradient(180deg,#ff71ce 5%,#ffd319 55%,#01cdfe 95%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+.wslyr-vice-city .f0 .wslyr-w.active{background:none;color:var(--lyr-accent);-webkit-text-fill-color:var(--lyr-accent);filter:drop-shadow(0 0 .35em var(--lyr-glow))}
+.wslyr-vice-city .f1 .wslyr-w{color:transparent;-webkit-text-fill-color:transparent;
+  -webkit-text-stroke:.045em #ff2e88;text-shadow:0 0 .5em rgba(255,46,136,.4)}
+.wslyr-vice-city .f1 .wslyr-w.active{color:var(--lyr-accent);-webkit-text-fill-color:var(--lyr-accent);-webkit-text-stroke:.02em var(--lyr-accent)}
+.wslyr-vice-city .f2{font-family:'Outfit',system-ui,sans-serif;font-style:italic;font-weight:800}
+.wslyr-vice-city .f2 .wslyr-w{color:#01cdfe;-webkit-text-fill-color:#01cdfe;
+  text-shadow:0 0 .4em rgba(1,205,254,.7),0 2px 6px #000}
+.wslyr-vice-city .f3 .wslyr-w{color:#ff71ce;-webkit-text-fill-color:#ff71ce;
+  text-shadow:0 0 .3em rgba(255,46,136,.9),.06em .06em 0 #0d0221}
+.wslyr-vice-city .f4{font-family:'Outfit',system-ui,sans-serif;font-weight:800}
+.wslyr-vice-city .f4 .wslyr-w{color:#b967ff;-webkit-text-fill-color:#b967ff;
+  text-shadow:0 0 .45em rgba(185,103,255,.75),0 2px 6px #000}
+
+/* ---- San Andreas: 90s West Coast street-poster, chunky ---- */
+.wslyr-san-andreas .wslyr-hero{font-family:'Bank Gothic','Beckett',sans-serif}
+.wslyr-san-andreas .f0 .wslyr-w{color:#ffd966;-webkit-text-fill-color:#ffd966;
+  text-shadow:.07em .07em 0 #1a1206,0 0 .35em rgba(255,180,40,.45)}
+.wslyr-san-andreas .f1{font-family:'Beckett',serif}
+.wslyr-san-andreas .f1 .wslyr-w{color:#f2e8c9;-webkit-text-fill-color:#f2e8c9;
+  text-shadow:.05em .05em 0 #2a1f10}
+.wslyr-san-andreas .f2 .wslyr-w{color:transparent;-webkit-text-fill-color:transparent;
+  -webkit-text-stroke:.05em #e8dcc0;text-shadow:.06em .06em 0 rgba(0,0,0,.7)}
+.wslyr-san-andreas .f2 .wslyr-w.active{color:var(--lyr-accent);-webkit-text-fill-color:var(--lyr-accent);-webkit-text-stroke:.02em var(--lyr-accent)}
+.wslyr-san-andreas .f3 .wslyr-w{color:#ff7b35;-webkit-text-fill-color:#ff7b35;
+  text-shadow:.07em .07em 0 #2b0f04,0 0 .4em rgba(255,123,53,.5)}
+.wslyr-san-andreas .f4{font-family:'Outfit',system-ui,sans-serif;font-style:italic;font-weight:900}
+.wslyr-san-andreas .f4 .wslyr-w{color:#fff;-webkit-text-fill-color:#fff;
+  text-shadow:.06em .06em 0 #111,0 0 .3em rgba(255,255,255,.35)}
+
+/* ---- GTA V: clean modern editorial, restrained kinetic ---- */
+.wslyr-gta-v .wslyr-hero{font-family:'Chalet Comprime','Chalet London',sans-serif;font-weight:600}
+.wslyr-gta-v .f0 .wslyr-w{color:#fff;-webkit-text-fill-color:#fff;
+  text-shadow:0 2px 10px rgba(0,0,0,.75)}
+.wslyr-gta-v .f1{font-family:'Chalet London',sans-serif}
+.wslyr-gta-v .f1 .wslyr-w{color:#e8e8e8;-webkit-text-fill-color:#e8e8e8;
+  text-shadow:0 2px 8px rgba(0,0,0,.7)}
+.wslyr-gta-v .f2{font-family:'SignPainter',cursive;font-weight:400}
+.wslyr-gta-v .f2 .wslyr-w{color:#fff;-webkit-text-fill-color:#fff;
+  text-shadow:0 0 .25em rgba(255,255,255,.35),0 2px 8px rgba(0,0,0,.7)}
+.wslyr-gta-v .f3 .wslyr-w{color:#a8e06b;-webkit-text-fill-color:#a8e06b;
+  text-shadow:0 2px 10px rgba(0,0,0,.75)}
+.wslyr-gta-v .f4{font-family:'Outfit',system-ui,sans-serif;font-weight:800}
+.wslyr-gta-v .f4 .wslyr-w{color:#f4f4f4;-webkit-text-fill-color:#f4f4f4;
+  letter-spacing:.02em;text-shadow:0 2px 8px rgba(0,0,0,.7)}
+
+/* ---- RDR2 / Frontier: period print, poster handbill ---- */
+.wslyr-rdr2 .wslyr-hero{font-family:'RDR Lino',serif}
+.wslyr-rdr2 .f0 .wslyr-w{color:#e8d9b0;-webkit-text-fill-color:#e8d9b0;
+  text-shadow:.04em .04em 0 #241a10,0 0 .3em rgba(232,217,176,.3)}
+.wslyr-rdr2 .f1{font-family:'Kirsty',serif}
+.wslyr-rdr2 .f1 .wslyr-w{color:#d8b36a;-webkit-text-fill-color:#d8b36a;
+  text-shadow:.04em .04em 0 #1d1208}
+.wslyr-rdr2 .f2 .wslyr-w{color:#efe0bd;-webkit-text-fill-color:#efe0bd;
+  text-shadow:.04em .04em 0 #241a10}
+.wslyr-rdr2 .f2{position:relative}
+.wslyr-rdr2 .f2::before,.wslyr-rdr2 .f2::after{content:"";display:block;
+  height:.12em;background:currentColor;opacity:.7;margin:.18em auto;max-width:70%}
+.wslyr-rdr2 .f3{font-family:'Kirsty',serif;font-style:italic}
+.wslyr-rdr2 .f3 .wslyr-w{color:#b8352f;-webkit-text-fill-color:#b8352f;
+  text-shadow:.03em .03em 0 rgba(20,10,5,.9)}
+.wslyr-rdr2 .f4{font-family:Georgia,'Times New Roman',serif;font-variant:small-caps}
+.wslyr-rdr2 .f4 .wslyr-w{color:#cbb37f;-webkit-text-fill-color:#cbb37f;
+  text-shadow:.04em .04em 0 #20150a}
+
+/* ghost + next inherit the theme ink at low opacity */
+.wslyr-prev,.wslyr-next{font-family:'Outfit',system-ui,sans-serif;font-weight:600}
+
+/* reduced motion: still readable, never kinetic */
+@media (prefers-reduced-motion:reduce){
+  .wslyr *,.wslyr *::before,.wslyr *::after{animation:none!important;transition:none!important}
+  .wslyr-ghost-run{opacity:.12}
+}

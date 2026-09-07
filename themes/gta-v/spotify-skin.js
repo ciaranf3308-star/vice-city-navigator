@@ -17,15 +17,12 @@
    Z-order: hud < album art < lyrics / track / controls / idle.
    The map shows through transparent pixels.
 
-   LYRICS (future pass):
-     The stage exposes [data-lyrics-stage] plus
-     skin.setLyricsRenderer(fn) / skin.clearLyrics().
-     The proven provider is LRCLIB:
-       GET https://lrclib.net/api/get?artist=<a>&track=<t>
-     A renderer receives the Spotify item and returns a DOM node
-     using .gv-lyric-line > .active (karaoke) / .ghost (previous)
-     / .next (upcoming). Never invent lyric text, never scrape,
-     never fake FFT from Spotify audio (the Web API exposes none).
+   LYRICS: owned by the shared kinetic karaoke engine (lyrics.js,
+     LRCLIB provider) mounted into [data-lyrics-stage] via
+     window.WSLyrics.render(). skin.setLyricsRenderer(fn) /
+     skin.clearLyrics() remain as an override hook. Never invent
+     lyric text, never scrape, never fake FFT from Spotify audio
+     (the Web API exposes none).
    ============================================================ */
 'use strict';
 
@@ -126,6 +123,7 @@
         artist.textContent = 'Connect Spotify to play';
         artist.classList.remove('gvsp-status');
         setArt('');
+        renderLyrics(null);
         return;
       }
       if (!s || !s.item) {
@@ -153,19 +151,22 @@
 
     /* Lyrics stage: a renderer (future LRCLIB pass) owns this DOM.
        With no provider, the stage stays ambient — never fake words. */
+    /* Lyrics stage: owned by the shared kinetic karaoke engine
+       (lyrics.js, LRCLIB). A custom lyricsRenderer set via the mount
+       api still overrides the engine. Never fake words. */
     function renderLyrics(s) {
       const box = q('.gvsp-lyrics');
-      box.innerHTML = '';
-      let node = null;
       if (lyricsRenderer && s && s.item) {
-        try { node = lyricsRenderer(s.item); } catch (e) { node = null; }
+        try {
+          if (window.WSLyrics) WSLyrics.destroy(box);
+          box.innerHTML = '';
+          const node = lyricsRenderer(s.item);
+          if (node) { box.appendChild(node); box.classList.add('has-lyrics'); }
+          else box.classList.remove('has-lyrics');
+        } catch (e) { box.classList.remove('has-lyrics'); }
+        return;
       }
-      if (node) {
-        box.appendChild(node);
-        box.classList.add('has-lyrics');
-      } else {
-        box.classList.remove('has-lyrics');
-      }
+      if (window.WSLyrics) WSLyrics.render(box, core, s && s.item, 'gta-v');
     }
 
     /* ---------- album art crossfade (art sits UNDER the frame) ---------- */
@@ -281,10 +282,8 @@
       render();
       if (core.isConnected()) core.startPolling();
       return {
-        /* Future lyrics pass: fn(item) -> DOM node built from LRCLIB
-           (https://lrclib.net/api/get?artist=&track=). Use
-           .gv-lyric-line with .active (karaoke), .ghost (previous),
-           .next (upcoming) inside the returned node. */
+        /* Override hook: fn(item) -> DOM node replaces the shared
+           kinetic karaoke engine (lyrics.js) for this stage. */
         setLyricsRenderer(fn) { lyricsRenderer = fn; renderLyrics(core.getState()); },
         clearLyrics() { lyricsRenderer = null; renderLyrics(core.getState()); },
       };

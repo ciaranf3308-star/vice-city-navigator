@@ -146,7 +146,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v40"), 'SW shell cache v40');
+ok(swSrc.includes("ws-shell-v41"), 'SW shell cache v41');
 ok(swSrc.includes("ws-theme-v12"), 'SW theme cache v12');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
@@ -716,6 +716,102 @@ ok(conv.trafficDelaySec === 120, 'traffic: converter keeps trafficDelayInSeconds
 let threw = false;
 try { TR.routeFromTomTom({}); } catch (e) { threw = true; }
 ok(threw, 'traffic: converter throws on empty payload (caller falls back to OSRM)');
+
+
+/* ---------- kinetic karaoke lyric engine (lyrics.js) ---------- */
+vm.runInContext(fs.readFileSync(path.join(REPO, 'lyrics.js'), 'utf8'), sandbox, { filename: 'lyrics.js' });
+const LY = sandbox.window.WSLyrics;
+ok(!!LY && typeof LY.render === 'function' && typeof LY.destroy === 'function', 'lyrics: WSLyrics exposes render/destroy');
+ok(typeof LY.setOffset === 'function' && LY.getOffset() === 600, 'lyrics: default offset 600ms (within the +500-800 concept)');
+ok(LY.setOffset(50) === 50 && LY.getOffset() === 50, 'lyrics: offset tunable');
+ok(LY.setOffset(-5) === 0 && LY.setOffset(99999) === 5000, 'lyrics: offset clamped to [0,5000]');
+LY.setOffset(600);
+const U = LY.util;
+
+// LRC parsing: timestamps, sort order, metadata + note-lines skipped
+const lrcLines = U.parseLRC('[ti:Title]\n[ar:Artist]\n[00:12.34]second line\n[00:05.00]first line\n[00:20.00]\n[00:25.10]\u266A\n[01:02.500]millis line');
+ok(lrcLines.length === 3, 'lyrics: parseLRC keeps 3 real lines, drops tags/empties/notes');
+ok(lrcLines[0].t === 5000 && lrcLines[0].text === 'first line', 'lyrics: parseLRC sorts by time');
+ok(lrcLines[1].t === 12340, 'lyrics: parseLRC centiseconds -> ms');
+ok(lrcLines[2].t === 62500, 'lyrics: parseLRC milliseconds -> ms');
+const multi = U.parseLRC('[00:01.00][00:02.00]repeated');
+ok(multi.length === 2 && multi[0].t === 1000 && multi[1].t === 2000, 'lyrics: parseLRC expands multi-tag lines');
+
+// Deterministic compositions: same seed -> identical, replay-stable
+const specA = U.composeSpec('track-abc', 3, 'hello world');
+const specB = U.composeSpec('track-abc', 3, 'hello world');
+ok(JSON.stringify(specA) === JSON.stringify(specB), 'lyrics: composition deterministic per track+line');
+const specC = U.composeSpec('track-abc', 4, 'hello world');
+ok(JSON.stringify(specA) !== JSON.stringify(specC), 'lyrics: composition varies per line');
+const specD = U.composeSpec('track-xyz', 3, 'hello world');
+ok(JSON.stringify(specA) !== JSON.stringify(specD), 'lyrics: composition varies per track');
+ok(specA.family >= 0 && specA.family <= 4, 'lyrics: composition picks 1 of 5 type families');
+ok(['left','center','right'].includes(specA.align) && ['up','mid','low'].includes(specA.vpos), 'lyrics: composition varies alignment/placement');
+ok(['upper','title','lower','as-is'].includes(specA.casing), 'lyrics: composition varies casing');
+ok(U.sizeClass('BABY') === 'xl', 'lyrics: short emotional lines may go HUGE');
+ok(U.sizeClass('a'.repeat(100)) === 'sm', 'lyrics: long lines shrink');
+ok(U.applyCase('hello world', 'upper') === 'HELLO WORLD', 'lyrics: upper casing');
+ok(U.applyCase('hELLo', 'title') === 'Hello', 'lyrics: title casing');
+
+// Artistic word progress across line start -> next line start
+let wp = U.wordProgress(1000, 0, 4000, 4);
+ok(wp.active === 1, 'lyrics: word progress distributes words across the line window');
+wp = U.wordProgress(0, 0, 4000, 4);
+ok(wp.active === 0 && wp.p === 0, 'lyrics: word progress starts at word 0');
+wp = U.wordProgress(99999, 0, 4000, 4);
+ok(wp.active === 3 && wp.p === 1, 'lyrics: word progress clamps at the final word');
+wp = U.wordProgress(20000, 0, 60000, 4); // 60s gap capped at the 12s window
+ok(wp.p === 1, 'lyrics: word window capped so long gaps do not crawl');
+ok(U.wordProgress(1000, 0, 4000, 0).active === -1, 'lyrics: wordless lines have no active word');
+
+// Active line lookup
+const tl = [{ t: 1000, text: 'a' }, { t: 5000, text: 'b' }, { t: 9000, text: 'c' }];
+ok(U.activeLineIndex(tl, 500) === -1, 'lyrics: no active line before the first timestamp');
+ok(U.activeLineIndex(tl, 5000) === 1, 'lyrics: active line at exact timestamp');
+ok(U.activeLineIndex(tl, 20000) === 2, 'lyrics: active line holds past the last timestamp');
+
+// Payload classification: never fake sync
+let cls = U.classifyPayload({ syncedLyrics: '[00:01.00]la\n[00:05.00]la la' });
+ok(cls.mode === 'karaoke' && cls.lines.length === 2, 'lyrics: synced payload -> karaoke');
+cls = U.classifyPayload({ plainLyrics: 'line one\nline two' });
+ok(cls.mode === 'ambient' && cls.plain.length === 2, 'lyrics: unsynced payload -> ambient, never fake karaoke');
+cls = U.classifyPayload({ instrumental: true });
+ok(cls.mode === 'instrumental', 'lyrics: instrumental flagged');
+cls = U.classifyPayload(null);
+ok(cls.mode === 'none', 'lyrics: missing payload -> none');
+cls = U.classifyPayload({ syncedLyrics: '[00:01.00]la' });
+ok(cls.mode === 'karaoke', 'lyrics: sparse synced lines still karaoke, not ambient');
+
+// Skin wiring: every theme routes its lyric stage through the engine
+for (const [skinFile, themeId, stageCls] of [
+  ['themes/vice-city/spotify-skin.js', 'vice-city', 'vcsp-lyrics'],
+  ['themes/san-andreas/spotify-skin.js', 'san-andreas', 'sasp-lyrics'],
+  ['themes/gta-v/spotify-skin.js', 'gta-v', 'gvsp-lyrics'],
+  ['themes/rdr2/spotify-skin.js', 'rdr2', 'rdsp-lyrics'],
+]) {
+  const src = fs.readFileSync(path.join(REPO, skinFile), 'utf8');
+  ok(src.includes(`WSLyrics.render(box, core, s && s.item, '${themeId}')`), `lyrics: ${themeId} skin routes stage to WSLyrics`);
+  ok(src.includes(`q('.${stageCls}')`), `lyrics: ${themeId} skin keeps its own stage element`);
+}
+
+// Theme styling hooks exist for all four themes
+const cssAll = fs.readFileSync(path.join(REPO, 'styles.css'), 'utf8');
+for (const tid of ['vice-city', 'san-andreas', 'gta-v', 'rdr2']) {
+  ok(cssAll.includes(`.wslyr-${tid}`), `lyrics: theme skin hooks for ${tid}`);
+  for (let fi = 0; fi < 5; fi++) {
+    ok(cssAll.includes(`.wslyr-${tid} .f${fi}`), `lyrics: ${tid} defines type family f${fi}`);
+  }
+}
+for (const k of ['wslyr-in-spring', 'wslyr-in-blur', 'wslyr-in-pop', 'wslyr-in-sweep', 'wslyr-in-snap', 'wslyr-in-flicker']) {
+  ok(cssAll.includes(k), `lyrics: entrance animation ${k} defined`);
+}
+ok(cssAll.includes('wslyr-ghost') && cssAll.includes('prefers-reduced-motion'), 'lyrics: ghost fade + reduced-motion guard');
+
+// Shell wiring
+const html = fs.readFileSync(path.join(REPO, 'index.html'), 'utf8');
+ok(html.includes('<script src="lyrics.js"></script>'), 'lyrics: index.html loads lyrics.js');
+const sw = fs.readFileSync(path.join(REPO, 'sw.js'), 'utf8');
+ok(sw.includes("'lyrics.js'"), 'lyrics: service worker precaches lyrics.js');
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

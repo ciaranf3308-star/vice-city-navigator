@@ -9,7 +9,7 @@
      used. Nothing theme-specific is eagerly precached except the
      default Vice City set.
    Map tiles, routing and search always go to the network. */
-const CACHE = 'ws-shell-v40';
+const CACHE = 'ws-shell-v41';
 const THEME_CACHE = 'ws-theme-v12';
 const VC_BLIPS = ['airYard','barbers','burgerShot','cash','chicken','dateDisco','dateDrink',
   'dateFood','diner','fuel','girlfriend','gym','hostpital','modGarage','north','parking',
@@ -21,7 +21,7 @@ const SHELL = [
   'themes/registry.js',
   'themes/vice-city/theme.js', 'themes/san-andreas/theme.js',
   'themes/gta-v/theme.js', 'themes/rdr2/theme.js',
-  'spotify-core.js', 'spotify/skins.js',
+  'spotify-core.js', 'spotify/skins.js', 'lyrics.js',
   'themes/vice-city/spotify-skin.js', 'themes/vice-city/spotify-skin.css',
   'themes/vice-city/spotify/hud.png',
   'themes/san-andreas/spotify-skin.js', 'themes/san-andreas/spotify-skin.css',
