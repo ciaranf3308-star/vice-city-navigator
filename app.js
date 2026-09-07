@@ -1,15 +1,16 @@
 /* Vice City Navigator — client-side turn-by-turn PWA.
    Map: MapLibre + OpenFreeMap vector tiles (recolored to the original
-   GTA Vice City pause-menu map: sand land, dusty-blue water, white roads).
+   GTA Vice City pause-menu map: grey land, pale water, dark cased roads).
    Routing: OSRM demo server. Search: Nominatim. Voice: speechSynthesis. */
 'use strict';
 
 const VC = {
-  /* pause-menu map palette (authentic VC, not neon) */
-  bg: '#d9c69e', water: '#5e9cbd', road: '#fdfbf3', roadCasing: '#b3a17e',
-  park: '#a4bb8d', building: '#c6ab7c', buildingLine: '#a68d60',
-  label: '#4c4030', labelHalo: '#ece1c6', waterLabel: '#2e5a72',
-  rail: '#8a7a5e', boundary: '#a08c66', icon: '#6b5a40',
+  /* authentic VC pause-map palette: light-grey land, pale-blue water,
+     dark roads with white casings, vivid parks, pale-yellow beach */
+  bg: '#d8d8d2', water: '#a3c9e2', road: '#333333', roadCasing: '#ffffff',
+  park: '#71c259', sand: '#f5e9c0', building: '#f4f4ee', buildingLine: '#8f8f88',
+  label: '#222222', labelHalo: '#ffffff', waterLabel: '#2a6a8f',
+  rail: '#555555', boundary: '#a8a8a0', icon: '#444444',
   routeCasing: '#ffffff', routeCore: '#f2a93b',
   /* HUD accents (kept for the nav instruction icons) */
   yellow: '#fffb96'
@@ -117,8 +118,9 @@ function blipFor(it) {
 const blipUrl = name => `${BLIP_PATH}${name}.png`;
 
 /* ---------------- Vice City style recolor ----------------
-   Matches the original GTA Vice City pause-menu map: sand-colored land,
-   dusty-blue water, thin white roads, muted parks, dark-brown labels. */
+   Matches the original GTA Vice City pause-menu map: light-grey land,
+   pale-blue water, dark roads with white casings, vivid-green parks,
+   pale-yellow beaches, near-black labels. */
 function recolorStyle(style) {
   for (const layer of style.layers) {
     const id = layer.id || '';
@@ -129,7 +131,8 @@ function recolorStyle(style) {
     if (id === 'background') { paint['background-color'] = VC.bg; continue; }
 
     const isWater = /water/.test(id) && !/water_name/.test(id);
-    const isPark = /park|wood|landcover|grass|sand|beach/.test(id);
+    const isSand = /sand|beach/.test(id);
+    const isPark = /park|wood|landcover|grass/.test(id);
     const isBuilding = id === 'building';
     const isMotorway = /motorway/.test(id);
     const isMajor = /major|trunk/.test(id);
@@ -149,6 +152,7 @@ function recolorStyle(style) {
       if (has('line-color')) paint['line-color'] = VC.water;
       continue;
     }
+    if (isSand && has('fill-color')) { paint['fill-color'] = VC.sand; continue; }
     if (isPark && has('fill-color')) { paint['fill-color'] = VC.park; continue; }
     if (/landuse/.test(id) && layer.type === 'fill' && has('fill-color')) { paint['fill-color'] = VC.bg; continue; }
     if (isBuilding) {
@@ -168,7 +172,7 @@ function recolorStyle(style) {
       else if (/aeroway/.test(id)) paint['line-color'] = '#a8a8a4';
     }
     if (layer.type === 'fill' && has('fill-color') && /transportation|road|aeroway/.test(id)) {
-      paint['fill-color'] = '#ded2b8';
+      paint['fill-color'] = VC.bg;
     }
   }
   return style;
