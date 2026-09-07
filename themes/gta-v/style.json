@@ -844,7 +844,7 @@
           ]
         ],
         "text-font": [
-          "gta-v"
+          "SignPainter"
         ],
         "text-size": 13.5,
         "text-max-width": 8
@@ -895,7 +895,7 @@
           ]
         ],
         "text-font": [
-          "gta-v"
+          "SignPainter"
         ],
         "text-max-width": 8,
         "text-size": [
