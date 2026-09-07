@@ -137,11 +137,16 @@ body{
 #results li:active{background:rgba(255,113,206,.12)}
 #results li strong{font-family:var(--vclabel);font-weight:600;font-size:16px;letter-spacing:.5px}
 .res-blip{flex:0 0 34px;width:34px;height:34px;image-rendering:pixelated;filter:drop-shadow(0 0 6px rgba(1,205,254,.5))}
+#recent-wrap h4{font-family:var(--vclabel);font-weight:600;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--purple);margin:14px 0 4px}
+#recent-list{list-style:none;margin:0;padding:0;max-height:220px;overflow-y:auto}
+#recent-list li{display:flex;align-items:center;gap:12px;padding:11px 12px;border-bottom:1px solid rgba(185,103,255,.25);cursor:pointer}
+#recent-list li strong{font-family:var(--vclabel);font-weight:600;font-size:16px;letter-spacing:.5px}
+#recent-list li:active{background:rgba(255,113,206,.12)}
 #route-card{margin-top:14px;text-align:center}
 .dest-label{font-family:var(--vclabel);font-weight:600;font-size:19px;letter-spacing:.5px;display:block;margin-bottom:8px}
 .route-meta{font-size:16px;margin-bottom:10px;color:var(--yellow);letter-spacing:1px;font-family:var(--vclabel);font-weight:500}
 .route-meta span{margin:0 6px;color:var(--purple)}
-#poi-detail{margin-top:40px}
+#poi-detail{margin-top:14px}
 .poi-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
 .poi-head img{image-rendering:pixelated;filter:drop-shadow(0 0 8px rgba(1,205,254,.55))}
 #poi-name{font-family:var(--vclabel);font-weight:600;font-size:18px;letter-spacing:.5px;display:block}
@@ -188,9 +193,16 @@ body{
 }
 #trip-meta{
   font-family:var(--vclabel);font-weight:500;font-size:14px;letter-spacing:1px;
-  color:var(--yellow);white-space:nowrap;
+  color:var(--yellow);white-space:nowrap;min-width:0;flex:1;
+  overflow:hidden;text-overflow:ellipsis;
 }
-#drive-bar .ctl{width:44px;height:44px;font-size:17px}
+#drive-bar .ctl{width:44px;height:44px;font-size:17px;flex:0 0 auto}
+/* when the user pans away, the recenter button pulses — hard to miss */
+#follow-btn:not(.on){animation:vcn-pulse 1.6s ease-in-out infinite}
+@keyframes vcn-pulse{
+  0%,100%{box-shadow:0 0 14px rgba(1,205,254,.35)}
+  50%{box-shadow:0 0 28px rgba(1,205,254,.85)}
+}
 
 /* ---------- player arrow (Vice City radar arrow) ---------- */
 .player-arrow{width:46px;height:46px;filter:drop-shadow(0 1px 3px rgba(60,45,25,.55))}

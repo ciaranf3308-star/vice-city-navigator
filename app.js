@@ -239,6 +239,55 @@ function updatePlayerArrow() {
   if (img) img.style.transform = `rotate(${lastHeading}deg)`;
 }
 
+/* ---------------- recent destinations ----------------
+   Repeat drives become two taps: open search, tap a recent. */
+const RECENT_KEY = 'vcn-recent-dest-v1';
+const RECENT_MAX = 8;
+function loadRecents() {
+  try {
+    const a = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+    return Array.isArray(a) ? a.filter(r => r && r.label && Array.isArray(r.lnglat)) : [];
+  } catch (e) { return []; }
+}
+function saveRecent(d) {
+  if (!d || !d.label || !Array.isArray(d.lnglat)) return;
+  const key = r => `${r.label}|${r.lnglat[0].toFixed(4)},${r.lnglat[1].toFixed(4)}`;
+  const list = loadRecents().filter(r => key(r) !== key(d));
+  list.unshift({ label: d.label, lnglat: d.lnglat.slice(), blip: d.blip || 'waypoint', t: Date.now() });
+  try { localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, RECENT_MAX))); } catch (e) {}
+}
+function renderRecents() {
+  const wrap = $('recent-wrap'), list = $('recent-list');
+  const recents = loadRecents();
+  list.innerHTML = '';
+  if (!recents.length) { wrap.hidden = true; return; }
+  for (const r of recents) {
+    const li = document.createElement('li');
+    const img = document.createElement('img');
+    img.className = 'res-blip'; img.alt = ''; img.src = blipUrl(r.blip || 'waypoint');
+    const strong = document.createElement('strong'); strong.textContent = r.label;
+    li.append(img, strong);
+    li.addEventListener('click', () => {
+      dest = { label: r.label, lnglat: r.lnglat.slice(), blip: r.blip };
+      $('search').value = r.label;
+      $('results').hidden = true;
+      $('recent-wrap').hidden = true;
+      showRoutePending(r.label);
+      planRoute();
+    });
+    list.appendChild(li);
+  }
+  wrap.hidden = false;
+}
+/* Instant drawer feedback the moment a destination is picked —
+   no dead air while the route computes. */
+function showRoutePending(label) {
+  $('dest-label').textContent = label || 'Destination';
+  $('route-dist').textContent = 'Finding route…';
+  $('route-time').textContent = '';
+  $('route-card').hidden = false;
+}
+
 /* ---------------- search ---------------- */
 let searchTimer = null;
 function wireSearch() {
@@ -246,7 +295,8 @@ function wireSearch() {
   input.addEventListener('input', () => {
     clearTimeout(searchTimer);
     const q = input.value.trim();
-    if (q.length < 3) { list.hidden = true; return; }
+    if (q.length < 3) { list.hidden = true; renderRecents(); return; }
+    $('recent-wrap').hidden = true;
     searchTimer = setTimeout(() => runSearch(q), 450);
   });
   input.addEventListener('keydown', e => { if (e.key === 'Enter') { clearTimeout(searchTimer); runSearch(input.value.trim()); } });
@@ -275,6 +325,8 @@ async function runSearch(q) {
       li.addEventListener('click', () => {
         dest = { label: name, lnglat: [parseFloat(it.lon), parseFloat(it.lat)], blip };
         list.hidden = true; $('search').value = name;
+        $('recent-wrap').hidden = true;
+        showRoutePending(name);
         planRoute();
       });
       list.appendChild(li);
@@ -336,11 +388,17 @@ async function planRoute() {
     steps = buildSteps(route);
     totalDist = route.distance; totalDur = route.duration;
     drawRoute();
+    saveRecent(dest);
     $('dest-label').textContent = (dest && dest.label) || 'Destination';
     $('route-dist').textContent = fmtDist(totalDist);
     $('route-time').textContent = `${Math.round(totalDur / 60)} min`;
     openPlanning('route');
-  } catch (e) { toast('Could not find a route. Try again.'); }
+    const rc = $('route-card');
+    if (rc && rc.scrollIntoView) rc.scrollIntoView({ block: 'nearest' });
+  } catch (e) {
+    $('route-card').hidden = true;
+    toast('Could not find a route. Try again.');
+  }
 }
 function currentPosOnce() {
   return new Promise((resolve, reject) => {
@@ -516,7 +574,14 @@ function openPlanning(view) {
   setUiMode('planning');
   $('poi-detail').hidden = view !== 'poi';
   if (view !== 'route') $('route-card').hidden = true;
-  if (view === 'search') setTimeout(() => $('search').focus(), 60);
+  if (view === 'search') {
+    // Synchronous focus inside the tap gesture so the mobile keyboard
+    // opens immediately — a deferred focus won't.
+    const s = $('search');
+    if (s.value.trim().length >= 3) $('recent-wrap').hidden = true;
+    else renderRecents();
+    if (s) s.focus({ preventScroll: true });
+  }
 }
 function closeDrawer() {
   setUiMode(navActive ? 'drive' : 'explore');
