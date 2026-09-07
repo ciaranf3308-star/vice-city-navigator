@@ -106,3 +106,25 @@ Documented in prior work: authentic blips extracted from ClassicHud
 player arrow from `hud.txd` (`assets/themes/vice-city/player.png`);
 PricedownBl/Oswald SDF glyphs (`fonts/PricedownBl`, `fonts/Oswald`);
 `vice-city-style.json` (29 layers, ids `vc-*`).
+
+## 2026-09-07 — Vice City Spotify dashboard skin (recomposed art)
+
+### Source artwork
+- Supplied by the user (transparent concept PNG, 1448x1086 RGBA):
+  `assets/spotify/vice_city_synthwave_music_widget.png`.
+  Kept in-repo as the component source; NOT served to clients at runtime.
+- Generator: `tools/build_spotify_crops.py` (PIL, re-runnable). Crops the
+  4:3 source into portrait-pane pieces at 2x for the ~2:3 dashboard pane:
+  - `themes/vice-city/spotify/header.png` (960x346) — neon logo + sun + skyline + tube
+  - `themes/vice-city/spotify/album.png` (560x666) — pink neon frame (transparent interior) + dark navy band
+  - `themes/vice-city/spotify/stage.png` (960x714) — sunset/palms/skyline lyric stage
+  - `themes/vice-city/spotify/tube.png` (960x30) — bottom neon tube
+- Album-art placement: the frame's interior opening was measured
+  programmatically (pink-pixel bbox, inset by border width); fractions are
+  baked into `themes/vice-city/spotify-skin.js` as FRAME. The live album
+  `<img>` renders UNDER the frame crop (z-order: art below, frame over it).
+- Skin code lives with the theme: `themes/vice-city/spotify-skin.js` /
+  `spotify-skin.css`, registered as the `vice-city` skin and selected via
+  the theme's `spotify.skin` field. Shared core (`spotify-core.js`) is
+  theme-independent.
+- License: user-supplied concept art for this personal project.

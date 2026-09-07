@@ -14,7 +14,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.css" rel="stylesheet">
 <link href="styles.css" rel="stylesheet">
-<link href="spotify/skin-vice-city.css" rel="stylesheet">
+<link href="themes/vice-city/spotify-skin.css" rel="stylesheet">
 <script src="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.js"></script>
 </head>
 <body>
@@ -31,7 +31,6 @@
     <button id="zoom-in" class="ctl" aria-label="Zoom in">+</button>
     <button id="zoom-out" class="ctl" aria-label="Zoom out">−</button>
     <button id="locate-btn" class="ctl" aria-label="My location">◎</button>
-    <button id="music-btn" class="ctl" aria-label="Music">♫</button>
   </div>
 </div>
 
@@ -76,6 +75,20 @@
       </label>
     </details>
     <small class="hint">Themed voice is free — DJ lines and voice served by your Supabase Edge Function (Gemini free tier).</small>
+  </section>
+
+  <section class="menu-section">
+    <h3>Spotify</h3>
+    <div id="spotify-status" class="stats">Not connected</div>
+    <button id="spotify-connect" class="ghost-btn">Connect Spotify</button>
+    <button id="spotify-disconnect" class="ghost-btn" hidden>Disconnect Spotify</button>
+    <small class="hint">Music plays on your phone or car — WayStation controls it. The player appears in dashboard mode.</small>
+  </section>
+
+  <section class="menu-section">
+    <h3>Display</h3>
+    <label class="row"><input type="checkbox" id="dashboard-toggle"> Dashboard mode</label>
+    <small class="hint">Wide layout: map + music side by side. Needs a wide landscape screen. Also: ?dashboard=1</small>
   </section>
 
   <p class="attrib">Map © OpenStreetMap contributors · Tiles OpenFreeMap · Routing OSRM</p>
@@ -129,7 +142,6 @@
   <div id="drive-bar">
     <span id="trip-meta">—</span>
     <button id="drive-search-btn" class="ctl" aria-label="Search">⌕</button>
-    <button id="drive-music-btn" class="ctl" aria-label="Music">♫</button>
     <button id="mute-btn" class="ctl" title="Voice on/off" aria-label="Toggle voice"></button>
     <button id="follow-btn" class="ctl on" title="Recenter" aria-label="Recenter"></button>
     <button id="end-btn" class="ctl danger" title="End navigation" aria-label="End navigation">✕</button>
@@ -138,10 +150,9 @@
 
 <div id="toast" hidden></div>
 
-<!-- ============ SPOTIFY pane: WayStation music widget (theme skin mounts here) ============ -->
+<!-- ============ SPOTIFY pane: dashboard-mode music (theme skin mounts here) ============ -->
 <aside id="spotify-pane" hidden aria-label="Music">
   <div id="spotify-stage"></div>
-  <button id="spotify-close" class="ctl" aria-label="Close music">✕</button>
 </aside>
 
 <script src="places-config.js"></script>
@@ -153,7 +164,7 @@
 <script src="themes/rdr2/theme.js"></script>
 <script src="spotify-core.js"></script>
 <script src="spotify/skins.js"></script>
-<script src="spotify/skin-vice-city.js"></script>
+<script src="themes/vice-city/spotify-skin.js"></script>
 <script src="discovery.js"></script>
 <script src="voice.js"></script>
 <script src="places.js"></script>

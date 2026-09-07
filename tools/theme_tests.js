@@ -155,5 +155,105 @@ ok(placesSrc.includes('sortKey: 100 - imp'), 'renderPois uses inverted sortKey')
 ok(key(IMP.airport) < key(IMP.bar), 'airport sortKey lower than bar (wins collisions)');
 ok(key(IMP.hospital) < key(IMP.fuel), 'hospital sortKey lower than fuel');
 
+/* ---------- Spotify dashboard mode + Vice City skin rebuild ---------- */
+const vcSkinJs = fs.readFileSync(path.join(REPO, 'themes/vice-city/spotify-skin.js'), 'utf8');
+const vcSkinCss = fs.readFileSync(path.join(REPO, 'themes/vice-city/spotify-skin.css'), 'utf8');
+const appSrc = fs.readFileSync(path.join(REPO, 'app.js'), 'utf8');
+const indexSrc = fs.readFileSync(path.join(REPO, 'index.html'), 'utf8');
+const cssSrc = fs.readFileSync(path.join(REPO, 'styles.css'), 'utf8');
+
+// art crops exist at 2x with expected dimensions
+const crops = { 'header.png': [960, 346], 'album.png': [560, 666], 'stage.png': [960, 714], 'tube.png': [960, 30] };
+for (const [f, [ew, eh]] of Object.entries(crops)) {
+  const { w, h } = pngSize(path.join(REPO, 'themes/vice-city/spotify', f));
+  ok(w === ew && h === eh, `VC spotify crop ${f} ${ew}x${eh}`);
+}
+// album frame interior must be transparent (art sits UNDER the frame)
+function pngAlphaAt(p, x, y) {
+  const buf = fs.readFileSync(p);
+  let pos = 8, w, h, bitDepth, colorType;
+  const idat = [];
+  while (pos < buf.length) {
+    const len = buf.readUInt32BE(pos);
+    const type = buf.toString('ascii', pos + 4, pos + 8);
+    const data = buf.subarray(pos + 8, pos + 8 + len);
+    if (type === 'IHDR') { w = data.readUInt32BE(0); h = data.readUInt32BE(4); bitDepth = data[8]; colorType = data[9]; }
+    else if (type === 'IDAT') idat.push(data);
+    else if (type === 'IEND') break;
+    pos += 12 + len;
+  }
+  ok(colorType === 6 && bitDepth === 8, 'album.png is 8-bit RGBA');
+  const raw = require('zlib').inflateSync(Buffer.concat(idat));
+  const bpp = 4, stride = w * bpp;
+  let prev = Buffer.alloc(stride), off = 0;
+  for (let row = 0; row < h; row++) {
+    const filter = raw[off++];
+    const cur = raw.subarray(off, off + stride); off += stride;
+    const recon = Buffer.alloc(stride);
+    for (let i = 0; i < stride; i++) {
+      const a = i >= bpp ? recon[i - bpp] : 0, b = prev[i], c = i >= bpp ? prev[i - bpp] : 0;
+      let v = cur[i];
+      if (filter === 1) v = (v + a) & 255;
+      else if (filter === 2) v = (v + b) & 255;
+      else if (filter === 3) v = (v + ((a + b) >> 1)) & 255;
+      else if (filter === 4) {
+        const pp = a + b - c, pa = Math.abs(pp - a), pb = Math.abs(pp - b), pc = Math.abs(pp - c);
+        v = (v + (pa <= pb && pa <= pc ? a : pb <= pc ? b : c)) & 255;
+      }
+      recon[i] = v;
+    }
+    if (row === y) return recon[x * bpp + 3];
+    prev = recon;
+  }
+  throw new Error('row out of range');
+}
+const albumPng = path.join(REPO, 'themes/vice-city/spotify/album.png');
+ok(pngAlphaAt(albumPng, 280, 232) === 0, 'album frame interior transparent (art shows through)');
+ok(pngAlphaAt(albumPng, 280, 600) > 200, 'album dark band opaque (readable text)');
+
+// skin contract + removed generic UI
+ok(vcSkinJs.includes("register('vice-city'"), 'VC skin registers as vice-city');
+ok(vcSkinJs.includes('data-lyrics-stage'), 'lyric stage hook present');
+ok(vcSkinJs.includes('setLyricsRenderer') && vcSkinJs.includes('clearLyrics'), 'lyric renderer hooks present');
+const stripComments = s => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|\s)\/\/.*$/gm, '$1');
+const vcSkinJsCode = stripComments(vcSkinJs), vcSkinCssCode = stripComments(vcSkinCss);
+for (const banned of ['miniviz', 'stagepeek', 'fullstage', 'vcsp-viz', 'spectrum', 'spotify-close', 'background-size: cover']) {
+  ok(!vcSkinJsCode.includes(banned) && !vcSkinCssCode.includes(banned), `VC skin has no ${banned}`);
+}
+ok(/\.vcsp\s*\{[^}]*background:\s*transparent/.test(vcSkinCss), 'VC skin root transparent');
+
+// app mode system
+ok(appSrc.includes("get('dashboard')"), 'dashboard URL param read');
+ok(appSrc.includes('ws.appMode'), 'app mode persisted');
+ok(appSrc.includes('WayStation.setAppMode'), 'setAppMode exposed for hosts');
+ok(appSrc.includes('dashboardLayoutActive()'), 'wide-landscape gate exists');
+ok(appSrc.includes('map.resize()'), 'mode switch resizes map (no recreate)');
+ok(!appSrc.includes('setSpotifyPane'), 'floating pane logic removed');
+ok(!appSrc.includes('music-btn'), 'music buttons removed from app.js');
+ok(appSrc.includes('spotify.skin'), 'skin resolved from theme config');
+
+// index.html: menu-only Spotify in normal mode, dashboard mount point
+ok(!indexSrc.includes('music-btn') && !indexSrc.includes('drive-music-btn'), 'no player buttons in chrome');
+ok(!indexSrc.includes('spotify-close'), 'no close button on pane');
+ok(indexSrc.includes('id="dashboard-toggle"'), 'dashboard toggle in menu');
+ok(indexSrc.includes('id="spotify-connect"') && indexSrc.includes('id="spotify-disconnect"'), 'menu connect/disconnect');
+ok(indexSrc.includes('id="spotify-status"'), 'menu Spotify status');
+ok(indexSrc.includes('themes/vice-city/spotify-skin.js'), 'VC skin script path');
+ok(indexSrc.includes('themes/vice-city/spotify-skin.css'), 'VC skin css path');
+
+// styles.css: dashboard 75/25, transparent pane, no card chrome
+ok(cssSrc.includes('body.dashboard-mode #map'), 'dashboard map rule');
+ok(!cssSrc.includes('#spotify-close'), 'no close-button styles');
+ok(/\#spotify-pane\{[\s\S]*?background:transparent/.test(cssSrc), 'pane transparent');
+
+// sw precache follows the move
+for (const p of ['themes/vice-city/spotify-skin.js', 'themes/vice-city/spotify-skin.css',
+    'themes/vice-city/spotify/header.png', 'themes/vice-city/spotify/album.png',
+    'themes/vice-city/spotify/stage.png', 'themes/vice-city/spotify/tube.png']) {
+  ok(SW.SHELL.includes(p), `SW precaches ${p}`);
+}
+ok(!SW.SHELL.some(p => p.includes('skin-vice-city') || p.includes('synthwave')), 'SW drops old skin paths');
+
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

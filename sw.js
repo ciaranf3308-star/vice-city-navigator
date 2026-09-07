@@ -9,7 +9,7 @@
      used. Nothing theme-specific is eagerly precached except the
      default Vice City set.
    Map tiles, routing and search always go to the network. */
-const CACHE = 'ws-shell-v19';
+const CACHE = 'ws-shell-v20';
 const THEME_CACHE = 'ws-theme-v1';
 const VC_BLIPS = ['airYard','barbers','burgerShot','cash','chicken','dateDisco','dateDrink',
   'dateFood','diner','fuel','girlfriend','gym','hostpital','modGarage','north','parking',
@@ -20,8 +20,10 @@ const SHELL = [
   'themes/registry.js',
   'themes/vice-city/theme.js', 'themes/san-andreas/theme.js',
   'themes/gta-v/theme.js', 'themes/rdr2/theme.js',
-  'spotify-core.js', 'spotify/skins.js', 'spotify/skin-vice-city.js',
-  'spotify/skin-vice-city.css', 'assets/spotify/vice_city_synthwave_music_widget.png',
+  'spotify-core.js', 'spotify/skins.js',
+  'themes/vice-city/spotify-skin.js', 'themes/vice-city/spotify-skin.css',
+  'themes/vice-city/spotify/header.png', 'themes/vice-city/spotify/album.png',
+  'themes/vice-city/spotify/stage.png', 'themes/vice-city/spotify/tube.png',
   'themes/vice-city/style.json',
   'manifest.webmanifest', 'icon.svg', 'icon-512.png', 'icon-maskable-512.png',
   'fonts/pricedown-bl.woff',

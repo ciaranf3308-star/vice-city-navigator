@@ -1,0 +1,218 @@
+/* ============================================================
+   Vice City Spotify skin — dashboard portrait pane.
+   Recomposed transparent artwork (themes/vice-city/spotify/).
+
+   Hard rules:
+   - every root is transparent; the map shows through
+   - no opaque panel, no modal, no close button, no spectrum
+   - album art sits UNDER the art's pink neon frame (the frame
+     PNG has a transparent interior; art is z-ordered below it)
+   - live data only; no fake lyrics, no fake visualizer
+   ============================================================ */
+
+.vcsp {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: stretch;
+  background: transparent;
+  overflow: hidden;
+  container-type: size;
+  font-family: Oswald, 'Arial Narrow', sans-serif; color: #fff;
+  user-select: none; -webkit-user-select: none;
+}
+.vcsp img { display: block; }
+
+/* ---------- header: neon logo + skyline (may break edges) ---------- */
+.vcsp-header {
+  flex: none;
+  width: 100%; height: 21cqh;
+  object-fit: cover; object-position: left center;
+}
+
+/* ---------- album zone: art under the neon frame ---------- */
+.vcsp-albumzone {
+  position: relative;
+  flex: none;
+  width: min(36.2cqh, 62cqw);
+  aspect-ratio: 500 / 595;
+  margin: 0 auto;
+}
+.vcsp-art {
+  position: absolute; z-index: 1;
+  object-fit: cover; border-radius: 3%;
+  opacity: 0; transition: opacity .45s ease;
+  background: #000;
+}
+.vcsp-art.on { opacity: 1; }
+.vcsp-albumframe {
+  position: absolute; z-index: 2; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+}
+/* track lives on the art's own dark navy band */
+.vcsp-track {
+  position: absolute; z-index: 3;
+  left: 5%; right: 5%; top: 69.5%; bottom: 1%;
+  display: flex; flex-direction: column; justify-content: center;
+  text-align: center;
+}
+.vcsp-title {
+  font-family: 'Pricedown Bl', Oswald, sans-serif;
+  font-size: 5.4cqw; letter-spacing: .05em; line-height: 1.15;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 0 10px rgba(255,47,179,.85), 0 2px 4px #000;
+}
+.vcsp-artist {
+  margin-top: .5cqh;
+  font-size: 3.7cqw; color: #ffd7f2;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 1px 3px #000;
+}
+.vcsp-artist.vcsp-status { color: #35e0ff; }
+
+.vcsp-progress { margin-top: 1.1cqh; padding: 0 2%; }
+.vcsp-bar { position: relative; height: 2.6cqh; cursor: pointer; touch-action: none; }
+.vcsp-bar::before {
+  content: ''; position: absolute; left: 0; right: 0; top: 50%;
+  height: 5px; margin-top: -2.5px; border-radius: 3px;
+  background: rgba(255,255,255,.16);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.6);
+}
+.vcsp-bar-fill {
+  position: absolute; left: 0; top: 50%; height: 5px; margin-top: -2.5px;
+  width: 0%; border-radius: 3px;
+  background: linear-gradient(90deg, #ff2fb3, #35e0ff);
+  box-shadow: 0 0 10px rgba(255,47,179,.8);
+}
+.vcsp-bar-knob {
+  position: absolute; top: 50%;
+  width: 3.2cqw; height: 3.2cqw; margin: -1.6cqw 0 0 -1.6cqw;
+  border-radius: 50%; background: #fff; border: 2px solid #ff4fc3;
+  box-shadow: 0 0 12px #ff2fb3;
+}
+.vcsp-times {
+  display: flex; justify-content: space-between; margin-top: .5cqh;
+  font-size: 3.2cqw; color: #9fd8ff; text-shadow: 0 1px 2px #000;
+}
+
+/* ---------- lyric / music-video stage ---------- */
+.vcsp-stagewrap {
+  position: relative;
+  flex: 1 1 auto; min-height: 0;
+  overflow: hidden;
+}
+.vcsp-stagebg {
+  position: absolute; inset: 0; z-index: 1;
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center 22%;
+}
+/* ambient glow while no lyrics provider is attached — pure CSS,
+   no fake data, no fake FFT */
+.vcsp-ambient {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background:
+    radial-gradient(60% 30% at 50% 30%, rgba(255,47,179,.20), transparent 70%),
+    radial-gradient(50% 26% at 50% 62%, rgba(53,224,255,.14), transparent 70%);
+  animation: vcsp-breathe 7s ease-in-out infinite;
+  mix-blend-mode: screen;
+}
+@keyframes vcsp-breathe {
+  0%, 100% { opacity: .55; transform: scale(1); }
+  50% { opacity: .9; transform: scale(1.06); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vcsp-ambient { animation: none; }
+}
+
+/* transparent DOM layer for the future lyric engine (LRCLIB).
+   A renderer mounted via setLyricsRenderer() owns this node. */
+.vcsp-lyrics {
+  position: absolute; z-index: 3;
+  left: 7%; right: 7%; top: 7%; bottom: 32%;
+  overflow: hidden;
+  display: flex; flex-direction: column; justify-content: center;
+  text-align: center; gap: 1.2cqh;
+  pointer-events: none;
+}
+.vcsp-lyrics.has-lyrics { pointer-events: auto; }
+
+/* lyric line hooks for the future LRCLIB pass */
+.vc-lyric-line {
+  font-size: 4.4cqw; line-height: 1.35; color: #ffd7f2; opacity: .6;
+  text-shadow: 0 0 8px rgba(255,47,179,.5), 0 2px 4px #000;
+  transition: opacity .3s ease, transform .3s ease;
+}
+.vc-lyric-line.ghost { opacity: .32; font-size: 3.8cqw; }
+.vc-lyric-line.next { opacity: .55; }
+.vc-lyric-line.active {
+  opacity: 1; color: #fff; font-size: 5.4cqw;
+  text-shadow: 0 0 14px rgba(255,47,179,.95), 0 0 34px rgba(255,47,179,.5), 0 2px 4px #000;
+}
+
+/* ---------- transport: neon, large touch targets ---------- */
+.vcsp-controls {
+  position: absolute; z-index: 4; left: 0; right: 0; bottom: 0;
+  display: flex; align-items: center; justify-content: center;
+  gap: 5cqw; padding: 3.2cqh 0 4.6cqh;
+  background: linear-gradient(180deg, transparent, rgba(5,7,22,.42) 55%, rgba(5,7,22,.62));
+}
+.vcsp-tbtn {
+  width: 13cqw; height: 13cqw; min-width: 56px; min-height: 56px;
+  border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; background: rgba(10,16,40,.55);
+  border: 2px solid rgba(53,224,255,.85);
+  box-shadow: 0 0 16px rgba(53,224,255,.45), inset 0 0 10px rgba(53,224,255,.22);
+  -webkit-tap-highlight-color: transparent;
+}
+.vcsp-tbtn.big {
+  width: 16.5cqw; height: 16.5cqw; min-width: 68px; min-height: 68px;
+  border-color: #ff4fc3;
+  box-shadow: 0 0 22px rgba(255,47,179,.6), inset 0 0 12px rgba(255,47,179,.3);
+}
+.vcsp-tbtn:active { transform: scale(.93); }
+.vcsp-tbtn svg {
+  width: 52%; height: 52%; fill: currentColor;
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+/* neon tube along the bottom edge */
+.vcsp-tube {
+  position: absolute; z-index: 5; left: 0; right: 0; bottom: 0;
+  width: 100%; aspect-ratio: 960 / 30;
+  pointer-events: none;
+}
+
+/* ---------- themed reconnect (no dark takeover) ---------- */
+.vcsp-connect {
+  position: absolute; inset: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent;
+  pointer-events: none;
+}
+.vcsp-connect[hidden] { display: none; }
+.vcsp-connect-pill {
+  pointer-events: auto;
+  text-align: center; padding: 4cqh 8cqw;
+  background: rgba(8,10,28,.62);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  border: 2px solid rgba(255,79,195,.7); border-radius: 18px;
+  box-shadow: 0 0 26px rgba(255,47,179,.4), inset 0 0 18px rgba(255,47,179,.12);
+}
+.vcsp-connect-note svg {
+  width: 11cqw; height: 11cqw; fill: #ff5fd2;
+  filter: drop-shadow(0 0 6px #ff2fb3);
+}
+.vcsp-connect-btn {
+  margin-top: 2.4cqh; padding: 1.8cqh 6cqw;
+  font-family: 'Pricedown Bl', Oswald, sans-serif;
+  font-size: 5cqw; letter-spacing: .12em;
+  color: #fff; background: rgba(255,47,179,.16);
+  border: 2px solid #ff4fc3; border-radius: 999px; cursor: pointer;
+  text-shadow: 0 0 8px #ff2fb3;
+  box-shadow: 0 0 18px rgba(255,47,179,.55), inset 0 0 12px rgba(255,47,179,.25);
+}
+.vcsp-connect-btn:active { transform: scale(.96); }
+.vcsp-connect-hint {
+  margin-top: 2cqh; font-size: 3.5cqw; line-height: 1.5;
+  color: #cfe6ff; opacity: .9; text-shadow: 0 1px 3px #000;
+}

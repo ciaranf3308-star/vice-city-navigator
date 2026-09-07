@@ -889,11 +889,83 @@ function openMenu() {
 }
 function closeMenu() { $('menu-panel').hidden = true; }
 
-/* ---------------- Spotify pane (WayStation music widget) ----------------
-   Theme-independent core (spotify-core.js) + per-theme skin mounted
-   into #spotify-stage. OAuth redirects reload the page, so the UI/map
-   state is stashed in sessionStorage before leaving and restored after
-   the callback — the map never visibly resets. */
+/* ---------------- App mode: normal | dashboard ----------------
+   The Spotify player is a DASHBOARD feature. In normal (mobile)
+   mode the map is full-screen and Spotify lives only in the menu
+   (connect / disconnect). Dashboard mode is an explicit app mode —
+   never inferred from screen width alone — activated with
+   ?dashboard=1 (persisted) or WayStation.setAppMode('dashboard')
+   so a future Android/Android Auto host can flip it directly.
+
+   Dashboard layout is ~75% map / ~25% music. The wide-landscape
+   media gate keeps a phone or narrow window from accidentally
+   growing a music pane; the MapLibre instance is never recreated,
+   only resized. Route, markers, POIs, discovery, voice and the
+   Spotify session all survive the switch. */
+const APP_MODE_KEY = 'ws.appMode';
+let appMode = 'normal'; // normal | dashboard
+
+function initAppMode() {
+  try {
+    const q = new URLSearchParams(location.search);
+    const param = q.get('dashboard');
+    if (param === '1') { appMode = 'dashboard'; localStorage.setItem(APP_MODE_KEY, 'dashboard'); }
+    else if (param === '0') { appMode = 'normal'; localStorage.setItem(APP_MODE_KEY, 'normal'); }
+    else appMode = localStorage.getItem(APP_MODE_KEY) === 'dashboard' ? 'dashboard' : 'normal';
+  } catch (e) { appMode = 'normal'; }
+}
+
+/* True only when dashboard was explicitly requested AND the viewport
+   is a wide landscape surface (e.g. 1920x720 automotive). */
+function dashboardLayoutActive() {
+  if (appMode !== 'dashboard') return false;
+  try {
+    return window.matchMedia('(min-width: 900px) and (orientation: landscape)').matches;
+  } catch (e) { return false; }
+}
+
+function applyAppMode() {
+  const on = dashboardLayoutActive();
+  document.body.classList.toggle('dashboard-mode', on);
+  const pane = $('spotify-pane');
+  if (pane) pane.hidden = !on;
+  if (on) mountSpotifySkin(wsThemeId());
+  else unmountSpotifySkin();
+  if (window.map && map.resize) { try { map.resize(); } catch (e) {} }
+  syncDashboardToggle();
+  return on;
+}
+
+function setAppMode(mode) {
+  const next = mode === 'dashboard' ? 'dashboard' : 'normal';
+  if (next === appMode && document.body.classList.contains('dashboard-mode') === dashboardLayoutActive()) {
+    syncDashboardToggle();
+    return dashboardLayoutActive();
+  }
+  appMode = next;
+  try { localStorage.setItem(APP_MODE_KEY, appMode); } catch (e) {}
+  const on = applyAppMode();
+  if (appMode === 'dashboard' && !on) {
+    toast('Dashboard mode needs a wide landscape screen.');
+  }
+  return on;
+}
+window.WayStation = window.WayStation || {};
+window.WayStation.setAppMode = setAppMode;
+window.WayStation.getAppMode = () => appMode;
+window.WayStation.dashboardActive = dashboardLayoutActive;
+
+/* ---------------- Spotify: theme-independent core + dashboard skin ----------------
+   Core (spotify-core.js) owns auth, tokens, playback state and controls —
+   it knows nothing about Vice City. The per-theme skin mounted into
+   #spotify-stage owns every pixel; the Vice City art lives in
+   themes/vice-city and is mounted only for that theme. Swaps are
+   presentational — the SpotifyCore session is never touched.
+
+   OAuth redirects reload the page, so the UI/map state is stashed in
+   sessionStorage before leaving and restored after the callback — the
+   map never visibly resets. Same-origin session reuse means dashboard
+   mode never forces a second login. */
 const SPOTIFY_CLIENT_ID = 'e15ad96d357849999f72380200c0e37d';
 const SPOTIFY_REDIRECT_URI = 'https://ciaranf3308-star.github.io/vice-city-navigator/';
 const SPOTIFY_SCOPES = [
@@ -902,18 +974,23 @@ const SPOTIFY_SCOPES = [
   'user-modify-playback-state',
 ];
 const SPOTIFY_PREAUTH = 'vcn.spotify.preAuth';
-const SPOTIFY_PANE_OPEN = 'vcn.spotify.paneOpen';
 let pendingSpotifyView = null;
-/* Mount the skin for a theme id (VC skin only on vice-city; the plain
-   default skin everywhere else). Swaps are presentational only — the
-   SpotifyCore session is never touched. */
 let spotifySkinId = null;
+
+/* Mount the skin declared by the theme (theme.spotify.skin), falling back
+   to the plain default skin. Only mounts while the dashboard layout is
+   active — in normal mode no player exists anywhere. */
 function mountSpotifySkin(themeId) {
   if (!window.SpotifySkins || !window.SpotifyCore || !$('spotify-stage')) return;
-  const want = SpotifySkins.get(themeId) ? themeId : 'default';
+  if (!dashboardLayoutActive()) { unmountSpotifySkin(); return; }
+  let want = 'default';
+  try {
+    const theme = window.VCNThemes && VCNThemes.get(themeId);
+    const skinId = theme && theme.spotify && theme.spotify.skin;
+    if (skinId && SpotifySkins.get(skinId)) want = skinId;
+  } catch (e) {}
   if (want === spotifySkinId) return;
-  const prev = spotifySkinId && SpotifySkins.get(spotifySkinId);
-  if (prev && prev.unmount) { try { prev.unmount(); } catch (e) {} }
+  unmountSpotifySkin();
   const skin = SpotifySkins.get(want);
   if (skin) {
     try { skin.mount($('spotify-stage'), SpotifyCore); spotifySkinId = want; }
@@ -921,31 +998,17 @@ function mountSpotifySkin(themeId) {
   }
 }
 
-function setSpotifyPane(open) {
-  $('spotify-pane').hidden = !open;
-  try {
-    if (open) localStorage.setItem(SPOTIFY_PANE_OPEN, '1');
-    else localStorage.removeItem(SPOTIFY_PANE_OPEN);
-  } catch (e) {}
-  if (window.SpotifyCore && SpotifyCore.isConnected()) {
-    if (open) SpotifyCore.startPolling();
-    else SpotifyCore.stopPolling();
-  }
-  offsetMapForSpotify(open);
-}
-
-/* Shift the map's visual center left so it stays clear of the floating music widget. */
-function offsetMapForSpotify(open) {
-  try {
-    if (!map || !map.easeTo) return;
-    const w = (open && window.innerWidth > 700) ? ($('spotify-pane').offsetWidth + 28) : 0;
-    map.easeTo({ padding: { top: 0, bottom: 0, left: 0, right: w }, duration: 400 });
-  } catch (e) {}
+function unmountSpotifySkin() {
+  const prev = spotifySkinId && window.SpotifySkins && SpotifySkins.get(spotifySkinId);
+  if (prev && prev.unmount) { try { prev.unmount(); } catch (e) {} }
+  spotifySkinId = null;
+  const stage = $('spotify-stage');
+  if (stage) stage.innerHTML = '';
 }
 
 function saveSpotifyPreAuth() {
   try {
-    const s = { uiMode, paneOpen: !$('spotify-pane').hidden };
+    const s = { uiMode };
     if (map) {
       const c = map.getCenter();
       s.center = [c.lng, c.lat];
@@ -957,10 +1020,8 @@ function saveSpotifyPreAuth() {
 }
 
 async function initSpotify() {
-  if (!window.SpotifyCore || !window.SpotifySkins) return;
+  if (!window.SpotifyCore) return;
   SpotifyCore.onBeforeRedirect(saveSpotifyPreAuth);
-  const themeId = window.VCNThemes ? VCNThemes.currentId() : 'vice-city';
-  mountSpotifySkin(themeId);
   let hadCallback = false;
   try {
     hadCallback = await SpotifyCore.init({
@@ -968,32 +1029,60 @@ async function initSpotify() {
       redirectUri: SPOTIFY_REDIRECT_URI,
       scopes: SPOTIFY_SCOPES,
     });
-  } catch (e) { /* init is best-effort; widget shows connect state */ }
+  } catch (e) { /* init is best-effort; menu shows connect state */ }
   if (hadCallback) {
     let s = null;
     try { s = JSON.parse(sessionStorage.getItem(SPOTIFY_PREAUTH) || 'null'); } catch (e) {}
     try { sessionStorage.removeItem(SPOTIFY_PREAUTH); } catch (e) {}
-    if (s) {
-      pendingSpotifyView = s; // applied once the map finishes loading
-      if (s.paneOpen) setSpotifyPane(true);
-      else setSpotifyPane(localStorage.getItem(SPOTIFY_PANE_OPEN) === '1');
-    }
-  } else {
-    try {
-      if (localStorage.getItem(SPOTIFY_PANE_OPEN) === '1') setSpotifyPane(true);
-    } catch (e) {}
+    if (s) pendingSpotifyView = s; // applied once the map finishes loading
   }
+  syncSpotifyMenu();
+  try {
+    SpotifyCore.on('auth', syncSpotifyMenu);
+  } catch (e) {}
+  if (dashboardLayoutActive()) mountSpotifySkin(wsThemeId());
 }
 
-function wireSpotifyButtons() {
-  const toggle = () => setSpotifyPane($('spotify-pane').hidden);
-  $('music-btn').addEventListener('click', toggle);
-  $('drive-music-btn').addEventListener('click', toggle);
-  $('spotify-close').addEventListener('click', () => setSpotifyPane(false));
+/* Menu is the only Spotify surface in normal mode: status + connect. */
+function syncSpotifyMenu() {
+  const statusEl = $('spotify-status');
+  const connectBtn = $('spotify-connect');
+  const disconnectBtn = $('spotify-disconnect');
+  if (!statusEl || !connectBtn || !disconnectBtn || !window.SpotifyCore) return;
+  const connected = SpotifyCore.isConnected();
+  statusEl.textContent = connected ? 'Connected' : 'Not connected';
+  connectBtn.hidden = connected;
+  disconnectBtn.hidden = !connected;
+}
+
+function syncDashboardToggle() {
+  const t = $('dashboard-toggle');
+  if (t) t.checked = appMode === 'dashboard';
+}
+
+function wireSpotifyMenu() {
+  const connectBtn = $('spotify-connect');
+  const disconnectBtn = $('spotify-disconnect');
+  const dashToggle = $('dashboard-toggle');
+  if (connectBtn) connectBtn.addEventListener('click', () => {
+    if (window.SpotifyCore) SpotifyCore.connect();
+  });
+  if (disconnectBtn) disconnectBtn.addEventListener('click', () => {
+    if (window.SpotifyCore) SpotifyCore.disconnect();
+    syncSpotifyMenu();
+  });
+  if (dashToggle) dashToggle.addEventListener('change', () => {
+    setAppMode(dashToggle.checked ? 'dashboard' : 'normal');
+  });
+  let rsT = null;
   window.addEventListener('resize', () => {
-    if (!$('spotify-pane').hidden) offsetMapForSpotify(true);
+    // Re-evaluate the wide-landscape gate after resizes; debounced and
+    // map-safe (applyAppMode only flips a class and calls map.resize()).
+    clearTimeout(rsT);
+    rsT = setTimeout(() => { if (appMode === 'dashboard') applyAppMode(); }, 150);
   });
 }
+
 function toggleMenu() { $('menu-panel').hidden ? openMenu() : closeMenu(); }
 
 /* ---------------- discovery menu wiring ---------------- */
@@ -1096,10 +1185,12 @@ function wireControls() {
 }
 
 /* ---------------- boot ---------------- */
+initAppMode();
 wireSearch();
 wireControls();
-wireSpotifyButtons();
+wireSpotifyMenu();
 initMap();
+applyAppMode();
 initSpotify();
 
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
