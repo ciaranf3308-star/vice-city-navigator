@@ -885,7 +885,7 @@ function closeDrawer() {
 }
 function openMenu() {
   $('menu-panel').hidden = false;
-  syncDiscoveryStats();
+  try { syncDiscoveryStats(); } catch (e) { /* menu must always open */ }
 }
 function closeMenu() { $('menu-panel').hidden = true; }
 
@@ -1091,6 +1091,15 @@ async function initSpotify() {
   syncSpotifyMenu();
   try {
     SpotifyCore.on('auth', syncSpotifyMenu);
+    // Auth/token failures were completely silent — the menu just sat on
+    // "Not connected" with no explanation. Surface them.
+    SpotifyCore.on('error', err => {
+      if (!err) return;
+      if (err.where === 'authorize' || err.where === 'token') {
+        toast('Spotify sign-in failed: ' + (err.message || 'unknown error'));
+        syncSpotifyMenu();
+      }
+    });
   } catch (e) {}
   if (dashboardLayoutActive()) mountSpotifySkin(wsThemeId());
 }

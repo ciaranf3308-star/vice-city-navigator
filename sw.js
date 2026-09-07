@@ -9,8 +9,8 @@
      used. Nothing theme-specific is eagerly precached except the
      default Vice City set.
    Map tiles, routing and search always go to the network. */
-const CACHE = 'ws-shell-v22';
-const THEME_CACHE = 'ws-theme-v1';
+const CACHE = 'ws-shell-v23';
+const THEME_CACHE = 'ws-theme-v2';
 const VC_BLIPS = ['airYard','barbers','burgerShot','cash','chicken','dateDisco','dateDrink',
   'dateFood','diner','fuel','girlfriend','gym','hostpital','modGarage','north','parking',
   'pizza','police','propertyG','qmark','race','runway','saveGame','school','spray','tattoo','waypoint'];
@@ -67,14 +67,19 @@ self.addEventListener('fetch', e => {
     return;
   }
   if (isThemeAsset(path)) {
+    // Stale-while-revalidate (not cache-first-forever): theme art is
+    // replaced over time (authentic blips etc.) and the new bytes must
+    // reach users. The cached copy renders instantly; the network copy
+    // refreshes it in the background for the next load.
     e.respondWith(
-      caches.open(THEME_CACHE).then(c => c.match(e.request).then(hit => {
-        if (hit) return hit;
-        return fetch(e.request).then(res => {
+      caches.open(THEME_CACHE).then(c => c.match(e.request).then(cached => {
+        const network = fetch(e.request).then(res => {
           if (res && res.ok) c.put(e.request, res.clone());
           return res;
-        });
+        }).catch(() => cached);
+        return cached || network;
       }))
     );
+    return;
   }
 });
