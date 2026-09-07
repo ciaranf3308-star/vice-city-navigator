@@ -1,224 +1,186 @@
 /* ============================================================
-   GTA V Spotify skin — dashboard portrait pane.
-   Art: themes/gta-v/spotify/ (Los Santos concept).
+   GTA V Spotify skin — the supplied concept art IS the widget
+   (themes/gta-v/spotify/hud.png, 1155x1362).
 
-   Hard rules (same as the VC skin):
-   - the frame interior is an opaque black opening: live art
-     layers OVER the frame, sized to the measured interior, so
-     the neon-green double border stays visible around it
-   - live data only; no fake lyrics, no fake visualizer
-   - no emojis anywhere
+   The hud is overlaid as one unified skin/chrome layer; live
+   HTML is positioned into its defined openings. The art dictates
+   the DOM placement. The map shows through transparent pixels.
 
-   GTA V visual language: near-black green-tinted panels
-   (#0d1117, #10161a), neon-green accent (#7CFF6B), white text
-   (#f0f0f0), muted grey-green secondary (#8a9a8c).
-   Titles: 'Chalet Comprime'. Body/labels: 'Chalet London'.
+   Measured openings (fractions of the hud):
+   - album frame   : x 0.0649-0.3333, y 0.3561-0.5837
+                     (the interior is OPAQUE black: live art
+                     layers OVER the hud here)
+   - dark panel    : right of the frame (title / artist /
+                     progress / lyrics)
+   - transport     : over the sunset panel, bottom center
+
+   Z-order: hud < album art < lyrics / track / controls / idle.
+   Live data only; no fake lyrics, no fake FFT.
    ============================================================ */
 
 .gvsp {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column; align-items: stretch;
-  background: #0d1117;
-  overflow: hidden;
+  position: absolute; left: 0; right: 0; top: 50%; translate: 0 -50%;
+  width: 100%; aspect-ratio: 1155 / 1362;
   container-type: size;
-  font-family: 'Chalet London', 'Helvetica Neue', Arial, sans-serif;
-  color: #f0f0f0;
+  background: transparent;
+  font-family: 'Chalet London', 'Helvetica Neue', Arial, sans-serif; color: #e8f0e8;
   user-select: none; -webkit-user-select: none;
 }
 .gvsp img { display: block; }
 
-/* ---------- header: skyline + Los Santos freeway-sign band ---------- */
-.gvsp-header {
-  flex: none;
-  width: 100%; aspect-ratio: 960 / 287;
-  object-fit: cover; object-position: center top;
-  border-bottom: 2px solid rgba(124,255,107,.55);
-  box-shadow: 0 2px 18px rgba(124,255,107,.18);
-}
-
-/* ---------- album zone: art under the neon-green frame ---------- */
-.gvsp-albumzone {
-  position: relative;
-  flex: none;
-  width: min(40cqh, 78cqw);
-  margin: 1.6cqh auto 0;
-}
-.gvsp-framesq {
-  position: relative;
-  aspect-ratio: 1;
-}
-.gvsp-art {
-  position: absolute; z-index: 3;
-  object-fit: cover; border-radius: 2%;
-  opacity: 0; transition: opacity .45s ease;
-  background: #000;
-}
-.gvsp-art.on { opacity: 1; }
-.gvsp-albumframe {
-  position: absolute; z-index: 2; inset: 0;
+/* ---------- the concept art: one unified skin ---------- */
+.gvsp-hud {
+  position: absolute; z-index: 1; inset: 0;
   width: 100%; height: 100%;
   pointer-events: none;
-  filter: drop-shadow(0 0 14px rgba(124,255,107,.35));
 }
-/* track sits on the pane's dark panel, below the frame */
+
+/* ---------- album art: OVER the hud's opaque black interior ---------- */
+.gvsp-art {
+  position: absolute; z-index: 2;
+  left: 6.49%; top: 35.61%; width: 26.84%; height: 22.76%;
+  object-fit: cover;
+  opacity: 0; transition: opacity .45s ease;
+  background: #05070a;
+}
+.gvsp-art.on { opacity: 1; }
+.gvsp-art-idle {
+  position: absolute; z-index: 2;
+  left: 6.49%; top: 35.61%; width: 26.84%; height: 22.76%;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(70% 70% at 50% 40%, #10161c 0%, #05070a 75%);
+}
+.gvsp-art-idle svg {
+  width: 26%; height: auto; fill: #7CFF6B; opacity: .45;
+  filter: drop-shadow(0 0 8px rgba(124,255,107,.6));
+}
+
+/* ---------- track on the dark panel ---------- */
 .gvsp-track {
-  padding: 1.2cqh 4% 0;
-  text-align: center;
+  position: absolute; z-index: 3;
+  left: 38%; right: 8%; top: 37%;
+  text-align: left;
 }
 .gvsp-title {
   font-family: 'SignPainter', 'Chalet London', cursive;
-  font-size: 6.6cqw; letter-spacing: .02em; line-height: 1.2;
-  color: #f0f0f0;
+  font-size: 6.4cqw; line-height: 1.1;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  text-shadow: 0 0 12px rgba(124,255,107,.45), 0 2px 4px #000;
+  color: #7CFF6B;
+  text-shadow: 0 0 10px rgba(124,255,107,.7), 0 2px 4px #000;
 }
 .gvsp-artist {
-  margin-top: .6cqh;
-  font-size: 3.8cqw; color: #8a9a8c;
+  margin-top: .5cqh;
+  font-size: 3.7cqw; letter-spacing: .05em;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: #c8d0d8;
   text-shadow: 0 1px 3px #000;
 }
-.gvsp-artist.gvsp-status { color: #7CFF6B; }
+.gvsp-artist.gvsp-status { color: #ffd319; }
 
-.gvsp-progress { margin-top: 1.2cqh; padding: 0 2%; }
+/* ---------- progress on the dark panel ---------- */
+.gvsp-progress {
+  position: absolute; z-index: 3;
+  left: 38%; right: 8%; top: 50%;
+}
 .gvsp-bar { position: relative; height: 2.6cqh; cursor: pointer; touch-action: none; }
 .gvsp-bar::before {
   content: ''; position: absolute; left: 0; right: 0; top: 50%;
   height: 5px; margin-top: -2.5px; border-radius: 3px;
-  background: rgba(138,154,140,.22);
+  background: rgba(255,255,255,.14);
   box-shadow: inset 0 1px 2px rgba(0,0,0,.7);
 }
 .gvsp-bar-fill {
   position: absolute; left: 0; top: 50%; height: 5px; margin-top: -2.5px;
   width: 0%; border-radius: 3px;
-  background: linear-gradient(90deg, #3f7d3a, #7CFF6B);
-  box-shadow: 0 0 10px rgba(124,255,107,.7);
+  background: #7CFF6B;
+  box-shadow: 0 0 10px rgba(124,255,107,.8);
 }
 .gvsp-bar-knob {
   position: absolute; top: 50%;
-  width: 3.2cqw; height: 3.2cqw; margin: -1.6cqw 0 0 -1.6cqw;
-  border-radius: 50%; background: #f0f0f0; border: 2px solid #7CFF6B;
-  box-shadow: 0 0 12px rgba(124,255,107,.8);
+  width: 3cqw; height: 3cqw; margin: -1.5cqw 0 0 -1.5cqw;
+  border-radius: 50%;
+  background: #eaffea; border: 2px solid #7CFF6B;
+  box-shadow: 0 0 10px rgba(124,255,107,.9);
 }
 .gvsp-times {
-  display: flex; justify-content: space-between; margin-top: .5cqh;
-  font-size: 3.2cqw; color: #8a9a8c; text-shadow: 0 1px 2px #000;
+  display: flex; justify-content: space-between; margin-top: .4cqh;
+  font-size: 3.1cqw; letter-spacing: .05em; color: #9fb3a8;
+  text-shadow: 0 1px 2px #000;
 }
 
-/* ---------- lyric / music-video stage: palm-sunset scene ---------- */
-.gvsp-stagewrap {
-  position: relative;
-  flex: 1 1 auto; min-height: 0;
-  margin-top: 1.6cqh;
-  overflow: hidden;
-  border-top: 2px solid rgba(124,255,107,.4);
-}
-.gvsp-stagebg {
-  position: absolute; inset: 0; z-index: 1;
-  width: 100%; height: 100%;
-  object-fit: cover; object-position: center 30%;
-}
-/* ambient glow while no lyrics provider is attached — pure CSS,
-   no fake data, no fake FFT */
-.gvsp-ambient {
-  position: absolute; inset: 0; z-index: 2; pointer-events: none;
-  background:
-    radial-gradient(60% 30% at 50% 28%, rgba(124,255,107,.16), transparent 70%),
-    radial-gradient(50% 26% at 50% 60%, rgba(255,150,60,.10), transparent 70%);
-  animation: gvsp-breathe 7s ease-in-out infinite;
-  mix-blend-mode: screen;
-}
-@keyframes gvsp-breathe {
-  0%, 100% { opacity: .55; transform: scale(1); }
-  50% { opacity: .9; transform: scale(1.06); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .gvsp-ambient { animation: none; }
-}
-
-/* transparent DOM layer for the future lyric engine (LRCLIB).
-   A renderer mounted via setLyricsRenderer() owns this node. */
+/* ---------- lyric stage: over the map grid ---------- */
 .gvsp-lyrics {
   position: absolute; z-index: 3;
-  left: 7%; right: 7%; top: 7%; bottom: 34%;
+  left: 38%; right: 8%; top: 57%; bottom: 28%;
   overflow: hidden;
   display: flex; flex-direction: column; justify-content: center;
-  text-align: center; gap: 1.2cqh;
+  text-align: left; gap: 1cqh;
   pointer-events: none;
 }
 .gvsp-lyrics.has-lyrics { pointer-events: auto; }
-
-/* lyric line hooks for the future LRCLIB pass */
 .gv-lyric-line {
-  font-size: 4.4cqw; line-height: 1.35; color: #8a9a8c; opacity: .6;
-  text-shadow: 0 0 8px rgba(124,255,107,.4), 0 2px 4px #000;
-  transition: opacity .3s ease, transform .3s ease;
+  font-size: 3.9cqw; line-height: 1.35; color: #cfe8d4; opacity: .6;
+  text-shadow: 0 0 8px rgba(124,255,107,.35), 0 2px 4px #000;
+  transition: opacity .3s ease;
 }
-.gv-lyric-line.ghost { opacity: .32; font-size: 3.8cqw; }
-.gv-lyric-line.next { opacity: .55; }
+.gv-lyric-line.ghost { opacity: .32; font-size: 3.5cqw; }
+.gv-lyric-line.next { opacity: .52; }
 .gv-lyric-line.active {
-  opacity: 1; color: #f0f0f0; font-size: 5.4cqw;
-  text-shadow: 0 0 14px rgba(124,255,107,.9), 0 0 34px rgba(124,255,107,.45), 0 2px 4px #000;
+  opacity: 1; font-size: 4.6cqw; color: #7CFF6B;
+  text-shadow: 0 0 12px rgba(124,255,107,.9), 0 2px 4px #000;
 }
 
-/* ---------- transport: dark chips, neon-green icons ---------- */
+/* ---------- transport over the sunset panel ---------- */
 .gvsp-controls {
-  position: absolute; z-index: 4; left: 0; right: 0; bottom: 0;
-  display: flex; align-items: center; justify-content: center;
-  gap: 5cqw; padding: 3.2cqh 0 4.6cqh;
-  background: linear-gradient(180deg, transparent, rgba(13,17,23,.55) 55%, rgba(13,17,23,.8));
+  position: absolute; z-index: 3;
+  left: 0; right: 0; bottom: 4%;
+  display: flex; align-items: center; justify-content: center; gap: 4cqw;
 }
 .gvsp-tbtn {
-  width: 13cqw; height: 13cqw; min-width: 56px; min-height: 56px;
-  border-radius: 14px; cursor: pointer;
+  width: 12cqw; height: 12cqw; min-width: 52px; min-height: 52px;
+  border-radius: 50%; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  color: #7CFF6B; background: #10161a;
-  border: 2px solid rgba(124,255,107,.7);
-  box-shadow: 0 0 16px rgba(124,255,107,.35), inset 0 0 10px rgba(124,255,107,.15);
+  color: #7CFF6B; background: rgba(6,10,8,.55);
+  border: 2px solid rgba(124,255,107,.85);
+  box-shadow: 0 0 14px rgba(124,255,107,.4), inset 0 0 10px rgba(124,255,107,.15);
   -webkit-tap-highlight-color: transparent;
 }
 .gvsp-tbtn.big {
-  width: 16.5cqw; height: 16.5cqw; min-width: 68px; min-height: 68px;
-  color: #0d1117; background: #7CFF6B;
-  border-color: #7CFF6B;
-  box-shadow: 0 0 26px rgba(124,255,107,.65), inset 0 0 12px rgba(0,0,0,.2);
+  width: 14.5cqw; height: 14.5cqw; min-width: 62px; min-height: 62px;
+  box-shadow: 0 0 20px rgba(124,255,107,.6), inset 0 0 12px rgba(124,255,107,.25);
 }
 .gvsp-tbtn:active { transform: scale(.93); }
 .gvsp-tbtn svg {
   width: 52%; height: 52%; fill: currentColor;
   filter: drop-shadow(0 0 4px currentColor);
 }
-.gvsp-tbtn.big svg { filter: none; }
 
-/* ---------- themed reconnect ---------- */
-.gvsp-connect {
-  position: absolute; inset: 0; z-index: 10;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(13,17,23,.72);
+/* ---------- themed idle / connect: pinned on the dark panel ---------- */
+.gvsp-idle {
+  position: absolute; z-index: 4;
+  left: 30%; right: 8%; top: 36%; bottom: 28%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; gap: 1.2cqh;
   pointer-events: none;
 }
-.gvsp-connect[hidden] { display: none; }
-.gvsp-connect-pill {
-  pointer-events: auto;
-  text-align: center; padding: 4cqh 8cqw;
-  background: #10161a;
-  border: 2px solid rgba(124,255,107,.65); border-radius: 14px;
-  box-shadow: 0 0 26px rgba(124,255,107,.35), inset 0 0 18px rgba(124,255,107,.1);
-}
-.gvsp-connect-note svg {
-  width: 11cqw; height: 11cqw; fill: #7CFF6B;
-  filter: drop-shadow(0 0 6px rgba(124,255,107,.8));
+.gvsp-idle[hidden] { display: none; }
+.gvsp-idle-kicker {
+  font-family: 'SignPainter', 'Chalet London', cursive;
+  font-size: 6.4cqw;
+  color: #7CFF6B;
+  text-shadow: 0 0 12px rgba(124,255,107,.8), 0 2px 4px #000;
 }
 .gvsp-connect-btn {
-  margin-top: 2.4cqh; padding: 1.6cqh 7cqw;
+  pointer-events: auto;
+  padding: 1cqh 6cqw;
   font-family: 'SignPainter', 'Chalet London', cursive;
-  font-size: 6.2cqw; letter-spacing: .03em;
-  color: #0d1117; background: #7CFF6B;
-  border: 2px solid #7CFF6B; border-radius: 10px; cursor: pointer;
-  box-shadow: 0 0 20px rgba(124,255,107,.55);
+  font-size: 5.2cqw;
+  color: #06110a; background: #7CFF6B;
+  border: none; border-radius: 999px; cursor: pointer;
+  box-shadow: 0 0 18px rgba(124,255,107,.6);
 }
 .gvsp-connect-btn:active { transform: scale(.96); }
-.gvsp-connect-hint {
-  margin-top: 2cqh; font-size: 3.5cqw; line-height: 1.5;
-  color: #8a9a8c; opacity: .9; text-shadow: 0 1px 3px #000;
+.gvsp-idle-hint {
+  font-size: 3.2cqw; line-height: 1.5;
+  color: #9fb3a8; opacity: .95; text-shadow: 0 1px 3px #000;
 }

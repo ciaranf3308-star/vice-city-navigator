@@ -1,93 +1,117 @@
 /* ============================================================
-   RDR2 "Frontier" Spotify skin — dashboard portrait pane.
-   Recomposed transparent artwork (themes/rdr2/spotify/).
+   RDR2 "Frontier" Spotify skin — the supplied concept art IS
+   the widget (themes/rdr2/spotify/hud.png, 1254x1254).
 
-   Hard rules:
-   - every root is transparent; the map shows through
-   - no opaque panel, no modal, no close button, no spectrum
-   - album art sits UNDER the art's wood/leather frame (the frame
-     PNG has a transparent interior; art is z-ordered below it)
-   - live data only; no fake lyrics, no fake visualizer
+   The hud is overlaid as one unified skin/chrome layer; live
+   HTML is positioned into its defined openings. The art dictates
+   the DOM placement. The map shows through transparent pixels.
+
+   Measured openings (fractions of the hud):
+   - album cut-out : x 0.1555-0.4466, y 0.2791-0.5661
+   - lyric stage   : dark wood right of the frame
+   - parchment     : torn strip (title / artist / progress)
+   - transport     : brass coins below the parchment
+
+   Z-order: art placeholder < album art < hud < lyrics / track /
+   controls / idle. Live data only; no fake lyrics, no fake FFT.
    ============================================================ */
 
 .rdsp {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column; align-items: stretch;
-  background: transparent;
-  overflow: hidden;
+  position: absolute; left: 0; right: 0; top: 50%; translate: 0 -50%;
+  width: 100%; aspect-ratio: 1 / 1;
   container-type: size;
+  background: transparent;
   font-family: 'RDR Lino', Georgia, serif; color: #e8d9b0;
   user-select: none; -webkit-user-select: none;
 }
 .rdsp img { display: block; }
 
-/* ---------- header: sunset / signpost / lantern band ---------- */
-.rdsp-header {
-  flex: none;
-  width: 100%; aspect-ratio: 960 / 281;
-  object-fit: cover; object-position: center top;
-}
-
-/* ---------- album zone: art under the wood/leather frame ---------- */
-.rdsp-albumzone {
-  position: relative;
-  flex: none;
-  width: min(40cqh, 72cqw);
-  aspect-ratio: 640 / 500;
-  margin: 1.2cqh auto 0;
-}
+/* ---------- album art: UNDER the hud, through the brass frame ---------- */
 .rdsp-art {
   position: absolute; z-index: 1;
-  object-fit: cover; border-radius: 3%;
+  left: 15.55%; top: 27.91%; width: 29.11%; height: 28.71%;
+  object-fit: cover;
   opacity: 0; transition: opacity .45s ease;
   background: #0d0906;
 }
 .rdsp-art.on { opacity: 1; }
-.rdsp-albumframe {
+.rdsp-art-idle {
+  position: absolute; z-index: 1;
+  left: 15.55%; top: 27.91%; width: 29.11%; height: 28.71%;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(70% 70% at 50% 40%, #241a10 0%, #0d0906 75%);
+}
+.rdsp-art-idle svg {
+  width: 26%; height: auto; fill: #d8b36a; opacity: .5;
+  filter: drop-shadow(0 2px 3px #000);
+}
+
+/* ---------- the concept art: one unified skin ---------- */
+.rdsp-hud {
   position: absolute; z-index: 2; inset: 0;
   width: 100%; height: 100%;
   pointer-events: none;
 }
 
-/* ---------- track plaque: brass-trimmed, under the frame ---------- */
+/* ---------- lyric stage: on the dark wood ---------- */
+.rdsp-lyrics {
+  position: absolute; z-index: 3;
+  left: 48%; right: 8%; top: 38%; bottom: 32%;
+  overflow: hidden;
+  display: flex; flex-direction: column; justify-content: center;
+  text-align: center; gap: 1cqh;
+  pointer-events: none;
+}
+.rdsp-lyrics.has-lyrics { pointer-events: auto; }
+.rd-lyric-line {
+  font-size: 4cqw; line-height: 1.35; color: #e8d9b0; opacity: .6;
+  text-shadow: 0 2px 3px #000;
+  transition: opacity .3s ease;
+}
+.rd-lyric-line.ghost { opacity: .32; font-size: 3.6cqw; }
+.rd-lyric-line.next { opacity: .52; }
+.rd-lyric-line.active {
+  opacity: 1; font-size: 4.8cqw; color: #d8b36a;
+  text-shadow: 0 2px 3px #000, 0 0 12px rgba(216,179,106,.4);
+}
+
+/* ---------- track on the parchment ---------- */
 .rdsp-track {
-  flex: none;
-  width: 88%; margin: 1.4cqh auto 0;
-  padding: 1.6cqh 5cqw 1.8cqh;
+  position: absolute; z-index: 3;
+  left: 28%; right: 9%; top: 70.5%;
   text-align: center;
-  background: linear-gradient(180deg, rgba(42,31,22,.88), rgba(26,18,12,.92));
-  border: 2px solid rgba(216,179,106,.75);
-  border-radius: 6px;
-  box-shadow: 0 2px 10px rgba(0,0,0,.55), inset 0 0 14px rgba(0,0,0,.5);
 }
 .rdsp-title {
   font-family: 'Kirsty', 'RDR Lino', Georgia, serif;
-  font-size: 5.6cqw; letter-spacing: .06em; line-height: 1.15;
-  color: #e8d9b0;
+  font-size: 5.4cqw; letter-spacing: .04em; line-height: 1.15;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  text-shadow: 0 2px 3px #000;
+  color: #2a1f16;
 }
 .rdsp-artist {
-  margin-top: .4cqh;
-  font-size: 3.9cqw; letter-spacing: .08em; color: #d8b36a;
+  margin-top: .5cqh;
+  font-size: 3.8cqw; letter-spacing: .06em;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  text-shadow: 0 1px 2px #000;
+  color: #7a2a24;
 }
 .rdsp-artist.rdsp-status { color: #b8352f; }
 
-.rdsp-progress { margin-top: 1cqh; }
+/* ---------- progress on the parchment ---------- */
+.rdsp-progress {
+  position: absolute; z-index: 3;
+  left: 30%; right: 12%; top: 80%;
+}
 .rdsp-bar { position: relative; height: 2.6cqh; cursor: pointer; touch-action: none; }
 .rdsp-bar::before {
   content: ''; position: absolute; left: 0; right: 0; top: 50%;
   height: 5px; margin-top: -2.5px; border-radius: 3px;
-  background: rgba(0,0,0,.55);
-  box-shadow: inset 0 1px 3px #000, 0 1px 0 rgba(216,179,106,.35);
+  background: rgba(42,31,22,.35);
+  box-shadow: inset 0 1px 2px rgba(42,31,22,.5);
 }
 .rdsp-bar-fill {
   position: absolute; left: 0; top: 50%; height: 5px; margin-top: -2.5px;
   width: 0%; border-radius: 3px;
-  background: linear-gradient(90deg, #b8352f, #d8b36a);
-  box-shadow: 0 0 8px rgba(184,53,47,.55);
+  background: #b8352f;
+  box-shadow: 0 0 6px rgba(184,53,47,.5);
 }
 .rdsp-bar-knob {
   position: absolute; top: 50%;
@@ -95,92 +119,33 @@
   border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, #f0d190, #a67c3e 70%, #6e4f22);
   border: 2px solid #2a1f16;
-  box-shadow: 0 1px 4px #000, 0 0 6px rgba(216,179,106,.5);
+  box-shadow: 0 1px 4px rgba(0,0,0,.5);
 }
 .rdsp-times {
-  display: flex; justify-content: space-between; margin-top: .5cqh;
-  font-size: 3.2cqw; letter-spacing: .06em; color: #c9b183;
-  text-shadow: 0 1px 2px #000;
+  display: flex; justify-content: space-between; margin-top: .4cqh;
+  font-size: 3.1cqw; letter-spacing: .05em; color: #5a4632;
 }
 
-/* ---------- lyric / ambient stage: the parchment strip ---------- */
-.rdsp-stagewrap {
-  position: relative;
-  flex: 1 1 auto; min-height: 0;
-  margin-top: 1.4cqh;
-  overflow: hidden;
-}
-.rdsp-stagebg {
-  position: absolute; inset: 0; z-index: 1;
-  width: 100%; height: 100%;
-  object-fit: cover; object-position: center 18%;
-}
-/* lantern warmth while no lyrics provider is attached — pure CSS,
-   no fake data, no fake FFT */
-.rdsp-ambient {
-  position: absolute; inset: 0; z-index: 2; pointer-events: none;
-  background: radial-gradient(46% 30% at 82% 12%, rgba(255,178,84,.22), transparent 70%);
-  animation: rdsp-flicker 6s ease-in-out infinite;
-  mix-blend-mode: screen;
-}
-@keyframes rdsp-flicker {
-  0%, 100% { opacity: .6; }
-  42% { opacity: .85; }
-  58% { opacity: .7; }
-  74% { opacity: .9; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .rdsp-ambient { animation: none; }
-}
-
-/* transparent DOM layer for the future lyric engine (LRCLIB).
-   A renderer mounted via setLyricsRenderer() owns this node. */
-.rdsp-lyrics {
-  position: absolute; z-index: 3;
-  left: 10%; right: 10%; top: 6%; bottom: 36%;
-  overflow: hidden;
-  display: flex; flex-direction: column; justify-content: center;
-  text-align: center; gap: 1cqh;
-  pointer-events: none;
-}
-.rdsp-lyrics.has-lyrics { pointer-events: auto; }
-
-/* lyric line hooks for the future LRCLIB pass: dark ink on parchment */
-.rd-lyric-line {
-  font-family: 'RDR Lino', Georgia, serif;
-  font-size: 4.2cqw; line-height: 1.35; color: #2a1f16; opacity: .62;
-  text-shadow: 0 1px 0 rgba(232,217,176,.5);
-  transition: opacity .3s ease, transform .3s ease;
-}
-.rd-lyric-line.ghost { opacity: .34; font-size: 3.7cqw; }
-.rd-lyric-line.next { opacity: .52; }
-.rd-lyric-line.active {
-  opacity: 1; font-size: 5.2cqw;
-  color: #b8352f;
-  text-shadow: 0 1px 0 rgba(232,217,176,.6), 0 0 12px rgba(184,53,47,.25);
-}
-
-/* ---------- transport: aged brass + iron, large touch targets ---------- */
+/* ---------- transport: brass coins below the parchment ---------- */
 .rdsp-controls {
-  position: absolute; z-index: 4; left: 0; right: 0; bottom: 0;
-  display: flex; align-items: center; justify-content: center;
-  gap: 5cqw; padding: 2.6cqh 0 3.4cqh;
-  background: linear-gradient(180deg, transparent, rgba(26,18,12,.5) 60%, rgba(26,18,12,.75));
+  position: absolute; z-index: 3;
+  left: 0; right: 0; bottom: 2%;
+  display: flex; align-items: center; justify-content: center; gap: 4cqw;
 }
 .rdsp-tbtn {
-  width: 13cqw; height: 13cqw; min-width: 56px; min-height: 56px;
+  width: 12cqw; height: 12cqw; min-width: 52px; min-height: 52px;
   border-radius: 50%; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   color: #e8d9b0;
   background: radial-gradient(circle at 35% 30%, #3a2c1e, #1a120c 75%);
-  border: 2px solid rgba(216,179,106,.8);
+  border: 2px solid rgba(216,179,106,.85);
   box-shadow: 0 2px 8px rgba(0,0,0,.6), inset 0 1px 2px rgba(216,179,106,.35);
   -webkit-tap-highlight-color: transparent;
 }
 .rdsp-tbtn.big {
-  width: 16.5cqw; height: 16.5cqw; min-width: 68px; min-height: 68px;
+  width: 14.5cqw; height: 14.5cqw; min-width: 62px; min-height: 62px;
   border-color: #b8352f;
-  box-shadow: 0 2px 10px rgba(0,0,0,.6), 0 0 14px rgba(184,53,47,.4), inset 0 1px 2px rgba(216,179,106,.35);
+  box-shadow: 0 2px 10px rgba(0,0,0,.6), 0 0 14px rgba(184,53,47,.4);
 }
 .rdsp-tbtn:active { transform: scale(.93); }
 .rdsp-tbtn svg {
@@ -188,36 +153,31 @@
   filter: drop-shadow(0 1px 2px #000);
 }
 
-/* ---------- themed reconnect (no dark takeover) ---------- */
-.rdsp-connect {
-  position: absolute; inset: 0; z-index: 10;
-  display: flex; align-items: center; justify-content: center;
-  background: transparent;
+/* ---------- themed idle / connect: a notice pinned on the parchment ---------- */
+.rdsp-idle {
+  position: absolute; z-index: 4;
+  left: 20%; right: 8%; top: 69%; bottom: 12%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; gap: 1.2cqh;
   pointer-events: none;
 }
-.rdsp-connect[hidden] { display: none; }
-.rdsp-connect-pill {
-  pointer-events: auto;
-  text-align: center; padding: 4cqh 8cqw;
-  background: linear-gradient(180deg, rgba(42,31,22,.9), rgba(26,18,12,.94));
-  border: 2px solid rgba(216,179,106,.7); border-radius: 6px;
-  box-shadow: 0 4px 18px rgba(0,0,0,.6), inset 0 0 18px rgba(0,0,0,.45);
-}
-.rdsp-connect-note svg {
-  width: 11cqw; height: 11cqw; fill: #d8b36a;
-  filter: drop-shadow(0 2px 3px #000);
+.rdsp-idle[hidden] { display: none; }
+.rdsp-idle-kicker {
+  font-family: 'Kirsty', 'RDR Lino', Georgia, serif;
+  font-size: 5.4cqw; letter-spacing: .08em;
+  color: #2a1f16;
 }
 .rdsp-connect-btn {
-  margin-top: 2.4cqh; padding: 1.8cqh 6cqw;
+  pointer-events: auto;
+  padding: 1cqh 6cqw;
   font-family: 'Kirsty', 'RDR Lino', Georgia, serif;
-  font-size: 5.4cqw; letter-spacing: .1em;
-  color: #e8d9b0; background: rgba(184,53,47,.22);
-  border: 2px solid #b8352f; border-radius: 6px; cursor: pointer;
-  text-shadow: 0 2px 3px #000;
-  box-shadow: 0 2px 8px rgba(0,0,0,.5), inset 0 1px 2px rgba(216,179,106,.3);
+  font-size: 4.6cqw; letter-spacing: .08em;
+  color: #e8d9b0; background: rgba(184,53,47,.85);
+  border: 2px solid #2a1f16; border-radius: 6px; cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,.5);
 }
 .rdsp-connect-btn:active { transform: scale(.96); }
-.rdsp-connect-hint {
-  margin-top: 2cqh; font-size: 3.5cqw; line-height: 1.5;
-  color: #c9b183; opacity: .92; text-shadow: 0 1px 2px #000;
+.rdsp-idle-hint {
+  font-size: 3.2cqw; line-height: 1.5;
+  color: #5a4632; opacity: .95;
 }

@@ -9,7 +9,7 @@
      used. Nothing theme-specific is eagerly precached except the
      default Vice City set.
    Map tiles, routing and search always go to the network. */
-const CACHE = 'ws-shell-v36';
+const CACHE = 'ws-shell-v37';
 const THEME_CACHE = 'ws-theme-v10';
 const VC_BLIPS = ['airYard','barbers','burgerShot','cash','chicken','dateDisco','dateDrink',
   'dateFood','diner','fuel','girlfriend','gym','hostpital','modGarage','north','parking',
@@ -24,14 +24,11 @@ const SHELL = [
   'themes/vice-city/spotify-skin.js', 'themes/vice-city/spotify-skin.css',
   'themes/vice-city/spotify/hud.png',
   'themes/san-andreas/spotify-skin.js', 'themes/san-andreas/spotify-skin.css',
-  'themes/san-andreas/spotify/header.png', 'themes/san-andreas/spotify/album.png',
-  'themes/san-andreas/spotify/stage.png',
+  'themes/san-andreas/spotify/hud.png',
   'themes/gta-v/spotify-skin.js', 'themes/gta-v/spotify-skin.css',
-  'themes/gta-v/spotify/header.png', 'themes/gta-v/spotify/album.png',
-  'themes/gta-v/spotify/stage.png',
+  'themes/gta-v/spotify/hud.png',
   'themes/rdr2/spotify-skin.js', 'themes/rdr2/spotify-skin.css',
-  'themes/rdr2/spotify/header.png', 'themes/rdr2/spotify/album.png',
-  'themes/rdr2/spotify/stage.png',
+  'themes/rdr2/spotify/hud.png',
   'themes/vice-city/style.json',
   'manifest.webmanifest', 'icon.svg', 'icon-512.png', 'icon-maskable-512.png',
   'fonts/pricedown-bl.woff',

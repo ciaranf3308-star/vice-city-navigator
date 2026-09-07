@@ -146,7 +146,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v36"), 'SW shell cache v36');
+ok(swSrc.includes("ws-shell-v37"), 'SW shell cache v37');
 ok(swSrc.includes("ws-theme-v10"), 'SW theme cache v10');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
@@ -278,27 +278,28 @@ ok(/\.vcsp-controls\s*\{[^}]*background:\s*none/.test(vcSkinCssCode), 'VC contro
 ok(vcSkinCssCode.includes('.vcsp-idle') && !vcSkinCssCode.includes('vcsp-connect-pill'), 'VC idle/connect lives inside the widget, no generic card');
 ok(vcSkinJs.includes('vcsp-idle') && !vcSkinJsCode.includes('vcsp-connect\'') && !vcSkinJsCode.includes('vcsp-connect"'), 'VC skin JS renders the in-widget idle state');
 
-/* ---------- GTA V Spotify skin ---------- */
+/* ---------- GTA V Spotify skin: the supplied art IS the widget ---------- */
 const gvSkinJs = fs.readFileSync(path.join(REPO, 'themes/gta-v/spotify-skin.js'), 'utf8');
 const gvSkinCss = fs.readFileSync(path.join(REPO, 'themes/gta-v/spotify-skin.css'), 'utf8');
-const gvCrops = { 'header.png': [960, 287], 'album.png': [560, 560], 'stage.png': [960, 471] };
-for (const [f, [ew, eh]] of Object.entries(gvCrops)) {
-  const { w, h } = pngSize(path.join(REPO, 'themes/gta-v/spotify', f));
-  ok(w === ew && h === eh, `GV spotify art ${f} ${ew}x${eh}`);
+{
+  const { w, h } = pngSize(path.join(REPO, 'themes/gta-v/spotify/hud.png'));
+  ok(w === 1155 && h === 1362, 'GV spotify hud.png is the supplied 1155x1362 art');
 }
-const gvAlbumPng = path.join(REPO, 'themes/gta-v/spotify/album.png');
-ok(pngAlphaAt(gvAlbumPng, 280, 280) > 200, 'GV album opening opaque black (art layers over the frame)');
+const gvHudPng = path.join(REPO, 'themes/gta-v/spotify/hud.png');
+ok(pngAlphaAt(gvHudPng, 230, 640) > 200, 'GV album frame interior opaque (art layers over the hud)');
+ok(!fs.existsSync(path.join(REPO, 'themes/gta-v/spotify/header.png')), 'GV chopped crops are gone');
 ok(gvSkinJs.includes("register('gta-v'"), 'GV skin registers as gta-v');
 ok(gvSkinJs.includes('data-lyrics-stage'), 'GV lyric stage hook present');
 ok(gvSkinJs.includes('setLyricsRenderer') && gvSkinJs.includes('clearLyrics'), 'GV lyric renderer hooks present');
-ok(gvSkinJs.includes('x0: 0.12') && gvSkinJs.includes('x1: 0.88'), 'GV art opening fractions 0.12/0.88 (inside the opaque frame)');
-ok(!gvSkinJs.includes('tube.png'), 'GV skin has no tube (no tube art shipped)');
+ok(/\.gvsp-art\s*\{[^}]*left:\s*6\.49%[^}]*top:\s*35\.61%[^}]*width:\s*26\.84%[^}]*height:\s*22\.76%/.test(gvSkinCss),
+  'GV art rect matches the hud frame opening');
+ok(gvSkinJs.includes('hud.png'), 'GV skin overlays the single hud art');
 const gvSkinJsCode = stripComments(gvSkinJs), gvSkinCssCode = stripComments(gvSkinCss);
 for (const banned of ['miniviz', 'stagepeek', 'fullstage', 'gvsp-viz', 'spectrum', 'spotify-close', 'background-size: cover', 'vcsp-']) {
   ok(!gvSkinJsCode.includes(banned) && !gvSkinCssCode.includes(banned), `GV skin has no ${banned}`);
 }
 ok(gvSkinJsCode.includes('gvsp-') && gvSkinCssCode.includes('.gvsp'), 'GV skin uses gvsp- prefix');
-ok(gvSkinCssCode.includes('#7CFF6B') && gvSkinCssCode.includes('#0d1117'), 'GV skin neon-green on dark panel');
+ok(gvSkinCssCode.includes('#7CFF6B') && gvSkinCssCode.includes('#05070a'), 'GV skin neon-green on dark panel');
 ok(gvSkinCssCode.includes("'SignPainter'") && gvSkinCssCode.includes("'Chalet London'"), 'GV skin SignPainter script + Chalet London');
 ok(!/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(gvSkinJsCode) && !/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(gvSkinCssCode), 'GV skin has no emojis');
 
@@ -432,24 +433,26 @@ const vcPlace = styles['vice-city'].layers.find(l => l.id === 'vc-label-place').
 ok(vcRoad !== vcPlace, 'VC: road labels a different tone from place labels');
 
 
-/* ---------- Spotify skin album-frame openings (measured from the crop art) ---------- */
-const FRAME_EXPECTED = {
-  'gta-v':        [0.12, 0.12, 0.88, 0.88],
-  'san-andreas':  [0.07, 0.028, 0.97, 0.905],
-  'rdr2':         [0.3047, 0.14, 0.875, 0.86],
+/* ---------- Spotify skins: single-hud overlays, art-registered openings ---------- */
+const HUD_EXPECTED = {
+  'gta-v':       { w: 1155, h: 1362, art: ['6.49%', '35.61%', '26.84%', '22.76%'], over: true },
+  'san-andreas': { w: 1254, h: 1254, art: ['5.18%', '30.70%', '40.67%', '39.07%'], over: false },
+  'rdr2':        { w: 1254, h: 1254, art: ['15.55%', '27.91%', '29.11%', '28.71%'], over: false },
 };
-for (const [theme, exp] of Object.entries(FRAME_EXPECTED)) {
-  const js = fs.readFileSync(path.join(REPO, 'themes', theme, 'spotify-skin.js'), 'utf8');
-  const m = js.match(/const FRAME = \{ x0: ([\d.]+), y0: ([\d.]+), x1: ([\d.]+), y1: ([\d.]+) \}/);
-  ok(!!m, `${theme}: skin declares a FRAME opening`);
-  if (m) {
-    const got = [1, 2, 3, 4].map(i => parseFloat(m[i]));
-    const close = got.every((v, i) => Math.abs(v - exp[i]) < 0.005);
-    ok(close, `${theme}: FRAME opening matches measured art (got ${got.join(',')})`);
+for (const [theme, exp] of Object.entries(HUD_EXPECTED)) {
+  const hudP = path.join(REPO, 'themes', theme, 'spotify/hud.png');
+  const { w, h } = pngSize(hudP);
+  ok(w === exp.w && h === exp.h, `${theme}: hud.png is the supplied ${exp.w}x${exp.h} art`);
+  for (const crop of ['header.png', 'album.png', 'stage.png']) {
+    ok(!fs.existsSync(path.join(REPO, 'themes', theme, 'spotify', crop)), `${theme}: chopped ${crop} is gone`);
   }
-  // art must size to the opening box (explicit height), not assume a square
-  ok(js.includes("'height:' + ((FRAME.y1 - FRAME.y0)"),
-    `${theme}: album art fills the measured opening box`);
+  const css = fs.readFileSync(path.join(REPO, 'themes', theme, 'spotify-skin.css'), 'utf8');
+  const [l, t, sw, sh] = exp.art;
+  const esc = x => x.replace('.', '\\.');
+  const re = new RegExp(`\\.[a-z]+-art\\s*\\{[^}]*left:\\s*${esc(l)}[^}]*top:\\s*${esc(t)}[^}]*width:\\s*${esc(sw)}[^}]*height:\\s*${esc(sh)}`);
+  ok(re.test(css), `${theme}: art rect matches the hud opening (${exp.art.join(' ')})`);
+  const js = fs.readFileSync(path.join(REPO, 'themes', theme, 'spotify-skin.js'), 'utf8');
+  ok(js.includes('hud.png') && !js.includes('header.png'), `${theme}: skin overlays the single hud`);
 }
 // vice-city: the opening is the hud's own cut-out, declared in CSS
 // (measured: x 0.0753-0.3936, y 0.3425-0.6924 of the 1448x1086 hud)

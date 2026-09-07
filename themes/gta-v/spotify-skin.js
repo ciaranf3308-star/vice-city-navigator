@@ -1,26 +1,21 @@
 /* ============================================================
    WayStation — GTA V Spotify skin (dashboard mode only).
    ------------------------------------------------------------
-   Art: themes/gta-v/spotify/*.png (generated from the Los Santos
-   concept — downtown skyline + freeway sign header band, dark
-   neon-green-framed album panel, palm-sunset stage). Portrait
-   composition (~2:3 automotive pane):
+   The supplied concept art (themes/gta-v/spotify/hud.png,
+   1155x1362 with transparency) IS the widget: it is overlaid as
+   one unified skin/chrome layer and live HTML is positioned into
+   its defined openings. The art dictates the DOM placement.
 
-     header    — skyline + "Los Santos" freeway-sign band
-     album     — square live album art OVER the frame's black
-                 opening, sized to the measured interior
-                 (x0=0.1125 y0=0.1125 x1=0.8875 y1=0.8875).
-                 The frame interior is opaque black (not a
-                 transparent cutout), so the art layers above the
-                 frame and the neon-green double border stays visible
-                 around it. Two stacked <img> crossfade on track
-                 change, same as the VC skin.
-     track     — title / artist / progress on the pane's dark panel
-     stage     — the palm-sunset street scene. Transparent DOM
-                 layer (.gvsp-lyrics) hosts live lyrics later;
-                 ambient glow until then.
-     controls  — prev / play-pause / next as dark chips with
-                 neon-green icons, large touch areas
+   Measured openings (fractions of the hud):
+   - album frame   : x 0.0649-0.3333, y 0.3561-0.5837
+                     (the frame interior is OPAQUE black, so live
+                     album art layers OVER the hud here)
+   - dark panel    : right of the frame, x ~0.38-0.92,
+                     y ~0.37-0.57 (title, artist, progress, lyrics)
+   - transport     : over the sunset panel, bottom center
+
+   Z-order: hud < album art < lyrics / track / controls / idle.
+   The map shows through transparent pixels.
 
    LYRICS (future pass):
      The stage exposes [data-lyrics-stage] plus
@@ -36,11 +31,6 @@
 
 (function () {
   const ART = 'themes/gta-v/spotify/';
-  const CSS_HREF = 'themes/gta-v/spotify-skin.css';
-
-  /* Album-art placement: square, centered in the frame's measured
-     interior opening, as fractions of album.png. */
-  const FRAME = { x0: 0.12, y0: 0.12, x1: 0.88, y1: 0.88 };
 
   const SVG = {
     play: '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',
@@ -60,18 +50,6 @@
     const s = Math.max(0, Math.floor((ms || 0) / 1000));
     return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
   }
-  /* The skin JS/CSS are statically linked in index.html; this is a
-     safety net for any host that mounts the skin without them. */
-  function ensureCss() {
-    const links = document.querySelectorAll
-      ? Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
-      : [];
-    if (links.some(l => (l.getAttribute('href') || '').indexOf('gta-v/spotify-skin.css') >= 0)) return;
-    const l = document.createElement('link');
-    l.rel = 'stylesheet';
-    l.href = CSS_HREF;
-    document.head.appendChild(l);
-  }
 
   function createSkin() {
     let root = null, core = null;
@@ -84,50 +62,32 @@
     /* ---------- dom ---------- */
     function build() {
       root = el('div', 'gvsp');
-      const artStyle =
-        'left:' + (FRAME.x0 * 100).toFixed(2) + '%;' +
-        'top:' + (FRAME.y0 * 100).toFixed(2) + '%;' +
-        'width:' + ((FRAME.x1 - FRAME.x0) * 100).toFixed(2) + '%;' +
-        'height:' + ((FRAME.y1 - FRAME.y0) * 100).toFixed(2) + '%;';
       root.innerHTML =
-        '<img class="gvsp-header" src="' + ART + 'header.png" alt="" aria-hidden="true">' +
-
-        '<div class="gvsp-albumzone">' +
-          '<div class="gvsp-framesq">' +
-            '<img class="gvsp-art a" style="' + artStyle + '" alt="">' +
-            '<img class="gvsp-art b" style="' + artStyle + '" alt="">' +
-            '<img class="gvsp-albumframe" src="' + ART + 'album.png" alt="" aria-hidden="true">' +
-          '</div>' +
-          '<div class="gvsp-track">' +
-            '<div class="gvsp-title">—</div>' +
-            '<div class="gvsp-artist">—</div>' +
-            '<div class="gvsp-progress">' +
-              '<div class="gvsp-bar" role="slider" aria-label="Seek" tabindex="0" aria-valuemin="0" aria-valuemax="100">' +
-                '<div class="gvsp-bar-fill"></div>' +
-                '<div class="gvsp-bar-knob"></div>' +
-              '</div>' +
-              '<div class="gvsp-times"><span class="gvsp-elapsed">0:00</span><span class="gvsp-duration">0:00</span></div>' +
-            '</div>' +
-          '</div>' +
+        '<div class="gvsp-art-idle">' + SVG.note + '</div>' +
+        '<img class="gvsp-hud" src="' + ART + 'hud.png" alt="" aria-hidden="true">' +
+        '<img class="gvsp-art a" alt="">' +
+        '<img class="gvsp-art b" alt="">' +
+        '<div class="gvsp-track">' +
+          '<div class="gvsp-title">Los Santos Radio</div>' +
+          '<div class="gvsp-artist">Connect Spotify to play</div>' +
         '</div>' +
-
-        '<div class="gvsp-stagewrap">' +
-          '<img class="gvsp-stagebg" src="' + ART + 'stage.png" alt="" aria-hidden="true">' +
-          '<div class="gvsp-ambient" aria-hidden="true"></div>' +
-          '<div class="gvsp-lyrics" data-lyrics-stage="1"></div>' +
-          '<div class="gvsp-controls">' +
-            '<button class="gvsp-tbtn" data-act="prev" aria-label="Previous">' + SVG.prev + '</button>' +
-            '<button class="gvsp-tbtn big" data-act="toggle" aria-label="Play or pause">' + SVG.play + '</button>' +
-            '<button class="gvsp-tbtn" data-act="next" aria-label="Next">' + SVG.next + '</button>' +
+        '<div class="gvsp-progress">' +
+          '<div class="gvsp-bar" role="slider" aria-label="Seek" tabindex="0" aria-valuemin="0" aria-valuemax="100">' +
+            '<div class="gvsp-bar-fill"></div>' +
+            '<div class="gvsp-bar-knob"></div>' +
           '</div>' +
+          '<div class="gvsp-times"><span class="gvsp-elapsed">0:00</span><span class="gvsp-duration">0:00</span></div>' +
         '</div>' +
-
-        '<div class="gvsp-connect" hidden>' +
-          '<div class="gvsp-connect-pill">' +
-            '<div class="gvsp-connect-note">' + SVG.note + '</div>' +
-            '<button class="gvsp-connect-btn" type="button">Connect Spotify</button>' +
-            '<p class="gvsp-connect-hint">Music plays on your phone or car.<br>WayStation just drives it.</p>' +
-          '</div>' +
+        '<div class="gvsp-controls">' +
+          '<button class="gvsp-tbtn" data-act="prev" aria-label="Previous">' + SVG.prev + '</button>' +
+          '<button class="gvsp-tbtn big" data-act="toggle" aria-label="Play or pause">' + SVG.play + '</button>' +
+          '<button class="gvsp-tbtn" data-act="next" aria-label="Next">' + SVG.next + '</button>' +
+        '</div>' +
+        '<div class="gvsp-lyrics" data-lyrics-stage="1"></div>' +
+        '<div class="gvsp-idle">' +
+          '<div class="gvsp-idle-kicker">Los Santos Radio</div>' +
+          '<button class="gvsp-connect-btn" type="button">Connect Spotify</button>' +
+          '<p class="gvsp-idle-hint">Music plays on your phone or car.<br>WayStation controls it.</p>' +
         '</div>';
       return root;
     }
@@ -153,13 +113,21 @@
     /* ---------- render ---------- */
     function render() {
       const s = core.getState();
-      const conn = q('.gvsp-connect');
+      const idle = q('.gvsp-idle');
       const connected = core.isConnected();
-      conn.hidden = connected;
-      if (!connected) { stopTick(); return; }
-
+      idle.hidden = connected;
       const title = q('.gvsp-title'), artist = q('.gvsp-artist');
       const toggle = q('.gvsp-tbtn[data-act="toggle"]');
+      if (!connected) {
+        // Disconnected state stays inside the one widget: themed idle
+        // text on the frame's band, connect CTA in the stage.
+        stopTick();
+        title.textContent = 'Los Santos Radio';
+        artist.textContent = 'Connect Spotify to play';
+        artist.classList.remove('gvsp-status');
+        setArt('');
+        return;
+      }
       if (!s || !s.item) {
         title.textContent = 'Nothing playing';
         artist.textContent = 'Press play in Spotify';
@@ -200,9 +168,7 @@
       }
     }
 
-    /* ---------- album art crossfade (art fills the frame's black
-       opening; the interior is opaque, so the art layers ABOVE
-       the frame and the neon border stays visible around it) ---------- */
+    /* ---------- album art crossfade (art sits UNDER the frame) ---------- */
     function setArt(url) {
       if (url === currentArtUrl) return;
       currentArtUrl = url;
@@ -309,7 +275,6 @@
 
     /* ---------- public ---------- */
     function mount(stageEl, spotifyCore) {
-      ensureCss();
       core = spotifyCore;
       stageEl.appendChild(build());
       wire();

@@ -1,226 +1,185 @@
 /* ============================================================
-   San Andreas Spotify skin — dashboard portrait pane.
-   Grove-street garage wall: deep green panels, cream type,
-   Grove-green glow, gold accents.
+   San Andreas Spotify skin — the supplied concept art IS the
+   widget (themes/san-andreas/spotify/hud.png, 1254x1254).
 
-   Hard rules:
-   - album art sits UNDER the art's cream-bordered frame (the
-     frame PNG has a transparent interior; art is z-ordered
-     below it)
-   - titles in Beckett blackletter, labels in Bank Gothic
-   - live data only; no fake lyrics, no fake visualizer
+   The hud is overlaid as one unified skin/chrome layer; live
+   HTML is positioned into its defined openings. The art dictates
+   the DOM placement. The map shows through transparent pixels.
+
+   Measured openings (fractions of the hud):
+   - album cut-out : x 0.0518-0.4585, y 0.3070-0.6976
+   - dark panel    : right of the frame (title / artist /
+                     progress / lyrics)
+   - transport     : the empty green bay below the album frame
+
+   Z-order: art placeholder < album art < hud < lyrics / track /
+   controls / idle. Live data only; no fake lyrics, no fake FFT.
    ============================================================ */
 
 .sasp {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column; align-items: stretch;
-  background: #0e1a12;
-  overflow: hidden;
+  position: absolute; left: 0; right: 0; top: 50%; translate: 0 -50%;
+  width: 100%; aspect-ratio: 1 / 1;
   container-type: size;
-  font-family: 'Bank Gothic', 'Arial Narrow', sans-serif; color: #f0e6c8;
+  background: transparent;
+  font-family: 'Bank Gothic', 'Arial Narrow', sans-serif; color: #f2e8c8;
   user-select: none; -webkit-user-select: none;
 }
 .sasp img { display: block; }
 
-/* ---------- header: graffiti logo + palms + skyline band ---------- */
-.sasp-header {
-  flex: none;
-  width: 100%; height: 15cqh;
-  object-fit: cover; object-position: center top;
-  border-bottom: 2px solid rgba(240,230,200,.28);
-}
-
-/* ---------- album zone: art under the cream-bordered frame ---------- */
-.sasp-albumzone {
-  position: relative;
-  flex: none;
-  width: min(52cqh, 86cqw);
-  aspect-ratio: 560 / 541;
-  margin: 2cqh auto 0;
-}
+/* ---------- album art: UNDER the hud, through the frame ---------- */
 .sasp-art {
   position: absolute; z-index: 1;
-  object-fit: cover; border-radius: 4%;
+  left: 5.18%; top: 30.70%; width: 40.67%; height: 39.07%;
+  object-fit: cover;
   opacity: 0; transition: opacity .45s ease;
-  background: #000;
+  background: #0a120c;
 }
 .sasp-art.on { opacity: 1; }
-.sasp-albumframe {
+.sasp-art-idle {
+  position: absolute; z-index: 1;
+  left: 5.18%; top: 30.70%; width: 40.67%; height: 39.07%;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(70% 70% at 50% 40%, #16241a 0%, #0a120c 75%);
+}
+.sasp-art-idle svg {
+  width: 22%; height: auto; fill: #d8b36a; opacity: .5;
+  filter: drop-shadow(0 2px 3px #000);
+}
+
+/* ---------- the concept art: one unified skin ---------- */
+.sasp-hud {
   position: absolute; z-index: 2; inset: 0;
   width: 100%; height: 100%;
   pointer-events: none;
 }
 
-/* ---------- track band on the dark green wall ---------- */
+/* ---------- track on the dark green panel ---------- */
 .sasp-track {
-  flex: none;
-  text-align: center;
-  padding: 1.6cqh 8cqw 1.2cqh;
-  background: linear-gradient(180deg, #0e1a12, #14231a);
-  border-top: 1px solid rgba(126,200,80,.25);
-  border-bottom: 1px solid rgba(126,200,80,.25);
+  position: absolute; z-index: 3;
+  left: 54%; right: 8%; top: 34%;
+  text-align: left;
 }
 .sasp-title {
   font-family: 'Beckett', 'Bank Gothic', serif;
-  font-size: 6.4cqw; letter-spacing: .04em; line-height: 1.15;
-  color: #f0e6c8;
+  font-size: 5.6cqw; letter-spacing: .03em; line-height: 1.15;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  text-shadow: 0 2px 0 #000, 0 0 12px rgba(232,163,61,.35);
+  color: #f2e8c8;
+  text-shadow: 0 2px 4px #000;
 }
 .sasp-artist {
-  margin-top: .6cqh;
-  font-size: 3.8cqw; letter-spacing: .18em; text-transform: uppercase;
-  color: #b9c9a8;
+  margin-top: .5cqh;
+  font-size: 3.8cqw; letter-spacing: .08em;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  text-shadow: 0 1px 2px #000;
+  color: #d8b36a;
+  text-shadow: 0 1px 3px #000;
 }
-.sasp-artist.sasp-status { color: #e8a33d; }
+.sasp-artist.sasp-status { color: #7CFF6B; }
 
-.sasp-progress { margin-top: 1.2cqh; padding: 0 1%; }
+/* ---------- progress on the dark green panel ---------- */
+.sasp-progress {
+  position: absolute; z-index: 3;
+  left: 54%; right: 8%; top: 52%;
+}
 .sasp-bar { position: relative; height: 2.6cqh; cursor: pointer; touch-action: none; }
 .sasp-bar::before {
   content: ''; position: absolute; left: 0; right: 0; top: 50%;
-  height: 6px; margin-top: -3px; border-radius: 3px;
-  background: rgba(240,230,200,.14);
-  box-shadow: inset 0 1px 3px rgba(0,0,0,.7);
-  border: 1px solid rgba(240,230,200,.12);
+  height: 5px; margin-top: -2.5px; border-radius: 3px;
+  background: rgba(242,232,200,.16);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.7);
 }
 .sasp-bar-fill {
-  position: absolute; left: 0; top: 50%; height: 6px; margin-top: -3px;
+  position: absolute; left: 0; top: 50%; height: 5px; margin-top: -2.5px;
   width: 0%; border-radius: 3px;
-  background: linear-gradient(90deg, #7ec850, #e8a33d);
-  box-shadow: 0 0 10px rgba(126,200,80,.7);
+  background: linear-gradient(90deg, #d8b36a, #7CFF6B);
+  box-shadow: 0 0 8px rgba(216,179,106,.6);
 }
 .sasp-bar-knob {
   position: absolute; top: 50%;
-  width: 3.4cqw; height: 3.4cqw; margin: -1.7cqw 0 0 -1.7cqw;
-  border-radius: 50%; background: #7ec850; border: 2px solid #f0e6c8;
-  box-shadow: 0 0 12px rgba(126,200,80,.9);
+  width: 3cqw; height: 3cqw; margin: -1.5cqw 0 0 -1.5cqw;
+  border-radius: 50%;
+  background: #f2e8c8; border: 2px solid #d8b36a;
+  box-shadow: 0 0 8px rgba(216,179,106,.8);
 }
 .sasp-times {
-  display: flex; justify-content: space-between; margin-top: .5cqh;
-  font-size: 3.2cqw; letter-spacing: .1em; color: #8fa07c;
+  display: flex; justify-content: space-between; margin-top: .4cqh;
+  font-size: 3.1cqw; letter-spacing: .05em; color: #b8a878;
   text-shadow: 0 1px 2px #000;
 }
 
-/* ---------- lyric / stage panel ---------- */
-.sasp-stagewrap {
-  position: relative;
-  flex: 1 1 auto; min-height: 0;
-  overflow: hidden;
-  background: #0e1a12;
-}
-.sasp-stagebg {
-  position: absolute; inset: 0; z-index: 1;
-  width: 100%; height: 100%;
-  object-fit: cover; object-position: center 18%;
-  opacity: .9;
-}
-/* ambient glow while no lyrics provider is attached — pure CSS,
-   no fake data, no fake FFT */
-.sasp-ambient {
-  position: absolute; inset: 0; z-index: 2; pointer-events: none;
-  background:
-    radial-gradient(60% 30% at 50% 30%, rgba(126,200,80,.18), transparent 70%),
-    radial-gradient(50% 26% at 50% 66%, rgba(232,163,61,.12), transparent 70%);
-  animation: sasp-breathe 8s ease-in-out infinite;
-  mix-blend-mode: screen;
-}
-@keyframes sasp-breathe {
-  0%, 100% { opacity: .55; transform: scale(1); }
-  50% { opacity: .9; transform: scale(1.06); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .sasp-ambient { animation: none; }
-}
-
-/* transparent DOM layer for the future lyric engine (LRCLIB).
-   A renderer mounted via setLyricsRenderer() owns this node. */
+/* ---------- lyric stage: over the faint graffiti ---------- */
 .sasp-lyrics {
   position: absolute; z-index: 3;
-  left: 7%; right: 7%; top: 6%; bottom: 34%;
+  left: 54%; right: 8%; top: 58%; bottom: 24%;
   overflow: hidden;
   display: flex; flex-direction: column; justify-content: center;
-  text-align: center; gap: 1.2cqh;
+  text-align: left; gap: 1cqh;
   pointer-events: none;
 }
 .sasp-lyrics.has-lyrics { pointer-events: auto; }
-
-/* lyric line hooks for the future LRCLIB pass */
 .sa-lyric-line {
-  font-family: 'Bank Gothic', 'Arial Narrow', sans-serif;
-  font-size: 4.4cqw; line-height: 1.35; letter-spacing: .08em;
-  color: #f0e6c8; opacity: .6;
-  text-shadow: 0 0 8px rgba(126,200,80,.45), 0 2px 4px #000;
-  transition: opacity .3s ease, transform .3s ease;
+  font-size: 3.9cqw; line-height: 1.35; color: #e8dcc0; opacity: .6;
+  text-shadow: 0 2px 4px #000;
+  transition: opacity .3s ease;
 }
-.sa-lyric-line.ghost { opacity: .32; font-size: 3.8cqw; }
-.sa-lyric-line.next { opacity: .55; }
+.sa-lyric-line.ghost { opacity: .32; font-size: 3.5cqw; }
+.sa-lyric-line.next { opacity: .52; }
 .sa-lyric-line.active {
-  opacity: 1; color: #fff; font-size: 5.4cqw;
-  text-shadow: 0 0 14px rgba(126,200,80,.9), 0 0 34px rgba(126,200,80,.45), 0 2px 4px #000;
+  opacity: 1; font-size: 4.6cqw; color: #d8b36a;
+  text-shadow: 0 2px 4px #000, 0 0 12px rgba(216,179,106,.4);
 }
 
-/* ---------- transport: chunky street-sign buttons ---------- */
+/* ---------- transport in the green bay below the album ---------- */
 .sasp-controls {
-  position: absolute; z-index: 4; left: 0; right: 0; bottom: 0;
-  display: flex; align-items: center; justify-content: center;
-  gap: 4.5cqw; padding: 2.8cqh 0 3.6cqh;
-  background: linear-gradient(180deg, transparent, rgba(10,18,12,.55) 55%, rgba(10,18,12,.8));
+  position: absolute; z-index: 3;
+  left: 5%; width: 44%; bottom: 3%;
+  display: flex; align-items: center; justify-content: center; gap: 4cqw;
 }
 .sasp-tbtn {
-  width: 15cqw; height: 11cqw; min-width: 64px; min-height: 48px;
-  border-radius: 10px; cursor: pointer;
+  width: 12cqw; height: 12cqw; min-width: 52px; min-height: 52px;
+  border-radius: 50%; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  color: #f0e6c8; background: #14231a;
-  border: 2px solid rgba(240,230,200,.55);
-  box-shadow: 0 3px 0 rgba(0,0,0,.55), 0 0 14px rgba(126,200,80,.35), inset 0 0 10px rgba(126,200,80,.15);
+  color: #f2e8c8; background: rgba(10,18,12,.55);
+  border: 2px solid rgba(216,179,106,.85);
+  box-shadow: 0 0 14px rgba(216,179,106,.35), inset 0 0 10px rgba(216,179,106,.15);
   -webkit-tap-highlight-color: transparent;
 }
 .sasp-tbtn.big {
-  width: 18cqw; height: 13cqw; min-width: 76px; min-height: 58px;
-  color: #1a1206; background: #e8a33d;
-  border-color: #f0e6c8;
-  box-shadow: 0 3px 0 rgba(0,0,0,.55), 0 0 20px rgba(232,163,61,.6), inset 0 0 10px rgba(255,255,255,.2);
+  width: 14.5cqw; height: 14.5cqw; min-width: 62px; min-height: 62px;
+  border-color: #7CFF6B;
+  box-shadow: 0 0 16px rgba(124,255,107,.45), inset 0 0 10px rgba(124,255,107,.2);
 }
-.sasp-tbtn:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,.55); }
+.sasp-tbtn:active { transform: scale(.93); }
 .sasp-tbtn svg {
-  width: 48%; height: 52%; fill: currentColor;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,.6));
+  width: 52%; height: 52%; fill: currentColor;
+  filter: drop-shadow(0 1px 2px #000);
 }
 
-/* ---------- themed reconnect (no dark takeover) ---------- */
-.sasp-connect {
-  position: absolute; inset: 0; z-index: 10;
-  display: flex; align-items: center; justify-content: center;
-  background: transparent;
+/* ---------- themed idle / connect: pinned on the dark panel ---------- */
+.sasp-idle {
+  position: absolute; z-index: 4;
+  left: 50%; right: 6%; top: 38%; bottom: 30%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; gap: 1.2cqh;
   pointer-events: none;
 }
-.sasp-connect[hidden] { display: none; }
-.sasp-connect-pill {
-  pointer-events: auto;
-  text-align: center; padding: 4cqh 8cqw;
-  background: rgba(14,26,18,.78);
-  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
-  border: 2px solid rgba(240,230,200,.5); border-radius: 14px;
-  box-shadow: 0 0 26px rgba(126,200,80,.35), inset 0 0 18px rgba(126,200,80,.12);
-}
-.sasp-connect-note svg {
-  width: 11cqw; height: 11cqw; fill: #7ec850;
-  filter: drop-shadow(0 0 6px rgba(126,200,80,.8));
+.sasp-idle[hidden] { display: none; }
+.sasp-idle-kicker {
+  font-family: 'Beckett', 'Bank Gothic', serif;
+  font-size: 5.6cqw; letter-spacing: .04em;
+  color: #f2e8c8;
+  text-shadow: 0 2px 4px #000, 0 0 14px rgba(216,179,106,.4);
 }
 .sasp-connect-btn {
-  margin-top: 2.4cqh; padding: 1.8cqh 6cqw;
-  font-family: 'Beckett', 'Bank Gothic', serif;
-  font-size: 5.4cqw; letter-spacing: .08em;
-  color: #1a1206; background: #e8a33d;
-  border: 2px solid #f0e6c8; border-radius: 10px; cursor: pointer;
-  box-shadow: 0 3px 0 rgba(0,0,0,.5), 0 0 18px rgba(232,163,61,.55);
-}
-.sasp-connect-btn:active { transform: translateY(2px); }
-.sasp-connect-hint {
-  margin-top: 2cqh; font-size: 3.5cqw; line-height: 1.5;
+  pointer-events: auto;
+  padding: 1cqh 6cqw;
   font-family: 'Bank Gothic', 'Arial Narrow', sans-serif;
-  letter-spacing: .1em; text-transform: uppercase;
-  color: #b9c9a8; opacity: .9; text-shadow: 0 1px 3px #000;
+  font-size: 4.4cqw; letter-spacing: .1em;
+  color: #0a120c; background: #d8b36a;
+  border: none; border-radius: 999px; cursor: pointer;
+  box-shadow: 0 0 16px rgba(216,179,106,.5);
+}
+.sasp-connect-btn:active { transform: scale(.96); }
+.sasp-idle-hint {
+  font-size: 3.2cqw; line-height: 1.5;
+  color: #b8a878; opacity: .95; text-shadow: 0 1px 3px #000;
 }

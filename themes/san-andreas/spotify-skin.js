@@ -1,23 +1,21 @@
 /* ============================================================
    WayStation — San Andreas Spotify skin (dashboard mode only).
    ------------------------------------------------------------
-   Recomposed from the SA concept art
-   (themes/san-andreas/spotify/*.png). The art is a UI skin, not
-   a background: roots stay dark green and the map is not asked
-   to show through — this is the Grove-street garage wall the
-   player leans on while the music plays.
+   The supplied concept art (themes/san-andreas/spotify/hud.png,
+   1254x1254 with transparency) IS the widget: it is overlaid as
+   one unified skin/chrome layer and live HTML is positioned into
+   its defined openings. The art dictates the DOM placement.
 
-   Portrait composition (480x720 automotive pane):
+   Measured openings (fractions of the hud):
+   - album cut-out : x 0.0518-0.4585, y 0.3070-0.6976
+                     (art lives UNDER the hud, seen through the
+                     frame's transparent opening)
+   - dark panel    : right of the frame, x ~0.54-0.92,
+                     y ~0.34-0.76 (title, artist, progress, lyrics)
+   - transport     : the empty green bay below the album frame
 
-     header    — SanAndreas graffiti logo + palms + skyline band
-     album     — square album art UNDER the art's cream-bordered
-                 dark green frame (z-order: art below, frame over)
-     track     — title / artist / progress on the dark green band
-     stage     — the art's dark green panel, ~25% of the pane.
-                 Transparent DOM layer (.sasp-lyrics) hosts live
-                 lyrics later; ambient glow until then.
-     controls  — prev / play-pause / next, chunky street-sign
-                 buttons, large touch areas
+   Z-order: art placeholder < album art < hud < lyrics / track /
+   controls / idle. The map shows through transparent pixels.
 
    LYRICS (future pass):
      The stage exposes [data-lyrics-stage] plus
@@ -33,10 +31,6 @@
 
 (function () {
   const ART = 'themes/san-andreas/spotify/';
-
-  /* Album-art placement: square, centered in the frame's measured
-     interior opening, as fractions of album.png (560x541). */
-  const FRAME = { x0: 0.07, y0: 0.028, x1: 0.97, y1: 0.905 };
 
   const SVG = {
     play: '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',
@@ -68,49 +62,32 @@
     /* ---------- dom ---------- */
     function build() {
       root = el('div', 'sasp');
-      const artStyle =
-        'left:' + (FRAME.x0 * 100).toFixed(2) + '%;' +
-        'top:' + (FRAME.y0 * 100).toFixed(2) + '%;' +
-        'width:' + ((FRAME.x1 - FRAME.x0) * 100).toFixed(2) + '%;' +
-        'height:' + ((FRAME.y1 - FRAME.y0) * 100).toFixed(2) + '%;';
       root.innerHTML =
-        '<img class="sasp-header" src="' + ART + 'header.png" alt="" aria-hidden="true">' +
-
-        '<div class="sasp-albumzone">' +
-          '<img class="sasp-art a" style="' + artStyle + '" alt="">' +
-          '<img class="sasp-art b" style="' + artStyle + '" alt="">' +
-          '<img class="sasp-albumframe" src="' + ART + 'album.png" alt="" aria-hidden="true">' +
-        '</div>' +
-
+        '<div class="sasp-art-idle">' + SVG.note + '</div>' +
+        '<img class="sasp-art a" alt="">' +
+        '<img class="sasp-art b" alt="">' +
+        '<img class="sasp-hud" src="' + ART + 'hud.png" alt="" aria-hidden="true">' +
         '<div class="sasp-track">' +
-          '<div class="sasp-title">—</div>' +
-          '<div class="sasp-artist">—</div>' +
-          '<div class="sasp-progress">' +
-            '<div class="sasp-bar" role="slider" aria-label="Seek" tabindex="0" aria-valuemin="0" aria-valuemax="100">' +
-              '<div class="sasp-bar-fill"></div>' +
-              '<div class="sasp-bar-knob"></div>' +
-            '</div>' +
-            '<div class="sasp-times"><span class="sasp-elapsed">0:00</span><span class="sasp-duration">0:00</span></div>' +
-          '</div>' +
+          '<div class="sasp-title">Grove Street Radio</div>' +
+          '<div class="sasp-artist">Connect Spotify to play</div>' +
         '</div>' +
-
-        '<div class="sasp-stagewrap">' +
-          '<img class="sasp-stagebg" src="' + ART + 'stage.png" alt="" aria-hidden="true">' +
-          '<div class="sasp-ambient" aria-hidden="true"></div>' +
-          '<div class="sasp-lyrics" data-lyrics-stage="1"></div>' +
-          '<div class="sasp-controls">' +
-            '<button class="sasp-tbtn" data-act="prev" aria-label="Previous">' + SVG.prev + '</button>' +
-            '<button class="sasp-tbtn big" data-act="toggle" aria-label="Play or pause">' + SVG.play + '</button>' +
-            '<button class="sasp-tbtn" data-act="next" aria-label="Next">' + SVG.next + '</button>' +
+        '<div class="sasp-progress">' +
+          '<div class="sasp-bar" role="slider" aria-label="Seek" tabindex="0" aria-valuemin="0" aria-valuemax="100">' +
+            '<div class="sasp-bar-fill"></div>' +
+            '<div class="sasp-bar-knob"></div>' +
           '</div>' +
+          '<div class="sasp-times"><span class="sasp-elapsed">0:00</span><span class="sasp-duration">0:00</span></div>' +
         '</div>' +
-
-        '<div class="sasp-connect" hidden>' +
-          '<div class="sasp-connect-pill">' +
-            '<div class="sasp-connect-note">' + SVG.note + '</div>' +
-            '<button class="sasp-connect-btn" type="button">Connect Spotify</button>' +
-            '<p class="sasp-connect-hint">Music plays on your phone or car.<br>WayStation just drives it.</p>' +
-          '</div>' +
+        '<div class="sasp-controls">' +
+          '<button class="sasp-tbtn" data-act="prev" aria-label="Previous">' + SVG.prev + '</button>' +
+          '<button class="sasp-tbtn big" data-act="toggle" aria-label="Play or pause">' + SVG.play + '</button>' +
+          '<button class="sasp-tbtn" data-act="next" aria-label="Next">' + SVG.next + '</button>' +
+        '</div>' +
+        '<div class="sasp-lyrics" data-lyrics-stage="1"></div>' +
+        '<div class="sasp-idle">' +
+          '<div class="sasp-idle-kicker">Grove Street Radio</div>' +
+          '<button class="sasp-connect-btn" type="button">Connect Spotify</button>' +
+          '<p class="sasp-idle-hint">Music plays on your phone or car.<br>WayStation controls it.</p>' +
         '</div>';
       return root;
     }
@@ -136,13 +113,21 @@
     /* ---------- render ---------- */
     function render() {
       const s = core.getState();
-      const conn = q('.sasp-connect');
+      const idle = q('.sasp-idle');
       const connected = core.isConnected();
-      conn.hidden = connected;
-      if (!connected) { stopTick(); return; }
-
+      idle.hidden = connected;
       const title = q('.sasp-title'), artist = q('.sasp-artist');
       const toggle = q('.sasp-tbtn[data-act="toggle"]');
+      if (!connected) {
+        // Disconnected state stays inside the one widget: themed idle
+        // text on the frame's band, connect CTA in the stage.
+        stopTick();
+        title.textContent = 'Grove Street Radio';
+        artist.textContent = 'Connect Spotify to play';
+        artist.classList.remove('sasp-status');
+        setArt('');
+        return;
+      }
       if (!s || !s.item) {
         title.textContent = 'Nothing playing';
         artist.textContent = 'Press play in Spotify';

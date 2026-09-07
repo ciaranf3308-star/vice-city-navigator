@@ -1,26 +1,23 @@
 /* ============================================================
    WayStation — RDR2 "Frontier" Spotify skin (dashboard mode only).
    ------------------------------------------------------------
-   Recomposed from the transparent concept art
-   (themes/rdr2/spotify/*.png). The art is a TRANSPARENT UI
-   skin, not a background: every root here is transparent and
-   the map stays visible behind transparent pixels. There is
-   no opaque panel, no modal, no close button, no spectrum
-   strip, no generic Spotify chrome.
+   The supplied concept art (themes/rdr2/spotify/hud.png,
+   1254x1254 with transparency) IS the widget: it is overlaid as
+   one unified skin/chrome layer and live HTML is positioned into
+   its defined openings. The art dictates the DOM placement.
 
-   Portrait composition (~2:3 automotive pane):
+   Measured openings (fractions of the hud):
+   - album cut-out : x 0.1555-0.4466, y 0.2791-0.5661
+                     (art lives UNDER the hud, seen through the
+                     brass frame's transparent opening)
+   - lyric stage   : dark wood right of the frame,
+                     x ~0.48-0.92, y ~0.38-0.68
+   - parchment     : the torn strip, x ~0.20-0.90, y ~0.70-0.86
+                     (title, artist, progress live here)
+   - transport     : brass coins below the parchment
 
-     header    — sunset/signpost/lantern band (may overlap edges)
-     album     — square live album art UNDER the art's dark
-                 wood/leather frame (z-order: art below, frame
-                 artwork over it)
-     track     — title / artist / progress on a brass-trimmed
-                 plaque below the frame
-     stage     — the art's parchment strip, ~30% of the pane.
-                 Transparent DOM layer (.rdsp-lyrics) hosts live
-                 lyrics later; ambient lantern warmth until then.
-     controls  — prev / play-pause / next, aged brass + iron,
-                 large touch areas
+   Z-order: art placeholder < album art < hud < lyrics / track /
+   controls / idle. The map shows through transparent pixels.
 
    LYRICS (future pass):
      The stage exposes [data-lyrics-stage] plus
@@ -36,10 +33,6 @@
 
 (function () {
   const ART = 'themes/rdr2/spotify/';
-
-  /* Album-art placement: square, centered in the frame's measured
-     interior opening, as fractions of album.png. */
-  const FRAME = { x0: 0.3047, y0: 0.14, x1: 0.875, y1: 0.86 };
 
   const SVG = {
     play: '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',
@@ -71,49 +64,32 @@
     /* ---------- dom ---------- */
     function build() {
       root = el('div', 'rdsp');
-      const artStyle =
-        'left:' + (FRAME.x0 * 100).toFixed(2) + '%;' +
-        'top:' + (FRAME.y0 * 100).toFixed(2) + '%;' +
-        'width:' + ((FRAME.x1 - FRAME.x0) * 100).toFixed(2) + '%;' +
-        'height:' + ((FRAME.y1 - FRAME.y0) * 100).toFixed(2) + '%;';
       root.innerHTML =
-        '<img class="rdsp-header" src="' + ART + 'header.png" alt="" aria-hidden="true">' +
-
-        '<div class="rdsp-albumzone">' +
-          '<img class="rdsp-art a" style="' + artStyle + '" alt="">' +
-          '<img class="rdsp-art b" style="' + artStyle + '" alt="">' +
-          '<img class="rdsp-albumframe" src="' + ART + 'album.png" alt="" aria-hidden="true">' +
-        '</div>' +
-
+        '<div class="rdsp-art-idle">' + SVG.note + '</div>' +
+        '<img class="rdsp-art a" alt="">' +
+        '<img class="rdsp-art b" alt="">' +
+        '<img class="rdsp-hud" src="' + ART + 'hud.png" alt="" aria-hidden="true">' +
         '<div class="rdsp-track">' +
-          '<div class="rdsp-title">—</div>' +
-          '<div class="rdsp-artist">—</div>' +
-          '<div class="rdsp-progress">' +
-            '<div class="rdsp-bar" role="slider" aria-label="Seek" tabindex="0" aria-valuemin="0" aria-valuemax="100">' +
-              '<div class="rdsp-bar-fill"></div>' +
-              '<div class="rdsp-bar-knob"></div>' +
-            '</div>' +
-            '<div class="rdsp-times"><span class="rdsp-elapsed">0:00</span><span class="rdsp-duration">0:00</span></div>' +
-          '</div>' +
+          '<div class="rdsp-title">Frontier Radio</div>' +
+          '<div class="rdsp-artist">Connect Spotify to play</div>' +
         '</div>' +
-
-        '<div class="rdsp-stagewrap">' +
-          '<img class="rdsp-stagebg" src="' + ART + 'stage.png" alt="" aria-hidden="true">' +
-          '<div class="rdsp-ambient" aria-hidden="true"></div>' +
-          '<div class="rdsp-lyrics" data-lyrics-stage="1"></div>' +
-          '<div class="rdsp-controls">' +
-            '<button class="rdsp-tbtn" data-act="prev" aria-label="Previous">' + SVG.prev + '</button>' +
-            '<button class="rdsp-tbtn big" data-act="toggle" aria-label="Play or pause">' + SVG.play + '</button>' +
-            '<button class="rdsp-tbtn" data-act="next" aria-label="Next">' + SVG.next + '</button>' +
+        '<div class="rdsp-progress">' +
+          '<div class="rdsp-bar" role="slider" aria-label="Seek" tabindex="0" aria-valuemin="0" aria-valuemax="100">' +
+            '<div class="rdsp-bar-fill"></div>' +
+            '<div class="rdsp-bar-knob"></div>' +
           '</div>' +
+          '<div class="rdsp-times"><span class="rdsp-elapsed">0:00</span><span class="rdsp-duration">0:00</span></div>' +
         '</div>' +
-
-        '<div class="rdsp-connect" hidden>' +
-          '<div class="rdsp-connect-pill">' +
-            '<div class="rdsp-connect-note">' + SVG.note + '</div>' +
-            '<button class="rdsp-connect-btn" type="button">Connect Spotify</button>' +
-            '<p class="rdsp-connect-hint">Music plays on your phone or car.<br>WayStation just drives it.</p>' +
-          '</div>' +
+        '<div class="rdsp-controls">' +
+          '<button class="rdsp-tbtn" data-act="prev" aria-label="Previous">' + SVG.prev + '</button>' +
+          '<button class="rdsp-tbtn big" data-act="toggle" aria-label="Play or pause">' + SVG.play + '</button>' +
+          '<button class="rdsp-tbtn" data-act="next" aria-label="Next">' + SVG.next + '</button>' +
+        '</div>' +
+        '<div class="rdsp-lyrics" data-lyrics-stage="1"></div>' +
+        '<div class="rdsp-idle">' +
+          '<div class="rdsp-idle-kicker">Frontier Radio</div>' +
+          '<button class="rdsp-connect-btn" type="button">Connect Spotify</button>' +
+          '<p class="rdsp-idle-hint">Music plays on your phone or car.<br>WayStation controls it.</p>' +
         '</div>';
       return root;
     }
@@ -139,13 +115,21 @@
     /* ---------- render ---------- */
     function render() {
       const s = core.getState();
-      const conn = q('.rdsp-connect');
+      const idle = q('.rdsp-idle');
       const connected = core.isConnected();
-      conn.hidden = connected;
-      if (!connected) { stopTick(); return; }
-
+      idle.hidden = connected;
       const title = q('.rdsp-title'), artist = q('.rdsp-artist');
       const toggle = q('.rdsp-tbtn[data-act="toggle"]');
+      if (!connected) {
+        // Disconnected state stays inside the one widget: themed idle
+        // text on the frame's band, connect CTA in the stage.
+        stopTick();
+        title.textContent = 'Frontier Radio';
+        artist.textContent = 'Connect Spotify to play';
+        artist.classList.remove('rdsp-status');
+        setArt('');
+        return;
+      }
       if (!s || !s.item) {
         title.textContent = 'Nothing playing';
         artist.textContent = 'Press play in Spotify';
