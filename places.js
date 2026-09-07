@@ -7,7 +7,12 @@
 
    Pipeline: GPS fix / 750 m movement -> searchNearby (5 category
    groups) -> cache (memory + localStorage, 24 h TTL) -> GeoJSON
-   source -> zoom-tiered symbol layers -> tap for VC place card.
+   source -> single symbol layer with importance-based,
+   zoom-band visibility -> tap for VC place card.
+
+   Visibility is a pure render rule over the cache: zooming out
+   never triggers new Google fetches, and zooming back in
+   restores cached POIs immediately.
 
    Table A place types verified against the official Places API
    type table (2026-09-07). Only Table A values are used in
@@ -23,29 +28,61 @@
   /* Category groups — one Nearby Search request per group so no single
      category can crowd the others out (maxResultCount is per request). */
   const POI_GROUPS = [
-    { id: 'driving',  types: ['gas_station', 'electric_vehicle_charging_station', 'car_repair', 'car_wash', 'parking', 'airport'] },
+    { id: 'driving',  types: ['gas_station', 'electric_vehicle_charging_station', 'car_repair', 'car_wash', 'parking', 'airport', 'train_station'] },
     { id: 'food',     types: ['restaurant', 'fast_food_restaurant', 'cafe', 'coffee_shop', 'bakery'] },
     { id: 'useful',   types: ['hospital', 'pharmacy', 'police', 'bank', 'atm'] },
     { id: 'shopping', types: ['supermarket', 'grocery_store', 'shopping_mall', 'convenience_store', 'department_store'] },
-    { id: 'leisure',   types: ['bar', 'pub', 'night_club', 'movie_theater', 'gym', 'hotel'] },
+    { id: 'leisure',   types: ['bar', 'pub', 'night_club', 'movie_theater', 'gym', 'hotel', 'stadium'] },
   ];
 
-  /* Zoom tiers (suggested behaviour):
-       essential: zoom 12+  (driving services, hospital, police, airport)
-       useful:    zoom 14+  (food, pharmacy, bank/atm, shopping, hotel, gym)
-       leisure:   zoom 16+  (bars, pubs, clubs, cinema) */
-  const TIER_BY_TYPE = {
-    gas_station: 'essential', electric_vehicle_charging_station: 'essential',
-    car_repair: 'essential', car_wash: 'essential', parking: 'essential',
-    airport: 'essential', hospital: 'essential', police: 'essential',
-    pharmacy: 'useful', bank: 'useful', atm: 'useful',
-    restaurant: 'useful', fast_food_restaurant: 'useful', bakery: 'useful',
-    cafe: 'useful', coffee_shop: 'useful',
-    supermarket: 'useful', grocery_store: 'useful', shopping_mall: 'useful',
-    convenience_store: 'useful', department_store: 'useful',
-    gym: 'useful', hotel: 'useful',
-    bar: 'leisure', pub: 'leisure', night_club: 'leisure', movie_theater: 'leisure',
+  /* Importance-based visibility (GTA-style declutter).
+     Every POI scores 0-100 from its Google type; specific
+     subtypes win over generic types (same rule as blip art).
+     Render bands below pick a minimum importance per zoom and
+     cap how many POIs may show in the viewport at wider zooms.
+     "Major" is inferred from type alone — the field mask
+     deliberately stays minimal, so e.g. every airport scores
+     100 (airports are rare enough that type is signal enough). */
+  const IMPORTANCE_BY_TYPE = {
+    airport: 100,
+    hospital: 90,
+    shopping_mall: 85,
+    department_store: 80, train_station: 80,
+    stadium: 75,
+    police: 70,
+    gas_station: 60, electric_vehicle_charging_station: 60, car_repair: 60,
+    car_wash: 55, parking: 55,
+    supermarket: 50, pharmacy: 50,
+    hotel: 50, motel: 50, hostel: 50, guest_house: 50, inn: 50,
+    grocery_store: 45, bank: 45,
+    atm: 40, convenience_store: 40,
+    gym: 35, fitness_center: 35, sports_club: 35,
+    restaurant: 30, fast_food_restaurant: 30,
+    cafe: 30, coffee_shop: 30, bakery: 30,
+    pizza_restaurant: 30, hamburger_restaurant: 30, chicken_restaurant: 30,
+    bar: 20, pub: 20, night_club: 20, movie_theater: 20,
   };
+  const DEFAULT_IMPORTANCE = 30; // unknown types behave like ordinary food/shop POIs
+
+  /* Zoom bands: the further out, the cleaner the map.
+       16+   full local set (everything cached)
+       14-16 useful local POIs (no food-by-default, no nightlife)
+       12-14 essential / high-importance only; low-importance
+             members (petrol, garages) lose the cap race in
+             dense areas — "if not too dense" falls out
+             naturally from importance sorting
+       10-12 major landmarks only, small viewport cap
+       <10   no ambient POIs at all (county-scale is clean) */
+  const ZOOM_BANDS = [
+    { minZoom: 16, minImportance: 0,  cap: Infinity },
+    { minZoom: 14, minImportance: 50, cap: Infinity },
+    { minZoom: 12, minImportance: 60, cap: 50 },
+    { minZoom: 10, minImportance: 75, cap: 12 },
+  ];
+  function bandForZoom(z) {
+    for (const b of ZOOM_BANDS) if (z >= b.minZoom) return b;
+    return null; // below 10: hide everything
+  }
 
   /* Google place type -> Vice City blip asset (blip_<name>.png).
      Specific subtypes are listed so they win over generic types. */
@@ -75,6 +112,9 @@
     hotel: 'saveGame', motel: 'saveGame', hostel: 'saveGame',
     guest_house: 'saveGame', inn: 'saveGame',
     gym: 'gym', fitness_center: 'gym', sports_club: 'gym',
+    stadium: 'race',
+    /* transport hubs */
+    train_station: 'waypoint',
     /* shopping — commerce blip */
     supermarket: 'cash', grocery_store: 'cash', convenience_store: 'cash',
     department_store: 'cash', shopping_mall: 'cash',
@@ -131,13 +171,13 @@
     }
     return 'qmark';
   }
-  function tierForType(primaryType, types) {
+  function importanceForType(primaryType, types) {
     const candidates = [primaryType, ...(types || [])].filter(Boolean);
     for (const t of candidates) {
-      const tier = TIER_BY_TYPE[t];
-      if (tier) return tier;
+      const imp = IMPORTANCE_BY_TYPE[t];
+      if (typeof imp === 'number') return imp;
     }
-    return 'useful';
+    return DEFAULT_IMPORTANCE;
   }
 
   async function searchGroup(group, lnglat) {
@@ -175,7 +215,7 @@
         primaryType, types,
         displayName: (p.displayName && p.displayName.text) || 'Unnamed place',
         blip: blipForPlace(primaryType, types),
-        tier: tierForType(primaryType, types),
+        importance: importanceForType(primaryType, types),
         fetchedAt: now,
       });
       added++;
@@ -218,11 +258,11 @@
   }
 
   /* ---------------- map rendering ---------------- */
-  const LAYERS = [
-    { id: 'vcn-poi-essential', tier: 'essential', minzoom: 12, size: [12, 2.4, 16, 3.2] },
-    { id: 'vcn-poi-useful',    tier: 'useful',    minzoom: 14, size: [14, 2.0, 16, 2.8] },
-    { id: 'vcn-poi-leisure',   tier: 'leisure',   minzoom: 16, size: [16, 1.8, 18, 2.6] },
-  ];
+  /* One symbol layer; visibility is computed in JS from the zoom
+     band, so zooming is purely a rendering rule over the existing
+     cache — no extra Google fetches, and cached POIs reappear
+     instantly when zooming back in. */
+  const POI_LAYER_ID = 'vcn-poi';
   function preloadBlipImages() {
     const names = [...new Set(Object.values(GOOGLE_TYPE_TO_BLIP).concat(['qmark']))];
     for (const name of names) {
@@ -238,36 +278,49 @@
   function ensureLayers() {
     if (map.getSource('vcn-pois')) return;
     map.addSource('vcn-pois', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
-    for (const L of LAYERS) {
-      map.addLayer({
-        id: L.id, type: 'symbol', source: 'vcn-pois', minzoom: L.minzoom,
-        filter: ['==', ['get', 'tier'], L.tier],
-        layout: {
-          'icon-image': ['concat', 'poi-', ['get', 'blip']],
-          'icon-size': ['interpolate', ['linear'], ['zoom'], L.size[0], L.size[1], L.size[2], L.size[3]],
-          'icon-anchor': 'center',
-          'icon-allow-overlap': false,
-          'icon-ignore-placement': false,
-          'icon-padding': 2,
-        },
-      });
-    }
+    map.addLayer({
+      id: POI_LAYER_ID, type: 'symbol', source: 'vcn-pois',
+      layout: {
+        'icon-image': ['concat', 'poi-', ['get', 'blip']],
+        'icon-size': ['interpolate', ['linear'], ['zoom'], 10, 2.2, 14, 2.6, 16, 3.0, 18, 3.4],
+        'icon-anchor': 'center',
+        'icon-allow-overlap': false,
+        'icon-ignore-placement': false,
+        'icon-padding': 2,
+        // higher importance wins any residual icon collisions
+        'symbol-sort-key': ['get', 'importance'],
+      },
+    });
   }
   function renderPois() {
     if (!map || !map.getSource('vcn-pois')) return;
     const now = Date.now(), ttl = ttlMs();
-    const features = [];
-    for (const rec of memCache.values()) {
-      if (now - rec.fetchedAt > ttl) continue;
-      features.push({
-        type: 'Feature',
-        geometry: { type: 'Point', coordinates: [rec.lng, rec.lat] },
-        properties: {
-          placeId: rec.placeId, name: rec.displayName,
-          type: rec.primaryType || '', blip: rec.blip, tier: rec.tier,
-        },
-      });
+    const band = bandForZoom(map.getZoom());
+    let picked = [];
+    if (band) {
+      // At capped bands only POIs inside the current viewport compete
+      // for the limited slots — highest importance wins.
+      const bounds = (band.cap !== Infinity && typeof map.getBounds === 'function') ? map.getBounds() : null;
+      for (const rec of memCache.values()) {
+        if (now - rec.fetchedAt > ttl) continue;
+        // older cached records predate importance scoring — derive it
+        const imp = (typeof rec.importance === 'number')
+          ? rec.importance : importanceForType(rec.primaryType, rec.types);
+        if (imp < band.minImportance) continue;
+        if (bounds && !bounds.contains([rec.lng, rec.lat])) continue;
+        picked.push([imp, rec]);
+      }
+      picked.sort((a, b) => b[0] - a[0]);
+      if (picked.length > band.cap) picked.length = band.cap;
     }
+    const features = picked.map(([imp, rec]) => ({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [rec.lng, rec.lat] },
+      properties: {
+        placeId: rec.placeId, name: rec.displayName,
+        type: rec.primaryType || '', blip: rec.blip, importance: imp,
+      },
+    }));
     map.getSource('vcn-pois').setData({ type: 'FeatureCollection', features });
   }
 
@@ -296,7 +349,7 @@
     document.getElementById('poi-close').addEventListener('click', () => {
       document.getElementById('poi-card').hidden = true;
     });
-    const layerIds = LAYERS.map(l => l.id);
+    const layerIds = [POI_LAYER_ID];
     const onPoiClick = e => {
       const f = e.features && e.features[0];
       if (!f) return;
@@ -315,6 +368,9 @@
       preloadBlipImages();
       renderPois();   // show cached POIs immediately
       wireCard();
+      // re-evaluate visibility on pan/zoom — purely a render rule,
+      // the cache is untouched so zooming back in is instant
+      map.on('moveend', renderPois);
     },
     maybeRefresh,
     renderPois,
