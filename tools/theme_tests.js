@@ -146,7 +146,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v28"), 'SW shell cache v28');
+ok(swSrc.includes("ws-shell-v29"), 'SW shell cache v29');
 ok(swSrc.includes("ws-theme-v10"), 'SW theme cache v10');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
@@ -268,9 +268,14 @@ for (const banned of ['miniviz', 'stagepeek', 'fullstage', 'vcsp-viz', 'spectrum
 }
 ok(/\.vcsp\s*\{[^}]*background:\s*transparent/.test(vcSkinCss), 'VC skin root transparent');
 ok(/\.vcsp\s*\{[^}]*position:\s*absolute[^}]*translate:\s*0\s*-50%/.test(vcSkinCssCode), 'VC widget is one floating object (absolute, vertically centered)');
-ok(/\.vcsp-logo\s*\{[^}]*width:\s*80%[^}]*height:\s*auto/.test(vcSkinCssCode), 'VC logo full art, never cropped into a strip');
 ok(!/\.vcsp-logo\s*\{[^}]*object-fit/.test(vcSkinCssCode), 'VC logo has no object-fit crop');
-ok(/\.vcsp-stage\s*\{[^}]*position:\s*absolute[^}]*border-radius/.test(vcSkinCssCode), 'VC stage is an integrated rounded body, not a slab');
+ok(/\.vcsp\s*\{[^}]*width:\s*29cqw/.test(vcSkinCssCode), 'VC widget is substantial (29cqw wide), not skinny');
+ok(/\.vcsp-logo\s*\{[^}]*width:\s*98%/.test(vcSkinCssCode), 'VC logo oversized, crowning the widget');
+ok(vcSkinCssCode.includes('.vcsp-body'), 'VC unified body holds the composition');
+ok(/\.vcsp-albumcol\s*\{[^}]*width:\s*38%/.test(vcSkinCssCode), 'VC album column reduced to ~38%');
+ok(/\.vcsp-lyriccol\s*\{[^}]*left:\s*47%/.test(vcSkinCssCode), 'VC lyric stage sits BESIDE the album (~55% of body)');
+ok(vcSkinCssCode.includes('.vcsp-bottombar'), 'VC transport + progress ride the bottom of the body');
+ok(vcSkinJs.includes('vcsp-lyriccol') && vcSkinJs.includes('vcsp-bottombar'), 'VC skin JS builds the two-column HUD');
 ok(/\.vcsp-controls\s*\{[^}]*background:\s*none/.test(vcSkinCssCode), 'VC controls float on the art (no background slab)');
 ok(vcSkinCssCode.includes('.vcsp-idle') && !vcSkinCssCode.includes('vcsp-connect-pill'), 'VC idle/connect lives inside the widget, no generic card');
 ok(vcSkinJs.includes('vcsp-idle') && !vcSkinJsCode.includes('vcsp-connect\'') && !vcSkinJsCode.includes('vcsp-connect"'), 'VC skin JS renders the in-widget idle state');

@@ -9,19 +9,20 @@
    pixels. There is no opaque panel, no modal, no close
    button, no spectrum strip, no generic Spotify chrome.
 
-   Portrait composition (~2:3 floating widget over the full-screen map):
+   Wide composed HUD (~29:26 floating widget over the full-screen map):
 
      .vcsp      — ONE transparent floating object; the art defines the
                   silhouette, the map shows through transparent pixels
-     logo       — full Vice City logo art, never cropped, breaking the
-                  top/left edge of the object
-     frame      — album art UNDER the pink neon frame (z-order:
-                  placeholder < art < frame chrome); track / artist /
-                  progress live on the frame's own dark band
-     stage      — sunset lower body, rounded, tucked up under the
-                  frame; hosts the lyric DOM layer, the themed idle /
-                  connect state, the transport buttons (no slab) and
-                  the neon tube along its bottom edge
+     logo       — oversized Vice City neon, crowning the widget and
+                  breaking its top/left edges
+     body       — unified sunset-skyline body holding everything
+     albumcol   — LEFT ~38%: album art UNDER the pink neon frame
+                  (z-order: placeholder < art < frame chrome);
+                  title / artist on the frame's own dark band
+     lyriccol   — RIGHT ~55%: the lyric stage, the big canvas;
+                  themed connect state lives here when idle
+     bottombar  — transport + progress across the bottom of the body,
+                  visually secondary, no slab
 
    LYRICS (future pass):
      The stage exposes [data-lyrics-stage] plus
@@ -80,14 +81,38 @@
       root.innerHTML =
         '<img class="vcsp-logo" src="' + ART + 'header.png" alt="" aria-hidden="true">' +
 
-        '<div class="vcsp-frame">' +
-          '<div class="vcsp-art-idle" style="' + artStyle + '">' + SVG.note + '</div>' +
-          '<img class="vcsp-art a" style="' + artStyle + '" alt="">' +
-          '<img class="vcsp-art b" style="' + artStyle + '" alt="">' +
-          '<img class="vcsp-frameart" src="' + ART + 'album.png" alt="" aria-hidden="true">' +
-          '<div class="vcsp-track">' +
-            '<div class="vcsp-title">WayStation Radio</div>' +
-            '<div class="vcsp-artist">Connect Spotify to play</div>' +
+        '<div class="vcsp-body">' +
+          '<img class="vcsp-stagebg" src="' + ART + 'stage.png" alt="" aria-hidden="true">' +
+          '<div class="vcsp-ambient" aria-hidden="true"></div>' +
+
+          '<div class="vcsp-albumcol">' +
+            '<div class="vcsp-frame">' +
+              '<div class="vcsp-art-idle" style="' + artStyle + '">' + SVG.note + '</div>' +
+              '<img class="vcsp-art a" style="' + artStyle + '" alt="">' +
+              '<img class="vcsp-art b" style="' + artStyle + '" alt="">' +
+              '<img class="vcsp-frameart" src="' + ART + 'album.png" alt="" aria-hidden="true">' +
+              '<div class="vcsp-track">' +
+                '<div class="vcsp-title">WayStation Radio</div>' +
+                '<div class="vcsp-artist">Connect Spotify to play</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+
+          '<div class="vcsp-lyriccol">' +
+            '<div class="vcsp-lyrics" data-lyrics-stage="1"></div>' +
+            '<div class="vcsp-idle">' +
+              '<div class="vcsp-idle-kicker">WayStation Radio</div>' +
+              '<button class="vcsp-connect-btn" type="button">Connect Spotify</button>' +
+              '<p class="vcsp-idle-hint">Music plays on your phone or car.<br>WayStation controls it.</p>' +
+            '</div>' +
+          '</div>' +
+
+          '<div class="vcsp-bottombar">' +
+            '<div class="vcsp-controls">' +
+              '<button class="vcsp-tbtn" data-act="prev" aria-label="Previous">' + SVG.prev + '</button>' +
+              '<button class="vcsp-tbtn big" data-act="toggle" aria-label="Play or pause">' + SVG.play + '</button>' +
+              '<button class="vcsp-tbtn" data-act="next" aria-label="Next">' + SVG.next + '</button>' +
+            '</div>' +
             '<div class="vcsp-progress">' +
               '<div class="vcsp-bar" role="slider" aria-label="Seek" tabindex="0" aria-valuemin="0" aria-valuemax="100">' +
                 '<div class="vcsp-bar-fill"></div>' +
@@ -96,22 +121,7 @@
               '<div class="vcsp-times"><span class="vcsp-elapsed">0:00</span><span class="vcsp-duration">0:00</span></div>' +
             '</div>' +
           '</div>' +
-        '</div>' +
 
-        '<div class="vcsp-stage">' +
-          '<img class="vcsp-stagebg" src="' + ART + 'stage.png" alt="" aria-hidden="true">' +
-          '<div class="vcsp-ambient" aria-hidden="true"></div>' +
-          '<div class="vcsp-lyrics" data-lyrics-stage="1"></div>' +
-          '<div class="vcsp-idle">' +
-            '<div class="vcsp-idle-note">' + SVG.note + '</div>' +
-            '<button class="vcsp-connect-btn" type="button">Connect Spotify</button>' +
-            '<p class="vcsp-idle-hint">Music plays on your phone or car.<br>WayStation just drives it.</p>' +
-          '</div>' +
-          '<div class="vcsp-controls">' +
-            '<button class="vcsp-tbtn" data-act="prev" aria-label="Previous">' + SVG.prev + '</button>' +
-            '<button class="vcsp-tbtn big" data-act="toggle" aria-label="Play or pause">' + SVG.play + '</button>' +
-            '<button class="vcsp-tbtn" data-act="next" aria-label="Next">' + SVG.next + '</button>' +
-          '</div>' +
           '<img class="vcsp-tube" src="' + ART + 'tube.png" alt="" aria-hidden="true">' +
         '</div>';
       return root;
