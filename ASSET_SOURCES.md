@@ -128,3 +128,137 @@ PricedownBl/Oswald SDF glyphs (`fonts/PricedownBl`, `fonts/Oswald`);
   the theme's `spotify.skin` field. Shared core (`spotify-core.js`) is
   theme-independent.
 - License: user-supplied concept art for this personal project.
+
+## 2026-09-07 — RDR2 / Frontier blip artwork (authentic community pack)
+
+### Source
+- Repo: https://github.com/femga/rdr3_discoveries (community RDR3/RDR2 research repo — NOT retail discs)
+- Catalogue: `useful_info_from_rpfs/textures/blips/README.md` — lists every blip texture hashname + hash, with preview images and per-icon downloads
+- Pack used: the **no-background** transparent PNG set:
+  `https://femga.com:8080/images/samples/ui_textures_no_bg/blips.zip`
+  (individual: `https://femga.com:8080/images/samples/ui_textures_no_bg/blips/<hashname>.png`)
+  Texture dictionary: BLIPS (-437533031). All icons 32x32 RGBA white line art on a
+  soft dark halo (authentic RDR2 minimap rendering); downscaled to 16x16 LANCZOS so
+  on-map scale matches the other themes (`icon-size` multiplier 2.2–3.4 in places.js
+  is tuned for 16px natives).
+- License/source note: community-redistributed extracted UI textures, same class of
+  source as the Vice City ClassicHud assets. Personal-use project.
+
+### Files replaced (semantic name → RDR2 blip hashname [texture hash])
+- `assets/themes/rdr2/blips/atm.png` ← blip_cash_bag [688589278] (money bag = cash)
+- `assets/themes/rdr2/blips/bank.png` ← blip_proc_bank [-2128054417]
+- `assets/themes/rdr2/blips/bar.png` ← blip_saloon [1879260108]
+- `assets/themes/rdr2/blips/burger.png` ← blip_shop_butcher [-1665418949] (butcher's cleaver = meat)
+- `assets/themes/rdr2/blips/cafe.png` ← blip_supply_icon_food [412928073] (frying pan = diner cookery)
+- `assets/themes/rdr2/blips/chicken.png` ← blip_supplies_food [-1852063472] (chicken leg)
+- `assets/themes/rdr2/blips/cinema.png` ← blip_ambient_theatre [-417940443] (theatre masks)
+- `assets/themes/rdr2/blips/fast_food.png` ← blip_donate_food [-1236018085] (tinned/quick fare)
+- `assets/themes/rdr2/blips/garage.png` ← blip_stable [-73168905] (stable = horse garage)
+- `assets/themes/rdr2/blips/hospital.png` ← blip_shop_doctor [-1739686743] (doctor's bag)
+- `assets/themes/rdr2/blips/hotel.png` ← blip_hotel_bed [-211556852]
+- `assets/themes/rdr2/blips/nightlife.png` ← blip_mg_drinking [1242464081] (whiskey glass)
+- `assets/themes/rdr2/blips/parking.png` ← blip_ambient_hitching_post [1220803671]
+- `assets/themes/rdr2/blips/pharmacy.png` ← blip_plant [-675651933] (herbs = apothecary)
+- `assets/themes/rdr2/blips/police.png` ← blip_ambient_sheriff [-693644997]
+- `assets/themes/rdr2/blips/qmark.png` ← blip_rc [-1822497728] (authentic "?" stranger icon)
+- `assets/themes/rdr2/blips/restaurant.png` ← blip_grub [935247438] (knife & fork)
+- `assets/themes/rdr2/blips/shop.png` ← blip_shop_store [1475879922]
+- `assets/themes/rdr2/blips/supermarket.png` ← blip_shop_market_stall [819673798]
+- `assets/themes/rdr2/blips/train.png` ← blip_ambient_train [-250506368]
+- `assets/themes/rdr2/blips/waypoint.png` ← blip_code_waypoint [960467426]
+- `assets/themes/rdr2/player.png` ← blip_player [-523921054] (authentic white teardrop player marker, kept at native 32x32)
+
+### Semantics that kept the existing placeholder (no 1899 analogue in the RDR2 set)
+- `airport.png`, `car_wash.png`, `ev_charger.png`, `fuel.png`, `gym.png`,
+  `mall.png`, `pizza.png`, `stadium.png` — no period equivalent exists in the
+  RDR2 blip catalogue (1899: no flight, automobiles, gyms, malls, stadiums, or
+  distinct pizza iconography). Existing generic pixel-art placeholders retained.
+
+### Fonts
+- The femga/rdr3_discoveries repo contains no HUD font files (TTF/OTF/WOFF) —
+  RDR2's actual HUD fonts are proprietary Rockstar assets and are not
+  redistributed there. No `assets/themes/rdr2/fonts/` directory was created;
+  the theme keeps its Rye open-font rendering (`fontStack: 'frontier'`).
+
+## 2026-09-07 — San Andreas blip artwork (authentic community pack)
+
+### Source
+- Repo: https://github.com/lolipalooza/ClassicHud (community SA HUD mod —
+  NOT retail discs). Note: the paths `resources/radar/sa_blips.txd`,
+  `resources/radar/sa_radar.txd`, `resources/data/sa_hud.dat`,
+  `resources/data/sa_hudColor.dat` do **not** exist in this repo; the
+  equivalent real assets live at:
+  - `Resources/models/ClassicHud/SanAndreas/hud.txd` — SA radar blips
+    (`radar_*` textures), player marker (`radar_centre`), `radardisc`,
+    `skipicon`, weapon `site*` icons
+  - `Resources/models/ClassicHud/SanAndreas/fonts.txd` — SA bitmap font
+    sheets (`font1`, `font2`, 512x512 DXT3)
+  - `Resources/models/ClassicHud/SanAndreas/fonts.dat` — font metrics
+- Conversion: `txd2png.py` (RenderWare D3D9 native parser: rasterFormat +
+  DXT FourCC, DXT1/3/5, 8888/565/1555/4444) → 69 textures decoded, 62 of
+  them 16x16 `radar_*` icons with true 1-bit alpha. Script lived in /tmp;
+  not committed.
+- Cross-check: https://github.com/J33sus/GTA-SA-Menu/tree/master/images/mapicons
+  inspected — holds 15 of the same radar icons as small PNGs
+  (radar_ammugun, radar_barbers, radar_burgerShot, radar_emmetGun,
+  radar_Flag, radar_girlfriend, radar_modGarage, radar_pizza,
+  radar_propertyG, radar_saveGame, radar_school, radar_spray,
+  radar_tattoo, radar_truck, radar_tshirt). The TXD extraction is a
+  superset (62 icons) with cleaner provenance, so it was used instead.
+- License: community-redistributed SA mod assets for this personal project
+  (same standing as the Vice City ClassicHud extraction).
+
+### Replacements (19 blips + player; 16x16, dropped in 1:1, no stretching)
+WayStation semantic → ClassicHud `hud.txd` texture:
+- `airport.png` ← `radar_airYard` (plane)
+- `atm.png` ← `radar_cash` (green $)
+- `bar.png` ← `radar_dateDrink` (cocktail glass)
+- `burger.png` ← `radar_burgerShot` (burger)
+- `cafe.png` ← `radar_diner` (milkshake cup)
+- `car_wash.png` ← `radar_spray` (Pay'n'Spray = SA's car repaint/wash)
+- `chicken.png` ← `radar_chicken` (Cluckin' Bell chicken)
+- `fast_food.png` ← `radar_burgerShot` (second copy — generic fast-food chains)
+- `garage.png` ← `radar_modGarage` (wrench)
+- `gym.png` ← `radar_gym` (dumbbell)
+- `hospital.png` ← `radar_hostpital` (red cross; SA's own misspelling)
+- `nightlife.png` ← `radar_dateDisco` (vinyl record)
+- `pizza.png` ← `radar_pizza` (pizza slice)
+- `police.png` ← `radar_police` (blue badge)
+- `qmark.png` ← `radar_qmark` (question mark)
+- `restaurant.png` ← `radar_dateFood` (fork & knife)
+- `shop.png` ← `radar_tshirt` (clothing store)
+- `stadium.png` ← `radar_race` (trophy cup)
+- `waypoint.png` ← `radar_waypoint` (red crosshair)
+- `player.png` ← `radar_centre` (SA's authentic white radar triangle,
+  16x16 → 32x32 NEAREST to match existing player.png size)
+
+### Placeholders kept (10 semantics — no suitable SA source icon exists)
+- `bank.png` — no SA bank blip (SA's `$` went to atm; bank stays pixel-art)
+- `cinema.png`, `hotel.png`, `mall.png`, `parking.png`, `pharmacy.png`,
+  `supermarket.png`, `train.png`, `fuel.png` — SA has no radar icons for
+  these categories
+- `ev_charger.png` — anachronistic for SA; intentionally kept pixel-art
+
+### Fonts
+- No TTF/OTF in ClassicHud or J33sus — only bitmap font sheets
+  (`fonts.txd`: `font1`/`font2`). Downloaded to /tmp for inspection only;
+  not shipped. Theme keeps its Archivo Narrow Bold open-font rendering.
+- SA's classic font is Pricedown (same family as Vice City's title font),
+  but no community TTF/OTF source was found; not added.
+
+### hud.dat / hudColor.dat
+- Not present in the ClassicHud repo (only `classichud.dat` INI-style
+  config exists) — no color findings to report.
+
+### Unused authentic SA icons (available for future mapping)
+`radar_ammugun`, `radar_emmetGun`, `radar_barbers`, `radar_tattoo`,
+`radar_school`, `radar_impound`, `radar_boatyard`, `radar_bulldozer`,
+`radar_truck`, `radar_runway`, `radar_light`, `radar_fire`,
+`radar_propertyG`/`radar_propertyR`, `radar_saveGame`, `radar_girlfriend`,
+`radar_Flag`, `radar_enemyAttack`, `radar_north`, `radardisc`, gang icons
+(`radar_gangB/G/N/P/Y`), mission contact letters (`radar_BIGSMOKE`,
+`radar_CATALINAPINK`, `radar_CESARVIAPANDO`, `radar_CJ`,
+`radar_LocoSyndicate`, `radar_MADDOG`, `radar_MCSTRAP`, `radar_OGLOC`,
+`radar_RYDER`, `radar_SWEET`, `radar_THETRUTH`, `radar_TORENO`,
+`radar_TorenoRanch`, `radar_WOOZIE`, `radar_ZERO`, `radar_CRASH1`,
+`radar_triads`, `radar_triadsCasino`, `radar_mafiaCasino`).
