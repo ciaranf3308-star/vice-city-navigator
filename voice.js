@@ -3,13 +3,17 @@
    ------------------------------------------------------------
    Pipeline: OSRM maneuver -> deterministic structured
    instruction (built by app.js, the LLM never decides
-   navigation) -> theme personality rewriter -> OpenAI TTS
-   (gpt-4o-mini-tts) -> audio playback.
+   navigation) -> Supabase Edge Function `navigation-voice`
+   (server-side theme persona + OpenAI gpt-4o-mini rewrite +
+   gpt-4o-mini-tts speech) -> audio playback.
 
-   The OpenAI key is NEVER in this client. All AI calls go
-   through the user's own tiny serverless endpoint (see
-   tts-worker.js + VOICE_SETUP.md), whose URL is stored in
-   local settings.
+   The OpenAI key is NEVER in this client. The app sends only
+   { text, theme, mode, profanity } to the Edge Function and gets
+   back { line, audio }. The key lives solely as the OPENAI_API_KEY
+   secret on the Supabase project (see VOICE_SETUP.md).
+
+   The function enforces its own per-day request cap (VOICE_DAILY_CAP,
+   default 1000), independent of the Google Places quota.
 
    Modes: standard | themed | banter | off
      standard — browser speechSynthesis, deterministic text
@@ -55,19 +59,28 @@
   function themeId() {
     return (window.VCNThemes && window.VCNThemes.currentId()) || 'vice-city';
   }
-  function persona() {
-    const t = window.VCNThemes ? window.VCNThemes.current() : null;
-    const v = (t && t.voice) || {};
-    let rewrite = v.rewriteInstructions || '';
-    if (settings.mode === 'banter' && v.banterInstructions) rewrite += ' ' + v.banterInstructions;
-    return {
-      rewriteInstructions: rewrite,
-      voice: v.ttsVoice || 'echo',
-      ttsInstructions: v.ttsInstructions || '',
-    };
-  }
+  /* The spoken persona now lives server-side in the Edge Function; the app
+     only sends the theme id. `settings.endpoint` remains as an advanced
+     override for a custom function URL. */
   const cacheKey = text => `${themeId()}|${settings.mode}|${settings.profanity ? 1 : 0}|${text}`;
-  const endpointUrl = () => (settings.endpoint || '').trim().replace(/\/+$/, '');
+  function functionUrl() {
+    const custom = (settings.endpoint || '').trim().replace(/\/+$/, '');
+    if (custom) return custom;
+    const cfg = window.VCNSupabase || {};
+    const base = (cfg.url || '').trim().replace(/\/+$/, '');
+    if (!base || /^https:\/\/YOUR_PROJECT_REF/i.test(base)) return '';
+    return base + (cfg.functionPath || '/functions/v1/navigation-voice');
+  }
+  function supabaseHeaders() {
+    const h = { 'Content-Type': 'application/json' };
+    const cfg = window.VCNSupabase || {};
+    const key = (cfg.anonKey || '').trim();
+    if (key && !/^YOUR_SUPABASE/i.test(key)) {
+      h['apikey'] = key;
+      h['Authorization'] = 'Bearer ' + key;
+    }
+    return h;
+  }
 
   /* ---------------- standard deterministic voice ---------------- */
   function synthSpeak(text) {
@@ -93,23 +106,36 @@
   async function fetchTts(text) {
     const key = cacheKey(text);
     if (audioCache.has(key) || inflight.has(key)) return;
-    const base = endpointUrl();
-    if (!base) return;
+    const url = functionUrl();
+    if (!url) return;
     inflight.add(key);
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
     try {
-      const res = await fetch(base + '/tts', {
+      const res = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, persona: persona(), profanity: !!settings.profanity }),
+        headers: supabaseHeaders(),
+        body: JSON.stringify({
+          text,
+          theme: themeId(),
+          mode: settings.mode, // 'themed' | 'banter'
+          profanity: !!settings.profanity,
+        }),
         signal: ctrl.signal,
       });
-      if (!res.ok) throw new Error('tts ' + res.status);
-      const blob = await res.blob();
-      if (!blob || !blob.size) throw new Error('empty audio');
-      const url = URL.createObjectURL(blob);
-      audioCache.set(key, { url, text });
+      if (res.status === 429) throw new Error('voice daily cap reached');
+      if (!res.ok) throw new Error('voice ' + res.status);
+      const data = await res.json();
+      const b64 = data && data.audio;
+      const line = (data && data.line) || text;
+      if (typeof b64 !== 'string' || !b64.length) throw new Error('empty audio');
+      const bin = atob(b64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      const blob = new Blob([bytes], { type: (data && data.mime) || 'audio/mpeg' });
+      if (!blob.size) throw new Error('empty audio');
+      const objUrl = URL.createObjectURL(blob);
+      audioCache.set(key, { url: objUrl, text: line });
       while (audioCache.size > CACHE_MAX) {
         const oldest = audioCache.keys().next().value;
         const evicted = audioCache.get(oldest);
@@ -121,11 +147,11 @@
   }
 
   function themedSpeak(text) {
-    const base = endpointUrl();
-    if (!base) {
+    const url = functionUrl();
+    if (!url) {
       if (!endpointWarned) {
         endpointWarned = true;
-        console.info('[vcn-voice] themed mode needs the TTS endpoint URL (menu → voice settings); using standard voice.');
+        console.info('[vcn-voice] themed mode needs the Supabase voice function — see VOICE_SETUP.md, then set supabase-config.js; using standard voice.');
       }
       synthSpeak(text);
       return;
@@ -179,7 +205,7 @@
     pregenerate(texts) {
       if (!Array.isArray(texts)) return;
       if (settings.mode !== 'themed' && settings.mode !== 'banter') return;
-      if (!endpointUrl()) return;
+      if (!functionUrl()) return;
       texts.filter(Boolean).slice(0, 5).forEach(t => { fetchTts(t); });
     },
 

@@ -59,10 +59,10 @@
       </select>
     </label>
     <label class="row"><input type="checkbox" id="profanity-toggle"> Profanity</label>
-    <label class="stack">Themed voice server
-      <input id="endpoint-url" type="url" inputmode="url" placeholder="https://your-worker.workers.dev" autocomplete="off">
+    <label class="stack">Themed voice server (advanced override)
+      <input id="endpoint-url" type="url" inputmode="url" placeholder="https://YOUR_PROJECT_REF.supabase.co/functions/v1/navigation-voice" autocomplete="off">
     </label>
-    <small class="hint">Themed voice needs your own TTS server — the OpenAI key stays server-side. See VOICE_SETUP.md.</small>
+    <small class="hint">Themed voice uses your Supabase Edge Function — the OpenAI key stays server-side. See VOICE_SETUP.md.</small>
   </section>
 
   <p class="attrib">Map © OpenStreetMap contributors · Tiles OpenFreeMap · Routing OSRM</p>
@@ -125,6 +125,7 @@
 <div id="toast" hidden></div>
 
 <script src="places-config.js"></script>
+<script src="supabase-config.js"></script>
 <script src="themes/vice-city.js"></script>
 <script src="discovery.js"></script>
 <script src="voice.js"></script>
