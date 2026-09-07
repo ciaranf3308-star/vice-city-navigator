@@ -1,82 +1,100 @@
 /* ============================================================
-   Vice City Spotify skin — dashboard portrait pane.
-   Recomposed transparent artwork (themes/vice-city/spotify/).
+   Vice City Spotify skin — ONE floating overlay object.
+
+   A single art-shaped HUD widget floating over the full-screen map.
+   The widget artwork defines the silhouette: the neon logo breaks
+   out over the top, the album frame overlaps the sunset stage, and
+   every transparent pixel reveals the live map underneath. No
+   sidebar, no stacked panels, no generic cards — album art, now
+   playing, lyric stage, controls and the connect state all live
+   inside this one integrated object.
 
    Hard rules:
-   - every root is transparent; the map shows through
-   - no opaque panel, no modal, no close button, no spectrum
-   - album art sits UNDER the art's pink neon frame (the frame
-     PNG has a transparent interior; art is z-ordered below it)
+   - .vcsp root is transparent; the map shows through everywhere
+     the art doesn't cover
+   - album art sits UNDER the frame's pink neon opening
+     (z-order: placeholder < art < frame chrome)
+   - logo is never cropped into a strip — full art, overlapping
+   - controls float on the stage art; no background slab
+   - disconnected state is themed and lives inside the widget —
+     no modal card
    - live data only; no fake lyrics, no fake visualizer
    ============================================================ */
 
 .vcsp {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column; align-items: stretch;
-  background: transparent;
-  overflow: hidden;
+  position: absolute; z-index: 1;
+  right: 2.2cqw; top: 50%; translate: 0 -50%;
+  width: 24cqw; height: 94cqh;
   container-type: size;
+  pointer-events: auto;
+  background: transparent;
   font-family: Oswald, 'Arial Narrow', sans-serif; color: #fff;
   user-select: none; -webkit-user-select: none;
+  /* one object: a single neon aura follows the art silhouette */
+  filter: drop-shadow(0 0 22px rgba(255,47,179,.30));
 }
 .vcsp img { display: block; }
 
-/* ---------- overlay composition: full-bleed stage base, album panel
-   and logo layered ON TOP, breaking edges like the concept art.
-   Every layer spans the full widget — no centered card, no gaps. --- */
-.vcsp-header {
+/* ---------- logo: part of the object, full art, breaking the edge ---------- */
+.vcsp-logo {
   position: absolute; z-index: 3;
-  top: 0; left: 0;
-  width: 100%; height: 19cqh;
-  object-fit: cover; object-position: left center;
+  top: -2.5%; left: -4%;
+  width: 80%; height: auto;
   pointer-events: none;
 }
 
-/* ---------- album zone: art under the neon frame ---------- */
-.vcsp-albumzone {
+/* ---------- album frame: art under the neon chrome ---------- */
+.vcsp-frame {
   position: absolute; z-index: 2;
-  left: 0; top: 12cqh;
-  width: 64cqw;
-  aspect-ratio: 500 / 595;
+  left: 0; top: 10%;
+  width: 84%; aspect-ratio: 560 / 666;
   margin: 0;
-  /* neon seam where the panel meets the sunset stage */
-  border-right: 2px solid rgba(255,79,195,.65);
-  box-shadow: 14px 0 28px -10px rgba(255,47,179,.55);
 }
 .vcsp-art {
   position: absolute; z-index: 1;
   object-fit: cover; border-radius: 4%;
   opacity: 0; transition: opacity .45s ease;
-  background: #000;
+  background: #0a0e24;
 }
 .vcsp-art.on { opacity: 1; }
-.vcsp-albumframe {
+/* themed placeholder inside the art opening while nothing is loaded */
+.vcsp-art-idle {
+  position: absolute; z-index: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 4%;
+  background: radial-gradient(70% 70% at 50% 38%, #16204a 0%, #070a1e 72%);
+}
+.vcsp-art-idle svg {
+  width: 26%; height: auto; fill: #ff5fd2; opacity: .38;
+  filter: drop-shadow(0 0 10px #ff2fb3);
+}
+.vcsp-frameart {
   position: absolute; z-index: 2; inset: 0;
   width: 100%; height: 100%;
   pointer-events: none;
 }
-/* track lives on the art's own dark navy band */
+/* track lives on the frame's own dark navy band */
 .vcsp-track {
   position: absolute; z-index: 3;
-  left: 5%; right: 5%; top: 69.5%; bottom: 1%;
+  left: 6%; right: 6%; top: 69%; bottom: 1.5%;
   display: flex; flex-direction: column; justify-content: center;
   text-align: center;
 }
 .vcsp-title {
   font-family: 'Pricedown Bl', Oswald, sans-serif;
-  font-size: 5.4cqw; letter-spacing: .05em; line-height: 1.15;
+  font-size: 5.6cqw; letter-spacing: .05em; line-height: 1.15;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   text-shadow: 0 0 10px rgba(255,47,179,.85), 0 2px 4px #000;
 }
 .vcsp-artist {
   margin-top: .5cqh;
-  font-size: 3.7cqw; color: #ffd7f2;
+  font-size: 3.8cqw; color: #ffd7f2;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   text-shadow: 0 1px 3px #000;
 }
 .vcsp-artist.vcsp-status { color: #35e0ff; }
 
-.vcsp-progress { margin-top: 1.1cqh; padding: 0 2%; }
+.vcsp-progress { margin-top: 1cqh; padding: 0 2%; }
 .vcsp-bar { position: relative; height: 2.6cqh; cursor: pointer; touch-action: none; }
 .vcsp-bar::before {
   content: ''; position: absolute; left: 0; right: 0; top: 50%;
@@ -101,15 +119,19 @@
   font-size: 3.2cqw; color: #9fd8ff; text-shadow: 0 1px 2px #000;
 }
 
-/* ---------- lyric / music-video stage: full-bleed base layer ---------- */
-.vcsp-stagewrap {
-  position: absolute; inset: 0; z-index: 1;
+/* ---------- stage: the widget's lower body, tucked under the frame ----------
+   Rounded and overlapped so the silhouette stays irregular and art-driven. */
+.vcsp-stage {
+  position: absolute; z-index: 1;
+  left: 9%; right: 2%; top: 62%; bottom: 2.5%;
+  border-radius: 5cqw;
   overflow: hidden;
+  box-shadow: 0 0 26px rgba(53,224,255,.30), inset 0 0 30px rgba(255,47,179,.14);
 }
 .vcsp-stagebg {
   position: absolute; inset: 0; z-index: 1;
   width: 100%; height: 100%;
-  object-fit: cover; object-position: center 22%;
+  object-fit: cover; object-position: center 62%;
 }
 /* ambient glow while no lyrics provider is attached — pure CSS,
    no fake data, no fake FFT */
@@ -133,7 +155,7 @@
    A renderer mounted via setLyricsRenderer() owns this node. */
 .vcsp-lyrics {
   position: absolute; z-index: 3;
-  left: 5%; right: 5%; top: 67%; bottom: 23%;
+  left: 8%; right: 8%; top: 6%; bottom: 34%;
   overflow: hidden;
   display: flex; flex-direction: column; justify-content: center;
   text-align: center; gap: 1.2cqh;
@@ -143,23 +165,54 @@
 
 /* lyric line hooks for the future LRCLIB pass */
 .vc-lyric-line {
-  font-size: 4.4cqw; line-height: 1.35; color: #ffd7f2; opacity: .6;
+  font-size: 4.6cqw; line-height: 1.35; color: #ffd7f2; opacity: .6;
   text-shadow: 0 0 8px rgba(255,47,179,.5), 0 2px 4px #000;
   transition: opacity .3s ease, transform .3s ease;
 }
-.vc-lyric-line.ghost { opacity: .32; font-size: 3.8cqw; }
+.vc-lyric-line.ghost { opacity: .32; font-size: 4cqw; }
 .vc-lyric-line.next { opacity: .55; }
 .vc-lyric-line.active {
-  opacity: 1; color: #fff; font-size: 5.4cqw;
+  opacity: 1; color: #fff; font-size: 5.6cqw;
   text-shadow: 0 0 14px rgba(255,47,179,.95), 0 0 34px rgba(255,47,179,.5), 0 2px 4px #000;
 }
 
-/* ---------- transport: neon, large touch targets ---------- */
+/* ---------- themed idle / connect state: lives INSIDE the widget ----------
+   No card, no modal — the stage art is the backdrop. */
+.vcsp-idle {
+  position: absolute; z-index: 4;
+  left: 8%; right: 8%; top: 6%; bottom: 34%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; gap: 1.6cqh;
+  pointer-events: none;
+}
+.vcsp-idle[hidden] { display: none; }
+.vcsp-idle-note svg {
+  width: 10cqw; height: auto; fill: #ff5fd2;
+  filter: drop-shadow(0 0 8px #ff2fb3);
+}
+.vcsp-connect-btn {
+  pointer-events: auto;
+  padding: 1.4cqh 6cqw;
+  font-family: 'Pricedown Bl', Oswald, sans-serif;
+  font-size: 5.4cqw; letter-spacing: .1em;
+  color: #fff; background: rgba(255,47,179,.14);
+  border: 2px solid #ff4fc3; border-radius: 999px; cursor: pointer;
+  text-shadow: 0 0 10px #ff2fb3;
+  box-shadow: 0 0 18px rgba(255,47,179,.5), inset 0 0 12px rgba(255,47,179,.2);
+}
+.vcsp-connect-btn:active { transform: scale(.96); }
+.vcsp-idle-hint {
+  font-size: 3.6cqw; line-height: 1.5;
+  color: #cfe6ff; opacity: .92; text-shadow: 0 1px 3px #000;
+}
+
+/* ---------- transport: neon buttons floating on the stage art ----------
+   No background slab — part of the same object. */
 .vcsp-controls {
-  position: absolute; z-index: 4; left: 0; right: 0; bottom: 0;
+  position: absolute; z-index: 4; left: 0; right: 0; bottom: 6%;
   display: flex; align-items: center; justify-content: center;
-  gap: 5cqw; padding: 3.2cqh 0 4.6cqh;
-  background: linear-gradient(180deg, transparent, rgba(5,7,22,.42) 55%, rgba(5,7,22,.62));
+  gap: 5cqw; padding: 0;
+  background: none;
 }
 .vcsp-tbtn {
   width: 13cqw; height: 13cqw; min-width: 56px; min-height: 56px;
@@ -181,44 +234,9 @@
   filter: drop-shadow(0 0 4px currentColor);
 }
 
-/* neon tube along the bottom edge */
+/* neon tube along the stage's bottom edge */
 .vcsp-tube {
   position: absolute; z-index: 5; left: 0; right: 0; bottom: 0;
   width: 100%; aspect-ratio: 960 / 30;
   pointer-events: none;
-}
-
-/* ---------- themed reconnect (no dark takeover) ---------- */
-.vcsp-connect {
-  position: absolute; inset: 0; z-index: 10;
-  display: flex; align-items: center; justify-content: center;
-  background: transparent;
-  pointer-events: none;
-}
-.vcsp-connect[hidden] { display: none; }
-.vcsp-connect-pill {
-  pointer-events: auto;
-  text-align: center; padding: 4cqh 8cqw;
-  background: rgba(8,10,28,.62);
-  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
-  border: 2px solid rgba(255,79,195,.7); border-radius: 18px;
-  box-shadow: 0 0 26px rgba(255,47,179,.4), inset 0 0 18px rgba(255,47,179,.12);
-}
-.vcsp-connect-note svg {
-  width: 11cqw; height: 11cqw; fill: #ff5fd2;
-  filter: drop-shadow(0 0 6px #ff2fb3);
-}
-.vcsp-connect-btn {
-  margin-top: 2.4cqh; padding: 1.8cqh 6cqw;
-  font-family: 'Pricedown Bl', Oswald, sans-serif;
-  font-size: 5cqw; letter-spacing: .12em;
-  color: #fff; background: rgba(255,47,179,.16);
-  border: 2px solid #ff4fc3; border-radius: 999px; cursor: pointer;
-  text-shadow: 0 0 8px #ff2fb3;
-  box-shadow: 0 0 18px rgba(255,47,179,.55), inset 0 0 12px rgba(255,47,179,.25);
-}
-.vcsp-connect-btn:active { transform: scale(.96); }
-.vcsp-connect-hint {
-  margin-top: 2cqh; font-size: 3.5cqw; line-height: 1.5;
-  color: #cfe6ff; opacity: .9; text-shadow: 0 1px 3px #000;
 }

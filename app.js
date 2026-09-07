@@ -958,8 +958,11 @@ function closeMenu() { $('menu-panel').hidden = true; }
    reference canvas (#dash-stage). On a real car display it renders at
    zoom 1; everywhere else JS zooms the whole canvas proportionally to
    fit the window, so Dashboard Preview on a phone or desktop shows the
-   exact same layout, Spotify pane, 75/25 split, HUD, theme, controls
-   and state. The MapLibre instance is never recreated, only resized.
+   exact same layout, HUD, theme, controls and state. The map fills the
+   entire canvas — no column is reserved for music. The Spotify widget
+   is a single floating overlay object above the full-screen map: the
+   widget artwork defines its silhouette and transparent areas reveal
+   the map. The MapLibre instance is never recreated, only resized.
    Route, markers, POIs, discovery, voice and the Spotify session all
    survive the switch. */
 const APP_MODE_KEY = 'ws.appMode';
@@ -1101,7 +1104,11 @@ function mountSpotifySkin(themeId) {
   unmountSpotifySkin();
   const skin = SpotifySkins.get(want);
   if (skin) {
-    try { skin.mount($('spotify-stage'), SpotifyCore); spotifySkinId = want; }
+    try {
+      skin.mount($('spotify-stage'), SpotifyCore); spotifySkinId = want;
+      const pane = $('spotify-pane');
+      if (pane) pane.dataset.skin = want; // shell positions floating vs docked skins
+    }
     catch (e) { console.error('[ws] spotify skin mount failed', e); }
   }
 }
@@ -1112,6 +1119,8 @@ function unmountSpotifySkin() {
   spotifySkinId = null;
   const stage = $('spotify-stage');
   if (stage) stage.innerHTML = '';
+  const pane = $('spotify-pane');
+  if (pane) delete pane.dataset.skin;
 }
 
 function saveSpotifyPreAuth() {

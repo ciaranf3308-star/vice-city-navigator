@@ -147,7 +147,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v28"), 'SW shell cache v28');
-ok(swSrc.includes("ws-theme-v9"), 'SW theme cache v9');
+ok(swSrc.includes("ws-theme-v10"), 'SW theme cache v10');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
@@ -267,9 +267,13 @@ for (const banned of ['miniviz', 'stagepeek', 'fullstage', 'vcsp-viz', 'spectrum
   ok(!vcSkinJsCode.includes(banned) && !vcSkinCssCode.includes(banned), `VC skin has no ${banned}`);
 }
 ok(/\.vcsp\s*\{[^}]*background:\s*transparent/.test(vcSkinCss), 'VC skin root transparent');
-ok(/\.vcsp-stagewrap\s*\{[^}]*position:\s*absolute[^}]*inset:\s*0/.test(vcSkinCssCode), 'VC stage is full-bleed overlay base');
-ok(/\.vcsp-albumzone\s*\{[^}]*position:\s*absolute/.test(vcSkinCssCode), 'VC album panel overlaid (absolute, breaks edges)');
-ok(/\.vcsp-header\s*\{[^}]*position:\s*absolute/.test(vcSkinCssCode), 'VC header logo overlaid (absolute)');
+ok(/\.vcsp\s*\{[^}]*position:\s*absolute[^}]*translate:\s*0\s*-50%/.test(vcSkinCssCode), 'VC widget is one floating object (absolute, vertically centered)');
+ok(/\.vcsp-logo\s*\{[^}]*width:\s*80%[^}]*height:\s*auto/.test(vcSkinCssCode), 'VC logo full art, never cropped into a strip');
+ok(!/\.vcsp-logo\s*\{[^}]*object-fit/.test(vcSkinCssCode), 'VC logo has no object-fit crop');
+ok(/\.vcsp-stage\s*\{[^}]*position:\s*absolute[^}]*border-radius/.test(vcSkinCssCode), 'VC stage is an integrated rounded body, not a slab');
+ok(/\.vcsp-controls\s*\{[^}]*background:\s*none/.test(vcSkinCssCode), 'VC controls float on the art (no background slab)');
+ok(vcSkinCssCode.includes('.vcsp-idle') && !vcSkinCssCode.includes('vcsp-connect-pill'), 'VC idle/connect lives inside the widget, no generic card');
+ok(vcSkinJs.includes('vcsp-idle') && !vcSkinJsCode.includes('vcsp-connect\'') && !vcSkinJsCode.includes('vcsp-connect"'), 'VC skin JS renders the in-widget idle state');
 
 /* ---------- GTA V Spotify skin ---------- */
 const gvSkinJs = fs.readFileSync(path.join(REPO, 'themes/gta-v/spotify-skin.js'), 'utf8');
@@ -318,8 +322,11 @@ ok(indexSrc.includes('id="spotify-status"'), 'menu Spotify status');
 ok(indexSrc.includes('themes/vice-city/spotify-skin.js'), 'VC skin script path');
 ok(indexSrc.includes('themes/vice-city/spotify-skin.css'), 'VC skin css path');
 
-// styles.css: dashboard 75/25, transparent pane, no card chrome
-ok(cssSrc.includes('body.dashboard-mode #map'), 'dashboard map rule');
+// styles.css: dashboard full-screen map, floating Spotify overlay, no sidebar
+ok(/body\.dashboard-mode #map\{[^}]*width:1920px[^}]*height:720px/.test(cssSrc), 'dashboard map fills the full canvas');
+ok(/body\.dashboard-mode #spotify-pane\{[\s\S]*?pointer-events:none/.test(cssSrc), 'dashboard Spotify pane is a transparent overlay (no reserved column)');
+ok(cssSrc.includes('[data-skin="vice-city"]'), 'floating-skin selector present');
+ok(appSrc.includes('pane.dataset.skin'), 'mount tags the pane with the active skin');
 ok(!cssSrc.includes('#spotify-close'), 'no close-button styles');
 ok(/\#spotify-pane\{[\s\S]*?background:transparent/.test(cssSrc), 'pane transparent');
 

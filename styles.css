@@ -291,13 +291,29 @@ body.theme-rdr2 .dest-pin{ background-image:url('assets/themes/rdr2/blips/waypoi
   position:fixed;width:1920px;height:720px;overflow:hidden;background:#000;
 }
 body.dashboard-mode{background:#000}
-body.dashboard-mode #map{position:absolute;left:0;top:0;width:1440px;height:720px;right:auto;bottom:auto}
+/* Full-screen map: nothing is reserved for music — the widget floats above. */
+body.dashboard-mode #map{position:absolute;left:0;top:0;width:1920px;height:720px;right:auto;bottom:auto}
 body.dashboard-mode #fx{position:absolute;inset:0}
 body.dashboard-mode #explore-ui{position:absolute;inset:0}
 body.dashboard-mode #drive-hud{position:absolute;inset:0}
+/* Spotify pane: full-canvas transparent overlay layer. pointer-events:none
+   so the map stays interactive everywhere; the skin's widget re-enables
+   events on itself. Transparent areas reveal the map. */
 body.dashboard-mode #spotify-pane{
-  position:absolute;left:1440px;top:0;width:480px;height:720px;
+  position:absolute;left:0;top:0;width:1920px;height:720px;
   right:auto;bottom:auto;max-width:none;min-width:0;
+  pointer-events:none;
+}
+/* Docked skins (gta-v, san-andreas, rdr2, default): keep their 480×720
+   pane, floating over the full-screen map at the right. */
+body.dashboard-mode #spotify-stage{
+  position:absolute;top:0;right:0;width:480px;height:720px;
+  left:auto;bottom:auto;pointer-events:auto;
+}
+/* Floating skins (vice-city): the stage is a full-canvas transparent
+   layer; the skin's widget positions itself and owns its silhouette. */
+body.dashboard-mode #spotify-pane[data-skin="vice-city"] #spotify-stage{
+  left:0;right:0;top:0;bottom:0;width:auto;height:auto;pointer-events:none;
 }
 /* HUD chrome stays clear of the music pane, in canvas coordinates */
 body.dashboard-mode #search-bar{right:492px}
