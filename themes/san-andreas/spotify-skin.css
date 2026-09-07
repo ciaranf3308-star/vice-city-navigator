@@ -17,9 +17,11 @@
    ============================================================ */
 
 .sasp {
-  position: absolute; left: 0; right: 0; top: 50%; translate: 0 -50%;
-  width: 100%; aspect-ratio: 1 / 1;
+  position: absolute; left: auto; right: 70px; top: 50%; translate: 0 -50%;
+  width: 600px; aspect-ratio: 1 / 1;
+  transform: rotate(-6deg); transform-origin: center;
   container-type: size;
+  pointer-events: auto;
   background: transparent;
   font-family: 'Bank Gothic', 'Arial Narrow', sans-serif; color: #f2e8c8;
   user-select: none; -webkit-user-select: none;
@@ -109,7 +111,7 @@
 /* ---------- lyric stage: over the faint graffiti ---------- */
 .sasp-lyrics {
   position: absolute; z-index: 3;
-  left: 54%; right: 8%; top: 58%; bottom: 24%;
+  left: 54%; right: 8%; top: 59%; bottom: 24%;
   overflow: hidden;
   display: flex; flex-direction: column; justify-content: center;
   text-align: left; gap: 1cqh;
@@ -157,12 +159,17 @@
 /* ---------- themed idle / connect: pinned on the dark panel ---------- */
 .sasp-idle {
   position: absolute; z-index: 4;
-  left: 50%; right: 6%; top: 38%; bottom: 30%;
+  left: 50%; right: 6%; top: 48%; bottom: 20%;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   text-align: center; gap: 1.2cqh;
   pointer-events: none;
 }
 .sasp-idle[hidden] { display: none; }
+/* Disconnected: the idle block owns the panel — hide progress, the lyric
+   stage and the dead transport so nothing overlaps. */
+.sasp.is-idle .sasp-progress { display: none; }
+.sasp.is-idle .sasp-lyrics { display: none; }
+.sasp.is-idle .sasp-controls { display: none; }
 .sasp-idle-kicker {
   font-family: 'Beckett', 'Bank Gothic', serif;
   font-size: 5.6cqw; letter-spacing: .04em;

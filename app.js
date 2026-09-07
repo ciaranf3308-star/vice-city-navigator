@@ -343,7 +343,23 @@ function waitForStyleLoad(isStale) {
   });
 }
 async function applyTheme(id) {
-  if (!window.VCNThemes || !map) return;
+  if (!window.VCNThemes) return;
+  if (!map) {
+    // Map unavailable (e.g. WebGL-less environment or failed init):
+    // still apply every non-map part of the theme — body chrome,
+    // persisted choice, Spotify skin — so theme switching never
+    // dead-ends. A later map init loads the persisted theme's style.
+    if (VCNThemes.currentId() === id) { syncThemeSelector(); return; }
+    const themeNoMap = VCNThemes.get(id);
+    if (!themeNoMap) { syncThemeSelector(); return; }
+    VCNThemes.setCurrent(id);
+    try { if (window.VCNVoice) VCNVoice.onThemeChanged(); } catch (e) {}
+    applyBodyTheme(id);
+    try { mountSpotifySkin(id); } catch (e) { console.error('[ws] spotify skin swap failed', e); }
+    syncThemeSelector();
+    toast(themeNoMap.name + ' theme active.');
+    return;
+  }
   if (VCNThemes.currentId() === id) { syncThemeSelector(); return; }
   const theme = VCNThemes.get(id);
   if (!theme) { syncThemeSelector(); return; }
@@ -1083,7 +1099,7 @@ function syncDashPadding() {
   // keep the camera target clear of them whether driving or exploring.
   const dash = b.contains('dashboard-mode');
   if (dash && b.contains('theme-vice-city'))
-    map.setPadding({ top: 76, right: 780, bottom: 88, left: 8 });
+    map.setPadding({ top: 76, right: 900, bottom: 88, left: 8 });
   else if (dash)
     map.setPadding({ top: 76, right: 8, bottom: 88, left: 8 });
   else map.setPadding({ top: 0, right: 0, bottom: 0, left: 0 });
@@ -1276,7 +1292,7 @@ function mountSpotifySkin(themeId) {
     try {
       skin.mount($('spotify-stage'), SpotifyCore); spotifySkinId = want;
       const pane = $('spotify-pane');
-      if (pane) pane.dataset.skin = want; // shell positions floating vs docked skins
+      if (pane) pane.dataset.skin = want; // tags the pane with the active skin for theming hooks
       document.body.dataset.spotskin = want; // HUD chrome clears wide floating skins
     }
     catch (e) { console.error('[ws] spotify skin mount failed', e); }

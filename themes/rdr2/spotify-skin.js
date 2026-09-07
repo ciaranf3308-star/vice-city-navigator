@@ -115,6 +115,7 @@
       const idle = q('.rdsp-idle');
       const connected = core.isConnected();
       idle.hidden = connected;
+      root.classList.toggle('is-idle', !connected);
       const title = q('.rdsp-title'), artist = q('.rdsp-artist');
       const toggle = q('.rdsp-tbtn[data-act="toggle"]');
       if (!connected) {

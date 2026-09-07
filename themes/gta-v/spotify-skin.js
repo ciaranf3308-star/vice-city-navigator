@@ -113,6 +113,7 @@
       const idle = q('.gvsp-idle');
       const connected = core.isConnected();
       idle.hidden = connected;
+      root.classList.toggle('is-idle', !connected);
       const title = q('.gvsp-title'), artist = q('.gvsp-artist');
       const toggle = q('.gvsp-tbtn[data-act="toggle"]');
       if (!connected) {

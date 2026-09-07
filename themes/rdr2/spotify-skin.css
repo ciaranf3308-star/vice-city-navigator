@@ -17,9 +17,11 @@
    ============================================================ */
 
 .rdsp {
-  position: absolute; left: 0; right: 0; top: 50%; translate: 0 -50%;
-  width: 100%; aspect-ratio: 1 / 1;
+  position: absolute; left: auto; right: 70px; top: 50%; translate: 0 -50%;
+  width: 600px; aspect-ratio: 1 / 1;
+  transform: rotate(-6.5deg); transform-origin: center;
   container-type: size;
+  pointer-events: auto;
   background: transparent;
   font-family: 'RDR Lino', Georgia, serif; color: #e8d9b0;
   user-select: none; -webkit-user-select: none;
@@ -78,7 +80,7 @@
 /* ---------- track on the parchment ---------- */
 .rdsp-track {
   position: absolute; z-index: 3;
-  left: 28%; right: 9%; top: 70.5%;
+  left: 28%; right: 9%; top: 69.5%;
   text-align: center;
 }
 .rdsp-title {
@@ -98,7 +100,7 @@
 /* ---------- progress on the parchment ---------- */
 .rdsp-progress {
   position: absolute; z-index: 3;
-  left: 30%; right: 12%; top: 80%;
+  left: 30%; right: 12%; top: 80.5%;
 }
 .rdsp-bar { position: relative; height: 2.6cqh; cursor: pointer; touch-action: none; }
 .rdsp-bar::before {
@@ -129,11 +131,11 @@
 /* ---------- transport: brass coins below the parchment ---------- */
 .rdsp-controls {
   position: absolute; z-index: 3;
-  left: 0; right: 0; bottom: 2%;
+  left: 0; right: 0; bottom: 1.5%;
   display: flex; align-items: center; justify-content: center; gap: 4cqw;
 }
 .rdsp-tbtn {
-  width: 12cqw; height: 12cqw; min-width: 52px; min-height: 52px;
+  width: 10cqw; height: 10cqw; min-width: 44px; min-height: 44px;
   border-radius: 50%; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   color: #e8d9b0;
@@ -143,7 +145,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 .rdsp-tbtn.big {
-  width: 14.5cqw; height: 14.5cqw; min-width: 62px; min-height: 62px;
+  width: 12cqw; height: 12cqw; min-width: 52px; min-height: 52px;
   border-color: #b8352f;
   box-shadow: 0 2px 10px rgba(0,0,0,.6), 0 0 14px rgba(184,53,47,.4);
 }
@@ -156,12 +158,17 @@
 /* ---------- themed idle / connect: a notice pinned on the parchment ---------- */
 .rdsp-idle {
   position: absolute; z-index: 4;
-  left: 20%; right: 8%; top: 69%; bottom: 12%;
+  left: 20%; right: 8%; top: 54%; bottom: 8%;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   text-align: center; gap: 1.2cqh;
   pointer-events: none;
 }
 .rdsp-idle[hidden] { display: none; }
+/* Disconnected: the idle block owns the parchment — hide progress, the
+   lyric stage and the dead transport so nothing overlaps. */
+.rdsp.is-idle .rdsp-progress { display: none; }
+.rdsp.is-idle .rdsp-lyrics { display: none; }
+.rdsp.is-idle .rdsp-controls { display: none; }
 .rdsp-idle-kicker {
   font-family: 'Kirsty', 'RDR Lino', Georgia, serif;
   font-size: 5.4cqw; letter-spacing: .08em;

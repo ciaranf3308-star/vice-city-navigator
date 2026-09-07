@@ -329,7 +329,7 @@ ok(indexSrc.includes('themes/vice-city/spotify-skin.css'), 'VC skin css path');
 // styles.css: dashboard full-screen map, floating Spotify overlay, no sidebar
 ok(/body\.dashboard-mode #map\{[^}]*width:1920px[^}]*height:720px/.test(cssSrc), 'dashboard map fills the full canvas');
 ok(/body\.dashboard-mode #spotify-pane\{[\s\S]*?pointer-events:none/.test(cssSrc), 'dashboard Spotify pane is a transparent overlay (no reserved column)');
-ok(cssSrc.includes('[data-skin="vice-city"]'), 'floating-skin selector present');
+ok(!cssSrc.includes('[data-skin='), 'shell no longer needs per-skin stage selectors (every skin floats)');
 ok(appSrc.includes('pane.dataset.skin'), 'mount tags the pane with the active skin');
 ok(appSrc.includes('body.dataset.spotskin'), 'mount exposes the skin on <body> for HUD clearance');
 ok(indexSrc.includes('id="dash-topbar"'), 'dashboard top status bar exists');
@@ -342,7 +342,10 @@ ok(/body\.dashboard-mode\.theme-vice-city #map-tools\{display:none\}/.test(cssSr
 ok(appSrc.includes('open-meteo.com'), 'weather comes from keyless Open-Meteo');
 ok(appSrc.includes("setAppMode('normal')"), 'PHONE tab drops back to the phone UI');
 ok(appSrc.includes("classList.toggle('radio-off')"), 'RADIO tab toggles the music widget');
-ok(cssSrc.includes('top:64px') && cssSrc.includes('bottom:72px'), 'docked skins fit between the dash bars (chrome never covers the widget)');
+ok(/body\.dashboard-mode #spotify-stage\{[\s\S]*?left:0;right:0;top:0;bottom:0/.test(cssSrc), 'Spotify stage is a full-canvas layer; every skin widget positions itself');
+ok(cssSrc.includes('#search-bar{right:740px}') && cssSrc.includes('#maneuver-card{right:740px}'), 'HUD chrome clears the larger tilted widgets');
+ok(cssSrc.includes('[data-spotskin="vice-city"] #search-bar{right:900px}'), 'VC chrome clears the wide tilted VC widget');
+ok(appSrc.includes('right: 900'), 'camera padding accounts for the larger VC widget');
 ok(cssSrc.includes('body.dashboard-mode.theme-vice-city #dash-topbar') === true, 'VC bar chrome is always-on in dashboard mode, like the original');
 // dashboard car chrome: every theme gets top/bottom bars, always visible in dashboard mode (driving or exploring)
 for (const id of ['vice-city', 'san-andreas', 'gta-v', 'rdr2']) {
@@ -404,7 +407,23 @@ ok(SW.isThemeAsset('/assets/themes/san-andreas/dashboard/menu-bgmap.jpg'), 'isTh
 ok(SW.isThemeAsset('/assets/themes/gta-v/dashboard/topbar-skyline.jpg'), 'isThemeAsset: V dashboard art');
 ok(SW.isThemeAsset('/assets/themes/rdr2/dashboard/menu_header_1a.png'), 'isThemeAsset: RDR2 dashboard art');
 const vcSkinSrc = fs.readFileSync(path.join(REPO, 'themes/vice-city/spotify-skin.css'), 'utf8');
-ok(vcSkinSrc.includes('width: 38cqw'), 'VC widget is the larger size');
+ok(vcSkinSrc.includes('width: 780px'), 'VC widget is the larger size');
+ok(vcSkinSrc.includes('rotate(6deg)'), 'VC widget carries its 6-degree tilt');
+// every theme widget: explicit larger size, ~6-7 degree tilt, no-overlap idle states
+const skinSpecs = [
+  ['vice-city', 'vcsp', 'rotate(6deg)', 'width: 780px'],
+  ['san-andreas', 'sasp', 'rotate(-6deg)', 'width: 600px'],
+  ['gta-v', 'gvsp', 'rotate(6.5deg)', 'width: 540px'],
+  ['rdr2', 'rdsp', 'rotate(-6.5deg)', 'width: 600px'],
+];
+for (const [theme, cls, tilt, size] of skinSpecs) {
+  const css = fs.readFileSync(path.join(REPO, `themes/${theme}/spotify-skin.css`), 'utf8');
+  const js = fs.readFileSync(path.join(REPO, `themes/${theme}/spotify-skin.js`), 'utf8');
+  ok(css.includes(tilt), `${theme}: widget tilted ${tilt}`);
+  ok(css.includes(size), `${theme}: widget sized up (${size})`);
+  ok(css.includes(`.${cls}.is-idle`), `${theme}: disconnected idle owns its stage (no overlaps)`);
+  ok(js.includes("root.classList.toggle('is-idle'"), `${theme}: render toggles the is-idle class`);
+}
 ok(appSrc.includes('syncDashPadding'), 'camera viewport offsets left of the VC widget');
 ok(cssSrc.includes("themes/vice-city/dashboard/bottombar.jpg"), 'bottom bar uses the generated neon plate');
 ok(!cssSrc.includes('#spotify-close'), 'no close-button styles');

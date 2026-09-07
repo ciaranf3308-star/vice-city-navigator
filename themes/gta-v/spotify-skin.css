@@ -19,9 +19,11 @@
    ============================================================ */
 
 .gvsp {
-  position: absolute; left: 0; right: 0; top: 50%; translate: 0 -50%;
-  width: 100%; aspect-ratio: 1155 / 1362;
+  position: absolute; left: auto; right: 70px; top: 50%; translate: 0 -50%;
+  width: 540px; aspect-ratio: 1155 / 1362;
+  transform: rotate(6.5deg); transform-origin: center;
   container-type: size;
+  pointer-events: auto;
   background: transparent;
   font-family: 'Chalet London', 'Helvetica Neue', Arial, sans-serif; color: #e8f0e8;
   user-select: none; -webkit-user-select: none;
@@ -158,12 +160,17 @@
 /* ---------- themed idle / connect: pinned on the dark panel ---------- */
 .gvsp-idle {
   position: absolute; z-index: 4;
-  left: 30%; right: 8%; top: 36%; bottom: 28%;
+  left: 30%; right: 8%; top: 50%; bottom: 20%;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   text-align: center; gap: 1.2cqh;
   pointer-events: none;
 }
 .gvsp-idle[hidden] { display: none; }
+/* Disconnected: the idle block owns the panel — hide progress, the lyric
+   stage and the dead transport so nothing overlaps. */
+.gvsp.is-idle .gvsp-progress { display: none; }
+.gvsp.is-idle .gvsp-lyrics { display: none; }
+.gvsp.is-idle .gvsp-controls { display: none; }
 .gvsp-idle-kicker {
   font-family: 'SignPainter', 'Chalet London', cursive;
   font-size: 6.4cqw;

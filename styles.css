@@ -304,41 +304,34 @@ body.dashboard-mode #spotify-pane{
   right:auto;bottom:auto;max-width:none;min-width:0;
   pointer-events:none;
 }
-/* Docked skins (gta-v, san-andreas, rdr2, default): keep their 480-wide
-   pane, floating over the full-screen map at the right — fitted
-   between the dashboard top/bottom bars so no chrome covers it. */
+/* Every skin floats: the stage is a full-canvas transparent layer and each
+   skin's widget positions itself on the right side, vertically centred,
+   at its own explicit size with a slight theme tilt. pointer-events:none
+   on the stage so the map stays interactive; widgets re-enable events. */
 body.dashboard-mode #spotify-stage{
-  position:absolute;top:64px;right:0;bottom:72px;width:480px;height:auto;
-  left:auto;pointer-events:auto;
+  position:absolute;left:0;right:0;top:0;bottom:0;width:auto;height:auto;
+  pointer-events:none;
 }
-/* Floating skins (vice-city): the stage is a full-canvas transparent
-   layer; the skin's widget positions itself and owns its silhouette. */
-body.dashboard-mode #spotify-pane[data-skin="vice-city"] #spotify-stage{
-  left:0;right:0;top:0;bottom:0;width:auto;height:auto;pointer-events:none;
-}
-/* HUD chrome stays clear of the music pane, in canvas coordinates */
-body.dashboard-mode #search-bar{right:492px}
-body.dashboard-mode #map-tools{right:492px}
-body.dashboard-mode #maneuver-card{right:492px}
-body.dashboard-mode #drive-bar{left:720px;max-width:none}
-/* Vice City's floating HUD is ~759px wide: slide chrome left of it */
-body.dashboard-mode[data-spotskin="vice-city"] #search-bar{right:780px}
-body.dashboard-mode[data-spotskin="vice-city"] #maneuver-card{right:780px}
+/* HUD chrome stays clear of the music widgets, in canvas coordinates */
+body.dashboard-mode #search-bar{right:740px}
+body.dashboard-mode #map-tools{right:740px}
+body.dashboard-mode #maneuver-card{right:740px}
+body.dashboard-mode #drive-bar{left:760px;max-width:none}
+/* Vice City's floating HUD is ~900px wide with its tilt: slide chrome left of it */
+body.dashboard-mode[data-spotskin="vice-city"] #search-bar{right:900px}
+body.dashboard-mode[data-spotskin="vice-city"] #maneuver-card{right:900px}
 /* RADIO tab hides the music widget for a full-bleed map */
 body.dashboard-mode.radio-off #spotify-pane{display:none}
 
 /* ---------- Vice City dashboard car chrome: angular HUD bars ----------
-   Vice City theme only (body.theme-vice-city). Early-2000s game-HUD
-   silhouette: clipped angular corners, hot-pink outer edge, dark
-   textured navy surface, cyan secondary detailing. Authored in
-   1920×720 canvas coordinates; reparented into #dash-stage so the
-   existing proportional scaling handles physical screens. The map
-   is never resized or inset — these are pure overlays. */
+   Authentic VC pause-menu assets: the in-game script logo
+   (assets/themes/vice-city/dashboard/vc-logo.png, ClassicHud bgmenu.txd)
+   as the wordmark, and the VC menu's mottled navy background
+   (bar-texture.jpg) multiplied into the bar surface. Pure overlays on
+   the 1920x720 canvas; the map is never resized or inset. */
 #dash-topbar,#dash-bottombar{display:none}
-/* Drive-mode car chrome: visible for every theme in dashboard mode
-   (body.dashboard-mode), driving or exploring — exactly like Vice
-   City's original always-on dashboard chrome. Each theme re-skins
-   the shared markup below. */
+/* Bespoke bars are always on in dashboard mode (every theme), driving or
+   exploring — exactly like Vice City's original dashboard chrome. */
 body.dashboard-mode.theme-vice-city #dash-topbar{
   display:block;position:absolute;left:0;right:0;top:0;height:68px;z-index:25;
   background:linear-gradient(180deg,#ff71ce,#ff2e88 55%,#b967ff);

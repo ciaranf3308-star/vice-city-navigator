@@ -113,6 +113,7 @@
       const idle = q('.sasp-idle');
       const connected = core.isConnected();
       idle.hidden = connected;
+      root.classList.toggle('is-idle', !connected);
       const title = q('.sasp-title'), artist = q('.sasp-artist');
       const toggle = q('.sasp-tbtn[data-act="toggle"]');
       if (!connected) {

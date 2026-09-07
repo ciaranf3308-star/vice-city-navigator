@@ -24,8 +24,9 @@
 
 .vcsp {
   position: absolute; z-index: 1;
-  right: 1.5cqw; top: 50%; translate: 0 -50%;
-  width: 38cqw; aspect-ratio: 1448 / 1086;
+  right: 55px; top: 50%; translate: 0 -50%;
+  width: 780px; aspect-ratio: 1448 / 1086;
+  transform: rotate(6deg); transform-origin: center;
   container-type: size;
   pointer-events: auto;
   background: transparent;
@@ -67,19 +68,19 @@
 /* ---------- track info on the dark panel under the album ---------- */
 .vcsp-track {
   position: absolute; z-index: 3;
-  left: 6%; right: 64%; top: 71%;
+  left: 6%; right: 64%; top: 71.5%;
   text-align: left;
 }
 .vcsp-title {
   font-family: 'Pricedown Bl', Oswald, sans-serif;
-  font-size: 4.6cqw; letter-spacing: .05em; line-height: 1.15;
+  font-size: 3.9cqw; letter-spacing: .05em; line-height: 1.15;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   color: #fff;
   text-shadow: 0 0 10px rgba(255,47,179,.85), 0 2px 4px #000;
 }
 .vcsp-artist {
   margin-top: .6cqh;
-  font-size: 3.4cqw; color: #ffd7f2;
+  font-size: 2.9cqw; color: #ffd7f2;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   text-shadow: 0 1px 3px #000;
 }
@@ -88,9 +89,9 @@
 /* ---------- progress on the dark panel ---------- */
 .vcsp-progress {
   position: absolute; z-index: 3;
-  left: 6%; right: 64%; top: 80.5%;
+  left: 6%; right: 64%; top: 82.5%;
 }
-.vcsp-bar { position: relative; height: 3cqh; cursor: pointer; touch-action: none; }
+.vcsp-bar { position: relative; height: 2.2cqh; cursor: pointer; touch-action: none; }
 .vcsp-bar::before {
   content: ''; position: absolute; left: 0; right: 0; top: 50%;
   height: 5px; margin-top: -2.5px; border-radius: 3px;
@@ -111,18 +112,18 @@
 }
 .vcsp-times {
   display: flex; justify-content: space-between; margin-top: .6cqh;
-  font-size: 3cqw; color: #9fd8ff; text-shadow: 0 1px 2px #000;
+  font-size: 2.6cqw; color: #9fd8ff; text-shadow: 0 1px 2px #000;
 }
 
 /* ---------- transport on the dark panel ---------- */
 .vcsp-controls {
   position: absolute; z-index: 3;
-  left: 6%; right: 64%; top: 86%; bottom: 3%;
-  display: flex; align-items: center; gap: 3cqw;
+  left: 6%; right: 64%; top: 89.5%; bottom: 2.5%;
+  display: flex; align-items: center; justify-content: center; gap: 2.5cqw;
   background: none; padding: 0;
 }
 .vcsp-tbtn {
-  width: 8cqw; height: 8cqw; min-width: 44px; min-height: 44px;
+  width: 4.9cqw; height: 4.9cqw; min-width: 34px; min-height: 34px;
   border-radius: 50%; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   color: #fff; background: rgba(10,16,40,.55);
@@ -131,7 +132,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 .vcsp-tbtn.big {
-  width: 10cqw; height: 10cqw; min-width: 54px; min-height: 54px;
+  width: 5.9cqw; height: 5.9cqw; min-width: 40px; min-height: 40px;
   border-color: #ff4fc3;
   box-shadow: 0 0 20px rgba(255,47,179,.6), inset 0 0 12px rgba(255,47,179,.3);
 }
@@ -177,6 +178,10 @@
   pointer-events: none;
 }
 .vcsp-idle[hidden] { display: none; }
+/* Disconnected: the idle block owns the lyric stage — hide the lyric
+   engine's waiting state and the dead transport so nothing overlaps. */
+.vcsp.is-idle .vcsp-lyrics { display: none; }
+.vcsp.is-idle .vcsp-controls { display: none; }
 .vcsp-idle-kicker {
   font-family: 'Pricedown Bl', Oswald, sans-serif;
   font-size: 5.2cqw; letter-spacing: .12em;
