@@ -147,7 +147,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v24"), 'SW shell cache v24');
-ok(swSrc.includes("ws-theme-v3"), 'SW theme cache v3');
+ok(swSrc.includes("ws-theme-v4"), 'SW theme cache v4');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
@@ -172,6 +172,12 @@ const vRoadFonts = new Set(vStyle.layers.filter(l => /label-road/.test(l.id)).ma
 ok(vRoadFonts.size === 1 && vRoadFonts.has('SignPainter'), 'V road labels use SignPainter stack');
 const vPlaceFonts = new Set(vStyle.layers.filter(l => /label-place$/.test(l.id)).map(l => l.layout['text-font'][0]));
 ok(vPlaceFonts.size === 1 && vPlaceFonts.has('gta-v'), 'V place labels use Chalet (gta-v) stack');
+const vcStyle = JSON.parse(fs.readFileSync(path.join(REPO, 'themes/vice-city/style.json'), 'utf8'));
+const vcRoadFonts = new Set(vcStyle.layers.filter(l => /label-road/.test(l.id)).map(l => l.layout['text-font'][0]));
+ok(vcRoadFonts.size === 1 && vcRoadFonts.has('PricedownBl'), 'VC road labels use Pricedown stack');
+const saStyle = JSON.parse(fs.readFileSync(path.join(REPO, 'themes/san-andreas/style.json'), 'utf8'));
+const saRoadFonts = new Set(saStyle.layers.filter(l => /label-road/.test(l.id)).map(l => l.layout['text-font'][0]));
+ok(saRoadFonts.size === 1 && saRoadFonts.has('san-andreas'), 'SA road labels use Bank Gothic (san-andreas) stack');
 const rdrStyle = JSON.parse(fs.readFileSync(path.join(REPO, 'themes/rdr2/style.json'), 'utf8'));
 const rdrPlace = rdrStyle.layers.find(l => /label-place$/.test(l.id));
 ok(rdrPlace && rdrPlace.layout['text-letter-spacing'] === 0.18, 'RDR2 place labels tracked out');
