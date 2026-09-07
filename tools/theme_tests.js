@@ -146,7 +146,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v31"), 'SW shell cache v31');
+ok(swSrc.includes("ws-shell-v32"), 'SW shell cache v32');
 ok(swSrc.includes("ws-theme-v10"), 'SW theme cache v10');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
@@ -331,7 +331,16 @@ ok(/body\.dashboard-mode #spotify-pane\{[\s\S]*?pointer-events:none/.test(cssSrc
 ok(cssSrc.includes('[data-skin="vice-city"]'), 'floating-skin selector present');
 ok(appSrc.includes('pane.dataset.skin'), 'mount tags the pane with the active skin');
 ok(appSrc.includes('body.dataset.spotskin'), 'mount exposes the skin on <body> for HUD clearance');
-ok(/body\.dashboard-mode\[data-spotskin="vice-city"\] #map-tools\{right:660px\}/.test(cssSrc), 'VC: zoom tools slide left of the floating HUD');
+ok(indexSrc.includes('id="dash-topbar"'), 'dashboard top status bar exists');
+ok(indexSrc.includes('id="dash-bottombar"'), 'dashboard bottom menu bar exists');
+ok(indexSrc.includes('data-dtab="phone"'), 'bottom bar has a PHONE tab');
+ok(indexSrc.includes('id="dash-temp"') && indexSrc.includes('id="dash-time"'), 'top bar has weather + clock slots');
+ok(indexSrc.includes('id="dash-zoom-in"') && indexSrc.includes('id="dash-zoom-out"') && indexSrc.includes('id="dash-locate"'), 'bottom bar carries zoom + locate');
+ok(appSrc.includes("'dash-topbar', 'dash-bottombar'"), 'bars are reparented into the dashboard stage');
+ok(/body\.dashboard-mode #map-tools\{display:none\}/.test(cssSrc), 'floating zoom tools hidden in dashboard (zoom lives in the bar)');
+ok(appSrc.includes('open-meteo.com'), 'weather comes from keyless Open-Meteo');
+ok(appSrc.includes("setAppMode('normal')"), 'PHONE tab drops back to the phone UI');
+ok(appSrc.includes("classList.toggle('radio-off')"), 'RADIO tab toggles the music widget');
 ok(!cssSrc.includes('#spotify-close'), 'no close-button styles');
 ok(/\#spotify-pane\{[\s\S]*?background:transparent/.test(cssSrc), 'pane transparent');
 

@@ -153,6 +153,29 @@
 
 <div id="toast" hidden></div>
 
+<!-- ============ DASHBOARD chrome: car head-unit top + bottom bars ============ -->
+<header id="dash-topbar" aria-label="Status">
+  <div class="dash-brand"><span class="dash-logo">WayStation</span></div>
+  <div class="dash-wx"><span id="dash-temp">--°C</span><span id="dash-wxicon" aria-hidden="true"></span></div>
+  <div class="dash-clock"><span id="dash-date">—</span><span id="dash-time">--:--</span></div>
+</header>
+<nav id="dash-bottombar" aria-label="Car menu">
+  <div class="dash-tabs" role="group" aria-label="Sections">
+    <button type="button" data-dtab="map" class="on">Map</button>
+    <button type="button" data-dtab="radio">Radio</button>
+    <button type="button" data-dtab="phone">Phone</button>
+    <button type="button" data-dtab="vehicle">Vehicle</button>
+    <button type="button" data-dtab="settings">Settings</button>
+  </div>
+  <div class="dash-dest"><span id="dash-dest">—</span></div>
+  <div class="dash-zoom">
+    <button type="button" id="dash-zoom-out" aria-label="Zoom out">−</button>
+    <button type="button" id="dash-zoom-in" aria-label="Zoom in">+</button>
+    <button type="button" id="dash-locate" aria-label="My location">◎</button>
+  </div>
+  <div class="dash-trip"><span id="dash-compass" aria-hidden="true">▲</span><span id="dash-eta">—</span></div>
+</nav>
+
 <!-- ============ SPOTIFY pane: dashboard-mode music (theme skin mounts here) ============ -->
 <aside id="spotify-pane" hidden aria-label="Music">
   <div id="spotify-stage"></div>

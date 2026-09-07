@@ -198,6 +198,7 @@ async function initMap() {
   });
   map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
   map.on('load', () => {
+    try { map.on('move', syncDashCompass); } catch (e) {}
     // Each module init is isolated: one failing module must never
     // silently prevent the others (e.g. POIs) from starting.
     try { if (window.VCNThemes) applyBodyTheme(VCNThemes.currentId()); }
@@ -774,6 +775,7 @@ function upcomingManeuverTexts() {
 }
 function endNav() {
   navActive = false;
+  syncDashTrip();
   if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
   if (window.VCNVoice) VCNVoice.cancel();
   setUiMode('explore');
@@ -888,6 +890,7 @@ function updateBanner(dMan) {
   const remainDist = steps.slice(nextIdx).reduce((a, s) => a + s.dist, 0) + dMan;
   const remainDur = totalDur * (totalDist ? remainDist / totalDist : 0);
   $('trip-meta').textContent = `${fmtDist(remainDist)} to go • arrive ${etaString(remainDur)}`;
+  syncDashTrip(remainDur);
 }
 
 function maybeAnnounce(dMan) {
@@ -989,7 +992,7 @@ function dashboardLayoutActive() {
    coordinates; the stage is zoomed to fit the window. Menus, drawers
    and toasts stay at body level so they remain usable at any scale. */
 const DASH_W = 1920, DASH_H = 720;
-const DASH_STAGE_NODES = ['map', 'fx', 'explore-ui', 'drive-hud', 'spotify-pane'];
+const DASH_STAGE_NODES = ['map', 'fx', 'explore-ui', 'drive-hud', 'spotify-pane', 'dash-topbar', 'dash-bottombar'];
 
 function buildDashboardStage() {
   let stage = $('dash-stage');
@@ -1046,6 +1049,11 @@ function applyAppMode() {
   if (pane) pane.hidden = !on;
   if (on) mountSpotifySkin(wsThemeId());
   else unmountSpotifySkin();
+  if (on) {
+    document.body.classList.remove('radio-off');
+    setDashTab('map');
+    tickDashClock(); refreshDashWeather(); syncDashTrip();
+  }
   if (map && map.resize) { try { map.resize(); } catch (e) {} }
   syncDashboardToggle();
   return on;
@@ -1065,6 +1073,91 @@ window.WayStation = window.WayStation || {};
 window.WayStation.setAppMode = setAppMode;
 window.WayStation.getAppMode = () => appMode;
 window.WayStation.dashboardActive = dashboardLayoutActive;
+
+/* ---------------- dashboard car chrome: top status bar + bottom menu --------
+   The head-unit bars from the visual benchmark: live weather + clock up top,
+   MAP / RADIO / PHONE / VEHICLE / SETTINGS tabs plus zoom in the bottom bar.
+   PHONE drops back to the phone UI; RADIO toggles the music widget. */
+const DASH_WX_SVG = {
+  sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.5 4.5l2 2M17.5 17.5l2 2M19.5 4.5l-2 2M6.5 17.5l-2 2"/></svg>',
+  cloud: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 18a4.5 4.5 0 1 1 .8-8.93A6 6 0 0 1 19.5 11 3.75 3.75 0 0 1 18.5 18H7z"/></svg>',
+  rain: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 14a4.5 4.5 0 1 1 .8-8.93A6 6 0 0 1 19.5 7 3.75 3.75 0 0 1 18.5 14H7z"/><path d="M8 17l-1 3M12 17l-1 3M16 17l-1 3"/></svg>',
+  snow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 14a4.5 4.5 0 1 1 .8-8.93A6 6 0 0 1 19.5 7 3.75 3.75 0 0 1 18.5 14H7z"/><path d="M12 17v4M10 19l4-4M14 19l-4-4"/></svg>',
+  fog: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 10h16M6 14h14M4 18h16M8 6h10"/></svg>',
+  storm: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 13a4.5 4.5 0 1 1 .8-8.93A6 6 0 0 1 19.5 6 3.75 3.75 0 0 1 18.5 13H7z"/><path d="M12 13l-3 6h5l-2 4" stroke-linejoin="round"/></svg>'
+};
+function dashWxIcon(code) {
+  const c = Number(code);
+  if (c === 0 || c === 1) return DASH_WX_SVG.sun;
+  if (c === 2 || c === 3) return DASH_WX_SVG.cloud;
+  if (c === 45 || c === 48) return DASH_WX_SVG.fog;
+  if ((c >= 51 && c <= 57) || (c >= 61 && c <= 65) || (c >= 80 && c <= 82)) return DASH_WX_SVG.rain;
+  if ((c >= 71 && c <= 77) || c === 85 || c === 86) return DASH_WX_SVG.snow;
+  if (c >= 95) return DASH_WX_SVG.storm;
+  return DASH_WX_SVG.cloud;
+}
+function tickDashClock() {
+  if (!document.body.classList.contains('dashboard-mode')) return;
+  try {
+    const dateEl = $('dash-date'), timeEl = $('dash-time');
+    if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en-IE',
+      { weekday: 'short', day: '2-digit', month: 'short', timeZone: 'Europe/Dublin' })
+      .replace(/,/g, '').toUpperCase();
+    if (timeEl) timeEl.textContent = new Date().toLocaleTimeString('en-IE',
+      { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Dublin' });
+  } catch (e) {}
+}
+function initDashClock() {
+  tickDashClock();
+  setInterval(tickDashClock, 5000);
+}
+let dashWxLast = '';
+async function refreshDashWeather() {
+  if (!document.body.classList.contains('dashboard-mode')) return;
+  let lat = null, lng = null;
+  if (typeof userPos !== 'undefined' && userPos) { lng = userPos[0]; lat = userPos[1]; }
+  else if (map) { try { const c = map.getCenter(); lat = c.lat; lng = c.lng; } catch (e) {} }
+  if (lat === null) return;
+  try {
+    const r = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat.toFixed(3) +
+      '&longitude=' + lng.toFixed(3) + '&current=temperature_2m,weather_code&timezone=Europe%2FDublin');
+    if (!r.ok) return;
+    const j = await r.json();
+    const temp = Math.round(j.current.temperature_2m);
+    const key = temp + '|' + j.current.weather_code;
+    if (key === dashWxLast) return;
+    dashWxLast = key;
+    const t = $('dash-temp'), ic = $('dash-wxicon');
+    if (t) t.textContent = temp + '°C';
+    if (ic) ic.innerHTML = dashWxIcon(j.current.weather_code);
+  } catch (e) { /* weather is decorative: never break the dash */ }
+}
+function initDashWeather() {
+  refreshDashWeather();
+  setInterval(refreshDashWeather, 10 * 60 * 1000);
+}
+function setDashTab(name) {
+  document.querySelectorAll('#dash-bottombar [data-dtab]')
+    .forEach(b => b.classList.toggle('on', b.dataset.dtab === name));
+}
+function syncDashCompass() {
+  const el = $('dash-compass');
+  if (!el || !map) return;
+  try { el.style.transform = 'rotate(' + (-map.getBearing()) + 'deg)'; } catch (e) {}
+}
+/* Bottom-bar trip readout, fed from the same numbers as the drive HUD. */
+function syncDashTrip(remainSec) {
+  const eta = $('dash-eta'), dst = $('dash-dest');
+  if (!eta || !dst) return;
+  if (navActive && typeof remainSec === 'number') {
+    eta.textContent = 'ARRIVE IN ' + Math.max(1, Math.round(remainSec / 60)) + ' MIN';
+    const label = (typeof dest !== 'undefined' && dest && dest.label) ? dest.label : '';
+    dst.textContent = (label || 'EN ROUTE').toUpperCase().slice(0, 28);
+  } else {
+    eta.textContent = '—';
+    dst.textContent = '—';
+  }
+}
 
 /* ---------------- Spotify: theme-independent core + dashboard skin ----------------
    Core (spotify-core.js) owns auth, tokens, playback state and controls —
@@ -1262,6 +1355,28 @@ function wireControls() {
   $('end-btn').addEventListener('click', endNav);
   $('start-btn').addEventListener('click', startNav);
   $('locate-btn').addEventListener('click', () => locateUser(true));
+
+  // dashboard car chrome: bottom-bar zoom replaces the floating #map-tools
+  $('dash-zoom-in').addEventListener('click', () => map && map.zoomIn());
+  $('dash-zoom-out').addEventListener('click', () => map && map.zoomOut());
+  $('dash-locate').addEventListener('click', () => locateUser(true));
+  document.querySelectorAll('#dash-bottombar [data-dtab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const t = btn.dataset.dtab;
+      if (t === 'phone') { setAppMode('normal'); return; } // back to the phone
+      if (t === 'radio') { // toggle the music widget for a full-bleed map
+        const off = document.body.classList.toggle('radio-off');
+        setDashTab(off ? 'map' : 'radio');
+        return;
+      }
+      if (t === 'vehicle' || t === 'settings') { openMenu(); setDashTab(t); return; }
+      closeMenu();
+      document.body.classList.remove('radio-off');
+      setDashTab('map');
+    });
+  });
+  initDashClock();
+  initDashWeather();
 
   // explore chrome
   $('menu-btn').addEventListener('click', toggleMenu);

@@ -316,14 +316,81 @@ body.dashboard-mode #spotify-pane[data-skin="vice-city"] #spotify-stage{
   left:0;right:0;top:0;bottom:0;width:auto;height:auto;pointer-events:none;
 }
 /* HUD chrome stays clear of the music pane, in canvas coordinates */
-body.dashboard-mode #search-bar{right:492px}
-body.dashboard-mode #map-tools{right:492px}
-body.dashboard-mode #maneuver-card{right:492px}
+body.dashboard-mode #search-bar{right:492px;top:calc(76px + env(safe-area-inset-top))}
+body.dashboard-mode #map-tools{display:none} /* zoom lives in the bottom bar */
+body.dashboard-mode #maneuver-card{right:492px;top:calc(76px + env(safe-area-inset-top))}
 body.dashboard-mode #drive-bar{left:720px;max-width:none}
 /* Vice City's floating HUD is ~643px wide: slide chrome left of it */
 body.dashboard-mode[data-spotskin="vice-city"] #search-bar{right:660px}
-body.dashboard-mode[data-spotskin="vice-city"] #map-tools{right:660px}
 body.dashboard-mode[data-spotskin="vice-city"] #maneuver-card{right:660px}
+/* RADIO tab hides the music widget for a full-bleed map */
+body.dashboard-mode.radio-off #spotify-pane{display:none}
+
+/* ---------- dashboard car chrome: top status bar + bottom menu bar ----------
+   Authored in 1920×720 canvas coordinates; reparented into #dash-stage. */
+#dash-topbar,#dash-bottombar{display:none}
+body.dashboard-mode #dash-topbar{
+  display:flex;position:absolute;left:0;right:0;top:0;height:64px;z-index:25;
+  align-items:center;gap:30px;padding:0 30px;pointer-events:none;
+  background:linear-gradient(180deg,rgba(10,2,20,.94),rgba(10,2,20,.55) 72%,transparent);
+  border-bottom:2px solid rgba(255,113,206,.6);
+  box-shadow:0 2px 22px rgba(255,46,136,.35);
+}
+.dash-logo{
+  font-family:'SignPainter','Pricedown Bl',cursive;font-size:40px;line-height:1;
+  color:#ff71ce;text-shadow:0 0 12px rgba(255,46,136,.9),0 0 30px rgba(255,46,136,.5);
+  transform:rotate(-2deg);white-space:nowrap;
+}
+.dash-wx{display:flex;align-items:center;gap:10px;color:var(--cyan);font-family:var(--vclabel);
+  font-size:26px;font-weight:600;letter-spacing:2px;text-shadow:0 0 10px rgba(1,205,254,.8)}
+.dash-wx svg{width:30px;height:30px;filter:drop-shadow(0 0 6px rgba(1,205,254,.8))}
+.dash-clock{margin-left:auto;display:flex;align-items:baseline;gap:18px;
+  font-family:var(--vclabel);letter-spacing:3px}
+#dash-date{color:var(--pink);font-size:24px;font-weight:600;text-shadow:0 0 10px rgba(255,113,206,.8)}
+#dash-time{color:var(--pink);font-size:30px;font-weight:700;text-shadow:0 0 12px rgba(255,46,136,.9)}
+body.dashboard-mode #dash-bottombar{
+  display:flex;position:absolute;left:0;right:0;bottom:0;height:72px;z-index:25;
+  align-items:stretch;gap:0;pointer-events:auto;
+  background:linear-gradient(0deg,rgba(10,2,20,.96),rgba(10,2,20,.6) 78%,transparent);
+  border-top:2px solid rgba(255,113,206,.6);
+  box-shadow:0 -2px 22px rgba(255,46,136,.35);
+}
+.dash-tabs{display:flex;align-items:stretch;padding:10px 6px 10px 18px;gap:4px}
+.dash-tabs button{
+  font-family:var(--vcfont);font-size:30px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--cyan);background:none;border:0;cursor:pointer;padding:0 20px;
+  text-shadow:0 0 10px rgba(1,205,254,.7);opacity:.85;
+}
+.dash-tabs button.on{color:var(--pink);opacity:1;
+  text-shadow:0 0 12px rgba(255,46,136,.95),0 0 34px rgba(255,46,136,.5)}
+.dash-dest{
+  flex:1;display:flex;align-items:center;justify-content:center;min-width:0;
+  padding:10px 12px;
+}
+#dash-dest{
+  font-family:var(--vclabel);font-size:26px;font-weight:700;letter-spacing:6px;
+  color:var(--pink);text-shadow:0 0 12px rgba(255,46,136,.9);
+  border:2px solid rgba(1,205,254,.65);border-radius:14px;padding:8px 34px;
+  box-shadow:0 0 14px rgba(1,205,254,.35),inset 0 0 18px rgba(1,205,254,.08);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
+}
+.dash-zoom{display:flex;align-items:center;gap:10px;padding:10px 14px}
+.dash-zoom button{
+  width:52px;height:52px;border-radius:50%;cursor:pointer;
+  font-size:26px;line-height:1;color:var(--cyan);
+  background:rgba(10,2,20,.7);border:2px solid rgba(1,205,254,.7);
+  box-shadow:0 0 12px rgba(1,205,254,.4);text-shadow:0 0 8px rgba(1,205,254,.8);
+}
+.dash-zoom button:active{transform:scale(.94)}
+.dash-trip{display:flex;align-items:center;gap:14px;padding:10px 30px 10px 14px}
+#dash-compass{
+  display:inline-block;font-size:30px;color:var(--cyan);
+  text-shadow:0 0 10px rgba(1,205,254,.8);transition:transform .2s linear;
+}
+#dash-eta{
+  font-family:var(--vclabel);font-size:24px;font-weight:600;letter-spacing:2px;
+  color:var(--cyan);text-shadow:0 0 10px rgba(1,205,254,.8);white-space:nowrap;
+}
 
 /* ---------- toast ---------- */
 #toast{
