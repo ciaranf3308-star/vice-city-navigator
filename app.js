@@ -74,6 +74,42 @@ function speak(text) {
   } catch (e) { /* voice unavailable */ }
 }
 
+/* ---------------- Vice City blips ----------------
+   Authentic radar blips extracted from ClassicHud's Vice City texture
+   packs (hud.txd), mapped to real-world Nominatim place categories. */
+const BLIP_PATH = 'assets/blips/blip_';
+function blipFor(it) {
+  const cat = (it.category || it.class || '').toLowerCase();
+  const type = (it.type || '').toLowerCase();
+  const cuisine = ((it.extratags && it.extratags.cuisine) || '').toLowerCase();
+  const shop = cat === 'shop' ? type : '';
+  if (/aerodrome|airport/.test(type) || cat === 'aeroway') return 'airYard';
+  if (type === 'hospital' || type === 'clinic' || type === 'doctors') return 'hostpital';
+  if (type === 'police') return 'police';
+  if (type === 'bank' || type === 'atm' || type === 'bureau_de_change') return 'cash';
+  if (type === 'school' || type === 'university' || type === 'college' || type === 'kindergarten') return 'school';
+  if (type === 'gym' || type === 'sports_centre' || type === 'stadium' || type === 'pitch') return 'gym';
+  if (type === 'car_repair' || shop === 'car_repair' || shop === 'car') return 'modGarage';
+  if (type === 'car_wash') return 'spray';
+  if (type === 'barbers' || type === 'hairdresser' || type === 'beauty') return 'barbers';
+  if (shop === 'tattoo' || type === 'tattoo') return 'tattoo';
+  if (shop === 'estate_agent' || type === 'estate_agent') return 'propertyG';
+  if (type === 'bar' || type === 'pub' || type === 'biergarten') return 'dateDrink';
+  if (type === 'nightclub' || type === 'cinema' || type === 'theatre') return 'dateDisco';
+  if (type === 'hotel' || type === 'hostel' || type === 'guest_house' || type === 'motel') return 'saveGame';
+  if (type === 'house' || type === 'residential' || type === 'apartments') return 'saveGame';
+  if (cat === 'amenity' && /restaurant|fast_food|cafe|food_court|ice_cream/.test(type)) {
+    if (/pizza/.test(cuisine)) return 'pizza';
+    if (/chicken/.test(cuisine)) return 'chicken';
+    if (/burger/.test(cuisine)) return 'burgerShot';
+    if (type === 'cafe' || type === 'ice_cream') return 'diner';
+    if (type === 'restaurant') return 'dateFood';
+    return 'burgerShot';
+  }
+  return 'qmark';
+}
+const blipUrl = name => `${BLIP_PATH}${name}.png`;
+
 /* ---------------- Vice City style recolor ---------------- */
 function recolorStyle(style) {
   for (const layer of style.layers) {
@@ -214,13 +250,21 @@ function locateUser(center) {
   );
 }
 
+let lastHeading = 0; // GPS travel heading, rotates the player arrow
 function placeUserMarker() {
   if (!map || !userPos) return;
   if (!userMarker) {
     const el = document.createElement('div');
-    el.className = 'user-dot';
+    el.className = 'player-arrow';
+    el.innerHTML = '<svg viewBox="0 0 48 48"><path d="M24 5 L41 40 L24 32 L7 40 Z" fill="#ffffff" stroke="#0b0b12" stroke-width="3.5" stroke-linejoin="round"/></svg>';
     userMarker = new maplibregl.Marker({ element: el }).setLngLat(userPos).addTo(map);
   } else userMarker.setLngLat(userPos);
+  updatePlayerArrow();
+}
+function updatePlayerArrow() {
+  if (!userMarker) return;
+  const svg = userMarker.getElement().querySelector('svg');
+  if (svg) svg.style.transform = `rotate(${lastHeading}deg)`;
 }
 
 /* ---------------- search ---------------- */
@@ -239,7 +283,7 @@ async function runSearch(q) {
   const list = $('results');
   if (!q) return;
   try {
-    const url = `${NOMINATIM}?format=jsonv2&limit=6&accept-language=en&q=${encodeURIComponent(q)}`;
+    const url = `${NOMINATIM}?format=jsonv2&extratags=1&limit=6&accept-language=en&q=${encodeURIComponent(q)}`;
     const res = await fetch(url);
     const items = await res.json();
     list.innerHTML = '';
@@ -247,11 +291,17 @@ async function runSearch(q) {
     for (const it of items) {
       const li = document.createElement('li');
       const name = (it.display_name || '').split(',').slice(0, 2).join(',');
-      li.innerHTML = `<strong></strong><small></small>`;
-      li.querySelector('strong').textContent = name;
-      li.querySelector('small').textContent = it.display_name;
+      const blip = blipFor(it);
+      const img = document.createElement('img');
+      img.className = 'res-blip'; img.alt = '';
+      img.src = blipUrl(blip);
+      const wrap = document.createElement('div');
+      const strong = document.createElement('strong'); strong.textContent = name;
+      const small = document.createElement('small'); small.textContent = it.display_name;
+      wrap.append(strong, small);
+      li.append(img, wrap);
       li.addEventListener('click', () => {
-        dest = { label: name, lnglat: [parseFloat(it.lon), parseFloat(it.lat)] };
+        dest = { label: name, lnglat: [parseFloat(it.lon), parseFloat(it.lat)], blip };
         list.hidden = true; $('search').value = name;
         planRoute();
       });
@@ -288,6 +338,7 @@ function drawRoute() {
   map.getSource('vcn-route').setData({ type: 'Feature', geometry: { type: 'LineString', coordinates: routeCoords }, properties: {} });
   if (destMarker) destMarker.remove();
   const el = document.createElement('div'); el.className = 'dest-pin';
+  el.style.backgroundImage = `url('${blipUrl((dest && dest.blip) || 'waypoint')}')`;
   destMarker = new maplibregl.Marker({ element: el }).setLngLat(dest.lnglat).addTo(map);
   const b = new maplibregl.LngLatBounds();
   routeCoords.forEach(c => b.extend(c));
@@ -372,6 +423,7 @@ function onPos(pos) {
     }
   }
   lastPos = { p, t: pos.timestamp };
+  if (heading !== null) { lastHeading = heading; updatePlayerArrow(); }
   if (followMode && now - lastCamMove > 900 && map) {
     lastCamMove = now;
     map.easeTo({ center: p, zoom: 16.5, pitch: 55,
