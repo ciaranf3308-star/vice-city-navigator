@@ -190,6 +190,7 @@ async function initMap() {
       getUserPos: () => userPos,
       formatDist: fmtDist,
       setDestination: d => { dest = d; planRoute(); },
+      navigateTo: d => { dest = d; showRoutePending(d && d.label); planRoute({ autostart: true }); },
       openPlanning: v => openPlanning(v || 'poi'),
     });
     locateUser(true);
@@ -218,6 +219,60 @@ function locateUser(center) {
 }
 
 let lastHeading = 0; // GPS travel heading, rotates the player arrow
+/* Device compass heading (degrees clockwise from north), when the phone
+   reports one. Lets the map/arrow follow the direction the user *faces*,
+   not just the direction GPS sees them move — crucial when stationary or
+   walking slowly, where GPS heading is unavailable. */
+let compassHeading = null;
+let orientationListening = false;
+let lastBearingPush = 0;
+function onOrientation(e) {
+  let h = null;
+  if (typeof e.webkitCompassHeading === 'number' && !isNaN(e.webkitCompassHeading)) {
+    h = e.webkitCompassHeading; // iOS: true compass heading
+  } else if (e.absolute === true && typeof e.alpha === 'number' && !isNaN(e.alpha)) {
+    h = (360 - e.alpha) % 360; // Android absolute mode
+  }
+  if (h === null) return;
+  compassHeading = h;
+  // Arrow follows the compass when GPS has no travel heading for us.
+  if (!navActive) { lastHeading = h; updatePlayerArrow(); }
+  // Keep the map rotated to the direction faced while driving (follow mode).
+  if (navActive && followMode && map) {
+    const now = Date.now();
+    let d = Math.abs(h - map.getBearing()) % 360;
+    if (d > 180) d = 360 - d;
+    if (now - lastBearingPush > 800 && d > 3) {
+      lastBearingPush = now;
+      try { map.easeTo({ bearing: h, duration: 400 }); } catch (err) {}
+    }
+  }
+}
+/* iOS requires compass permission from inside a user gesture — startNav's
+   tap counts. Android needs no permission. Safe to call repeatedly. */
+function enableCompass() {
+  if (typeof window.DeviceOrientationEvent === 'undefined') return;
+  if (orientationListening) return;
+  try {
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission().then(s => {
+        if (s === 'granted' && !orientationListening) {
+          window.addEventListener('deviceorientation', onOrientation);
+          orientationListening = true;
+        }
+      }).catch(() => {});
+    } else {
+      window.addEventListener('deviceorientation', onOrientation);
+      orientationListening = true;
+    }
+  } catch (e) {}
+}
+/* Best available heading: compass first (faces direction), then GPS travel. */
+function bestBearing(fallback) {
+  if (compassHeading !== null) return compassHeading;
+  if (fallback !== undefined && fallback !== null) return fallback;
+  return map ? map.getBearing() : 0;
+}
 /* Authentic player arrow extracted from ClassicHud's Vice City hud.txd
    ("arrow" texture) — replaces the earlier hand-drawn SVG. */
 function placeUserMarker() {
@@ -378,9 +433,10 @@ function buildSteps(route) {
     ann300: false, ann80: false
   }));
 }
-async function planRoute() {
+async function planRoute(opts) {
   if (!dest) return;
-  toast('Finding the neon route…', 1500);
+  const autostart = !!(opts && opts.autostart);
+  if (!autostart) toast('Finding the neon route…', 1500);
   try {
     const from = userPos || await currentPosOnce().catch(() => DUBLIN);
     const route = await osrmRoute(from, dest.lnglat);
@@ -389,6 +445,7 @@ async function planRoute() {
     totalDist = route.distance; totalDur = route.duration;
     drawRoute();
     saveRecent(dest);
+    if (autostart) { startNav(); return; }
     $('dest-label').textContent = (dest && dest.label) || 'Destination';
     $('route-dist').textContent = fmtDist(totalDist);
     $('route-time').textContent = `${Math.round(totalDur / 60)} min`;
@@ -415,6 +472,7 @@ function startNav() {
   if (discoveryOn) setDiscovery(false); // fog never shows during navigation
   setUiMode('drive');
   setFollow(true);
+  enableCompass(); // map follows the direction the user faces, not just GPS travel
   updateBanner();
   const first = steps[0];
   speak(`Starting navigation. ${instrText(first)}. Total ${speakDist(totalDist)}.`);
@@ -469,11 +527,13 @@ function onPos(pos) {
     }
   }
   lastPos = { p, t: pos.timestamp };
-  if (heading !== null) { lastHeading = heading; updatePlayerArrow(); }
+  if (heading !== null) lastHeading = heading; // GPS travel heading wins when moving
+  else if (compassHeading !== null) lastHeading = compassHeading; // else face direction
+  updatePlayerArrow();
   if (followMode && now - lastCamMove > 900 && map) {
     lastCamMove = now;
     map.easeTo({ center: p, zoom: 16.5, pitch: 55,
-      bearing: heading !== null ? heading : map.getBearing(), duration: 900 });
+      bearing: bestBearing(heading), duration: 900 });
   }
 
   // off-route detection
@@ -630,7 +690,8 @@ function wireControls() {
   });
   $('follow-btn').addEventListener('click', () => {
     setFollow(!followMode);
-    if (followMode && userPos && map) map.easeTo({ center: userPos, zoom: 16.5, pitch: 55, duration: 700 });
+    if (followMode && userPos && map) map.easeTo({ center: userPos, zoom: 16.5, pitch: 55,
+      bearing: bestBearing(), duration: 700 });
   });
   $('zoom-in').addEventListener('click', () => map && map.zoomIn());
   $('zoom-out').addEventListener('click', () => map && map.zoomOut());

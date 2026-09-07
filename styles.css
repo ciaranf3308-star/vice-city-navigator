@@ -147,6 +147,8 @@ body{
 .route-meta{font-size:16px;margin-bottom:10px;color:var(--yellow);letter-spacing:1px;font-family:var(--vclabel);font-weight:500}
 .route-meta span{margin:0 6px;color:var(--purple)}
 #poi-detail{margin-top:14px}
+#poi-drive{width:100%}
+#poi-detail .poi-secondary{width:100%;margin-top:10px}
 .poi-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
 .poi-head img{image-rendering:pixelated;filter:drop-shadow(0 0 8px rgba(1,205,254,.55))}
 #poi-name{font-family:var(--vclabel);font-weight:600;font-size:18px;letter-spacing:.5px;display:block}

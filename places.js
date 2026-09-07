@@ -417,6 +417,11 @@
         label: props.name, lnglat: [props.lng, props.lat], blip: props.blip || 'waypoint',
       });
     };
+    document.getElementById('poi-drive').onclick = () => {
+      if (hooks.navigateTo) hooks.navigateTo({
+        label: props.name, lnglat: [props.lng, props.lat], blip: props.blip || 'waypoint',
+      });
+    };
   }
   function wireCard() {
     const layerIds = [POI_LAYER_ID];
