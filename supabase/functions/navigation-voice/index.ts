@@ -1,12 +1,12 @@
 /* ============================================================================
    Vice City Navigator — navigation-voice Edge Function (Supabase / Deno)
 
-   Provider chain (first configured key wins):
+   Provider chain (Gemini preferred, OpenAI as automatic fallback):
      1. Gemini Developer API (FREE tier) — GEMINI_API_KEY secret.
-        Rewrite: gemini-2.0-flash. Speech: gemini-2.5-flash-preview-tts
+        Rewrite: runtime-discovered flash model. Speech: gemini-2.5-flash-preview-tts
         (free of charge on the free tier: text input + audio output).
-     2. OpenAI — OPENAI_API_KEY secret (optional fallback).
-        Rewrite: gpt-4o-mini. Speech: gpt-4o-mini-tts → MP3.
+     2. OpenAI — OPENAI_API_KEY secret (optional, used automatically when a
+        Gemini step fails). Rewrite: gpt-4o-mini. Speech: gpt-4o-mini-tts → MP3.
 
    API keys live ONLY as Supabase Edge Function secrets, read here via
    Deno.env at runtime. They are NEVER committed to git, NEVER shipped in
@@ -201,6 +201,17 @@ function geminiHeaders(key: string): Record<string, string> {
   return { 'x-goog-api-key': key, 'Content-Type': 'application/json' };
 }
 
+/* Truncated Google error payload for logs. The API key is sent in a request
+   header and is never echoed in these bodies; still, keep it short. */
+async function geminiErrorSnippet(res: Response): Promise<string> {
+  try {
+    const t = await res.text();
+    return t ? ' body:' + t.slice(0, 300).replace(/\s+/g, ' ') : '';
+  } catch {
+    return '';
+  }
+}
+
 /* Runtime discovery of a working text model. Hardcoded aliases keep dying, so
    on a cold start (or when the cached model 404s) we ask models.list which
    flash-family models actually support generateContent right now, and remember
@@ -211,7 +222,7 @@ async function discoverTextModel(key: string): Promise<string | null> {
   try {
     const res = await fetch(GEMINI_MODELS_URL, {
       headers: geminiHeaders(key),
-      signal: AbortSignal.timeout(15000),
+      signal: AbortSignal.timeout(5000),
     });
     if (!res.ok) return null;
     const data = await res.json();
@@ -267,11 +278,11 @@ async function geminiRewrite(key: string, persona: Persona, mode: string, profan
       });
     } catch (e) { lastErr = e as Error; continue; }
     if (res.status === 404 || res.status === 429) {
-      lastErr = new Error(`gemini_rewrite_${res.status}:${model}`);
+      lastErr = new Error(`gemini_rewrite_${res.status}:${model}${await geminiErrorSnippet(res)}`);
       if (res.status === 404 && model === cachedTextModel) cachedTextModel = null;
       continue;
     }
-    if (!res.ok) throw new Error(`gemini_rewrite_${res.status}`);
+    if (!res.ok) throw new Error(`gemini_rewrite_${res.status}${await geminiErrorSnippet(res)}`);
     const data = await res.json();
     const parts = data?.candidates?.[0]?.content?.parts;
     const out = Array.isArray(parts) ? parts.map((p: { text?: unknown }) =>
@@ -294,10 +305,12 @@ async function geminiSpeak(key: string, persona: Persona, text: string): Promise
     },
   });
   /* Free-tier TTS rate-limits under burst (the app pre-generates upcoming
-     maneuvers), so retry 429s with backoff instead of failing instantly. */
+     maneuvers). One quick retry, then give up fast so the OpenAI fallback
+     (or the client's standard voice) takes over instead of burning the
+     client's 12s fetch budget on doomed retries. */
   let lastErr: Error | null = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (attempt > 0) await new Promise((r) => setTimeout(r, 1200 * attempt));
+  for (let attempt = 0; attempt < 2; attempt++) {
+    if (attempt > 0) await new Promise((r) => setTimeout(r, 1200));
     let res: Response;
     try {
       res = await fetch(`${GEMINI_API_BASE}/${GEMINI_TTS_MODEL}:generateContent`, {
@@ -307,8 +320,8 @@ async function geminiSpeak(key: string, persona: Persona, text: string): Promise
         signal: AbortSignal.timeout(15000),
       });
     } catch (e) { lastErr = e as Error; continue; } // timeout/network -> retry
-    if (res.status === 429) { lastErr = new Error('gemini_tts_429'); continue; }
-    if (!res.ok) throw new Error(`gemini_tts_${res.status}`);
+    if (res.status === 429) { lastErr = new Error('gemini_tts_429' + await geminiErrorSnippet(res)); continue; }
+    if (!res.ok) throw new Error(`gemini_tts_${res.status}` + await geminiErrorSnippet(res));
     const data = await res.json();
     const b64 = data?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
     if (typeof b64 !== 'string' || !b64.length) throw new Error('gemini_tts_empty');
@@ -377,12 +390,10 @@ async function openaiSpeak(key: string, persona: Persona, text: string): Promise
 async function handleVoice(req: Request): Promise<Response> {
   const geminiKey = Deno.env.get('GEMINI_API_KEY');
   const openAiKey = Deno.env.get('OPENAI_API_KEY');
-  const provider = geminiKey ? 'gemini' : openAiKey ? 'openai' : null;
-  if (!provider) {
+  if (!geminiKey && !openAiKey) {
     console.error('[navigation-voice] misconfigured: no GEMINI_API_KEY or OPENAI_API_KEY secret set');
     return json(req, { error: 'server_misconfigured' }, 500);
   }
-  const providerKey = (provider === 'gemini' ? geminiKey : openAiKey) as string;
 
   let body: Record<string, unknown>;
   try {
@@ -411,30 +422,51 @@ async function handleVoice(req: Request): Promise<Response> {
     return json(req, { error: 'daily_cap_reached' }, 429);
   }
 
-  /* 2. Rewrite: canonical maneuver → themed dialogue. Never fatal. */
+  /* 2. Rewrite: canonical maneuver → themed dialogue. Never fatal.
+        Gemini first; if every Gemini model fails and an OpenAI key is
+        configured, try OpenAI before falling back to the original text. */
   let themed = text.trim();
-  try {
-    themed = provider === 'gemini'
-      ? await geminiRewrite(providerKey, persona, mode, profanity, themed)
-      : await openaiRewrite(providerKey, persona, mode, profanity, themed);
-  } catch (e) {
-    // Status only — never the key, never response bodies that could echo it.
-    console.error('[navigation-voice] rewrite_failed, provider:', provider, (e as Error).message);
-    /* fall through — themed stays the original deterministic text */
+  let rewriteOk = false;
+  if (geminiKey) {
+    try {
+      themed = await geminiRewrite(geminiKey, persona, mode, profanity, themed);
+      rewriteOk = true;
+    } catch (e) {
+      // Truncated Google error payload only — never the key.
+      console.error('[navigation-voice] rewrite_failed, provider: gemini', (e as Error).message);
+    }
+  }
+  if (!rewriteOk && openAiKey) {
+    try {
+      themed = await openaiRewrite(openAiKey, persona, mode, profanity, themed);
+    } catch (e) {
+      console.error('[navigation-voice] rewrite_failed, provider: openai', (e as Error).message);
+      /* fall through — themed stays the original deterministic text */
+    }
   }
 
-  /* 3. Speak: themed text → audio. Failure here is a 502; the app's
+  /* 3. Speak: themed text → audio. Gemini first; OpenAI fallback when
+        configured. Failure of every provider is a 502; the app's
         standard voice has already spoken, so the driver loses nothing. */
-  try {
-    const spoken = provider === 'gemini'
-      ? await geminiSpeak(providerKey, persona, themed)
-      : await openaiSpeak(providerKey, persona, themed);
-    return json(req, { line: themed, audio: spoken.audio, mime: spoken.mime });
-  } catch (e) {
-    // Status only — never the key, never response bodies that could echo it.
-    console.error('[navigation-voice] tts_failed, provider:', provider, (e as Error).message);
-    return json(req, { error: 'tts_failed' }, 502);
+  let spoken: { audio: string; mime: string } | null = null;
+  if (geminiKey) {
+    try {
+      spoken = await geminiSpeak(geminiKey, persona, themed);
+    } catch (e) {
+      // Truncated Google error payload only — never the key.
+      console.error('[navigation-voice] tts_failed, provider: gemini', (e as Error).message);
+    }
   }
+  if (!spoken && openAiKey) {
+    try {
+      spoken = await openaiSpeak(openAiKey, persona, themed);
+      console.log('[navigation-voice] tts_fallback: openai');
+    } catch (e) {
+      console.error('[navigation-voice] tts_failed, provider: openai', (e as Error).message);
+    }
+  }
+  if (!spoken) return json(req, { error: 'tts_failed' }, 502);
+  return json(req, { line: themed, audio: spoken.audio, mime: spoken.mime });
 }
 
 Deno.serve(async (req: Request): Promise<Response> => {
