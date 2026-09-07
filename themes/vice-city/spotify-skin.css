@@ -21,20 +21,27 @@
 }
 .vcsp img { display: block; }
 
-/* ---------- header: neon logo + skyline (may break edges) ---------- */
+/* ---------- overlay composition: full-bleed stage base, album panel
+   and logo layered ON TOP, breaking edges like the concept art.
+   Every layer spans the full widget — no centered card, no gaps. --- */
 .vcsp-header {
-  flex: none;
-  width: 100%; height: 21cqh;
+  position: absolute; z-index: 3;
+  top: 0; left: 0;
+  width: 100%; height: 19cqh;
   object-fit: cover; object-position: left center;
+  pointer-events: none;
 }
 
 /* ---------- album zone: art under the neon frame ---------- */
 .vcsp-albumzone {
-  position: relative;
-  flex: none;
-  width: min(46cqh, 78cqw);
+  position: absolute; z-index: 2;
+  left: 0; top: 12cqh;
+  width: 64cqw;
   aspect-ratio: 500 / 595;
-  margin: 0 auto;
+  margin: 0;
+  /* neon seam where the panel meets the sunset stage */
+  border-right: 2px solid rgba(255,79,195,.65);
+  box-shadow: 14px 0 28px -10px rgba(255,47,179,.55);
 }
 .vcsp-art {
   position: absolute; z-index: 1;
@@ -94,10 +101,9 @@
   font-size: 3.2cqw; color: #9fd8ff; text-shadow: 0 1px 2px #000;
 }
 
-/* ---------- lyric / music-video stage ---------- */
+/* ---------- lyric / music-video stage: full-bleed base layer ---------- */
 .vcsp-stagewrap {
-  position: relative;
-  flex: 1 1 auto; min-height: 0;
+  position: absolute; inset: 0; z-index: 1;
   overflow: hidden;
 }
 .vcsp-stagebg {
@@ -127,7 +133,7 @@
    A renderer mounted via setLyricsRenderer() owns this node. */
 .vcsp-lyrics {
   position: absolute; z-index: 3;
-  left: 7%; right: 7%; top: 7%; bottom: 32%;
+  left: 5%; right: 5%; top: 67%; bottom: 23%;
   overflow: hidden;
   display: flex; flex-direction: column; justify-content: center;
   text-align: center; gap: 1.2cqh;

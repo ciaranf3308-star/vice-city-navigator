@@ -147,7 +147,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v28"), 'SW shell cache v28');
-ok(swSrc.includes("ws-theme-v8"), 'SW theme cache v8');
+ok(swSrc.includes("ws-theme-v9"), 'SW theme cache v9');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
@@ -267,6 +267,9 @@ for (const banned of ['miniviz', 'stagepeek', 'fullstage', 'vcsp-viz', 'spectrum
   ok(!vcSkinJsCode.includes(banned) && !vcSkinCssCode.includes(banned), `VC skin has no ${banned}`);
 }
 ok(/\.vcsp\s*\{[^}]*background:\s*transparent/.test(vcSkinCss), 'VC skin root transparent');
+ok(/\.vcsp-stagewrap\s*\{[^}]*position:\s*absolute[^}]*inset:\s*0/.test(vcSkinCssCode), 'VC stage is full-bleed overlay base');
+ok(/\.vcsp-albumzone\s*\{[^}]*position:\s*absolute/.test(vcSkinCssCode), 'VC album panel overlaid (absolute, breaks edges)');
+ok(/\.vcsp-header\s*\{[^}]*position:\s*absolute/.test(vcSkinCssCode), 'VC header logo overlaid (absolute)');
 
 /* ---------- GTA V Spotify skin ---------- */
 const gvSkinJs = fs.readFileSync(path.join(REPO, 'themes/gta-v/spotify-skin.js'), 'utf8');
@@ -289,7 +292,7 @@ for (const banned of ['miniviz', 'stagepeek', 'fullstage', 'gvsp-viz', 'spectrum
 }
 ok(gvSkinJsCode.includes('gvsp-') && gvSkinCssCode.includes('.gvsp'), 'GV skin uses gvsp- prefix');
 ok(gvSkinCssCode.includes('#7CFF6B') && gvSkinCssCode.includes('#0d1117'), 'GV skin neon-green on dark panel');
-ok(gvSkinCssCode.includes("'Chalet Comprime'") && gvSkinCssCode.includes("'Chalet London'"), 'GV skin Chalet typefaces');
+ok(gvSkinCssCode.includes("'SignPainter'") && gvSkinCssCode.includes("'Chalet London'"), 'GV skin SignPainter script + Chalet London');
 ok(!/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(gvSkinJsCode) && !/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(gvSkinCssCode), 'GV skin has no emojis');
 
 // app mode system
