@@ -50,7 +50,10 @@ const ALLOWED_ORIGIN = 'https://ciaranf3308-star.github.io';
 
 /* Gemini Developer API (free tier). */
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
-const GEMINI_TEXT_MODEL = 'gemini-2.0-flash';
+/* Text models for the rewrite step, in preference order. Google retires model
+   aliases without warning (gemini-2.0-flash started 404ing in Sep 2026), so
+   on a 404 we try the next model instead of failing the rewrite. */
+const GEMINI_TEXT_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite'];
 const GEMINI_TTS_MODEL = 'gemini-2.5-flash-preview-tts';
 const GEMINI_TTS_VOICE = 'Puck'; // upbeat prebuilt voice
 const GEMINI_TTS_RATE = 24000; // PCM is 24 kHz, 16-bit, mono
@@ -196,21 +199,27 @@ async function geminiRewrite(key: string, persona: Persona, mode: string, profan
       ? ' Mild profanity is allowed when it fits the persona.'
       : ' No profanity or slurs, keep it clean.') +
     '\n\nInstruction to rewrite: ' + text;
-  const res = await fetch(`${GEMINI_API_BASE}/${GEMINI_TEXT_MODEL}:generateContent`, {
-    method: 'POST',
-    headers: geminiHeaders(key),
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.8, maxOutputTokens: 140 },
-    }),
+  const body = JSON.stringify({
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { temperature: 0.8, maxOutputTokens: 140 },
   });
-  if (!res.ok) throw new Error(`gemini_rewrite_${res.status}`);
-  const data = await res.json();
-  const parts = data?.candidates?.[0]?.content?.parts;
-  const out = Array.isArray(parts) ? parts.map((p: { text?: unknown }) =>
-    typeof p.text === 'string' ? p.text : '').join('').trim() : '';
-  if (!out) throw new Error('gemini_rewrite_empty');
-  return out;
+  let lastErr: Error | null = null;
+  for (const model of GEMINI_TEXT_MODELS) {
+    const res = await fetch(`${GEMINI_API_BASE}/${model}:generateContent`, {
+      method: 'POST',
+      headers: geminiHeaders(key),
+      body,
+    });
+    if (res.status === 404) { lastErr = new Error(`gemini_rewrite_404:${model}`); continue; }
+    if (!res.ok) throw new Error(`gemini_rewrite_${res.status}`);
+    const data = await res.json();
+    const parts = data?.candidates?.[0]?.content?.parts;
+    const out = Array.isArray(parts) ? parts.map((p: { text?: unknown }) =>
+      typeof p.text === 'string' ? p.text : '').join('').trim() : '';
+    if (!out) throw new Error('gemini_rewrite_empty');
+    return out;
+  }
+  throw lastErr ?? new Error('gemini_rewrite_no_model');
 }
 
 async function geminiSpeak(key: string, persona: Persona, text: string): Promise<{ audio: string; mime: string }> {
