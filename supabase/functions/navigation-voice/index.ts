@@ -1,25 +1,31 @@
 /* ============================================================================
-   Vice City Navigator — navigation-voice Edge Function (Supabase / Deno)
+   WayStation — navigation-voice Edge Function (Supabase / Deno)
 
-   Per-theme provider chains. The client sends { text, theme, mode,
-   profanity } and the server decides — the PWA needs no changes:
+   OpenAI-primary voice for EVERY theme. The client sends
+   { text, theme, profile, personaVersion, mode, profanity } and the server
+   renders the active theme's persona — the theme's voice block is the
+   source of truth for which profile speaks.
 
-     san-andreas — OpenAI primary (funded account). Gemini is NEVER
-     attempted for this profile.
-       1. Server audio cache (Supabase Storage `voice-cache` bucket, keyed
-          by voice profile + normalized instruction + mode + profanity +
-          TTS model + voice). Repeats cost nothing.
-       2. OpenAI rewrite: gpt-4o-mini with the San Andreas persona below.
-       3. OpenAI TTS: gpt-4o-mini-tts, voice `onyx` → MP3.
-       4. Browser/device speech fallback (client-side, on 502/429).
+   Normal provider order, identical for all four themes:
+     1. Cached generated audio — server-side `voice-cache` Storage bucket,
+        keyed by voice profile + persona version + normalized instruction +
+        mode + profanity + TTS model + voice. Repeats cost nothing.
+     2. OpenAI rewrite: gpt-4o-mini with the theme persona below.
+     3. OpenAI TTS: gpt-4o-mini-tts → MP3.
+     4. Browser/device speech fallback (client-side, on 502/429). The app
+        always speaks the deterministic instruction immediately, so the
+        driver never waits on AI.
 
-     vice-city (default) — Gemini free tier first, OpenAI fallback:
-       1. Gemini Developer API (FREE tier) — GEMINI_API_KEY secret.
-          Rewrite: runtime-discovered flash model. Speech:
-          gemini-2.5-flash-preview-tts → WAV.
-       2. OpenAI — OPENAI_API_KEY secret (automatic fallback when a
-          Gemini step fails). Rewrite: gpt-4o-mini. Speech:
-          gpt-4o-mini-tts → MP3.
+   Gemini is NEVER attempted in the normal path. The code below keeps an
+   explicit opt-in `provider: 'gemini-first'` slot, but no shipped profile
+   uses it — nothing in the normal flow can add Gemini latency before
+   OpenAI.
+
+   Voices (all gpt-4o-mini-tts):
+     vice-city  — echo  — energetic 1980s Miami traffic-radio DJ
+     san-andreas — onyx — West Coast neighborhood OG, deep baritone
+     gta-v      — alloy — slick modern Los Santos city guide
+     rdr2       — fable — seasoned frontier trail guide
 
    API keys live ONLY as Supabase Edge Function secrets, read here via
    Deno.env at runtime. They are NEVER committed to git, NEVER shipped in
@@ -29,10 +35,11 @@
      POST /functions/v1/navigation-voice
        Headers: apikey: <anon key>, Authorization: Bearer <anon key>
        Body:    { "text": "Turn left onto Main Street.",
-                  "theme": "san-andreas", "mode": "themed"|"banter",
-                  "profanity": false }
+                  "theme": "san-andreas", "profile": "san-andreas",
+                  "personaVersion": "v2",
+                  "mode": "themed"|"banter", "profanity": false }
        → 200  { "line": "Aight, hang that left on Main Street.",
-                "audio": "<base64 mp3|wav>", "mime": "audio/mpeg"|"audio/wav" }
+                "audio": "<base64 mp3>", "mime": "audio/mpeg" }
        → 400  { "error": "invalid_json" | "bad_text" }
        → 403  wrong Origin
        → 429  { "error": "daily_cap_reached" }
@@ -43,16 +50,15 @@
    12s. ALL expensive provider work on the server runs under a single 10s
    global deadline that ALSO fires when the client disconnects (req.signal),
    so the function never keeps burning paid provider calls after nobody is
-   listening.
+   listening. No long retry chains.
 
    Pipeline per request:
      1. Rate limit — atomic daily counter in Postgres (navigation_voice_usage,
         bumped via the navigation_voice_bump() RPC with the service_role key).
         Over VOICE_DAILY_CAP (default 1000) → 429. Fail CLOSED: an
         unreachable counter is a 500, never uncapped provider calls.
-     2. Audio cache (OpenAI profiles) — content-addressed MP3 in the
-        self-provisioned `voice-cache` Storage bucket. Hit → 200 with no
-        provider spend at all.
+     2. Audio cache — content-addressed MP3 in the self-provisioned
+        `voice-cache` Storage bucket. Hit → 200 with no provider spend.
      3. Rewrite — the text model turns the canonical OSRM maneuver into
         themed dialogue using the server-side persona below. Never fatal:
         any failure falls back to the original text; navigation never waits
@@ -92,7 +98,9 @@ function deadlineScope(req: Request): { signal: AbortSignal; done: () => void } 
   };
 }
 
-/* Gemini Developer API (free tier). */
+/* Gemini Developer API (free tier) — kept ONLY behind the explicit
+   'gemini-first' provider opt-in. No shipped profile uses it, so none of
+   this code runs in the normal OpenAI-primary path. */
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 /* Text models for the rewrite step, in preference order. Google retires model
    aliases without warning (gemini-2.0-flash started 404ing in Sep 2026, then
@@ -117,45 +125,56 @@ const OPENAI_TTS_URL = 'https://api.openai.com/v1/audio/speech';
 
 interface Persona {
   /* 'openai' — OpenAI only, Gemini is never attempted for this profile.
-     'gemini-first' — Gemini first, OpenAI as automatic fallback. */
+     'gemini-first' — explicit opt-in only; NO shipped profile uses it, so
+     the normal path never touches Gemini. */
   provider: 'openai' | 'gemini-first';
   /* Server-side generated-audio cache for this profile. */
   cacheAudio: boolean;
   voice: string; // OpenAI voice id
   ttsModel: string; // OpenAI TTS model
   rewriteModel: string; // OpenAI chat model for the rewrite step
+  /* Persona/instruction version. Bump whenever the wording below changes;
+     it is part of the cache key so stale audio is never reused. */
+  personaVersion: string;
   ttsInstructions: string; // OpenAI TTS style instructions
-  geminiStyle: string; // natural-language voice direction, prepended for Gemini TTS
+  geminiStyle?: string; // only used by the 'gemini-first' opt-in
   rewrite: string; // rewrite system prompt: persona + hard preservation rules
   banter: string; // appended in banter mode
 }
 
 /* Server-side voice personas, keyed by the theme id the app sends.
    Kept here (not in client JS) so the spoken persona can't be swapped by
-   editing client code, and the prompts stay with the keys they belong to. */
+   editing client code, and the prompts stay with the keys they belong to.
+   Mirrors the wording in each theme's voice block — bump personaVersion
+   here AND in the theme config whenever either changes. */
 const PERSONAS: Record<string, Persona> = {
   'vice-city': {
-    provider: 'gemini-first',
-    cacheAudio: false,
+    provider: 'openai',
+    cacheAudio: true,
     voice: 'echo',
     ttsModel: 'gpt-4o-mini-tts',
     rewriteModel: 'gpt-4o-mini',
+    personaVersion: 'v2',
     ttsInstructions:
-      'Speak like an energetic 1980s Miami radio DJ doing traffic: punchy, ' +
-      'playful, confident, medium-fast pace. Crisp enunciation on street ' +
-      'names and numbers so the driver never misses a turn.',
-    geminiStyle:
-      'Say it in the voice of an energetic 1980s Miami radio DJ doing the ' +
-      'traffic report: punchy, playful, confident, medium-fast. Enunciate ' +
-      'street names and numbers crisply so the driver never misses a turn. ' +
-      'The line to speak is: ',
+      'Energetic 1980s Miami traffic-radio DJ. Punchy, charismatic, playful, ' +
+      'confident. Medium-fast cadence, late-night FM swagger, occasional ' +
+      'dry or sarcastic aside. Exceptionally clear street names, distances, ' +
+      'and maneuver words so the driver never misses a turn. Avoid generic ' +
+      'GPS voice, modern podcast host, corporate announcer, or exaggerated parody.',
     rewrite:
       'You are the voice of a Vice City street guide — an energetic 1980s ' +
-      'Miami radio DJ with playful swagger and the occasional sarcastic aside. ' +
-      'Rewrite the navigation instruction below in character. RULES: keep the ' +
-      'maneuver direction (left/right/straight/U-turn/roundabout), EVERY street ' +
-      'name, and EVERY distance exactly as given — never invent, drop, or change ' +
-      'them. One or two short sentences only. No emojis, no hashtags.',
+      'Miami traffic-radio DJ: punchy, charismatic, playful, confident, with ' +
+      'late-night FM swagger and the occasional dry or sarcastic aside. ' +
+      'Rewrite the navigation instruction below in character. RULES: preserve ' +
+      'EVERY direction (left/right/straight/U-turn), roundabout maneuver and ' +
+      'exit facts, EVERY road and street name, EVERY distance, destination ' +
+      'facts, and maneuver order exactly as given — never invent landmarks or ' +
+      'traffic, never change distances or names, never swap directions, never ' +
+      'omit or add maneuvers. Keep it to 1-2 short spoken sentences; navigation ' +
+      'clarity comes before character. Street names, distances, and maneuver ' +
+      'words must be exceptionally clear. Avoid generic GPS voice, modern ' +
+      'podcast host, corporate announcer, or exaggerated parody. ' +
+      'No emojis, no hashtags.',
     banter:
       'You may append ONE very short playful quip (under 10 words) after the ' +
       'instruction when it feels natural — never before it, never instead of it.',
@@ -166,39 +185,100 @@ const PERSONAS: Record<string, Persona> = {
     voice: 'onyx',
     ttsModel: 'gpt-4o-mini-tts',
     rewriteModel: 'gpt-4o-mini',
+    personaVersion: 'v2',
     ttsInstructions:
       'Deep Black American male voice, roughly late 30s to mid 40s. Heavy ' +
-      'baritone, warm low end, slightly raspy and lived-in. Strong presence ' +
-      'and natural authority. Streetwise, confident, relaxed, intimidating ' +
-      'when needed, with dry humor. You are a respected West Coast ' +
-      'neighborhood OG riding shotgun — not a narrator, not a performer. ' +
-      'African American West Coast urban cadence, Los Angeles / South Central ' +
-      'influence: natural AAVE rhythm and phrasing, loose consonants, relaxed ' +
-      'vowels, occasional drawn-out words, effortless slang. Do not ' +
-      'over-enunciate. Slow-to-moderate, laid-back conversational pacing — ' +
-      'calm power, never shouting. Avoid generic narrator, corporate GPS, ' +
-      'cartoon gangster, parody, forced slang, or theatrical toughness. ' +
-      'Enunciate street names and numbers clearly enough that the driver ' +
-      'never misses a turn.',
-    geminiStyle:
-      'Say it like a laid-back West Coast OG riding shotgun: deep, calm, ' +
-      'confident, unhurried, dry humor. The line to speak is: ',
+      'baritone, warm low end, slightly raspy and lived-in. A respected West ' +
+      'Coast neighborhood OG riding shotgun — not a narrator, not a performer. ' +
+      'Natural Los Angeles / South Central AAVE rhythm: relaxed vowels and ' +
+      'consonants, occasional effortless slang. Slow-to-moderate, laid-back ' +
+      'pacing; calm power, never shouting. Enunciate street names and numbers ' +
+      'clearly enough that the driver never misses a turn. Avoid suburban ' +
+      'cadence, generic narrator or GPS voice, cartoon gangster, parody, ' +
+      'forced slang, or theatrical toughness. Profanity may occur naturally ' +
+      'but not in every instruction.',
     rewrite:
       'You are the voice of a San Andreas street guide — a respected West ' +
-      'Coast neighborhood OG, late 30s to mid 40s, riding shotgun: deep, ' +
-      'calm, streetwise, confident, relaxed, with dry humor and a natural ' +
-      'AAVE rhythm (Los Angeles / South Central influence). Rewrite the ' +
-      'navigation instruction below in character. RULES: preserve EVERY ' +
-      'direction, EVERY street name, EVERY distance, the maneuver type and ' +
-      'all roundabout facts exactly as given — never invent landmarks or ' +
-      'traffic, never alter left/right, never drop or change any of these. ' +
-      'Keep it to 1-2 short spoken sentences. Profanity and slang are ' +
-      'allowed when they feel natural, but not in every instruction. No ' +
-      'emojis, no hashtags. Avoid generic narrator, corporate GPS, cartoon ' +
-      'gangster, parody, forced slang, or theatrical toughness.',
+      'Coast neighborhood OG, a deep Black American male roughly late 30s to ' +
+      'mid 40s, riding shotgun: heavy baritone warmth, natural Los Angeles / ' +
+      'South Central AAVE rhythm, relaxed vowels and consonants, occasional ' +
+      'effortless slang, slow-to-moderate laid-back pacing, calm power. ' +
+      'Rewrite the navigation instruction below in character. RULES: preserve ' +
+      'EVERY direction (left/right/straight/U-turn), roundabout maneuver and ' +
+      'exit facts, EVERY road and street name, EVERY distance, destination ' +
+      'facts, and maneuver order exactly as given — never invent landmarks or ' +
+      'traffic, never change distances or names, never swap directions, never ' +
+      'omit or add maneuvers. Keep it to 1-2 short spoken sentences; navigation ' +
+      'clarity comes before character. Profanity may occur naturally but not in ' +
+      'every instruction. Avoid suburban cadence, generic narrator or GPS voice, ' +
+      'cartoon gangster, parody, forced slang, or theatrical toughness. ' +
+      'No emojis, no hashtags.',
     banter:
       'You may append ONE very short dry quip (under 10 words) after the ' +
       'instruction when it feels natural — never before it, never instead of it.',
+  },
+  'gta-v': {
+    provider: 'openai',
+    cacheAudio: true,
+    voice: 'alloy',
+    ttsModel: 'gpt-4o-mini-tts',
+    rewriteModel: 'gpt-4o-mini',
+    personaVersion: 'v2',
+    ttsInstructions:
+      'Slick modern Los Santos city guide. Controlled, polished, confident, ' +
+      'slightly cynical. Modern metropolitan cadence; understated wit. An ' +
+      'expensive city concierge with a little attitude. Crisp street names ' +
+      'and numbers so the driver never misses a turn. Avoid bubbly assistant ' +
+      'voice, game-show energy, heavy slang, or exaggerated gangster delivery.',
+    rewrite:
+      'You are the voice of a Los Santos street guide — a slick modern city ' +
+      'guide: controlled, polished, confident, slightly cynical, with a modern ' +
+      'metropolitan cadence and understated wit, like an expensive city ' +
+      'concierge with a little attitude. Rewrite the navigation instruction ' +
+      'below in character. RULES: preserve EVERY direction ' +
+      '(left/right/straight/U-turn), roundabout maneuver and exit facts, EVERY ' +
+      'road and street name, EVERY distance, destination facts, and maneuver ' +
+      'order exactly as given — never invent landmarks or traffic, never change ' +
+      'distances or names, never swap directions, never omit or add maneuvers. ' +
+      'Keep it to 1-2 short spoken sentences; navigation clarity comes before ' +
+      'character. Keep street names and numbers crisp. Avoid bubbly assistant ' +
+      'voice, game-show energy, heavy slang, or exaggerated gangster delivery. ' +
+      'No emojis, no hashtags.',
+    banter:
+      'You may append ONE very short slick quip (under 10 words) after the ' +
+      'instruction when it feels natural — never before it, never instead of it.',
+  },
+  'rdr2': {
+    provider: 'openai',
+    cacheAudio: true,
+    voice: 'fable',
+    ttsModel: 'gpt-4o-mini-tts',
+    rewriteModel: 'gpt-4o-mini',
+    personaVersion: 'v2',
+    ttsInstructions:
+      'Seasoned frontier trail guide. Warm, weathered, unhurried, plainspoken, ' +
+      'old-soul steadiness. Slightly gravelly where supported; wry rather than ' +
+      'comedic. Period flavor is acceptable, but modern real-world road ' +
+      'terminology must remain clear. Crisp enunciation on street names and ' +
+      'numbers so the rider never misses a turn. Avoid theatrical cowboy ' +
+      'parody, cartoon Western accent, or excessive archaic language.',
+    rewrite:
+      'You are the voice of a frontier trail guide — seasoned, warm, weathered, ' +
+      'unhurried, plainspoken, with old-soul steadiness; wry rather than comedic. ' +
+      'Rewrite the navigation instruction below in character. RULES: preserve ' +
+      'EVERY direction (left/right/straight/U-turn), roundabout maneuver and ' +
+      'exit facts, EVERY road and street name, EVERY distance, destination ' +
+      'facts, and maneuver order exactly as given — never invent landmarks or ' +
+      'traffic, never change distances or names, never swap directions, never ' +
+      'omit or add maneuvers. Keep it to 1-2 short spoken sentences; navigation ' +
+      'clarity comes before character. Period flavor is acceptable, but modern ' +
+      'real-world road terminology must remain clear. Avoid theatrical cowboy ' +
+      'parody, cartoon Western accent, or excessive archaic language. ' +
+      'No emojis, no hashtags.',
+    banter:
+      'You may append ONE very short wry trail-side remark (under 10 words) ' +
+      'after the instruction when it feels natural — never before it, never ' +
+      'instead of it.',
   },
 };
 
@@ -273,7 +353,8 @@ function writeAscii(view: DataView, offset: number, s: string): void {
   for (let i = 0; i < s.length; i++) view.setUint8(offset + i, s.charCodeAt(i));
 }
 
-/* Gemini TTS returns raw 16-bit PCM — wrap it as WAV so browsers play it. */
+/* Gemini TTS returns raw 16-bit PCM — wrap it as WAV so browsers play it.
+   Only reachable via the explicit 'gemini-first' provider opt-in. */
 function pcmToWav(pcm: Uint8Array, sampleRate: number): Uint8Array {
   const header = new ArrayBuffer(44);
   const v = new DataView(header);
@@ -300,8 +381,8 @@ function pcmToWav(pcm: Uint8Array, sampleRate: number): Uint8Array {
    Supabase Storage bucket `voice-cache`, self-provisioned on first use with
    the service_role key (no dashboard step needed). Cache key:
 
-     v1 | voice profile | mode | profanity | normalized instruction |
-     TTS model | voice   →   sha256 hex
+     v2 | voice profile | persona version | mode | profanity |
+     normalized instruction | TTS model | voice   →   sha256 hex
 
    The MP3 lives at <key>.mp3; the rewritten line (for the client's
    speak-fallback path) rides along at <key>.json. The bucket is private;
@@ -334,11 +415,11 @@ function ensureVoiceCacheBucket(supabaseUrl: string, serviceKey: string): Promis
 }
 
 async function voiceCacheKey(
-  profile: string, mode: string, profanity: boolean,
+  profile: string, personaVersion: string, mode: string, profanity: boolean,
   text: string, ttsModel: string, voice: string,
 ): Promise<string> {
   const normalized = text.trim().toLowerCase().replace(/\s+/g, ' ');
-  const canonical = ['v1', profile, mode, profanity ? 'p1' : 'p0', normalized, ttsModel, voice].join('|');
+  const canonical = ['v2', profile, personaVersion, mode, profanity ? 'p1' : 'p0', normalized, ttsModel, voice].join('|');
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(canonical));
   const hex = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
   return `${profile}/${hex}`;
@@ -407,7 +488,10 @@ async function voiceCachePut(
   }
 }
 
-/* ---------------- Gemini provider (free tier) ---------------- */
+/* ---------------- Gemini provider (free tier) ----------------
+   ONLY reachable when a persona explicitly opts in with
+   provider: 'gemini-first'. No shipped profile does, so this never
+   runs — and never adds latency — in the normal OpenAI-primary path. */
 function geminiHeaders(key: string): Record<string, string> {
   return { 'x-goog-api-key': key, 'Content-Type': 'application/json' };
 }
@@ -509,7 +593,7 @@ async function geminiSpeak(
   key: string, persona: Persona, text: string, signal: AbortSignal,
 ): Promise<{ audio: string; mime: string }> {
   const body = JSON.stringify({
-    contents: [{ parts: [{ text: persona.geminiStyle + text }] }],
+    contents: [{ parts: [{ text: (persona.geminiStyle || '') + text }] }],
     generationConfig: {
       responseModalities: ['AUDIO'],
       speechConfig: {
@@ -630,11 +714,16 @@ async function handleVoice(req: Request): Promise<Response> {
   const profile = profileIdFor(body.theme);
   const mode = body.mode === 'banter' ? 'banter' : 'themed';
   const profanity = body.profanity === true;
+  /* Persona version from the active theme (the source of truth), falling
+     back to the server-side profile version. Part of the cache key. */
+  const personaVersion = typeof body.personaVersion === 'string' && body.personaVersion
+    ? body.personaVersion
+    : persona.personaVersion;
 
-  /* San Andreas runs OpenAI-only — a missing key is a hard misconfiguration,
-     not something to paper over with another provider. */
+  /* Every shipped profile is OpenAI-primary — a missing key is a hard
+     misconfiguration, not something to paper over with another provider. */
   if (persona.provider === 'openai' && !openAiKey) {
-    console.error('[navigation-voice] misconfigured: OPENAI_API_KEY secret required for the san-andreas profile');
+    console.error('[navigation-voice] misconfigured: OPENAI_API_KEY secret required for the ' + profile + ' profile');
     return json(req, { error: 'server_misconfigured' }, 500);
   }
 
@@ -658,14 +747,14 @@ async function handleVoice(req: Request): Promise<Response> {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-    /* 2. Server audio cache (OpenAI profiles): an exact repeat of a
-          generated line costs nothing — no rewrite, no TTS. */
+    /* 2. Server audio cache: an exact repeat of a generated line costs
+          nothing — no rewrite, no TTS. */
     let cacheKeyStr: string | null = null;
     if (persona.cacheAudio && supabaseUrl && serviceKey) {
       try {
         await ensureVoiceCacheBucket(supabaseUrl, serviceKey);
         cacheKeyStr = await voiceCacheKey(
-          profile, mode, profanity, text.trim(), persona.ttsModel, persona.voice);
+          profile, personaVersion, mode, profanity, text.trim(), persona.ttsModel, persona.voice);
         const hit = await voiceCacheGet(supabaseUrl, serviceKey, cacheKeyStr, scope.signal);
         if (hit) {
           console.log('[navigation-voice] voice_cache_hit profile=' + profile);
@@ -681,7 +770,8 @@ async function handleVoice(req: Request): Promise<Response> {
     }
 
     /* 3. Rewrite: canonical maneuver → themed dialogue. Never fatal.
-          For the OpenAI profile Gemini is never attempted. */
+          Gemini is never attempted unless the profile explicitly opts in
+          with provider: 'gemini-first' (none do). */
     let themed = text.trim();
     if (persona.provider === 'openai') {
       if (openAiKey) {

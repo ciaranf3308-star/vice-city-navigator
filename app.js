@@ -390,6 +390,9 @@ async function applyTheme(id) {
   if (isStale()) return;
   // Commit only now that the style is live.
   VCNThemes.setCurrent(id);
+  // The voice profile follows the theme: abort any in-flight generation
+  // from the old theme so it can never populate the cache or speak.
+  try { if (window.VCNVoice) VCNVoice.onThemeChanged(); } catch (e) {}
   applyBodyTheme(id);
   syncThemeSelector();
   // Rehydrate every custom overlay the style change dropped.

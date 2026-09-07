@@ -461,38 +461,101 @@ ok(/\.vcsp-art\s*\{[^}]*left:\s*7\.5%[^}]*top:\s*34\.3%[^}]*width:\s*31\.9%[^}]*
 ok(/\.vcsp-art-idle\s*\{[^}]*left:\s*7\.5%/.test(vcSkinCssCode),
   'vice-city: idle placeholder fills the same opening');
 
-/* ---------- navigation voice: San Andreas OpenAI-primary ---------- */
+/* ---------- navigation voice: OpenAI-primary for EVERY theme ---------- */
 const voiceFn = fs.readFileSync(path.join(REPO, 'supabase/functions/navigation-voice/index.ts'), 'utf8');
 const voiceClient = fs.readFileSync(path.join(REPO, 'voice.js'), 'utf8');
-// San Andreas persona exists and is OpenAI-only with the onyx voice
-ok(/'san-andreas':\s*\{[^}]*provider:\s*'openai'/.test(voiceFn), 'SA voice profile: provider openai (Gemini never attempted)');
-ok(/'san-andreas':\s*\{[^}]*voice:\s*'onyx'/.test(voiceFn), 'SA voice profile: onyx voice');
-ok(/'san-andreas':\s*\{[^}]*ttsModel:\s*'gpt-4o-mini-tts'/.test(voiceFn), 'SA voice profile: gpt-4o-mini-tts');
-ok(/'san-andreas':\s*\{[^}]*rewriteModel:\s*'gpt-4o-mini'/.test(voiceFn), 'SA voice profile: gpt-4o-mini rewrite');
-ok(/'san-andreas':\s*\{[^}]*cacheAudio:\s*true/.test(voiceFn), 'SA voice profile: server audio cache on');
-// SA rewrite hard rules: preserve facts, never invent, 1-2 sentences
-for (const rule of ['RULES: preserve EVERY', 'direction, EVERY street name', 'EVERY distance', 'never invent landmarks or',
-  'never alter left/right', '1-2 short spoken sentences', 'roundabout facts']) {
-  ok(voiceFn.includes(rule), `SA rewrite rule present: "${rule}"`);
+const appJsCode = fs.readFileSync(path.join(REPO, 'app.js'), 'utf8');
+ok(voiceFn.includes('OpenAI-primary voice for EVERY theme'), 'voice function: OpenAI-primary for every theme');
+// Every theme profile: cached audio -> OpenAI rewrite -> OpenAI TTS.
+// Gemini is never attempted first for any of them.
+const THEME_VOICES = {
+  'vice-city': 'echo',
+  'san-andreas': 'onyx',
+  'gta-v': 'alloy',
+  'rdr2': 'fable',
+};
+for (const [theme, voice] of Object.entries(THEME_VOICES)) {
+  const block = new RegExp(`'${theme}':\\s*\\{[^}]*?\\}`, 's');
+  const m = voiceFn.match(block);
+  ok(!!m, `${theme}: voice profile block exists`);
+  const src = m ? m[0] : '';
+  ok(/provider:\s*'openai'/.test(src), `${theme} voice profile: provider openai (Gemini never attempted)`);
+  ok(src.includes(`voice: '${voice}'`), `${theme} voice profile: ${voice} voice`);
+  ok(src.includes(`ttsModel: 'gpt-4o-mini-tts'`), `${theme} voice profile: gpt-4o-mini-tts`);
+  ok(src.includes(`rewriteModel: 'gpt-4o-mini'`), `${theme} voice profile: gpt-4o-mini rewrite`);
+  ok(/cacheAudio:\s*true/.test(src), `${theme} voice profile: server audio cache on`);
+  ok(/personaVersion:\s*'v2'/.test(src), `${theme} voice profile: persona version v2`);
 }
-// SA TTS persona: the West Coast OG delivery spec
-for (const marker of ['mid 40s. Heavy', 'baritone, warm low end', 'West Coast', 'AAVE', 'South Central', 'over-enunciate',
-  'calm power, never shouting', 'cartoon gangster']) {
+// No shipped profile opts into the explicit gemini-first slot, so the
+// normal path can never run Gemini — before OpenAI or at all.
+const personasBlock = (voiceFn.match(/const PERSONAS[^=]*=\s*\{([\s\S]*?)\n\};/) || [])[1] || '';
+ok(personasBlock.length > 0, 'PERSONAS map found in the edge function');
+ok(!/provider:\s*'gemini-first'/.test(personasBlock), 'no voice profile opts into gemini-first');
+ok((voiceFn.match(/await geminiRewrite\(/g) || []).length === 1, 'geminiRewrite reachable only from the explicit opt-in branch');
+ok((voiceFn.match(/await geminiSpeak\(/g) || []).length === 1, 'geminiSpeak reachable only from the explicit opt-in branch');
+// Shared rewrite hard rules: route facts are sacred, 1-2 short sentences.
+const ruleCopies = voiceFn.split('RULES: preserve ').length - 1;
+ok(ruleCopies === 4, `rewrite RULES block present in all four profiles (found ${ruleCopies})`);
+for (const rule of ['roundabout maneuver and', 'exit facts', 'EVERY road and street name',
+  'EVERY distance', 'destination', 'maneuver order', 'never invent landmarks or',
+  'never swap directions', 'omit or add maneuvers', '1-2 short spoken sentences',
+  'clarity comes before character', 'No emojis, no hashtags']) {
+  ok(voiceFn.includes(rule), `rewrite rule present: "${rule}"`);
+}
+// Per-theme TTS persona markers (the exact delivery spec for each voice).
+for (const marker of ['late-night FM swagger', 'corporate announcer']) {
+  ok(voiceFn.includes(marker), `VC TTS persona marker present: "${marker}"`);
+}
+for (const marker of ['baritone, warm low end', 'AAVE', 'South Central', 'calm power, never shouting', 'cartoon gangster']) {
   ok(voiceFn.includes(marker), `SA TTS persona marker present: "${marker}"`);
 }
-// Server audio cache: keyed by profile + normalized instruction + model + voice
+for (const marker of ['concierge with a little attitude', 'slightly cynical', 'game-show energy']) {
+  ok(voiceFn.includes(marker), `GTA V TTS persona marker present: "${marker}"`);
+}
+for (const marker of ['old-soul steadiness', 'wry rather than', 'theatrical cowboy']) {
+  ok(voiceFn.includes(marker), `RDR2 TTS persona marker present: "${marker}"`);
+}
+// Server audio cache: keyed by profile + persona version + normalized
+// instruction + mode + profanity + TTS model + voice.
 ok(voiceFn.includes("VOICE_CACHE_BUCKET = 'voice-cache'"), 'voice cache bucket: voice-cache');
-ok(/canonical = \['v1', profile, mode, profanity \? 'p1' : 'p0', normalized, ttsModel, voice\]/.test(voiceFn),
-  'voice cache key: profile + mode + profanity + normalized instruction + tts model + voice');
+ok(/canonical = \['v2', profile, personaVersion, mode, profanity \? 'p1' : 'p0', normalized, ttsModel, voice\]/.test(voiceFn),
+  'voice cache key: profile + persona version + mode + profanity + normalized instruction + tts model + voice');
 ok(voiceFn.includes('crypto.subtle.digest'), 'voice cache key: sha256-hashed');
 ok(voiceFn.includes('ensureVoiceCacheBucket'), 'voice cache bucket self-provisions on first use');
-// Global server deadline sits below the client timeout and covers disconnects
+// The active theme's personaVersion rides in the request and into the key.
+ok(/personaVersion/.test(voiceFn) && voiceFn.includes('body.personaVersion'),
+  'server reads personaVersion from the request for the cache key');
+// Global server deadline sits below the client timeout and covers disconnects.
 const serverDeadline = Number((voiceFn.match(/SERVER_DEADLINE_MS = (\d+)/) || [])[1]);
 const clientTimeout = Number((voiceClient.match(/FETCH_TIMEOUT_MS = (\d+)/) || [])[1]);
 ok(Number.isFinite(serverDeadline) && Number.isFinite(clientTimeout) && serverDeadline < clientTimeout,
   `server deadline (${serverDeadline}ms) below client timeout (${clientTimeout}ms)`);
 ok(/deadlineScope\(req\)/.test(voiceFn) && /req\.signal/.test(voiceFn),
   'server deadline combines the client-disconnect signal');
+// Client: the active theme's voice block drives every request.
+ok(/const inflight = new Map\(\)/.test(voiceClient), 'voice client: controller-backed in-flight map');
+ok(/inflight\.has\(key\)/.test(voiceClient), 'voice client: concurrent generation deduplicated');
+ok(voiceClient.includes('onThemeChanged'), 'voice client: onThemeChanged aborts stale theme generation');
+ok(appJsCode.includes('VCNVoice.onThemeChanged'), 'app.js: theme switch notifies the voice client');
+ok(/routeEpoch\+\+/.test(voiceClient), 'voice client: reroute/theme bumps the generation epoch');
+ok(/rec\.epoch !== routeEpoch/.test(voiceClient), 'voice client: stale in-flight results are dropped');
+ok(/p\.profile.*p\.personaVersion.*p\.ttsModel.*p\.ttsVoice/.test(voiceClient),
+  'voice client cache key: profile + persona version + tts model + tts voice');
+ok(voiceClient.includes('personaVersion: profile.personaVersion'),
+  'voice client sends the theme personaVersion with every request');
+ok(/PREGEN_DEPTH = 5/.test(voiceClient) && /slice\(0, PREGEN_DEPTH\)/.test(voiceClient),
+  'voice client pregenerates 5 upcoming instructions');
+ok(voiceClient.includes('synthSpeak(text);\n    fetchTts(text);'),
+  'voice client: immediate maneuver speaks deterministic browser voice, never waits for AI');
+// Theme configs carry the full OpenAI-primary profile (source of truth).
+for (const [theme, voice] of Object.entries(THEME_VOICES)) {
+  const cfg = fs.readFileSync(path.join(REPO, 'themes', theme, 'theme.js'), 'utf8');
+  ok(/provider:\s*'openai'/.test(cfg), `${theme} theme config: provider openai`);
+  ok(cfg.includes(`profile: '${theme}'`), `${theme} theme config: profile id`);
+  ok(cfg.includes(`ttsVoice: '${voice}'`), `${theme} theme config: ${voice} voice`);
+  ok(cfg.includes(`ttsModel: 'gpt-4o-mini-tts'`), `${theme} theme config: gpt-4o-mini-tts`);
+  ok(/personaVersion:\s*'v2'/.test(cfg), `${theme} theme config: persona version v2`);
+}
 // Key hygiene: no OpenAI secret material in the client or repo
 ok(!/sk-(proj-)?[A-Za-z0-9]{20,}/.test(voiceClient), 'voice client ships no OpenAI key');
 ok(!/sk-(proj-)?[A-Za-z0-9]{20,}/.test(voiceFn), 'edge function ships no hardcoded OpenAI key');
