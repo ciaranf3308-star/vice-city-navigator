@@ -484,7 +484,7 @@ for (const [theme, voice] of Object.entries(THEME_VOICES)) {
   ok(src.includes(`ttsModel: 'gpt-4o-mini-tts'`), `${theme} voice profile: gpt-4o-mini-tts`);
   ok(src.includes(`rewriteModel: 'gpt-4o-mini'`), `${theme} voice profile: gpt-4o-mini rewrite`);
   ok(/cacheAudio:\s*true/.test(src), `${theme} voice profile: server audio cache on`);
-  ok(/personaVersion:\s*'v2'/.test(src), `${theme} voice profile: persona version v2`);
+  ok(/personaVersion:\s*'v3'/.test(src), `${theme} voice profile: persona version v3`);
 }
 // No shipped profile opts into the explicit gemini-first slot, so the
 // normal path can never run Gemini — before OpenAI or at all.
@@ -493,14 +493,30 @@ ok(personasBlock.length > 0, 'PERSONAS map found in the edge function');
 ok(!/provider:\s*'gemini-first'/.test(personasBlock), 'no voice profile opts into gemini-first');
 ok((voiceFn.match(/await geminiRewrite\(/g) || []).length === 1, 'geminiRewrite reachable only from the explicit opt-in branch');
 ok((voiceFn.match(/await geminiSpeak\(/g) || []).length === 1, 'geminiSpeak reachable only from the explicit opt-in branch');
-// Shared rewrite hard rules: route facts are sacred, 1-2 short sentences.
+// Shared rewrite hard rules: route facts are sacred, brevity is mandatory.
 const ruleCopies = voiceFn.split('RULES: preserve ').length - 1;
 ok(ruleCopies === 4, `rewrite RULES block present in all four profiles (found ${ruleCopies})`);
 for (const rule of ['roundabout maneuver and', 'exit facts', 'EVERY road and street name',
   'EVERY distance', 'destination', 'maneuver order', 'never invent landmarks or',
-  'never swap directions', 'omit or add maneuvers', '1-2 short spoken sentences',
-  'clarity comes before character', 'No emojis, no hashtags']) {
+  'never swap directions', 'omit or add maneuvers', 'No emojis, no hashtags']) {
   ok(voiceFn.includes(rule), `rewrite rule present: "${rule}"`);
+}
+// Global brevity pass (v3): the mandatory instruction sits in EVERY theme
+// rewrite prompt, client and server alike.
+const BREVITY_RULES = ['BREVITY IS MANDATORY', '3–9 words', 'max 12 words',
+  'max 18 words', 'Give the maneuver immediately',
+  'Character should come from word choice and cadence',
+  'preserve the necessary navigation facts',
+  'If character makes the instruction longer, cut the character',
+  'The ONLY data you have is the source instruction text',
+  'never invent or add landmarks'];
+ok(voiceFn.split('BREVITY IS MANDATORY').length - 1 === 4,
+  'BREVITY IS MANDATORY in all four server rewrite prompts');
+// Prompt assertions below run against the source with adjacent JS string
+// literals joined, so phrases spanning a '+ ... +' line break still match.
+const voicePrompts = voiceFn.replace(/'\s*\+\s*'/g, '');
+for (const rule of BREVITY_RULES) {
+  ok(voicePrompts.includes(rule), `server rewrite rule present: "${rule}"`);
 }
 // Per-theme TTS persona markers (the exact delivery spec for each voice).
 for (const marker of ['late-night FM swagger', 'corporate announcer']) {
@@ -509,7 +525,7 @@ for (const marker of ['late-night FM swagger', 'corporate announcer']) {
 for (const marker of ['baritone, warm low end', 'AAVE', 'South Central', 'calm power, never shouting', 'cartoon gangster']) {
   ok(voiceFn.includes(marker), `SA TTS persona marker present: "${marker}"`);
 }
-for (const marker of ['concierge with a little attitude', 'slightly cynical', 'game-show energy']) {
+for (const marker of ['slick Los Santos local with a little attitude', 'slightly cynical', 'game-show energy']) {
   ok(voiceFn.includes(marker), `GTA V TTS persona marker present: "${marker}"`);
 }
 for (const marker of ['old-soul steadiness', 'wry rather than', 'theatrical cowboy']) {
@@ -518,7 +534,7 @@ for (const marker of ['old-soul steadiness', 'wry rather than', 'theatrical cowb
 // Server audio cache: keyed by profile + persona version + normalized
 // instruction + mode + profanity + TTS model + voice.
 ok(voiceFn.includes("VOICE_CACHE_BUCKET = 'voice-cache'"), 'voice cache bucket: voice-cache');
-ok(/canonical = \['v2', profile, personaVersion, mode, profanity \? 'p1' : 'p0', normalized, ttsModel, voice\]/.test(voiceFn),
+ok(/canonical = \['v3', profile, personaVersion, mode, profanity \? 'p1' : 'p0', normalized, ttsModel, voice\]/.test(voiceFn),
   'voice cache key: profile + persona version + mode + profanity + normalized instruction + tts model + voice');
 ok(voiceFn.includes('crypto.subtle.digest'), 'voice cache key: sha256-hashed');
 ok(voiceFn.includes('ensureVoiceCacheBucket'), 'voice cache bucket self-provisions on first use');
@@ -532,6 +548,9 @@ ok(Number.isFinite(serverDeadline) && Number.isFinite(clientTimeout) && serverDe
   `server deadline (${serverDeadline}ms) below client timeout (${clientTimeout}ms)`);
 ok(/deadlineScope\(req\)/.test(voiceFn) && /req\.signal/.test(voiceFn),
   'server deadline combines the client-disconnect signal');
+// Brevity pass: rewrite outputs are capped at the API level as well.
+ok(/max_tokens: 60/.test(voiceFn), 'OpenAI rewrite output capped at 60 tokens');
+ok(/maxOutputTokens: 60/.test(voiceFn), 'Gemini rewrite output capped at 60 tokens');
 // Client: the active theme's voice block drives every request.
 ok(/const inflight = new Map\(\)/.test(voiceClient), 'voice client: controller-backed in-flight map');
 ok(/inflight\.has\(key\)/.test(voiceClient), 'voice client: concurrent generation deduplicated');
@@ -554,7 +573,32 @@ for (const [theme, voice] of Object.entries(THEME_VOICES)) {
   ok(cfg.includes(`profile: '${theme}'`), `${theme} theme config: profile id`);
   ok(cfg.includes(`ttsVoice: '${voice}'`), `${theme} theme config: ${voice} voice`);
   ok(cfg.includes(`ttsModel: 'gpt-4o-mini-tts'`), `${theme} theme config: gpt-4o-mini-tts`);
-  ok(/personaVersion:\s*'v2'/.test(cfg), `${theme} theme config: persona version v2`);
+  ok(/personaVersion:\s*'v3'/.test(cfg), `${theme} theme config: persona version v3`);
+  // Brevity pass, client side: the theme's own rewrite prompt carries the
+  // same mandatory instruction + word-count ceilings as the server mirror.
+  const ri = T.get(theme).voice.rewriteInstructions;
+  for (const rule of BREVITY_RULES) {
+    ok(ri.includes(rule), `${theme} client prompt carries: "${rule}"`);
+  }
+  ok(/quick [\w-]+ callouts/.test(T.get(theme).voice.ttsInstructions),
+     `${theme} client TTS delivery: quick callouts, not monologues`);
+}
+// Distinct personality markers per theme — four recognisable voices, not
+// four versions of one GPS voice.
+const THEME_MARKERS = {
+  'vice-city': ['hotshot', 'Take this left, baby'],
+  'san-andreas': ['homie', 'fool'],
+  'gta-v': ['genius', 'Try not to miss it'],
+  'rdr2': ['partner', 'Bear left here'],
+};
+for (const [theme, markers] of Object.entries(THEME_MARKERS)) {
+  const ri = T.get(theme).voice.rewriteInstructions;
+  for (const m of markers) ok(ri.includes(m), `${theme} client prompt keeps its voice: "${m}"`);
+  // The server mirror must carry the same personality markers — the Edge
+  // Function renders the persona, so its wording has to match the theme's.
+  const block = new RegExp(`'${theme}':\\s*\\{[^}]*?\\}`, 's');
+  const src = (voiceFn.match(block) || [])[0] || '';
+  for (const m of markers) ok(src.includes(m), `${theme} server prompt mirrors the voice: "${m}"`);
 }
 // Key hygiene: no OpenAI secret material in the client or repo
 ok(!/sk-(proj-)?[A-Za-z0-9]{20,}/.test(voiceClient), 'voice client ships no OpenAI key');
