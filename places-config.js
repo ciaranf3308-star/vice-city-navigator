@@ -27,8 +27,8 @@
 'use strict';
 
 const GOOGLE_PLACES_CONFIG = {
-  /* Paste your website-restricted key between the quotes. */
-  apiKey: 'PASTE_YOUR_GOOGLE_PLACES_API_KEY_HERE',
+  /* Website-restricted key (github.io only) + Places API (New) only. */
+  apiKey: 'AIzaSyA5MehiZgqZw0BocXMQp4rIPjHO9hCbdAA',
 
   /* Master switch for ambient POIs. */
   enabled: true,
