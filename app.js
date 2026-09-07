@@ -199,6 +199,7 @@ async function initMap() {
   map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
   map.on('load', () => {
     try { map.on('move', syncDashCompass); } catch (e) {}
+    try { map.on('moveend', queueDashLocality); } catch (e) {}
     // Each module init is isolated: one failing module must never
     // silently prevent the others (e.g. POIs) from starting.
     try { if (window.VCNThemes) applyBodyTheme(VCNThemes.currentId()); }
@@ -1052,7 +1053,7 @@ function applyAppMode() {
   if (on) {
     document.body.classList.remove('radio-off');
     setDashTab('map');
-    tickDashClock(); refreshDashWeather(); syncDashTrip();
+    tickDashClock(); refreshDashWeather(); syncDashTrip(); queueDashLocality();
   }
   if (map && map.resize) { try { map.resize(); } catch (e) {} }
   syncDashboardToggle();
@@ -1157,6 +1158,33 @@ function syncDashTrip(remainSec) {
     eta.textContent = '—';
     dst.textContent = '—';
   }
+}
+
+/* Bottom-bar locality plate: reverse-geocode the map centre (debounced,
+   ~100m grid) so the chrome names the current town like the benchmark. */
+let dashLocTimer = null, dashLocKey = '';
+function queueDashLocality() {
+  clearTimeout(dashLocTimer);
+  dashLocTimer = setTimeout(syncDashLocality, 1200);
+}
+async function syncDashLocality() {
+  const el = $('dash-dest');
+  if (!el || !window.map) return;
+  if (!document.body.classList.contains('dashboard-mode') ||
+      !document.body.classList.contains('theme-vice-city')) return;
+  if (typeof navActive !== 'undefined' && navActive) return; /* nav shows the destination */
+  let c; try { c = map.getCenter(); } catch (e) { return; }
+  const key = c.lat.toFixed(3) + ',' + c.lng.toFixed(3);
+  if (key === dashLocKey) return;
+  dashLocKey = key;
+  try {
+    const r = await fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' +
+      c.lat.toFixed(5) + '&lon=' + c.lng.toFixed(5) + '&zoom=14');
+    if (!r.ok) return;
+    const j = await r.json(), a = (j && j.address) || {};
+    const name = a.suburb || a.town || a.city || a.village || a.hamlet || a.county || '';
+    if (name && (typeof navActive === 'undefined' || !navActive)) el.textContent = name.toUpperCase().slice(0, 28);
+  } catch (e) { /* locality stays as-is */ }
 }
 
 /* ---------------- Spotify: theme-independent core + dashboard skin ----------------

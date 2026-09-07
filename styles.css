@@ -354,19 +354,13 @@ body.dashboard-mode.theme-vice-city #dash-bottombar{
 #dash-topbar .dash-chrome{
   position:absolute;inset:0 0 3px 0;
   clip-path:polygon(0 0,100% 0,100% 50%,96.6% 100%,3.4% 100%,0 50%);
-  background:
-    repeating-linear-gradient(45deg,rgba(255,255,255,.022) 0 2px,transparent 2px 5px),
-    repeating-linear-gradient(-45deg,rgba(1,205,254,.02) 0 2px,transparent 2px 6px),
-    linear-gradient(180deg,#0b0518 0%,#150a28 72%,#1c0e36 100%);
+  background:url('themes/vice-city/dashboard/topbar.jpg') 50% 50%/100% 100% no-repeat,#0b0518;
   display:flex;align-items:center;gap:30px;padding:0 40px;overflow:hidden;
 }
 #dash-bottombar .dash-chrome{
   position:absolute;inset:3px 0 0 0;
   clip-path:polygon(3.4% 0,96.6% 0,100% 50%,100% 100%,0 100%,0 50%);
-  background:
-    repeating-linear-gradient(45deg,rgba(255,255,255,.022) 0 2px,transparent 2px 5px),
-    repeating-linear-gradient(-45deg,rgba(1,205,254,.02) 0 2px,transparent 2px 6px),
-    linear-gradient(0deg,#0b0518 0%,#150a28 72%,#1c0e36 100%);
+  background:url('themes/vice-city/dashboard/bottombar.jpg') 50% 50%/100% 100% no-repeat,#0b0518;
   display:flex;align-items:stretch;overflow:hidden;
 }
 /* Vice City chrome owns the top/bottom of the canvas: keep HUD + drive
@@ -383,18 +377,11 @@ body.dashboard-mode.theme-vice-city #drive-bar{bottom:calc(88px + env(safe-area-
 .dash-wx{display:flex;align-items:center;gap:10px;color:var(--cyan);font-family:var(--vclabel);
   font-size:26px;font-weight:600;letter-spacing:2px;text-shadow:0 0 10px rgba(1,205,254,.8)}
 .dash-wx svg{width:30px;height:30px;filter:drop-shadow(0 0 6px rgba(1,205,254,.8))}
-.dash-clock{margin-left:auto;display:flex;align-items:baseline;gap:18px;position:relative;z-index:1;
+.dash-clock{margin:0 auto;display:flex;align-items:baseline;gap:18px;position:relative;z-index:1;
   font-family:var(--vclabel);letter-spacing:3px}
 #dash-date{color:var(--pink);font-size:24px;font-weight:600;text-shadow:0 0 10px rgba(255,113,206,.8)}
 #dash-time{color:var(--pink);font-size:30px;font-weight:700;text-shadow:0 0 12px rgba(255,46,136,.9)}
-/* skyline silhouette integrated into the chrome, behind the clock */
-.dash-skyline{
-  position:absolute;right:6px;top:0;height:100%;width:250px;opacity:.6;pointer-events:none;
-}
-.dash-skyline .sk-sun{fill:#ff2e88;opacity:.85}
-.dash-skyline .sk-sunhalo{fill:none;stroke:#ff71ce;stroke-width:1.5;opacity:.5}
-.dash-skyline .sk-b{fill:#04020a}
-.dash-skyline .sk-sea{fill:#01cdfe;opacity:.55}
+/* skyline artwork now lives in the generated topbar.jpg plate */
 .dash-tabs{display:flex;align-items:stretch;padding:12px 6px 12px 34px;gap:4px}
 .dash-tabs button{
   font-family:var(--vcfont);font-size:32px;letter-spacing:2px;text-transform:uppercase;
@@ -424,7 +411,13 @@ body.dashboard-mode.theme-vice-city #drive-bar{bottom:calc(88px + env(safe-area-
   clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
 }
 .dash-zoom button:active{transform:scale(.94)}
-.dash-trip{display:flex;align-items:center;gap:14px;padding:12px 44px 12px 14px}
+.dash-trip{display:flex;align-items:center;gap:14px;padding:12px 14px 12px 14px}
+.dash-tag{
+  display:flex;align-items:center;padding:12px 44px 12px 6px;
+  font-family:'SignPainter','Pricedown Bl',cursive;font-size:24px;line-height:1.05;
+  color:#ff71ce;text-shadow:0 0 10px rgba(255,46,136,.85);transform:rotate(-2deg);
+  white-space:nowrap;
+}
 #dash-compass{
   display:inline-block;font-size:30px;color:var(--cyan);
   text-shadow:0 0 10px rgba(1,205,254,.8);transition:transform .2s linear;
