@@ -320,6 +320,10 @@ body.dashboard-mode #search-bar{right:492px}
 body.dashboard-mode #map-tools{right:492px}
 body.dashboard-mode #maneuver-card{right:492px}
 body.dashboard-mode #drive-bar{left:720px;max-width:none}
+/* Vice City's floating HUD is ~643px wide: slide chrome left of it */
+body.dashboard-mode[data-spotskin="vice-city"] #search-bar{right:660px}
+body.dashboard-mode[data-spotskin="vice-city"] #map-tools{right:660px}
+body.dashboard-mode[data-spotskin="vice-city"] #maneuver-card{right:660px}
 
 /* ---------- toast ---------- */
 #toast{

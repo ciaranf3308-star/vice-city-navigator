@@ -1108,6 +1108,7 @@ function mountSpotifySkin(themeId) {
       skin.mount($('spotify-stage'), SpotifyCore); spotifySkinId = want;
       const pane = $('spotify-pane');
       if (pane) pane.dataset.skin = want; // shell positions floating vs docked skins
+      document.body.dataset.spotskin = want; // HUD chrome clears wide floating skins
     }
     catch (e) { console.error('[ws] spotify skin mount failed', e); }
   }
@@ -1121,6 +1122,7 @@ function unmountSpotifySkin() {
   if (stage) stage.innerHTML = '';
   const pane = $('spotify-pane');
   if (pane) delete pane.dataset.skin;
+  delete document.body.dataset.spotskin;
 }
 
 function saveSpotifyPreAuth() {

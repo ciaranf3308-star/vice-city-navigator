@@ -146,7 +146,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v30"), 'SW shell cache v30');
+ok(swSrc.includes("ws-shell-v31"), 'SW shell cache v31');
 ok(swSrc.includes("ws-theme-v10"), 'SW theme cache v10');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
@@ -330,6 +330,8 @@ ok(/body\.dashboard-mode #map\{[^}]*width:1920px[^}]*height:720px/.test(cssSrc),
 ok(/body\.dashboard-mode #spotify-pane\{[\s\S]*?pointer-events:none/.test(cssSrc), 'dashboard Spotify pane is a transparent overlay (no reserved column)');
 ok(cssSrc.includes('[data-skin="vice-city"]'), 'floating-skin selector present');
 ok(appSrc.includes('pane.dataset.skin'), 'mount tags the pane with the active skin');
+ok(appSrc.includes('body.dataset.spotskin'), 'mount exposes the skin on <body> for HUD clearance');
+ok(/body\.dashboard-mode\[data-spotskin="vice-city"\] #map-tools\{right:660px\}/.test(cssSrc), 'VC: zoom tools slide left of the floating HUD');
 ok(!cssSrc.includes('#spotify-close'), 'no close-button styles');
 ok(/\#spotify-pane\{[\s\S]*?background:transparent/.test(cssSrc), 'pane transparent');
 
