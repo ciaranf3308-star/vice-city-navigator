@@ -78,7 +78,7 @@ jobs:
           BUBBLEWRAP_KEYSTORE_PASSWORD: ${{ secrets.VCN_KEYSTORE_PASSWORD }}
           BUBBLEWRAP_KEY_PASSWORD: ${{ secrets.VCN_KEY_PASSWORD }}
         run: |
-          bubblewrap init --manifest=twa-manifest.json
+          bubblewrap init --manifest=twa-manifest.json --jdkPath="$JAVA_HOME"
           bubblewrap build
 
       - name: Upload APK
