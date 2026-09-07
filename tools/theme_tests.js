@@ -146,7 +146,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v29"), 'SW shell cache v29');
+ok(swSrc.includes("ws-shell-v30"), 'SW shell cache v30');
 ok(swSrc.includes("ws-theme-v10"), 'SW theme cache v10');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
@@ -268,14 +268,12 @@ for (const banned of ['miniviz', 'stagepeek', 'fullstage', 'vcsp-viz', 'spectrum
 }
 ok(/\.vcsp\s*\{[^}]*background:\s*transparent/.test(vcSkinCss), 'VC skin root transparent');
 ok(/\.vcsp\s*\{[^}]*position:\s*absolute[^}]*translate:\s*0\s*-50%/.test(vcSkinCssCode), 'VC widget is one floating object (absolute, vertically centered)');
-ok(!/\.vcsp-logo\s*\{[^}]*object-fit/.test(vcSkinCssCode), 'VC logo has no object-fit crop');
-ok(/\.vcsp\s*\{[^}]*width:\s*29cqw/.test(vcSkinCssCode), 'VC widget is substantial (29cqw wide), not skinny');
-ok(/\.vcsp-logo\s*\{[^}]*width:\s*98%/.test(vcSkinCssCode), 'VC logo oversized, crowning the widget');
-ok(vcSkinCssCode.includes('.vcsp-body'), 'VC unified body holds the composition');
-ok(/\.vcsp-albumcol\s*\{[^}]*width:\s*38%/.test(vcSkinCssCode), 'VC album column reduced to ~38%');
-ok(/\.vcsp-lyriccol\s*\{[^}]*left:\s*47%/.test(vcSkinCssCode), 'VC lyric stage sits BESIDE the album (~55% of body)');
-ok(vcSkinCssCode.includes('.vcsp-bottombar'), 'VC transport + progress ride the bottom of the body');
-ok(vcSkinJs.includes('vcsp-lyriccol') && vcSkinJs.includes('vcsp-bottombar'), 'VC skin JS builds the two-column HUD');
+ok(vcSkinJs.includes("hud.png"), 'VC skin overlays the supplied concept art');
+ok(/\.vcsp-hud\s*\{[^}]*inset:\s*0/.test(vcSkinCssCode), 'VC hud is one full-bleed skin layer');
+ok(/\.vcsp\s*\{[^}]*aspect-ratio:\s*1448\s*\/\s*1086/.test(vcSkinCssCode), 'VC widget matches the concept art proportions');
+ok(/\.vcsp-art\s*\{[^}]*left:\s*7\.5%/.test(vcSkinCssCode), 'VC album art sits in the art opening, under the hud');
+ok(/\.vcsp-lyrics\s*\{[^}]*left:\s*41%/.test(vcSkinCssCode), 'VC lyric stage sits on the sunset, beside the album');
+ok(!vcSkinCssCode.includes('.vcsp-logo') && !vcSkinJs.includes('vcsp-logo'), 'no chopped logo — it is part of the hud');
 ok(/\.vcsp-controls\s*\{[^}]*background:\s*none/.test(vcSkinCssCode), 'VC controls float on the art (no background slab)');
 ok(vcSkinCssCode.includes('.vcsp-idle') && !vcSkinCssCode.includes('vcsp-connect-pill'), 'VC idle/connect lives inside the widget, no generic card');
 ok(vcSkinJs.includes('vcsp-idle') && !vcSkinJsCode.includes('vcsp-connect\'') && !vcSkinJsCode.includes('vcsp-connect"'), 'VC skin JS renders the in-widget idle state');
@@ -337,8 +335,7 @@ ok(/\#spotify-pane\{[\s\S]*?background:transparent/.test(cssSrc), 'pane transpar
 
 // sw precache follows the move
 for (const p of ['themes/vice-city/spotify-skin.js', 'themes/vice-city/spotify-skin.css',
-    'themes/vice-city/spotify/header.png', 'themes/vice-city/spotify/album.png',
-    'themes/vice-city/spotify/stage.png', 'themes/vice-city/spotify/tube.png']) {
+    'themes/vice-city/spotify/hud.png']) {
   ok(SW.SHELL.includes(p), `SW precaches ${p}`);
 }
 ok(!SW.SHELL.some(p => p.includes('skin-vice-city') || p.includes('synthwave')), 'SW drops old skin paths');
@@ -415,7 +412,6 @@ ok(vcRoad !== vcPlace, 'VC: road labels a different tone from place labels');
 
 /* ---------- Spotify skin album-frame openings (measured from the crop art) ---------- */
 const FRAME_EXPECTED = {
-  'vice-city':    [0.04, 0.032, 0.958, 0.665],
   'gta-v':        [0.12, 0.12, 0.88, 0.88],
   'san-andreas':  [0.07, 0.028, 0.97, 0.905],
   'rdr2':         [0.3047, 0.14, 0.875, 0.86],
@@ -433,6 +429,12 @@ for (const [theme, exp] of Object.entries(FRAME_EXPECTED)) {
   ok(js.includes("'height:' + ((FRAME.y1 - FRAME.y0)"),
     `${theme}: album art fills the measured opening box`);
 }
+// vice-city: the opening is the hud's own cut-out, declared in CSS
+// (measured: x 0.0753-0.3936, y 0.3425-0.6924 of the 1448x1086 hud)
+ok(/\.vcsp-art\s*\{[^}]*left:\s*7\.5%[^}]*top:\s*34\.3%[^}]*width:\s*31\.9%[^}]*height:\s*35%/.test(vcSkinCssCode),
+  'vice-city: art opening matches the hud cut-out');
+ok(/\.vcsp-art-idle\s*\{[^}]*left:\s*7\.5%/.test(vcSkinCssCode),
+  'vice-city: idle placeholder fills the same opening');
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
