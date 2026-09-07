@@ -335,17 +335,18 @@ body.dashboard-mode.radio-off #spotify-pane{display:none}
    existing proportional scaling handles physical screens. The map
    is never resized or inset — these are pure overlays. */
 #dash-topbar,#dash-bottombar{display:none}
-/* Drive-mode car chrome: visible for every theme while navigating
-   (body.nav-driving), never outside drive mode. Each theme re-skins
+/* Drive-mode car chrome: visible for every theme in dashboard mode
+   (body.dashboard-mode), driving or exploring — exactly like Vice
+   City's original always-on dashboard chrome. Each theme re-skins
    the shared markup below. */
-body.dashboard-mode.nav-driving.theme-vice-city #dash-topbar{
+body.dashboard-mode.theme-vice-city #dash-topbar{
   display:block;position:absolute;left:0;right:0;top:0;height:68px;z-index:25;
   background:linear-gradient(180deg,#ff71ce,#ff2e88 55%,#b967ff);
   clip-path:polygon(0 0,100% 0,100% 50%,96.6% 100%,3.4% 100%,0 50%);
   filter:drop-shadow(0 2px 12px rgba(255,46,136,.5));
   pointer-events:none;
 }
-body.dashboard-mode.nav-driving.theme-vice-city #dash-bottombar{
+body.dashboard-mode.theme-vice-city #dash-bottombar{
   display:block;position:absolute;left:0;right:0;bottom:0;height:78px;z-index:25;
   background:linear-gradient(0deg,#ff71ce,#ff2e88 55%,#b967ff);
   clip-path:polygon(3.4% 0,96.6% 0,100% 50%,100% 100%,0 100%,0 50%);
@@ -441,27 +442,27 @@ body.dashboard-mode:not(.theme-vice-city) .dash-scene{display:none}
 /* ---------- San Andreas dashboard chrome: 90s West Coast plate ----------
    Deep olive-green bar, gold chamfered edge, cream ink, green accents.
    Beckett wordmark, Bank Gothic labels (via the theme-mapped vars). */
-body.dashboard-mode.nav-driving.theme-san-andreas #dash-topbar{
+body.dashboard-mode.theme-san-andreas #dash-topbar{
   display:block;position:absolute;left:0;right:0;top:0;height:68px;z-index:25;
   background:linear-gradient(180deg,#e8a33d,#c07a1e 60%,#9a5f14);
   clip-path:polygon(18px 0,100% 0,100% 100%,0 100%,0 18px);
   filter:drop-shadow(0 2px 10px rgba(0,0,0,.55));
   pointer-events:none;
 }
-body.dashboard-mode.nav-driving.theme-san-andreas #dash-bottombar{
+body.dashboard-mode.theme-san-andreas #dash-bottombar{
   display:block;position:absolute;left:0;right:0;bottom:0;height:78px;z-index:25;
   background:linear-gradient(0deg,#e8a33d,#c07a1e 60%,#9a5f14);
   clip-path:polygon(0 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%);
   filter:drop-shadow(0 -2px 10px rgba(0,0,0,.55));
   pointer-events:auto;
 }
-body.dashboard-mode.nav-driving.theme-san-andreas #dash-topbar .dash-chrome{
+body.dashboard-mode.theme-san-andreas #dash-topbar .dash-chrome{
   inset:0 0 3px 0;clip-path:polygon(18px 0,100% 0,100% 100%,0 100%,0 18px);
   background:
     repeating-linear-gradient(45deg,rgba(255,255,255,.02) 0 2px,transparent 2px 6px),
     linear-gradient(180deg,#16281b 0%,#101d14 70%,#0c160f 100%);
 }
-body.dashboard-mode.nav-driving.theme-san-andreas #dash-bottombar .dash-chrome{
+body.dashboard-mode.theme-san-andreas #dash-bottombar .dash-chrome{
   inset:3px 0 0 0;clip-path:polygon(0 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%);
   background:
     repeating-linear-gradient(45deg,rgba(255,255,255,.02) 0 2px,transparent 2px 6px),
@@ -495,20 +496,20 @@ body.dashboard-mode.theme-san-andreas .dash-tag{
 /* ---------- GTA V dashboard chrome: Los Santos pause-menu ----------
    Near-black green-tinted panel, thin neon-green edge, sharp rectangles,
    Chalet type. No clip-path: V's pause menu is all right angles. */
-body.dashboard-mode.nav-driving.theme-gta-v #dash-topbar{
+body.dashboard-mode.theme-gta-v #dash-topbar{
   display:block;position:absolute;left:0;right:0;top:0;height:68px;z-index:25;
   background:#0d1117;border-bottom:2px solid #7CFF6B;
   box-shadow:0 2px 18px rgba(124,255,107,.22);
   pointer-events:none;
 }
-body.dashboard-mode.nav-driving.theme-gta-v #dash-bottombar{
+body.dashboard-mode.theme-gta-v #dash-bottombar{
   display:block;position:absolute;left:0;right:0;bottom:0;height:78px;z-index:25;
   background:#0d1117;border-top:2px solid #7CFF6B;
   box-shadow:0 -2px 18px rgba(124,255,107,.22);
   pointer-events:auto;
 }
-body.dashboard-mode.nav-driving.theme-gta-v #dash-topbar .dash-chrome,
-body.dashboard-mode.nav-driving.theme-gta-v #dash-bottombar .dash-chrome{
+body.dashboard-mode.theme-gta-v #dash-topbar .dash-chrome,
+body.dashboard-mode.theme-gta-v #dash-bottombar .dash-chrome{
   clip-path:none;inset:0;background:rgba(255,255,255,.015);
 }
 body.dashboard-mode.theme-gta-v .dash-logo{
@@ -539,27 +540,27 @@ body.dashboard-mode.theme-gta-v .dash-tag{
    Dark leather bar, thin parchment edge, ink-red accents, parchment ink.
    Kirsty wordmark, RDR Lino labels (via the theme-mapped vars). Flat
    letterpress — no neon glow anywhere on this theme. */
-body.dashboard-mode.nav-driving.theme-rdr2 #dash-topbar{
+body.dashboard-mode.theme-rdr2 #dash-topbar{
   display:block;position:absolute;left:0;right:0;top:0;height:68px;z-index:25;
   background:linear-gradient(180deg,#d8b36a,#8a6f4d);
   clip-path:polygon(0 0,100% 0,100% 100%,10px 100%,0 calc(100% - 10px));
   filter:drop-shadow(0 2px 8px rgba(0,0,0,.6));
   pointer-events:none;
 }
-body.dashboard-mode.nav-driving.theme-rdr2 #dash-bottombar{
+body.dashboard-mode.theme-rdr2 #dash-bottombar{
   display:block;position:absolute;left:0;right:0;bottom:0;height:78px;z-index:25;
   background:linear-gradient(0deg,#d8b36a,#8a6f4d);
   clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%,0 10px);
   filter:drop-shadow(0 -2px 8px rgba(0,0,0,.6));
   pointer-events:auto;
 }
-body.dashboard-mode.nav-driving.theme-rdr2 #dash-topbar .dash-chrome{
+body.dashboard-mode.theme-rdr2 #dash-topbar .dash-chrome{
   inset:0 0 2px 0;clip-path:polygon(0 0,100% 0,100% 100%,10px 100%,0 calc(100% - 10px));
   background:
     repeating-linear-gradient(90deg,rgba(0,0,0,.12) 0 3px,transparent 3px 7px),
     linear-gradient(180deg,#33241a 0%,#241a12 70%,#1c140d 100%);
 }
-body.dashboard-mode.nav-driving.theme-rdr2 #dash-bottombar .dash-chrome{
+body.dashboard-mode.theme-rdr2 #dash-bottombar .dash-chrome{
   inset:2px 0 0 0;clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%,0 10px);
   background:
     repeating-linear-gradient(90deg,rgba(0,0,0,.12) 0 3px,transparent 3px 7px),

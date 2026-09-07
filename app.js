@@ -1079,10 +1079,12 @@ function fitDashboardStage() {
 function syncDashPadding() {
   if (!window.map || !map.setPadding) return;
   const b = document.body.classList;
-  const driving = b.contains('dashboard-mode') && b.contains('nav-driving');
-  if (driving && b.contains('theme-vice-city'))
+  // Dash bars are always visible in dashboard mode (every theme), so
+  // keep the camera target clear of them whether driving or exploring.
+  const dash = b.contains('dashboard-mode');
+  if (dash && b.contains('theme-vice-city'))
     map.setPadding({ top: 76, right: 780, bottom: 88, left: 8 });
-  else if (driving)
+  else if (dash)
     map.setPadding({ top: 76, right: 8, bottom: 88, left: 8 });
   else map.setPadding({ top: 0, right: 0, bottom: 0, left: 0 });
 }

@@ -343,11 +343,11 @@ ok(appSrc.includes('open-meteo.com'), 'weather comes from keyless Open-Meteo');
 ok(appSrc.includes("setAppMode('normal')"), 'PHONE tab drops back to the phone UI');
 ok(appSrc.includes("classList.toggle('radio-off')"), 'RADIO tab toggles the music widget');
 ok(cssSrc.includes('top:64px') && cssSrc.includes('bottom:72px'), 'docked skins fit between the dash bars (chrome never covers the widget)');
-ok(cssSrc.includes('body.dashboard-mode.theme-vice-city #dash-topbar') === false, 'VC bar chrome is drive-gated, not always-on');
-// drive-mode car chrome: every theme gets top/bottom bars, shown only while driving
+ok(cssSrc.includes('body.dashboard-mode.theme-vice-city #dash-topbar') === true, 'VC bar chrome is always-on in dashboard mode, like the original');
+// dashboard car chrome: every theme gets top/bottom bars, always visible in dashboard mode (driving or exploring)
 for (const id of ['vice-city', 'san-andreas', 'gta-v', 'rdr2']) {
-  ok(cssSrc.includes(`body.dashboard-mode.nav-driving.theme-${id} #dash-topbar`), `${id} drive-mode top bar chrome`);
-  ok(cssSrc.includes(`body.dashboard-mode.nav-driving.theme-${id} #dash-bottombar`), `${id} drive-mode bottom bar chrome`);
+  ok(cssSrc.includes(`body.dashboard-mode.theme-${id} #dash-topbar`), `${id} dashboard top bar chrome`);
+  ok(cssSrc.includes(`body.dashboard-mode.theme-${id} #dash-bottombar`), `${id} dashboard bottom bar chrome`);
 }
 ok(appSrc.includes("classList.toggle('nav-driving'"), 'nav-driving class toggles with drive mode');
 ok(appSrc.includes('nav-driving') && /setUiMode/.test(appSrc), 'drive-mode chrome state lives in setUiMode');
