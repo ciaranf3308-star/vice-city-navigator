@@ -344,16 +344,25 @@
      cache — no extra Google fetches, and cached POIs reappear
      instantly when zooming back in. */
   const POI_LAYER_ID = 'vcn-poi';
+  let lastImageError = null;
   function preloadBlipImages() {
+    // NOTE: plain <img> loading, NOT map.loadImage — MapLibre's loader
+    // silently fails for these assets on the user's mobile Safari while
+    // plain <img> (player arrow) works fine. Decode via Image, register
+    // the element directly with addImage.
     const names = [...new Set(Object.values(GOOGLE_TYPE_TO_BLIP).concat(['qmark']))];
     for (const name of names) {
       const id = 'poi-' + name;
       if (map.hasImage(id)) continue;
-      map.loadImage(blipUrl(name), (err, img) => {
-        if (err) { console.warn('[vcn-pois] blip image failed:', name); return; }
-        if (!map.hasImage(id)) map.addImage(id, img, { sdf: false });
+      const img = new Image();
+      img.onload = () => {
+        try {
+          if (!map.hasImage(id)) map.addImage(id, img, { sdf: false });
+        } catch (e) { lastImageError = id + ': addImage threw ' + (e && e.message); }
         renderPois(); // paint any features that were waiting on this blip
-      });
+      };
+      img.onerror = () => { lastImageError = id + ': <img> onerror for ' + img.src; };
+      img.src = blipUrl(name);
     }
   }
   function ensureLayers() {
@@ -484,7 +493,7 @@
           try {
             const names = [...new Set(Object.values(GOOGLE_TYPE_TO_BLIP).concat(['qmark']))];
             const missing = names.filter(n => !map.hasImage('poi-' + n));
-            return { total: names.length, missing };
+            return { total: names.length, missing, lastImageError };
           } catch (e) { return { error: String(e && e.message || e) }; }
         })(),
         cooldownMsLeft: Math.max(0, failCooldownUntil - Date.now()),
