@@ -1,7 +1,7 @@
 /* ============================================================
    WayStation theme: Grand Theft Auto V.
-   GTA V minimap language: warm grey ground, white road hierarchy,
-   dark olive parks, blue-grey water, white labels with dark halos,
+   GTA V pause-map language: near-black land, light grey road
+   hierarchy, blue-grey water, white labels with black halos,
    Chalet-style typography. GPS purple route (as in-game).
    ============================================================ */
 'use strict';

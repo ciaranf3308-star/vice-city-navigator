@@ -146,8 +146,8 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v25"), 'SW shell cache v24');
-ok(swSrc.includes("ws-theme-v5"), 'SW theme cache v4');
+ok(swSrc.includes("ws-shell-v26"), 'SW shell cache v24');
+ok(swSrc.includes("ws-theme-v6"), 'SW theme cache v4');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
@@ -313,17 +313,17 @@ ok(appSrc.includes('VCNThemes.setCurrent(id)') && /await loadP;[\s\S]*?VCNThemes
    'theme persisted only after the new style actually loads');
 ok(!appSrc.includes('window.map && map.resize'), 'no window.map/map null mismatch on resize guards');
 
-/* ---------- GTA V palette matches the in-game minimap reference ---------- */
+/* ---------- GTA V palette matches the in-game pause map ---------- */
 const vPaint = id => vStyle.layers.find(l => l.id === id).paint;
-ok(vPaint('v-land')['background-color'] === '#8b8578', 'V land: warm radar grey');
-ok(vPaint('v-water')['fill-color'] === '#5d8aa8', 'V water: blue-grey');
+ok(vPaint('v-land')['background-color'] === '#1e1e1e', 'V land: near-black pause map');
+ok(vPaint('v-water')['fill-color'] === '#55636b', 'V water: blue-grey');
 for (const id of ['v-parks', 'v-grass', 'v-golf', 'v-gardens', 'v-recreation', 'v-park-areas', 'v-playing-fields'])
-  ok(vPaint(id)['fill-color'] === '#5c6b3c', `V ${id}: dark olive`);
-ok(vPaint('v-woods')['fill-color'] === '#4e5c33', 'V woods: deep olive');
+  ok(/^#2f3b28$|^#35422c$/.test(vPaint(id)['fill-color']), `V ${id}: dark olive`);
+ok(vPaint('v-woods')['fill-color'] === '#26331f', 'V woods: deep olive');
 for (const id of ['v-road-minor', 'v-road-primary', 'v-road-motorway'])
-  ok(vPaint(id)['line-color'] === '#f4f2ec', `V ${id}: white road core`);
-ok(vPaint('v-label-road-major')['text-color'] === '#ffffff', 'V road labels: white like the radar');
-ok(vPaint('v-label-place')['text-halo-color'] === '#3a372f', 'V place labels: dark halo');
+  ok(/^#a/.test(vPaint(id)['line-color']), `V ${id}: light grey road core`);
+ok(vPaint('v-label-road-major')['text-color'] === '#f0f0f0', 'V road labels: near-white');
+ok(vPaint('v-label-place')['text-halo-color'] === '#000000', 'V place labels: black halo');
 ok(T.get('gta-v').map.routeColor === '#a86fd6', 'V route stays purple (as in-game)');
 
 
