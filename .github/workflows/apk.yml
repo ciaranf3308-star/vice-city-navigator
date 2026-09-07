@@ -77,7 +77,9 @@ jobs:
         env:
           BUBBLEWRAP_KEYSTORE_PASSWORD: ${{ secrets.VCN_KEYSTORE_PASSWORD }}
           BUBBLEWRAP_KEY_PASSWORD: ${{ secrets.VCN_KEY_PASSWORD }}
-        run: bubblewrap build
+        run: |
+          bubblewrap init --manifest=twa-manifest.json
+          bubblewrap build
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
