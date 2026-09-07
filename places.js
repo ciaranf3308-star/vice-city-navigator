@@ -237,9 +237,10 @@
           those POIs are already in the cache, re-asking is pure waste
        2. hard daily budget on refreshes (configurable) — the last
           line of defence so usage can never run away */
-  const LS_QUERIES_KEY = 'vcn-poi-queries-v1';
-  const LS_BUDGET_KEY = 'vcn-poi-budget-v1';
+  const LS_QUERIES_KEY = 'vcn-poi-queries-v2';
+  const LS_BUDGET_KEY = 'vcn-poi-budget-v2';
   let queryHistory = []; // [{lng, lat, at}] — ground already fetched
+  let failCooldownUntil = 0; // backoff after a totally failed refresh
   function loadQueryHistory() {
     try {
       const arr = JSON.parse(localStorage.getItem(LS_QUERIES_KEY) || '[]');
@@ -287,6 +288,7 @@
       return;
     }
     if (refreshInFlight) return;
+    if (Date.now() < failCooldownUntil) return; // backing off after a total failure
     const minMove = cfg().refreshDistanceMeters || 750;
     if (lastQueryCenter && haversine(lastQueryCenter, lnglat) < minMove) return;
     lastQueryCenter = lnglat.slice();
@@ -302,13 +304,22 @@
     }
     refreshInFlight = true;
     try {
-      let total = 0;
+      let total = 0, ok = false;
       for (const group of POI_GROUPS) {
-        try { total += await searchGroup(group, lnglat); }
+        try { total += await searchGroup(group, lnglat); ok = true; }
         catch (e) { console.warn('[vcn-pois] group failed:', group.id, e.message); }
       }
-      queryHistory.push({ lng: lnglat[0], lat: lnglat[1], at: Date.now() });
-      saveQueryHistory();
+      if (ok) {
+        // Only mark ground as covered when Google actually answered.
+        // A failed refresh must stay retryable — recording it would
+        // poison the 24 h history and silently block every later pan.
+        queryHistory.push({ lng: lnglat[0], lat: lnglat[1], at: Date.now() });
+        saveQueryHistory();
+      } else {
+        // Nothing answered (bad key, no network): back off a minute so a
+        // broken setup can't hammer the API on every pan.
+        failCooldownUntil = Date.now() + 60000;
+      }
       renderPois();
       persistCache();
       console.info(`[vcn-pois] refreshed: ${total} places around ${lnglat[1].toFixed(4)},${lnglat[0].toFixed(4)}`);
