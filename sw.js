@@ -1,6 +1,6 @@
 /* Vice City Navigator service worker — caches the app shell only.
    Map tiles, routing and search always go to the network. */
-const CACHE = 'vcn-shell-v4';
+const CACHE = 'vcn-shell-v5';
 const BLIPS = ['airYard','barbers','burgerShot','cash','chicken','dateDisco','dateDrink',
   'dateFood','diner','girlfriend','gym','hostpital','modGarage','north','pizza','police',
   'propertyG','qmark','race','runway','saveGame','school','spray','tattoo','waypoint'];
@@ -8,6 +8,7 @@ const SHELL = [
   './', 'index.html', 'styles.css', 'app.js',
   'manifest.webmanifest', 'icon.svg',
   'fonts/pricedown-bl.woff',
+  'assets/player_arrow.png',
   ...BLIPS.map(b => `assets/blips/blip_${b}.png`)
 ];
 self.addEventListener('install', e => {

@@ -1,12 +1,18 @@
 /* Vice City Navigator — client-side turn-by-turn PWA.
-   Map: MapLibre + OpenFreeMap vector tiles (recolored neon).
+   Map: MapLibre + OpenFreeMap vector tiles (recolored to the original
+   GTA Vice City pause-menu map: sand land, dusty-blue water, white roads).
    Routing: OSRM demo server. Search: Nominatim. Voice: speechSynthesis. */
 'use strict';
 
 const VC = {
-  bg: '#140823', pink: '#ff71ce', hot: '#ff2e88', cyan: '#01cdfe',
-  purple: '#b967ff', yellow: '#fffb96', mint: '#05ffa1',
-  land: '#0e3a2c', building: '#2b1546', label: '#ffd9f2', routeCore: '#ff9de2'
+  /* pause-menu map palette (authentic VC, not neon) */
+  bg: '#d9c69e', water: '#5e9cbd', road: '#fdfbf3', roadCasing: '#b3a17e',
+  park: '#a4bb8d', building: '#c6ab7c', buildingLine: '#a68d60',
+  label: '#4c4030', labelHalo: '#ece1c6', waterLabel: '#2e5a72',
+  rail: '#8a7a5e', boundary: '#a08c66', icon: '#6b5a40',
+  routeCasing: '#ffffff', routeCore: '#f2a93b',
+  /* HUD accents (kept for the nav instruction icons) */
+  yellow: '#fffb96'
 };
 const STYLE_URL = 'https://tiles.openfreemap.org/styles/dark';
 const OSRM = 'https://router.project-osrm.org/route/v1/driving';
@@ -110,7 +116,9 @@ function blipFor(it) {
 }
 const blipUrl = name => `${BLIP_PATH}${name}.png`;
 
-/* ---------------- Vice City style recolor ---------------- */
+/* ---------------- Vice City style recolor ----------------
+   Matches the original GTA Vice City pause-menu map: sand-colored land,
+   dusty-blue water, thin white roads, muted parks, dark-brown labels. */
 function recolorStyle(style) {
   for (const layer of style.layers) {
     const id = layer.id || '';
@@ -130,39 +138,39 @@ function recolorStyle(style) {
     const isBoundary = /boundary/.test(id);
 
     if (layer.type === 'symbol') {
-      if (has('text-color')) paint['text-color'] = /water/.test(id) ? VC.cyan : VC.label;
-      if (has('text-halo-color')) paint['text-halo-color'] = VC.bg;
+      if (has('text-color')) paint['text-color'] = /water/.test(id) ? VC.waterLabel : VC.label;
+      if (has('text-halo-color')) paint['text-halo-color'] = VC.labelHalo;
       if (has('text-halo-width')) paint['text-halo-width'] = 1.5;
-      if (has('icon-color')) paint['icon-color'] = VC.purple;
+      if (has('icon-color')) paint['icon-color'] = VC.icon;
       continue;
     }
     if (isWater && (has('fill-color') || has('line-color'))) {
-      if (has('fill-color')) paint['fill-color'] = VC.cyan;
-      if (has('line-color')) paint['line-color'] = VC.cyan;
+      if (has('fill-color')) paint['fill-color'] = VC.water;
+      if (has('line-color')) paint['line-color'] = VC.water;
       continue;
     }
-    if (isPark && has('fill-color')) { paint['fill-color'] = VC.land; continue; }
+    if (isPark && has('fill-color')) { paint['fill-color'] = VC.park; continue; }
+    if (/landuse/.test(id) && layer.type === 'fill' && has('fill-color')) { paint['fill-color'] = VC.bg; continue; }
     if (isBuilding) {
       if (has('fill-color')) paint['fill-color'] = VC.building;
-      if (has('fill-outline-color')) paint['fill-outline-color'] = VC.purple;
+      if (has('fill-outline-color')) paint['fill-outline-color'] = VC.buildingLine;
       continue;
     }
-    if (isRail && has('line-color')) { paint['line-color'] = VC.purple; continue; }
-    if (isBoundary && has('line-color')) { paint['line-color'] = '#5a2d82'; continue; }
+    if (isRail && has('line-color')) { paint['line-color'] = VC.rail; continue; }
+    if (isBoundary && has('line-color')) { paint['line-color'] = VC.boundary; continue; }
 
     if (layer.type === 'line' && has('line-color')) {
       const casing = /casing/.test(id);
-      if (isMotorway) paint['line-color'] = casing ? VC.hot : VC.yellow;
-      else if (isMajor) paint['line-color'] = casing ? VC.purple : VC.hot;
+      if (isMotorway) paint['line-color'] = casing ? VC.roadCasing : VC.road;
+      else if (isMajor) paint['line-color'] = casing ? VC.roadCasing : VC.road;
       else if (isMinorRoad || /highway/.test(id) || /road/.test(id) || /street/.test(id))
-        paint['line-color'] = VC.pink;
-      else if (/aeroway/.test(id)) paint['line-color'] = '#3a2358';
+        paint['line-color'] = casing ? VC.roadCasing : VC.road;
+      else if (/aeroway/.test(id)) paint['line-color'] = '#a8a8a4';
     }
     if (layer.type === 'fill' && has('fill-color') && /transportation|road|aeroway/.test(id)) {
-      paint['fill-color'] = '#241238';
+      paint['fill-color'] = '#ded2b8';
     }
   }
-  // night-sky background behind everything at low zooms
   return style;
 }
 
@@ -225,7 +233,7 @@ async function initMap() {
     if (!res.ok) throw new Error('style fetch failed');
     style = recolorStyle(await res.json());
   } catch (e) {
-    toast('Could not load the neon map style. Check your connection.');
+    toast('Could not load the Vice City map style. Check your connection.');
     return;
   }
   map = new maplibregl.Map({
@@ -251,20 +259,25 @@ function locateUser(center) {
 }
 
 let lastHeading = 0; // GPS travel heading, rotates the player arrow
+/* Authentic player arrow extracted from ClassicHud's Vice City hud.txd
+   ("arrow" texture) — replaces the earlier hand-drawn SVG. */
 function placeUserMarker() {
   if (!map || !userPos) return;
   if (!userMarker) {
     const el = document.createElement('div');
     el.className = 'player-arrow';
-    el.innerHTML = '<svg viewBox="0 0 48 48"><path d="M24 5 L41 40 L24 32 L7 40 Z" fill="#ffffff" stroke="#0b0b12" stroke-width="3.5" stroke-linejoin="round"/></svg>';
+    const img = document.createElement('img');
+    img.src = 'assets/player_arrow.png';
+    img.alt = '';
+    el.appendChild(img);
     userMarker = new maplibregl.Marker({ element: el }).setLngLat(userPos).addTo(map);
   } else userMarker.setLngLat(userPos);
   updatePlayerArrow();
 }
 function updatePlayerArrow() {
   if (!userMarker) return;
-  const svg = userMarker.getElement().querySelector('svg');
-  if (svg) svg.style.transform = `rotate(${lastHeading}deg)`;
+  const img = userMarker.getElement().querySelector('img');
+  if (img) img.style.transform = `rotate(${lastHeading}deg)`;
 }
 
 /* ---------------- search ---------------- */
@@ -323,9 +336,9 @@ function ensureRouteLayers() {
   if (map.getSource('vcn-route')) return;
   map.addSource('vcn-route', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
   map.addLayer({
-    id: 'vcn-route-glow', type: 'line', source: 'vcn-route',
+    id: 'vcn-route-casing', type: 'line', source: 'vcn-route',
     layout: { 'line-cap': 'round', 'line-join': 'round' },
-    paint: { 'line-color': VC.pink, 'line-width': 15, 'line-opacity': 0.35, 'line-blur': 9 }
+    paint: { 'line-color': VC.routeCasing, 'line-width': 9, 'line-opacity': 0.95 }
   });
   map.addLayer({
     id: 'vcn-route-core', type: 'line', source: 'vcn-route',

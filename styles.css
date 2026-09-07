@@ -27,11 +27,7 @@ body{
 #fx{
   position:absolute;inset:0;pointer-events:none;z-index:5;
   background:
-    radial-gradient(ellipse at center, transparent 55%, rgba(10,2,20,.55) 100%);
-}
-#fx::after{
-  content:"";position:absolute;inset:0;
-  background:repeating-linear-gradient(0deg, rgba(255,255,255,.022) 0 1px, transparent 1px 3px);
+    radial-gradient(ellipse at center, transparent 60%, rgba(120,90,50,.16) 100%);
 }
 
 /* ---------- start panel ---------- */
@@ -117,8 +113,8 @@ body{
 .ctl:active{transform:scale(.94)}
 
 /* ---------- player arrow (Vice City radar arrow) ---------- */
-.player-arrow{width:46px;height:46px;filter:drop-shadow(0 0 8px rgba(255,255,255,.65))}
-.player-arrow svg{width:100%;height:100%;transition:transform .25s ease-out}
+.player-arrow{width:46px;height:46px;filter:drop-shadow(0 1px 3px rgba(60,45,25,.55))}
+.player-arrow img{width:100%;height:100%;transition:transform .25s ease-out}
 .dest-pin{
   width:48px;height:48px;
   background:url('assets/blips/blip_waypoint.png') center/contain no-repeat;
