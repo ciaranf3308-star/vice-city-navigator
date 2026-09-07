@@ -4,12 +4,12 @@
    Pipeline: OSRM maneuver -> deterministic structured
    instruction (built by app.js, the LLM never decides
    navigation) -> Supabase Edge Function `navigation-voice`
-   (server-side theme persona + OpenAI gpt-4o-mini rewrite +
-   gpt-4o-mini-tts speech) -> audio playback.
+   (server-side theme persona + Gemini free-tier rewrite +
+   Gemini TTS speech) -> audio playback.
 
-   The OpenAI key is NEVER in this client. The app sends only
+   The Gemini API key is NEVER in this client. The app sends only
    { text, theme, mode, profanity } to the Edge Function and gets
-   back { line, audio }. The key lives solely as the OPENAI_API_KEY
+   back { line, audio }. The key lives solely as the GEMINI_API_KEY
    secret on the Supabase project (see VOICE_SETUP.md).
 
    The function enforces its own per-day request cap (VOICE_DAILY_CAP,
@@ -31,11 +31,12 @@
 'use strict';
 
 (function () {
-  const LS_KEY = 'vcn-voice-settings-v1';
+  const LS_KEY = 'vcn-voice-settings-v2';
   const CACHE_MAX = 24;
   const FETCH_TIMEOUT_MS = 12000;
 
-  const settings = { mode: 'standard', profanity: false, endpoint: '', muted: false };
+  /* Defaults: full Vice City DJ — banter + profanity on. */
+  const settings = { mode: 'banter', profanity: true, endpoint: '', muted: false };
   const audioCache = new Map(); // key -> { url, text }
   const inflight = new Set();
   let audioEl = null;
@@ -50,7 +51,7 @@
         }
       }
     } catch (e) { /* start with defaults */ }
-    if (!['standard', 'themed', 'banter', 'off'].includes(settings.mode)) settings.mode = 'standard';
+    if (!['standard', 'themed', 'banter', 'off'].includes(settings.mode)) settings.mode = 'banter';
   }
   function saveSettings() {
     try { localStorage.setItem(LS_KEY, JSON.stringify(settings)); } catch (e) {}
@@ -179,7 +180,7 @@
         for (const k of ['mode', 'profanity', 'endpoint', 'muted']) {
           if (patch[k] !== undefined) settings[k] = patch[k];
         }
-        if (!['standard', 'themed', 'banter', 'off'].includes(settings.mode)) settings.mode = 'standard';
+        if (!['standard', 'themed', 'banter', 'off'].includes(settings.mode)) settings.mode = 'banter';
         saveSettings();
       }
       return { ...settings };

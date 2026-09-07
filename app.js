@@ -242,28 +242,34 @@ function onOrientation(e) {
     const now = Date.now();
     let d = Math.abs(h - map.getBearing()) % 360;
     if (d > 180) d = 360 - d;
-    if (now - lastBearingPush > 800 && d > 3) {
+    if (now - lastBearingPush > 500 && d > 3) {
       lastBearingPush = now;
-      try { map.easeTo({ bearing: h, duration: 400 }); } catch (err) {}
+      try { map.easeTo({ bearing: h, duration: 300 }); } catch (err) {}
     }
   }
 }
 /* iOS requires compass permission from inside a user gesture — startNav's
-   tap counts. Android needs no permission. Safe to call repeatedly. */
+   tap counts. Android needs no permission but requires the
+   'deviceorientationabsolute' event for a true-north heading — the plain
+   'deviceorientation' event's alpha is relative on Android Chrome and never
+   sets absolute=true, so without this the compass stays dead on Android.
+   Safe to call repeatedly. */
 function enableCompass() {
   if (typeof window.DeviceOrientationEvent === 'undefined') return;
   if (orientationListening) return;
+  const listen = () => {
+    window.addEventListener('deviceorientation', onOrientation);
+    // Android Chrome: absolute (true-north) headings arrive here.
+    window.addEventListener('deviceorientationabsolute', onOrientation);
+    orientationListening = true;
+  };
   try {
     if (typeof DeviceOrientationEvent.requestPermission === 'function') {
       DeviceOrientationEvent.requestPermission().then(s => {
-        if (s === 'granted' && !orientationListening) {
-          window.addEventListener('deviceorientation', onOrientation);
-          orientationListening = true;
-        }
+        if (s === 'granted' && !orientationListening) listen();
       }).catch(() => {});
     } else {
-      window.addEventListener('deviceorientation', onOrientation);
-      orientationListening = true;
+      listen();
     }
   } catch (e) {}
 }
@@ -614,6 +620,7 @@ function maybeAnnounce(dMan) {
 function setFollow(on) {
   followMode = on;
   $('follow-btn').classList.toggle('on', on);
+  if (on) enableCompass(); // re-arm heading sensor when follow resumes
 }
 
 /* ---------------- UI modes: explore / planning / drive ----------------

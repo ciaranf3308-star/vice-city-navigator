@@ -50,19 +50,22 @@
 
   <section class="menu-section">
     <h3>Voice</h3>
-    <label class="stack">Mode
+    <label class="stack">Voice
       <select id="voice-mode">
+        <option value="banter">Vice City DJ + banter</option>
+        <option value="themed">Vice City DJ</option>
         <option value="standard">Standard navigation</option>
-        <option value="themed">Themed</option>
-        <option value="banter">Themed + banter</option>
         <option value="off">Voice off</option>
       </select>
     </label>
     <label class="row"><input type="checkbox" id="profanity-toggle"> Profanity</label>
-    <label class="stack">Themed voice server (advanced override)
-      <input id="endpoint-url" type="url" inputmode="url" placeholder="https://YOUR_PROJECT_REF.supabase.co/functions/v1/navigation-voice" autocomplete="off">
-    </label>
-    <small class="hint">Themed voice uses your Supabase Edge Function — the OpenAI key stays server-side. See VOICE_SETUP.md.</small>
+    <details class="advanced">
+      <summary>Advanced: custom voice server</summary>
+      <label class="stack">Themed voice server URL
+        <input id="endpoint-url" type="url" inputmode="url" placeholder="https://YOUR_PROJECT_REF.supabase.co/functions/v1/navigation-voice" autocomplete="off">
+      </label>
+    </details>
+    <small class="hint">Themed voice is free — DJ lines and voice served by your Supabase Edge Function (Gemini free tier).</small>
   </section>
 
   <p class="attrib">Map © OpenStreetMap contributors · Tiles OpenFreeMap · Routing OSRM</p>
