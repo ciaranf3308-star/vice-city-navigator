@@ -225,10 +225,12 @@
 
   /* ---------------- refresh gating ---------------- */
   let map = null, hooks = {};
+  let initialized = false;
   let lastQueryCenter = null;
   let refreshInFlight = false;
   let keyWarned = false;
   let budgetWarnedFor = null;
+  let lastRefreshInfo = null; // {at, total, ok, error} — surfaced via status()
 
   /* ---------------- spend guards ----------------
      Google can't cap quotas on trial projects, so the app caps
@@ -291,7 +293,6 @@
     if (Date.now() < failCooldownUntil) return; // backing off after a total failure
     const minMove = cfg().refreshDistanceMeters || 750;
     if (lastQueryCenter && haversine(lastQueryCenter, lnglat) < minMove) return;
-    lastQueryCenter = lnglat.slice();
     pruneQueryHistory();
     if (recentlyQueried(lnglat)) return; // cache already covers this ground
     if (!budgetAllows()) {
@@ -300,15 +301,23 @@
         budgetWarnedFor = today;
         console.info('[vcn-pois] daily refresh budget reached — ambient POIs paused until tomorrow');
       }
+      lastRefreshInfo = { at: Date.now(), total: 0, ok: false, error: 'daily budget reached' };
       return;
     }
+    // Only advance the movement gate when we're actually about to fetch —
+    // bailing above must not poison the gate with unfetched ground.
+    lastQueryCenter = lnglat.slice();
     refreshInFlight = true;
+    const info = { at: Date.now(), total: 0, ok: false, error: null };
     try {
       let total = 0, ok = false;
+      const errors = [];
       for (const group of POI_GROUPS) {
         try { total += await searchGroup(group, lnglat); ok = true; }
-        catch (e) { console.warn('[vcn-pois] group failed:', group.id, e.message); }
+        catch (e) { errors.push(group.id + ':' + e.message); console.warn('[vcn-pois] group failed:', group.id, e.message); }
       }
+      info.total = total; info.ok = ok;
+      if (!ok) info.error = errors.join(' | ') || 'all groups failed';
       if (ok) {
         // Only mark ground as covered when Google actually answered.
         // A failed refresh must stay retryable — recording it would
@@ -323,6 +332,7 @@
       renderPois();
       persistCache();
       console.info(`[vcn-pois] refreshed: ${total} places around ${lnglat[1].toFixed(4)},${lnglat[0].toFixed(4)}`);
+      lastRefreshInfo = info;
     } finally {
       refreshInFlight = false;
     }
@@ -444,6 +454,7 @@
       preloadBlipImages();
       renderPois();   // show cached POIs immediately
       wireCard();
+      initialized = true;
       // re-evaluate visibility on pan/zoom — purely a render rule,
       // the cache is untouched so zooming back in is instant
       map.on('moveend', renderPois);
@@ -451,5 +462,20 @@
     maybeRefresh,
     renderPois,
     cacheSize: () => memCache.size,
+    /* Diagnostic snapshot for the ?poi-debug panel and console probing. */
+    status() {
+      let budget = null;
+      try { budget = JSON.parse(localStorage.getItem(LS_BUDGET_KEY) || 'null'); } catch (e) { /* ignore */ }
+      return {
+        initialized,
+        keyReady: !!keyReady(),
+        cacheSize: memCache.size,
+        lastRefresh: lastRefreshInfo,
+        budgetToday: budget && budget.date === new Date().toISOString().slice(0, 10) ? budget.count : 0,
+        queryHistory: queryHistory.length,
+        layerOnMap: !!(map && map.getSource('vcn-pois')),
+        cooldownMsLeft: Math.max(0, failCooldownUntil - Date.now()),
+      };
+    },
   };
 })();

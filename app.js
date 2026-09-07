@@ -183,16 +183,23 @@ async function initMap() {
   });
   map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
   map.on('load', () => {
-    if (window.VCNThemes) document.body.classList.add(window.VCNThemes.current().ui.bodyClass);
-    if (window.VCNVoice) VCNVoice.init();
-    if (window.VCNDiscovery) VCNDiscovery.init(map);
-    if (window.VCNPlaces) VCNPlaces.init(map, {
-      getUserPos: () => userPos,
-      formatDist: fmtDist,
-      setDestination: d => { dest = d; planRoute(); },
-      navigateTo: d => { dest = d; showRoutePending(d && d.label); planRoute({ autostart: true }); },
-      openPlanning: v => openPlanning(v || 'poi'),
-    });
+    // Each module init is isolated: one failing module must never
+    // silently prevent the others (e.g. POIs) from starting.
+    try { if (window.VCNThemes) document.body.classList.add(window.VCNThemes.current().ui.bodyClass); }
+    catch (e) { console.error('[vcn] themes init failed', e); }
+    try { if (window.VCNVoice) VCNVoice.init(); }
+    catch (e) { console.error('[vcn] voice init failed', e); }
+    try { if (window.VCNDiscovery) VCNDiscovery.init(map); }
+    catch (e) { console.error('[vcn] discovery init failed', e); }
+    try {
+      if (window.VCNPlaces) VCNPlaces.init(map, {
+        getUserPos: () => userPos,
+        formatDist: fmtDist,
+        setDestination: d => { dest = d; planRoute(); },
+        navigateTo: d => { dest = d; showRoutePending(d && d.label); planRoute({ autostart: true }); },
+        openPlanning: v => openPlanning(v || 'poi'),
+      });
+    } catch (e) { console.error('[vcn] places init failed', e); }
     // Restore the pre-Spotify-OAuth view (the auth redirect reloads the page).
     const rv = pendingSpotifyView;
     pendingSpotifyView = null;
@@ -212,6 +219,44 @@ async function initMap() {
   map.on('moveend', () => {
     if (window.VCNPlaces && map) VCNPlaces.maybeRefresh(map.getCenter().toArray());
   });
+  maybeShowPoiDebug();
+}
+
+/* Temporary diagnostic: open the app with ?poi-debug in the URL to get a
+   small live panel showing the ambient-POI pipeline state (init, key,
+   cache, last refresh result/error, budget). Remove once POIs are confirmed. */
+function maybeShowPoiDebug() {
+  let enabled = false;
+  try { enabled = new URLSearchParams(location.search).has('poi-debug'); } catch (e) { /* ignore */ }
+  if (!enabled) return;
+  const el = document.createElement('div');
+  el.style.cssText = 'position:fixed;top:8px;left:8px;z-index:99999;background:rgba(8,8,12,.94);' +
+    'color:#7dffb0;font:11px/1.55 monospace;padding:10px 12px;border:1px solid #f5d020;' +
+    'border-radius:8px;max-width:82vw;max-height:60vh;overflow:auto;';
+  const pre = document.createElement('div');
+  pre.style.whiteSpace = 'pre-wrap';
+  const btn = document.createElement('button');
+  btn.textContent = 'refresh POIs now';
+  btn.style.cssText = 'margin-top:8px;padding:8px 12px;font:12px monospace;touch-action:manipulation;';
+  btn.onclick = () => {
+    try {
+      const m = (window.VCN && window.VCN._map) ? window.VCN._map() : null;
+      const c = m ? m.getCenter().toArray() : [-6.68, 53.29];
+      window.VCNPlaces.maybeRefresh(c);
+      pre.textContent = 'manual refresh triggered…\n' + pre.textContent;
+    } catch (e) { pre.textContent = 'ERR ' + e.message; }
+  };
+  el.appendChild(pre);
+  el.appendChild(btn);
+  document.body.appendChild(el);
+  const tick = () => {
+    try {
+      const s = window.VCNPlaces ? window.VCNPlaces.status() : null;
+      pre.textContent = s ? JSON.stringify(s, null, 1) : 'VCNPlaces missing!';
+    } catch (e) { pre.textContent = 'status ERR: ' + e.message; }
+  };
+  tick();
+  setInterval(tick, 2000);
 }
 
 function locateUser(center) {
