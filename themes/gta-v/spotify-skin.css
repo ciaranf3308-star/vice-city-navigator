@@ -66,8 +66,8 @@
   text-align: center;
 }
 .gvsp-title {
-  font-family: 'Chalet Comprime', 'Arial Narrow', sans-serif;
-  font-size: 5.6cqw; letter-spacing: .04em; line-height: 1.15;
+  font-family: 'SignPainter', 'Chalet London', cursive;
+  font-size: 6.6cqw; letter-spacing: .02em; line-height: 1.2;
   color: #f0f0f0;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   text-shadow: 0 0 12px rgba(124,255,107,.45), 0 2px 4px #000;
@@ -210,9 +210,9 @@
   filter: drop-shadow(0 0 6px rgba(124,255,107,.8));
 }
 .gvsp-connect-btn {
-  margin-top: 2.4cqh; padding: 1.8cqh 6cqw;
-  font-family: 'Chalet Comprime', 'Arial Narrow', sans-serif;
-  font-size: 5cqw; letter-spacing: .1em;
+  margin-top: 2.4cqh; padding: 1.6cqh 7cqw;
+  font-family: 'SignPainter', 'Chalet London', cursive;
+  font-size: 6.2cqw; letter-spacing: .03em;
   color: #0d1117; background: #7CFF6B;
   border: 2px solid #7CFF6B; border-radius: 10px; cursor: pointer;
   box-shadow: 0 0 20px rgba(124,255,107,.55);
