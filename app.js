@@ -1,21 +1,16 @@
 /* Vice City Navigator — client-side turn-by-turn PWA.
-   Map: MapLibre + OpenFreeMap vector tiles (recolored to the original
-   GTA Vice City pause-menu map: grey land, pale water, dark cased roads).
+   Map: dedicated vice-city-style.json built from the OpenMapTiles vector
+   source to match the original GTA Vice City pause-map.
    Routing: OSRM demo server. Search: Nominatim. Voice: speechSynthesis. */
 'use strict';
 
 const VC = {
-  /* authentic VC pause-map palette: light-grey land, pale-blue water,
-     dark roads with white casings, vivid parks, pale-yellow beach */
-  bg: '#d8d8d2', water: '#a3c9e2', road: '#333333', roadCasing: '#ffffff',
-  park: '#71c259', sand: '#f5e9c0', building: '#f4f4ee', buildingLine: '#8f8f88',
-  label: '#222222', labelHalo: '#ffffff', waterLabel: '#2a6a8f',
-  rail: '#555555', boundary: '#a8a8a0', icon: '#444444',
+  /* map colors live in vice-city-style.json; these are app-level accents */
   routeCasing: '#ffffff', routeCore: '#f2a93b',
   /* HUD accents (kept for the nav instruction icons) */
   yellow: '#fffb96'
 };
-const STYLE_URL = 'https://tiles.openfreemap.org/styles/dark';
+const STYLE_URL = 'vice-city-style.json';
 const OSRM = 'https://router.project-osrm.org/route/v1/driving';
 const NOMINATIM = 'https://nominatim.openstreetmap.org/search';
 const DUBLIN = [-6.2603, 53.3498]; // fallback centre (user is in Ireland)
@@ -117,83 +112,6 @@ function blipFor(it) {
 }
 const blipUrl = name => `${BLIP_PATH}${name}.png`;
 
-/* ---------------- Vice City style recolor ----------------
-   Matches the original GTA Vice City pause-menu map: light-grey land,
-   pale-blue water, dark roads with white casings, vivid-green parks,
-   pale-yellow beaches, near-black labels. */
-function recolorStyle(style) {
-  for (const layer of style.layers) {
-    const id = layer.id || '';
-    const paint = layer.paint = layer.paint || {};
-    const has = k => Object.prototype.hasOwnProperty.call(paint, k);
-
-    if (layer.type === 'raster') { paint['raster-opacity'] = 0; continue; }
-    if (id === 'background') { paint['background-color'] = VC.bg; continue; }
-
-    const isWater = /water/.test(id) && !/water_name/.test(id);
-    const isSand = /sand|beach/.test(id);
-    const isPark = /park|wood|landcover|grass/.test(id);
-    const isBuilding = id === 'building';
-    const isMotorway = /motorway/.test(id);
-    const isMajor = /major|trunk/.test(id);
-    const isMinorRoad = /minor|path|pier|taxiway|runway|bridge|tunnel/.test(id) && layer.type === 'line' && !/name/.test(id);
-    const isRail = /railway/.test(id);
-    const isBoundary = /boundary/.test(id);
-
-    if (layer.type === 'symbol') {
-      if (has('text-color')) paint['text-color'] = /water/.test(id) ? VC.waterLabel : VC.label;
-      if (has('text-halo-color')) paint['text-halo-color'] = VC.labelHalo;
-      if (has('text-halo-width')) paint['text-halo-width'] = 1.5;
-      if (has('icon-color')) paint['icon-color'] = VC.icon;
-      continue;
-    }
-    if (isWater && (has('fill-color') || has('line-color'))) {
-      if (has('fill-color')) paint['fill-color'] = VC.water;
-      if (has('line-color')) paint['line-color'] = VC.water;
-      continue;
-    }
-    if (isSand && has('fill-color')) { paint['fill-color'] = VC.sand; continue; }
-    if (isPark && has('fill-color')) { paint['fill-color'] = VC.park; continue; }
-    if (/landuse/.test(id) && layer.type === 'fill' && has('fill-color')) { paint['fill-color'] = VC.bg; continue; }
-    if (isBuilding) {
-      if (has('fill-color')) paint['fill-color'] = VC.building;
-      if (has('fill-outline-color')) paint['fill-outline-color'] = VC.buildingLine;
-      continue;
-    }
-    if (isRail && has('line-color')) { paint['line-color'] = VC.rail; continue; }
-    if (isBoundary && has('line-color')) { paint['line-color'] = VC.boundary; continue; }
-
-    if (layer.type === 'line' && has('line-color')) {
-      const casing = /casing/.test(id);
-      if (isMotorway) paint['line-color'] = casing ? VC.roadCasing : VC.road;
-      else if (isMajor) paint['line-color'] = casing ? VC.roadCasing : VC.road;
-      else if (isMinorRoad || /highway/.test(id) || /road/.test(id) || /street/.test(id))
-        paint['line-color'] = casing ? VC.roadCasing : VC.road;
-      else if (/aeroway/.test(id)) paint['line-color'] = '#a8a8a4';
-    }
-    if (layer.type === 'fill' && has('fill-color') && /transportation|road|aeroway/.test(id)) {
-      paint['fill-color'] = VC.bg;
-    }
-  }
-  // The base style only draws houses + one park class, so suburbs render as
-  // flat grey. The VC map is full of green patches — inject layers for
-  // fields, meadows, gardens, pitches, etc. from the vector tiles.
-  const greenLandcover = ['farmland', 'grass', 'scrub'];
-  const greenLanduse = ['park', 'garden', 'pitch', 'playground', 'cemetery', 'stadium', 'golf'];
-  const mkGreen = (id, sourceLayer, classes) => ({
-    id, type: 'fill', source: 'openmaptiles', 'source-layer': sourceLayer,
-    filter: ['all',
-      ['match', ['geometry-type'], ['MultiPolygon', 'Polygon'], true, false],
-      ['match', ['get', 'class'], classes, true, false]],
-    paint: { 'fill-color': VC.park, 'fill-antialias': true }
-  });
-  const at = style.layers.findIndex(l => l.id === 'building');
-  style.layers.splice(at < 0 ? 0 : at, 0,
-    mkGreen('vcn-green-landcover', 'landcover', greenLandcover),
-    mkGreen('vcn-green-landuse', 'landuse', greenLanduse));
-  return style;
-}
-
 /* ---------------- maneuver arrows (original SVG) ---------------- */
 function arrowSvg(kind) {
   const base = '<path d="M32 9 V45 M19 23 L32 9 L45 23"/>';
@@ -251,7 +169,7 @@ async function initMap() {
   try {
     const res = await fetch(STYLE_URL);
     if (!res.ok) throw new Error('style fetch failed');
-    style = recolorStyle(await res.json());
+    style = await res.json();
   } catch (e) {
     toast('Could not load the Vice City map style. Check your connection.');
     return;
@@ -574,7 +492,6 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
 // debug / test hook
 window.VCN = {
   state: () => ({ navActive, stepIdx, steps: steps.length, voiceOn, hasMap: !!map, hasRoute: routeCoords.length > 0 }),
-  recolor: recolorStyle,
   _map: () => map,
   _setTestRoute(coords, testSteps) { routeCoords = coords; steps = testSteps; totalDist = 1000; totalDur = 300; }
 };
