@@ -356,3 +356,62 @@ WayStation semantic → ClassicHud `hud.txd` texture:
 `radar_RYDER`, `radar_SWEET`, `radar_THETRUTH`, `radar_TORENO`,
 `radar_TorenoRanch`, `radar_WOOZIE`, `radar_ZERO`, `radar_CRASH1`,
 `radar_triads`, `radar_triadsCasino`, `radar_mafiaCasino`).
+
+## 2026-09-08 — Bespoke dashboard bar assets (all four themes)
+
+Dashboard top/bottom bars are reskinned per theme with authentic game-UI
+textures. All files live under `assets/themes/<theme>/dashboard/` and are
+local (nothing hotlinked at runtime).
+
+### Vice City — ClassicHud menu textures
+- Source: `https://github.com/lolipalooza/ClassicHud` (community SA-engine
+  HUD mod; same source as the Vice City blip/player-arrow extraction) —
+  `Resources/models/ClassicHud/ViceCity/bgmenu.txd`.
+- Extraction: minimal RenderWare TXD parser (`/tmp` scratch, DXT1/DXT3/DXT5
+  decode) — textures `vc_logo` (256×256 DXT3) and `background` (512×512 DXT1).
+- WayStation files:
+  - `assets/themes/vice-city/dashboard/vc-logo.png` — the authentic Vice
+    City script logo, used as the top-bar wordmark (replaces typeset text).
+  - `assets/themes/vice-city/dashboard/bar-texture.jpg` — the VC pause-menu
+    mottled navy background, tiled as the bar surface texture.
+- License/source note: community-redistributed extracted UI textures, same
+  class of source as the existing ClassicHud extractions. Personal-use project.
+
+### San Andreas — ClassicHud SA menu background
+- Source: same ClassicHud repo —
+  `Resources/models/ClassicHud/SanAndreas/bgmenu.txd`, texture `menu_bgmap`
+  (1024×1024 DXT1): the engraved San Andreas state map (Los Santos / San
+  Fierro / Las Venturas line art) from the SA pause-menu background.
+- WayStation file: `assets/themes/san-andreas/dashboard/menu-bgmap.jpg`
+  (downscaled to 768×768, JPEG q82) — tinted olive via CSS blend and used as
+  the bar surface texture.
+- License/source note: as above (ClassicHud community redistribution).
+
+### GTA V — v-hud pause-menu backdrop art
+- Source: `https://github.com/gennariarmando/v-hud` (MIT License),
+  `resources/VHud/frontend/back.png` (3840×2160): the mod's green-tinted
+  Los Santos skyline pause-menu backdrop, in GTA V's pause-menu visual language.
+- WayStation files (cropped strips, JPEG):
+  - `assets/themes/gta-v/dashboard/topbar-skyline.jpg` (1920×68) — stepped
+    downtown tower silhouette band, darkened in CSS behind the top bar.
+  - `assets/themes/gta-v/dashboard/bottombar-skyline.jpg` (1920×78) —
+    darker ground band for the bottom bar.
+- License: v-hud is MIT-licensed (mod-original artwork, not Rockstar files).
+
+### RDR2 — community UI texture dictionary (generic_textures)
+- Source: `https://github.com/femga/rdr3_discoveries` (community RDR2
+  research repo), `useful_info_from_rpfs/textures/menu_textures/README.md` —
+  texture dictionary `generic_textures` (590634476), no-background PNG set:
+  `https://femga.com:8080/images/samples/ui_textures_no_bg/generic_textures.zip`
+  (same source class as the RDR2 blip pack already shipped).
+- WayStation files (used as-is, white line art on transparent):
+  - `assets/themes/rdr2/dashboard/menu_header_1a.png` (432×108) — ornate
+    Victorian corner-flourish frame → destination plate border-image.
+  - `assets/themes/rdr2/dashboard/menu_bar.png` (432×12) — double-rule line
+    → repeated along the bars' outer edges.
+  - `assets/themes/rdr2/dashboard/title_divider.png` (16×64) — vertical
+    divider ornaments between bar sections.
+  - `assets/themes/rdr2/dashboard/selection_box_bg_1a.png` (972×100) —
+    grunge paper panel → subtle parchment texture overlay on the leather.
+- License/source note: community-redistributed extracted UI textures, same
+  standing as the RDR2 blip extraction. Personal-use project.
