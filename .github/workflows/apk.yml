@@ -80,7 +80,7 @@ jobs:
         run: |
           mkdir -p ~/.bubblewrap
           printf '{"jdkPath":"%s","androidSdkPath":"%s"}' "$JAVA_HOME" "$ANDROID_HOME" > ~/.bubblewrap/config.json
-          yes | bubblewrap build
+          printf 'y\n' | bubblewrap build
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
