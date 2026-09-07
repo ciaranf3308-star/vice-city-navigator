@@ -42,4 +42,11 @@ const GOOGLE_PLACES_CONFIG = {
 
   /* Cached POIs older than this are refetched (24 hours). */
   cacheTtlMs: 24 * 3600 * 1000,
+
+  /* Hard daily cap on Google refreshes — the rate limit Google won't
+     set server-side, enforced here instead. Each refresh is 5 small
+     requests (one per category group) at $32/1000, so 30/day caps
+     worst-case spend at ~$4.80/day (~$144/month), inside the
+     $200/month free tier. Raise/lower to taste. */
+  maxRefreshesPerDay: 30,
 };

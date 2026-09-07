@@ -228,6 +228,54 @@
   let lastQueryCenter = null;
   let refreshInFlight = false;
   let keyWarned = false;
+  let budgetWarnedFor = null;
+
+  /* ---------------- spend guards ----------------
+     Google can't cap quotas on trial projects, so the app caps
+     itself two ways:
+       1. never refetch ground covered by a query in the last 24 h —
+          those POIs are already in the cache, re-asking is pure waste
+       2. hard daily budget on refreshes (configurable) — the last
+          line of defence so usage can never run away */
+  const LS_QUERIES_KEY = 'vcn-poi-queries-v1';
+  const LS_BUDGET_KEY = 'vcn-poi-budget-v1';
+  let queryHistory = []; // [{lng, lat, at}] — ground already fetched
+  function loadQueryHistory() {
+    try {
+      const arr = JSON.parse(localStorage.getItem(LS_QUERIES_KEY) || '[]');
+      if (Array.isArray(arr)) {
+        const cutoff = Date.now() - ttlMs();
+        queryHistory = arr.filter(q => q && q.at > cutoff);
+      }
+    } catch (e) { queryHistory = []; }
+  }
+  function saveQueryHistory() {
+    try { localStorage.setItem(LS_QUERIES_KEY, JSON.stringify(queryHistory.slice(-300))); }
+    catch (e) { /* private mode — memory history still works */ }
+  }
+  function pruneQueryHistory() {
+    const cutoff = Date.now() - ttlMs();
+    const n = queryHistory.length;
+    queryHistory = queryHistory.filter(q => q.at > cutoff);
+    if (queryHistory.length !== n) saveQueryHistory();
+  }
+  function recentlyQueried(lnglat) {
+    // a previous query within one search radius covers this point —
+    // its POIs are already in the cache
+    const r = cfg().radiusMeters || 2500;
+    return queryHistory.some(q => haversine([q.lng, q.lat], lnglat) < r);
+  }
+  function budgetAllows() {
+    const max = cfg().maxRefreshesPerDay || 30;
+    const today = new Date().toISOString().slice(0, 10);
+    let b = null;
+    try { b = JSON.parse(localStorage.getItem(LS_BUDGET_KEY) || 'null'); } catch (e) { /* ignore */ }
+    if (!b || b.date !== today) b = { date: today, count: 0 };
+    if (b.count >= max) return false;
+    b.count += 1;
+    try { localStorage.setItem(LS_BUDGET_KEY, JSON.stringify(b)); } catch (e) { /* ignore */ }
+    return true;
+  }
 
   async function maybeRefresh(lnglat) {
     if (!map || !lnglat) return;
@@ -241,14 +289,26 @@
     if (refreshInFlight) return;
     const minMove = cfg().refreshDistanceMeters || 750;
     if (lastQueryCenter && haversine(lastQueryCenter, lnglat) < minMove) return;
+    lastQueryCenter = lnglat.slice();
+    pruneQueryHistory();
+    if (recentlyQueried(lnglat)) return; // cache already covers this ground
+    if (!budgetAllows()) {
+      const today = new Date().toISOString().slice(0, 10);
+      if (budgetWarnedFor !== today) {
+        budgetWarnedFor = today;
+        console.info('[vcn-pois] daily refresh budget reached — ambient POIs paused until tomorrow');
+      }
+      return;
+    }
     refreshInFlight = true;
     try {
-      lastQueryCenter = lnglat.slice();
       let total = 0;
       for (const group of POI_GROUPS) {
         try { total += await searchGroup(group, lnglat); }
         catch (e) { console.warn('[vcn-pois] group failed:', group.id, e.message); }
       }
+      queryHistory.push({ lng: lnglat[0], lat: lnglat[1], at: Date.now() });
+      saveQueryHistory();
       renderPois();
       persistCache();
       console.info(`[vcn-pois] refreshed: ${total} places around ${lnglat[1].toFixed(4)},${lnglat[0].toFixed(4)}`);
@@ -364,6 +424,7 @@
     init(m, h) {
       map = m; hooks = h || {};
       loadPersistedCache();
+      loadQueryHistory();
       ensureLayers();
       preloadBlipImages();
       renderPois();   // show cached POIs immediately
