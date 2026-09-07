@@ -67,8 +67,23 @@
   <button id="end-btn" class="ctl danger" title="End navigation" aria-label="End navigation">✕</button>
 </div>
 
+<!-- ============ AMBIENT POI CARD ============ -->
+<section id="poi-card" class="panel" hidden>
+  <button id="poi-close" class="ctl" aria-label="Close">✕</button>
+  <div class="poi-head">
+    <img id="poi-blip" alt="" width="40" height="40">
+    <div>
+      <strong id="poi-name">—</strong>
+      <small><span id="poi-type">—</span> · <span id="poi-dist">—</span></small>
+    </div>
+  </div>
+  <button id="poi-go" class="big-btn">Set destination</button>
+</section>
+
 <div id="toast" hidden></div>
 
+<script src="places-config.js"></script>
+<script src="places.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

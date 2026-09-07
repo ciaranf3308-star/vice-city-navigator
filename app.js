@@ -179,7 +179,14 @@ async function initMap() {
     attributionControl: { compact: true }
   });
   map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
-  map.on('load', () => { locateUser(true); });
+  map.on('load', () => {
+    if (window.VCNPlaces) VCNPlaces.init(map, {
+      getUserPos: () => userPos,
+      formatDist: fmtDist,
+      setDestination: d => { dest = d; planRoute(); },
+    });
+    locateUser(true);
+  });
   map.on('dragstart', () => { if (navActive) setFollow(false); });
 }
 
@@ -189,6 +196,7 @@ function locateUser(center) {
     pos => {
       userPos = [pos.coords.longitude, pos.coords.latitude];
       placeUserMarker();
+      if (window.VCNPlaces) VCNPlaces.maybeRefresh(userPos); // ambient POIs
       if (center && map) map.flyTo({ center: userPos, zoom: 14, duration: 1200 });
     },
     () => { if (center) toast('Location unavailable — showing Dublin.'); },
@@ -361,6 +369,7 @@ function onPosErr() { /* keep last known position; toast once */ }
 function onPos(pos) {
   const p = [pos.coords.longitude, pos.coords.latitude];
   userPos = p; placeUserMarker();
+  if (window.VCNPlaces) VCNPlaces.maybeRefresh(p); // ambient POIs, 750 m gated
   if (!navActive || !steps.length) return;
 
   // camera follow

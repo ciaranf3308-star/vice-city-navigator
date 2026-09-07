@@ -140,3 +140,12 @@ body{
   .panel{left:50%;right:auto;transform:translateX(-50%);width:440px}
   #nav-banner{left:50%;right:auto;transform:translateX(-50%);width:520px}
 }
+
+/* ---------- ambient POI card ---------- */
+#poi-card{max-height:none;padding:16px}
+#poi-card[hidden]{display:none}
+#poi-close{position:absolute;top:8px;right:8px}
+.poi-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.poi-head img{image-rendering:pixelated;filter:drop-shadow(0 0 8px rgba(1,205,254,.55))}
+#poi-name{font-family:var(--vclabel);font-weight:600;font-size:18px;letter-spacing:.5px;display:block}
+.poi-head small{color:var(--purple);font-size:13px}
