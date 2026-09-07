@@ -51,9 +51,18 @@ const ALLOWED_ORIGIN = 'https://ciaranf3308-star.github.io';
 /* Gemini Developer API (free tier). */
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 /* Text models for the rewrite step, in preference order. Google retires model
-   aliases without warning (gemini-2.0-flash started 404ing in Sep 2026), so
-   on a 404 we try the next model instead of failing the rewrite. */
-const GEMINI_TEXT_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite'];
+   aliases without warning (gemini-2.0-flash started 404ing in Sep 2026, then
+   gemini-2.5-flash and gemini-2.5-flash-lite 404'd on generateContent), so the
+   function discovers a working model at runtime via models.list and falls back
+   through these aliases when discovery yields nothing. */
+const GEMINI_TEXT_MODELS = [
+  'gemini-2.5-flash',
+  'gemini-2.5-flash-lite',
+  'gemini-flash-latest',
+  'gemini-flash-lite-latest',
+  'gemini-2.0-flash-lite',
+];
+const GEMINI_MODELS_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 const GEMINI_TTS_MODEL = 'gemini-2.5-flash-preview-tts';
 const GEMINI_TTS_VOICE = 'Puck'; // upbeat prebuilt voice
 const GEMINI_TTS_RATE = 24000; // PCM is 24 kHz, 16-bit, mono
@@ -191,6 +200,37 @@ function geminiHeaders(key: string): Record<string, string> {
   return { 'x-goog-api-key': key, 'Content-Type': 'application/json' };
 }
 
+/* Runtime discovery of a working text model. Hardcoded aliases keep dying, so
+   on a cold start (or when the cached model 404s) we ask models.list which
+   flash-family models actually support generateContent right now, and remember
+   the winner in module state for subsequent requests. */
+let cachedTextModel: string | null = null;
+
+async function discoverTextModel(key: string): Promise<string | null> {
+  try {
+    const res = await fetch(GEMINI_MODELS_URL, { headers: geminiHeaders(key) });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const models: Array<{ name?: string; supportedGenerationMethods?: string[] }> =
+      Array.isArray(data?.models) ? data.models : [];
+    const usable = models
+      .filter((m) => Array.isArray(m.supportedGenerationMethods) &&
+        (m.supportedGenerationMethods as string[]).includes('generateContent'))
+      .map((m) => (m.name ?? '').replace(/^models\//, ''))
+      .filter((n) => n && /flash/i.test(n) && !/tts|embed|image|vision/i.test(n));
+    if (!usable.length) return null;
+    const rank = (n: string) => {
+      const i = GEMINI_TEXT_MODELS.indexOf(n);
+      return i === -1 ? GEMINI_TEXT_MODELS.length : i;
+    };
+    usable.sort((a, b) => rank(a) - rank(b));
+    console.log('[navigation-voice] text_model_discovered:', usable[0]);
+    return usable[0];
+  } catch {
+    return null;
+  }
+}
+
 async function geminiRewrite(key: string, persona: Persona, mode: string, profanity: boolean, text: string): Promise<string> {
   const prompt =
     persona.rewrite +
@@ -203,48 +243,73 @@ async function geminiRewrite(key: string, persona: Persona, mode: string, profan
     contents: [{ parts: [{ text: prompt }] }],
     generationConfig: { temperature: 0.8, maxOutputTokens: 140 },
   });
+  /* Build the attempt queue: cached winner first, then a fresh discovery,
+     then the hardcoded aliases. Each model gets one shot; 404/429 moves on
+     (quotas are per-model, so the next alias may succeed). */
+  const queue: string[] = [];
+  const enqueue = (m: string | null) => { if (m && !queue.includes(m)) queue.push(m); };
+  enqueue(cachedTextModel);
+  if (!cachedTextModel) enqueue(await discoverTextModel(key));
+  for (const m of GEMINI_TEXT_MODELS) enqueue(m);
   let lastErr: Error | null = null;
-  for (const model of GEMINI_TEXT_MODELS) {
-    const res = await fetch(`${GEMINI_API_BASE}/${model}:generateContent`, {
-      method: 'POST',
-      headers: geminiHeaders(key),
-      body,
-    });
-    if (res.status === 404) { lastErr = new Error(`gemini_rewrite_404:${model}`); continue; }
+  for (const model of queue) {
+    let res: Response;
+    try {
+      res = await fetch(`${GEMINI_API_BASE}/${model}:generateContent`, {
+        method: 'POST',
+        headers: geminiHeaders(key),
+        body,
+      });
+    } catch (e) { lastErr = e as Error; continue; }
+    if (res.status === 404 || res.status === 429) {
+      lastErr = new Error(`gemini_rewrite_${res.status}:${model}`);
+      if (res.status === 404 && model === cachedTextModel) cachedTextModel = null;
+      continue;
+    }
     if (!res.ok) throw new Error(`gemini_rewrite_${res.status}`);
     const data = await res.json();
     const parts = data?.candidates?.[0]?.content?.parts;
     const out = Array.isArray(parts) ? parts.map((p: { text?: unknown }) =>
       typeof p.text === 'string' ? p.text : '').join('').trim() : '';
     if (!out) throw new Error('gemini_rewrite_empty');
+    cachedTextModel = model;
     return out;
   }
   throw lastErr ?? new Error('gemini_rewrite_no_model');
 }
 
 async function geminiSpeak(key: string, persona: Persona, text: string): Promise<{ audio: string; mime: string }> {
-  const res = await fetch(`${GEMINI_API_BASE}/${GEMINI_TTS_MODEL}:generateContent`, {
-    method: 'POST',
-    headers: geminiHeaders(key),
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: persona.geminiStyle + text }] }],
-      generationConfig: {
-        responseModalities: ['AUDIO'],
-        speechConfig: {
-          voiceConfig: { prebuiltVoiceConfig: { voiceName: GEMINI_TTS_VOICE } },
-        },
+  const body = JSON.stringify({
+    contents: [{ parts: [{ text: persona.geminiStyle + text }] }],
+    generationConfig: {
+      responseModalities: ['AUDIO'],
+      speechConfig: {
+        voiceConfig: { prebuiltVoiceConfig: { voiceName: GEMINI_TTS_VOICE } },
       },
-    }),
+    },
   });
-  if (!res.ok) throw new Error(`gemini_tts_${res.status}`);
-  const data = await res.json();
-  const b64 = data?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-  if (typeof b64 !== 'string' || !b64.length) throw new Error('gemini_tts_empty');
-  const bin = atob(b64);
-  const pcm = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) pcm[i] = bin.charCodeAt(i);
-  if (!pcm.length) throw new Error('gemini_tts_empty');
-  return { audio: bufToBase64(pcmToWav(pcm, GEMINI_TTS_RATE)), mime: 'audio/wav' };
+  /* Free-tier TTS rate-limits under burst (the app pre-generates upcoming
+     maneuvers), so retry 429s with backoff instead of failing instantly. */
+  let lastErr: Error | null = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (attempt > 0) await new Promise((r) => setTimeout(r, 1200 * attempt));
+    const res = await fetch(`${GEMINI_API_BASE}/${GEMINI_TTS_MODEL}:generateContent`, {
+      method: 'POST',
+      headers: geminiHeaders(key),
+      body,
+    });
+    if (res.status === 429) { lastErr = new Error('gemini_tts_429'); continue; }
+    if (!res.ok) throw new Error(`gemini_tts_${res.status}`);
+    const data = await res.json();
+    const b64 = data?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+    if (typeof b64 !== 'string' || !b64.length) throw new Error('gemini_tts_empty');
+    const bin = atob(b64);
+    const pcm = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) pcm[i] = bin.charCodeAt(i);
+    if (!pcm.length) throw new Error('gemini_tts_empty');
+    return { audio: bufToBase64(pcmToWav(pcm, GEMINI_TTS_RATE)), mime: 'audio/wav' };
+  }
+  throw lastErr ?? new Error('gemini_tts_failed');
 }
 
 /* ---------------- OpenAI provider (optional fallback) ---------------- */
