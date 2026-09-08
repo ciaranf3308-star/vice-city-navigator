@@ -19,8 +19,11 @@ body.dashboard-mode.theme-vice-city #dash-topbar::before{display:none}
 /* Hero skyline silhouette on the right of the top bar */
 body.dashboard-mode.theme-vice-city #dash-topbar::after{
   content:'';position:absolute;right:0;top:0;bottom:0;width:600px;pointer-events:none;
-  background:url('dashboard/topbar-skyline-right.png') right center/contain no-repeat;
-  opacity:.9;
+  background-image:url('dashboard/topbar-skyline-right.png');
+  background-position:right center;
+  background-size:contain;
+  background-repeat:no-repeat;
+  opacity:.9;z-index:1;
 }
 body.dashboard-mode.theme-vice-city #dash-topbar::after{display:none}
 body.dashboard-mode.theme-vice-city #dash-topbar .dash-chrome{
