@@ -13,7 +13,7 @@
     "sha256": "b0c2d38168ea816fca3fac1a57865a23834b21497f07508ef8211af8fe06419d"
   },
   "vice-city": {
-    "locked": true,
-    "sha256": "531cf5dab84c26255488a5b223bf58db916f9a5c19cf5a634bed30f0dd86cfe4"
+    "locked": false,
+    "sha256": null
   }
 }
