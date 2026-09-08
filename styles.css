@@ -389,7 +389,11 @@ body.dashboard-mode.theme-vice-city .dash-north{
   color:var(--cyan);text-shadow:0 0 10px rgba(1,205,254,.85);margin-left:-8px;
 }
 /* vector sunset scene: crisp at any size, never stretches */
-.dash-scene{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+/* illustrated sunset skyline: oversized, anchored so the sun + towers sit
+   in the bar's sightline; soft left fade melts it into the console */
+.dash-skyline{position:absolute;right:0;bottom:-45%;height:170%;width:auto;pointer-events:none;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 22%);
+  mask-image:linear-gradient(90deg,transparent 0,#000 22%)}
 body.dashboard-mode.theme-vice-city #dash-bottombar .dash-chrome{
   inset:5px 0 0 0;
   clip-path:polygon(5.5% 0,94.5% 0,100% 58%,100% 100%,0 100%,0 58%);
@@ -515,8 +519,8 @@ body.dashboard-mode.theme-vice-city #next-stats{
 body.dashboard-mode.theme-vice-city #next-stats .ns-min{color:#ff71ce;text-shadow:0 0 10px rgba(255,46,136,.9)}
 body.dashboard-mode.theme-vice-city #next-stats .ns-sep{opacity:.7}
 
-/* The Vice City sunset scene is VC artwork: never on other themes. */
-body.dashboard-mode:not(.theme-vice-city) .dash-scene{display:none}
+/* The Vice City skyline art is VC artwork: never on other themes. */
+body.dashboard-mode:not(.theme-vice-city) .dash-skyline{display:none}
 
 /* ---------- San Andreas dashboard chrome: Grove Street menu console ----------
    The SA pause-menu language: deep olive-black panels, a gold chamfered

@@ -146,7 +146,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v49"), 'SW shell cache v49');
+ok(swSrc.includes("ws-shell-v50"), 'SW shell cache v50');
 ok(swSrc.includes("ws-theme-v13"), 'SW theme cache v13');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
@@ -172,6 +172,11 @@ const vRoadFonts = new Set(vStyle.layers.filter(l => /label-road/.test(l.id)).ma
 ok(vRoadFonts.size === 1 && vRoadFonts.has('SignPainter'), 'V road labels use SignPainter stack');
 const vLabelFonts = new Set(vStyle.layers.filter(l => /label-/.test(l.id)).map(l => l.layout['text-font'][0]));
 ok(vLabelFonts.size === 1 && vLabelFonts.has('SignPainter'), 'V labels all use SignPainter stack (script everywhere)');
+const vLay = id => vStyle.layers.find(l => l.id === id);
+ok(vLay('v-land').paint['background-color'] === '#101010', 'V pause-menu land is near-black');
+ok(vLay('v-water').paint['fill-color'] === '#2c3a42', 'V pause-menu water is dark slate');
+ok(vLay('v-road-motorway').paint['line-color'] === '#9a9a9a', 'V pause-menu motorways are thin pale lines');
+ok(vLay('v-label-place').paint['text-halo-color'] === '#000000', 'V labels keep black halos on the dark map');
 const vcStyle = JSON.parse(fs.readFileSync(path.join(REPO, 'themes/vice-city/style.json'), 'utf8'));
 const vcRoadFonts = new Set(vcStyle.layers.filter(l => /label-road/.test(l.id)).map(l => l.layout['text-font'][0]));
 ok(vcRoadFonts.size === 1 && vcRoadFonts.has('PricedownBl'), 'VC road labels use Pricedown stack');
@@ -358,14 +363,14 @@ ok(appSrc.includes("classList.toggle('nav-driving'"), 'nav-driving class toggles
 ok(appSrc.includes('nav-driving') && /setUiMode/.test(appSrc), 'drive-mode chrome state lives in setUiMode');
 ok(cssSrc.includes('body.dashboard-mode.nav-driving #maneuver-card'), 'drive HUD clears the top bar on every theme');
 ok(cssSrc.includes('body.dashboard-mode.nav-driving #drive-bar'), 'drive trip bar clears the bottom bar on every theme');
-ok(cssSrc.includes('body.dashboard-mode:not(.theme-vice-city) .dash-scene'), 'VC sunset art hidden on other themes');
+ok(cssSrc.includes('body.dashboard-mode:not(.theme-vice-city) .dash-skyline'), 'VC skyline art hidden on other themes');
 ok(/theme-san-andreas #dash-topbar\{[^}]*#e8a33d/.test(cssSrc), 'SA chrome uses gold, not neon');
 ok(/theme-gta-v #dash-topbar\{[^}]*#7CFF6B/.test(cssSrc), 'GTA V chrome uses pause-menu neon green');
 ok(/theme-rdr2 #dash-topbar\{[^}]*menu_bar\.png/.test(cssSrc), 'RDR2 chrome uses the engraved double-rule seam, not neon');
 ok(!/theme-rdr2 #dash-(topbar|bottombar)\{[^}]*#ff71ce/.test(cssSrc), 'RDR2 bar shells carry no neon pink');
 // VC visual quality pass: neon console bars per the benchmark
 ok(indexSrc.includes('class="dash-palm"'), 'top bar has a neon palm beside the wordmark');
-ok(indexSrc.includes('id="dsc-sky"'), 'VC skyline scene has a sunset gradient sky band');
+ok(indexSrc.includes('dashboard/skyline.png'), 'VC top bar uses the illustrated skyline art');
 ok(indexSrc.includes('class="dash-north"'), 'bottom bar compass shows the N marker');
 ok(indexSrc.includes('id="next-stats"'), 'maneuver card has a trip stats row slot');
 ok(cssSrc.includes('body.dashboard-mode.theme-vice-city #next-stats'), 'VC dashboard styles the maneuver stats row');
@@ -379,7 +384,7 @@ ok(!/function syncDashLocality\(\)[\s\S]{0,400}theme-vice-city/.test(appSrc), 'b
 ok(cssSrc.includes('clip-path:polygon(0 0,100% 0,100% 42%'), 'VC bars use the angular neon-tube silhouette');
 ok(indexSrc.includes('dash-tag'), 'bottom bar carries the script tagline');
 ok(appSrc.includes('queueDashLocality'), 'locality plate reverse-geocodes the map centre');
-ok(indexSrc.includes('dash-scene'), 'top bar uses a crisp vector sunset scene (no stretched raster)');
+ok(indexSrc.includes('dash-skyline'), 'top bar uses the illustrated skyline art, masked to melt into the console');
 /* ---------- bespoke bar silhouettes: every theme gets its own bar heights,
    layouts and drive-HUD clearances, not one shared silhouette ---------- */
 const barHeights = {
@@ -537,14 +542,14 @@ ok(!appSrc.includes('window.map && map.resize'), 'no window.map/map null mismatc
 
 /* ---------- GTA V palette matches the in-game pause map ---------- */
 const vPaint = id => vStyle.layers.find(l => l.id === id).paint;
-ok(vPaint('v-land')['background-color'] === '#1e1e1e', 'V land: near-black pause map');
-ok(vPaint('v-water')['fill-color'] === '#55636b', 'V water: blue-grey');
+ok(vPaint('v-land')['background-color'] === '#101010', 'V land: near-black pause map');
+ok(vPaint('v-water')['fill-color'] === '#2c3a42', 'V water: dark slate');
 for (const id of ['v-parks', 'v-grass', 'v-golf', 'v-gardens', 'v-recreation', 'v-park-areas', 'v-playing-fields'])
-  ok(/^#2f3b28$|^#35422c$/.test(vPaint(id)['fill-color']), `V ${id}: dark olive`);
-ok(vPaint('v-woods')['fill-color'] === '#26331f', 'V woods: deep olive');
+  ok(/^(#1a2415|#1d2818)$/.test(vPaint(id)['fill-color']), `V ${id}: near-black green`);
+ok(vPaint('v-woods')['fill-color'] === '#141c10', 'V woods: near-black green');
 for (const id of ['v-road-minor', 'v-road-primary', 'v-road-motorway'])
-  ok(/^#[a-b]/.test(vPaint(id)['line-color']), `V ${id}: light grey road core`);
-ok(vPaint('v-label-road-major')['text-color'] === '#f0f0f0', 'V road labels: near-white');
+  ok(/^#[89]/.test(vPaint(id)['line-color']), `V ${id}: pale road core on black`);
+ok(vPaint('v-label-road-major')['text-color'] === '#d8d8d8', 'V road labels: pale grey');
 ok(vPaint('v-label-place')['text-halo-color'] === '#000000', 'V place labels: black halo');
 ok(T.get('gta-v').map.routeColor === '#a86fd6', 'V route stays purple (as in-game)');
 

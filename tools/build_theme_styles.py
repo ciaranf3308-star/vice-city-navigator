@@ -47,26 +47,33 @@ SAN_ANDREAS = {
 
 GTA_V = {
     "name": "Grand Theft Auto V",
-    "description": "GTA V Atlas style: pale monochrome urban map, clean white road hierarchy. Built from OpenMapTiles.",
+    "description": "GTA V pause-menu style: near-black land, dark slate water, thin pale street grid. Built from OpenMapTiles.",
     "font": "gta-v",
-    "background": "#e9e9e7",
-    "water": "#a9c3d3", "waterway": "#a9c3d3",
-    "beach": "#e2dac6",
-    "grass": "#c3cfa6", "park": "#b3c397", "golf": "#bcc99f",
-    "garden": "#b3c397", "recreation": "#c3cfa6", "wood": "#98ad86",
-    "park_area": "#b3c397", "field": "#c3cfa6", "cemetery": "#bfc7ae",
-    "urban": "#dcdcdc", "aeroway": "#d2d2d2", "building": "#cdcdcd",
-    "road_minor_core": "#ffffff", "road_minor_casing": "#b5b5b5",
-    "road_primary_core": "#ffffff", "road_primary_casing": "#a8a8a8",
-    "road_motor_core": "#ffffff", "road_motor_casing": "#989898",
-    "rail": "#8c8c8c",
-    "label_place": "#3c3c3c", "label_place_halo": "#f2f2f0",
-    "label_road": "#5a5a5a", "label_road_halo": "#f2f2f0",
-    "label_water": "#5c7c8c", "label_water_halo": "#e9e9e7",
+    # Pause-menu map sets every label in the SignPainter script.
+    "place_font": "SignPainter",
+    "background": "#101010",
+    "water": "#2c3a42", "waterway": "#2c3a42",
+    "beach": "#46565f",
+    "grass": "#1a2415", "park": "#1a2415", "golf": "#1d2818",
+    "garden": "#1a2415", "recreation": "#1a2415", "wood": "#141c10",
+    "park_area": "#1a2415", "field": "#1d2818", "cemetery": "#232a1e",
+    "urban": "#161616", "aeroway": "#1e1e1e", "building": "#202020",
+    "road_minor_core": "#8e8e8e", "road_minor_casing": "#2a2a2a",
+    "road_primary_core": "#949494", "road_primary_casing": "#2e2e2e",
+    "road_motor_core": "#9a9a9a", "road_motor_casing": "#333333",
+    "rail": "#555555",
+    "label_place": "#f2f2f2", "label_place_halo": "#000000",
+    "label_place_halo_width": 2.2,
+    "label_water_size": 13.5,
+    "place_sizes": {"country": 27, "state": 23, "city": 38.5, "town": 34.5,
+                    "village": 23, "suburb": 21, "hamlet": 19, "default": 19},
+    "label_road": "#d8d8d8", "label_road_halo": "#000000",
+    "road_major_sizes": [[11, 20.5], [14, 21], [17, 21.5]],
+    "road_minor_sizes": [[13.5, 18], [16, 20.5], [18, 21]],
+    "label_water": "#8fa5b0", "label_water_halo": "#101010",
     "place_transform": "none",
     "road_dash_tunnel": [3, 3],
-    # GTA V renders street names in the SignPainter script on the pause
-    # map; place/water labels stay in Chalet London.
+    # Every GTA V pause-map label — streets, places, water — is SignPainter.
     "road_font": "SignPainter",
 }
 
@@ -209,32 +216,42 @@ def build_layers(p, pal):
                    "line-width": line_width([[8, 1], [12, 2.5], [16, 6]])}})
     # labels
     font = [pal["font"]]
+    place_font = [pal.get("place_font", pal["font"])]
     road_font = [pal.get("road_font", pal["font"])]
     place_extra = ({"text-letter-spacing": pal["place_letter_spacing"]}
                    if pal.get("place_letter_spacing") else {})
     add({"id": f"{p}-label-water", "type": "symbol",
          "source": "openmaptiles", "source-layer": "water_name",
-         "layout": {"text-field": NAME_FIELD, "text-font": font,
-                    "text-size": 11, "text-max-width": 8},
+         "layout": {"text-field": NAME_FIELD, "text-font": place_font,
+                    "text-size": pal.get("label_water_size", 11), "text-max-width": 8},
          "paint": {"text-color": pal["label_water"],
                    "text-halo-color": pal["label_water_halo"],
                    "text-halo-width": 1.5}})
-    place_size = ["match", ["get", "class"],
+    ps = pal.get("place_sizes")
+    place_size = (["match", ["get", "class"],
+                  "country", ps["country"], "state", ps["state"],
+                  "city", ps["city"], "town", ps["town"],
+                  "village", ps["village"], "suburb", ps["suburb"],
+                  "hamlet", ps["hamlet"], ps["default"]]
+                 if ps else
+                 ["match", ["get", "class"],
                   "country", 13, "state", 12, "city", 18, "town", 14,
-                  "village", 11, "suburb", 11, "hamlet", 10, 10]
+                  "village", 11, "suburb", 11, "hamlet", 10, 10])
     add({"id": f"{p}-label-place", "type": "symbol",
          "source": "openmaptiles", "source-layer": "place",
          "filter": ["match", ["get", "class"],
                     ["country", "state", "city", "town", "village",
                      "suburb", "hamlet"], True, False],
-         "layout": {"text-field": NAME_FIELD, "text-font": font,
+         "layout": {"text-field": NAME_FIELD, "text-font": place_font,
                     "text-max-width": 8, "text-size": place_size,
                     **place_extra,
                     **({"text-transform": "uppercase"}
                        if pal["place_transform"] == "uppercase" else {})},
          "paint": {"text-color": pal["label_place"],
                    "text-halo-color": pal["label_place_halo"],
-                   "text-halo-width": 2}})
+                   "text-halo-width": pal.get("label_place_halo_width", 2)}})
+    rmaj = pal.get("road_major_sizes", [[11, 10], [14, 11.5], [17, 13]])
+    rmin = pal.get("road_minor_sizes", [[13.5, 9.5], [16, 11], [18, 12.5]])
     add({"id": f"{p}-label-road-major", "type": "symbol",
          "source": "openmaptiles", "source-layer": "transportation_name",
          "minzoom": 11,
@@ -243,8 +260,8 @@ def build_layers(p, pal):
                                  "secondary", "tertiary"]]],
          "layout": {"symbol-placement": "line", "text-field": NAME_FIELD,
                     "text-font": road_font, "text-max-width": 8,
-                    "text-size": ["interpolate", ["linear"], ["zoom"],
-                                  11, 10, 14, 11.5, 17, 13]},
+                    "text-size": ["interpolate", ["linear"], ["zoom"]] +
+                                 [x for s in rmaj for x in s]},
          "paint": {"text-color": pal["label_road"],
                    "text-halo-color": pal["label_road_halo"],
                    "text-halo-width": 1.5}})
@@ -256,8 +273,8 @@ def build_layers(p, pal):
                                         "secondary", "tertiary"]]]],
          "layout": {"symbol-placement": "line", "text-field": NAME_FIELD,
                     "text-font": road_font, "text-max-width": 8,
-                    "text-size": ["interpolate", ["linear"], ["zoom"],
-                                  13.5, 9.5, 16, 11, 18, 12.5]},
+                    "text-size": ["interpolate", ["linear"], ["zoom"]] +
+                                 [x for s in rmin for x in s]},
          "paint": {"text-color": pal["label_road"],
                    "text-halo-color": pal["label_road_halo"],
                    "text-halo-width": 1.25}})
