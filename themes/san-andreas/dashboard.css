@@ -194,13 +194,20 @@ body.dashboard-mode.theme-san-andreas .sasp{
   translate:none;transform:none;
 }
 /* "Good Music Better Times" script rides below the music widget, hero-style */
+body.dashboard-mode.theme-san-andreas .sasp::after{
+  content:"";display:block;width:300px;height:92px;margin:14px 20px 0 auto;
+  background:url('dashboard/script-music.png') 50% 50%/contain no-repeat;
+  filter:drop-shadow(0 3px 5px rgba(0,0,0,.85));pointer-events:none;
+}
+/* bottom-bar right slot: palm sunset panel only (script lives in right column) */
 body.dashboard-mode.theme-san-andreas #dash-bottombar .dash-tag{
-  position:absolute;right:90px;bottom:calc(104px + env(safe-area-inset-bottom));
-  width:280px;height:88px;flex:none;
-  font-size:0;line-height:0;color:transparent;text-shadow:none;transform:none;
-  display:block;padding:0;white-space:normal;
-  background:url('dashboard/script-music.png') 50% 50%/240px auto no-repeat;
-  border:0;clip-path:none;filter:drop-shadow(0 3px 5px rgba(0,0,0,.85));
+  position:static;width:280px;height:76px;flex:0 0 auto;
+  font-size:0;line-height:0;color:transparent;
+  display:block;padding:0;
+  background:url('dashboard/bottombar-palms.jpg') 50% 50%/cover no-repeat;
+  border:1px solid rgba(201,162,39,.5);
+  clip-path:polygon(12px 0,100% 0,100% 100%,0 100%,0 12px);
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.6));
 }
 /* hero map is clean: no floating zoom pills on this theme */
 body.dashboard-mode.theme-san-andreas #map-tools{display:none}
