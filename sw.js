@@ -9,8 +9,8 @@
      used. Nothing theme-specific is eagerly precached except the
      default Vice City set.
    Map tiles, routing and search always go to the network. */
-const CACHE = 'ws-shell-v56';
-const THEME_CACHE = 'ws-theme-v19';
+const CACHE = 'ws-shell-v57';
+const THEME_CACHE = 'ws-theme-v20';
 const VC_BLIPS = ['airYard','barbers','burgerShot','cash','chicken','dateDisco','dateDrink',
   'dateFood','diner','fuel','girlfriend','gym','hostpital','modGarage','north','parking',
   'pizza','police','propertyG','qmark','race','runway','saveGame','school','spray','tattoo','waypoint'];
@@ -19,7 +19,8 @@ const SHELL = [
   'traffic.js', 'traffic-config.js',
   'discovery.js', 'voice.js', 'supabase-config.js',
   'themes/vice-city/dashboard.css',
-  'themes/vice-city/dashboard/topbar-skyline.png',
+  'themes/vice-city/dashboard/waystation-logo.png',
+  'themes/vice-city/dashboard/topbar-skyline-right.png',
   'themes/vice-city/dashboard/sunset-panel.png', 'themes/san-andreas/dashboard.css',
   'themes/gta-v/dashboard.css', 'themes/rdr2/dashboard.css',
   'themes/registry.js',

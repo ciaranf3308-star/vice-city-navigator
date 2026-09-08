@@ -165,8 +165,8 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v56"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v19"), 'SW theme cache v18');
+ok(swSrc.includes("ws-shell-v57"), 'SW shell cache v55');
+ok(swSrc.includes("ws-theme-v20"), 'SW theme cache v18');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
@@ -393,7 +393,7 @@ ok(/theme-gta-v #dash-topbar\{[^}]*#7CFF6B/.test(cssSrc), 'GTA V chrome uses pau
 ok(/theme-rdr2 #dash-topbar\{[^}]*menu_bar\.png/.test(cssSrc), 'RDR2 chrome uses the engraved double-rule seam, not neon');
 ok(!/theme-rdr2 #dash-(topbar|bottombar)\{[^}]*#ff71ce/.test(cssSrc), 'RDR2 bar shells carry no neon pink');
 // VC hero: neon 80s chrome per the benchmark image
-ok(cssSrc.includes('topbar-skyline.png'), 'VC top bar uses the neon skyline art');
+ok(cssSrc.includes('topbar-skyline-right.png'), 'VC top bar uses the neon skyline art');
 ok(cssSrc.includes('sunset-panel.png'), 'VC right panel uses the sunset scene art');
 ok(cssSrc.includes("Yellowtail"), 'VC hero uses a neon script font');
 /* ---------- VC asset-pack polish: authored chrome ---------- */
@@ -419,7 +419,7 @@ ok(cssSrc.includes('vc-logo-script'), 'VC hero logo script styled');
 /* ---------- bespoke bar silhouettes: every theme gets its own bar heights,
    layouts and drive-HUD clearances, not one shared silhouette ---------- */
 const barHeights = {
-  'vice-city': ['88px', '92px'],
+  'vice-city': ['76px', '88px'],
   'san-andreas': ['86px', '96px'],
   'gta-v': ['56px', '64px'],
   'rdr2': ['72px', '72px'],
@@ -499,7 +499,7 @@ ok(appSrc.includes('layoutDashDrawer(); // dock the drawer to the live stage rec
 
 /* ---------- bespoke dashboard bar assets (authentic game-UI textures) ---------- */
 const dashAssets = [
-  ['vice-city', 'topbar-skyline.png'],
+  ['vice-city', 'topbar-skyline-right.png'],
   ['vice-city', 'sunset-panel.png'],
   ['gta-v', 'topbar-skyline.jpg'],
   ['gta-v', 'bottombar-skyline.jpg'],
@@ -608,7 +608,7 @@ ok(/theme-gta-v \.dash-tabs button\{[^}]*var\(--vcfont\)/.test(cssSrc) && !/them
 ok(/theme-rdr2 #dash-topbar \.dash-chrome\{[^}]*selection_box_bg_1a\.png/.test(cssSrc), 'RDR2 bars wear the grunge panel texture');
 // service worker: VC dashboard art is shell-precached (default theme), the
 // other themes' dashboard art rides the on-demand theme-asset cache
-ok(swSrc.includes('themes/vice-city/dashboard/topbar-skyline.png'), 'SW precaches the VC skyline');
+ok(swSrc.includes('themes/vice-city/dashboard/topbar-skyline-right.png'), 'SW precaches the VC skyline');
 ok(swSrc.includes('themes/vice-city/dashboard/sunset-panel.png'), 'SW precaches the VC sunset');
 ok(SW.isThemeAsset('/themes/san-andreas/dashboard/sa-logo.png'), 'isThemeAsset: SA wordmark');
 ok(SW.isThemeAsset('/assets/themes/gta-v/dashboard/topbar-skyline.jpg'), 'isThemeAsset: V dashboard art');
