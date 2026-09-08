@@ -21,7 +21,7 @@ const SHELL = [
   'themes/vice-city/dashboard.css',
   'themes/vice-city/dashboard/waystation-logo.png',
   'themes/vice-city/dashboard/topbar-skyline-right.png',
-  'themes/vice-city/dashboard/sunset-panel.png', 'themes/san-andreas/dashboard.css',
+  'themes/san-andreas/dashboard.css',
   'themes/gta-v/dashboard.css', 'themes/rdr2/dashboard.css',
   'themes/registry.js',
   'themes/vice-city/theme.js', 'themes/san-andreas/theme.js',

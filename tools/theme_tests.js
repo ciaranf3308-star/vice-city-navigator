@@ -394,7 +394,7 @@ ok(/theme-rdr2 #dash-topbar\{[^}]*menu_bar\.png/.test(cssSrc), 'RDR2 chrome uses
 ok(!/theme-rdr2 #dash-(topbar|bottombar)\{[^}]*#ff71ce/.test(cssSrc), 'RDR2 bar shells carry no neon pink');
 // VC hero: neon 80s chrome per the benchmark image
 ok(true, "VC top bar uses CSS neon (no image)");
-ok(cssSrc.includes('sunset-panel.png'), 'VC right panel uses the sunset scene art');
+ok(cssSrc.includes('hud.png') || cssSrc.includes('.vcsp'), 'VC right panel uses the unified Spotify skin (hud art)');
 ok(cssSrc.includes("Yellowtail"), 'VC hero uses a neon script font');
 /* ---------- VC asset-pack polish: authored chrome ---------- */
 const vctop = jpgSize(path.join(REPO, 'themes/vice-city/dashboard/topbar.jpg'));
@@ -478,10 +478,12 @@ ok(appSrc.includes('layoutDashMenu(); // dock (or undock) the body-level menu pa
    so dashboard users had no visible way to set a route. It now drops
    below the per-theme bar heights, and the planning drawer docks to the
    live stage rect in real pixels like the menu panel. */
-for (const [id, top] of [['vice-city', 88], ['gta-v', 68], ['rdr2', 84]]) {
+for (const [id, top] of [['gta-v', 68], ['rdr2', 84]]) {
   ok(new RegExp(`body\\.dashboard-mode\\.theme-${id} #search-bar\\{top:calc\\(${top}px`).test(cssSrc),
     `dashboard search bar clears the ${id} top bar (${top}px)`);
 }
+ok(/body\.dashboard-mode\.theme-vice-city #search-bar\{display:none\}/.test(cssSrc),
+  'VC dashboard hides the search pill for the hero composition');
 ok(/body\.dashboard-mode\.theme-san-andreas #search-bar\{display:none\}/.test(cssSrc),
   'SA dashboard hides the search pill for the hero composition');
 ok(appSrc.includes("openPlanning('search')") && /saDash && !dismissing/.test(appSrc),
@@ -499,7 +501,6 @@ ok(appSrc.includes('layoutDashDrawer(); // dock the drawer to the live stage rec
 
 /* ---------- bespoke dashboard bar assets (authentic game-UI textures) ---------- */
 const dashAssets = [
-  ['vice-city', 'sunset-panel.png'],
   ['gta-v', 'topbar-skyline.jpg'],
   ['gta-v', 'bottombar-skyline.jpg'],
   ['rdr2', 'menu_header_1a.png'],
@@ -610,7 +611,6 @@ ok(/theme-rdr2 #dash-topbar \.dash-chrome\{[^}]*selection_box_bg_1a\.png/.test(c
 // service worker: VC dashboard art is shell-precached (default theme), the
 // other themes' dashboard art rides the on-demand theme-asset cache
 ok(swSrc.includes('themes/vice-city/dashboard/topbar-skyline-right.png'), 'SW precaches the VC skyline');
-ok(swSrc.includes('themes/vice-city/dashboard/sunset-panel.png'), 'SW precaches the VC sunset');
 ok(SW.isThemeAsset('/themes/san-andreas/dashboard/sa-logo.png'), 'isThemeAsset: SA wordmark');
 ok(SW.isThemeAsset('/assets/themes/gta-v/dashboard/topbar-skyline.jpg'), 'isThemeAsset: V dashboard art');
 ok(SW.isThemeAsset('/assets/themes/rdr2/dashboard/menu_header_1a.png'), 'isThemeAsset: RDR2 dashboard art');

@@ -207,10 +207,10 @@
 <!-- San Andreas dashboard: Grove Street scene panel above the music widget -->
 <div id="sa-grove-panel" aria-hidden="true"></div>
 <!-- Vice City dashboard: hero chrome (maneuver card, right scene panel, neon logos) -->
-<div id="vc-maneuver" aria-hidden="true">
-  <svg class="vc-man-arrow" viewBox="0 0 64 64"><path d="M40 8 L16 32 L32 32 L32 56 L44 56 L44 32 L60 32 Z" fill="#ff71ce" stroke="#ff71ce" stroke-width="2"/></svg>
-  <div class="vc-man-text"><strong>350 m</strong><span>Rathmines Road</span></div>
-  <div class="vc-man-meta"><span>12 min</span><i>•</i><span>6.8 km</span><i>•</i><span>21:36</span></div>
+<div id="vc-maneuver" aria-hidden="true" hidden>
+  <svg class="vc-man-arrow" viewBox="0 0 64 64" id="vc-man-arrow"><path d="M40 8 L16 32 L32 32 L32 56 L44 56 L44 32 L60 32 Z" fill="#ff71ce" stroke="#ff71ce" stroke-width="2"/></svg>
+  <div class="vc-man-text"><strong id="vc-man-dist">—</strong><span id="vc-man-road">—</span></div>
+  <div class="vc-man-meta"><span id="vc-man-eta">—</span><i>•</i><span id="vc-man-remain">—</span><i>•</i><span id="vc-man-arrive">—</span></div>
   <span class="vc-man-script">Vice city</span>
 </div>
 <div id="vc-right-panel" aria-hidden="true">

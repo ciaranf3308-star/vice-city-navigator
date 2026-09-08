@@ -875,6 +875,7 @@ function upcomingManeuverTexts() {
 function endNav() {
   navActive = false;
   syncDashTrip();
+  try { const vc = $('vc-maneuver'); if (vc) vc.hidden = true; } catch (e) {}
   if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
   if (window.VCNVoice) VCNVoice.cancel();
   setUiMode('explore');
@@ -1002,6 +1003,18 @@ function updateBanner(dMan) {
     `<span class="ns-sep"> • </span><span>${fmtDist(remainDist)}</span>` +
     `<span class="ns-sep"> • </span><span>${etaString(remainDur)}</span>`;
   syncDashTrip(remainDur);
+  /* VC dashboard hero card: same live data, no fakes. */
+  try {
+    const vc = $('vc-maneuver');
+    if (vc) {
+      vc.hidden = false;
+      const vd = $('vc-man-dist'); if (vd) vd.textContent = fmtDist(dMan);
+      const vr = $('vc-man-road'); if (vr) vr.textContent = roadName(next) || instrText(next);
+      const ve = $('vc-man-eta'); if (ve) ve.textContent = Math.max(1, Math.round(remainDur / 60)) + ' min';
+      const vm = $('vc-man-remain'); if (vm) vm.textContent = fmtDist(remainDist);
+      const va = $('vc-man-arrive'); if (va) va.textContent = etaString(remainDur);
+    }
+  } catch (e) {}
 }
 
 function maybeAnnounce(dMan) {
