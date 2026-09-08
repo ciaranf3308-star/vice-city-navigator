@@ -146,7 +146,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v50"), 'SW shell cache v50');
+ok(swSrc.includes("ws-shell-v51"), 'SW shell cache v50');
 ok(swSrc.includes("ws-theme-v13"), 'SW theme cache v13');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
@@ -493,6 +493,9 @@ ok(/theme-rdr2 #dash-dest\{[^}]*border-image-source:url\('assets\/themes\/rdr2\/
    'RDR2 destination plate uses the ornate menu-header frame');
 ok(/theme-rdr2 #dash-topbar\{[^}]*menu_bar\.png/.test(cssSrc), 'RDR2 top bar seam uses the authentic double-rule');
 ok(/theme-rdr2 \.dash-dest::before/.test(cssSrc) && cssSrc.includes('title_divider.png'), 'RDR2 destination plate is flanked by divider ornaments');
+ok(/theme-gta-v \.dash-logo\{[^}]*'SignPainter'/.test(cssSrc), 'V wordmark is a SignPainter script accent');
+ok(/theme-gta-v #dash-dest\{[^}]*'SignPainter'/.test(cssSrc), 'V destination plate is a SignPainter script accent');
+ok(/theme-gta-v \.dash-tabs button\{[^}]*var\(--vcfont\)/.test(cssSrc) && !/theme-gta-v \.dash-tabs button\{[^}]*SignPainter/.test(cssSrc), 'V tabs stay in Chalet (functional text)');
 ok(/theme-rdr2 #dash-topbar \.dash-chrome\{[^}]*selection_box_bg_1a\.png/.test(cssSrc), 'RDR2 bars wear the grunge panel texture');
 // service worker: VC dashboard art is shell-precached (default theme), the
 // other themes' dashboard art rides the on-demand theme-asset cache

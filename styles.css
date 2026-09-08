@@ -633,9 +633,13 @@ body.dashboard-mode.theme-gta-v #dash-bottombar .dash-chrome{
 }
 body.dashboard-mode.theme-gta-v.nav-driving #maneuver-card{top:calc(68px + env(safe-area-inset-top))}
 body.dashboard-mode.theme-gta-v.nav-driving #drive-bar{bottom:calc(74px + env(safe-area-inset-bottom))}
+/* V's wordmark is a SignPainter script accent over the minimal panel —
+   functional text stays Chalet, display type goes script. */
 body.dashboard-mode.theme-gta-v .dash-logo{
-  font-family:var(--vcfont);font-weight:700;font-size:28px;letter-spacing:8px;text-transform:uppercase;
-  color:#f2f5f2;transform:none;text-shadow:none;white-space:nowrap;
+  font-family:'SignPainter','Pricedown Bl',cursive;font-weight:400;font-size:42px;
+  letter-spacing:0;text-transform:none;
+  color:#f2f5f2;transform:rotate(-2deg);text-shadow:0 0 12px rgba(124,255,107,.35);
+  white-space:nowrap;
   display:flex;align-items:center;gap:14px;
 }
 body.dashboard-mode.theme-gta-v .dash-logo::before{
@@ -661,10 +665,11 @@ body.dashboard-mode.theme-gta-v .dash-tabs button.on{
 }
 body.dashboard-mode.theme-gta-v .dash-dest{padding:10px 8px}
 body.dashboard-mode.theme-gta-v #dash-dest{
-  font-family:var(--vclabel);font-size:21px;letter-spacing:4px;text-transform:uppercase;
-  color:#f2f5f2;background:rgba(255,255,255,.045);text-shadow:none;
+  font-family:'SignPainter','Pricedown Bl',cursive;font-size:32px;font-weight:400;
+  letter-spacing:1px;text-transform:none;
+  color:#f2f5f2;background:rgba(255,255,255,.045);text-shadow:0 0 10px rgba(124,255,107,.3);
   border:1px solid rgba(124,255,107,.5);border-radius:2px;clip-path:none;box-shadow:none;
-  padding:7px 22px;
+  padding:4px 26px;
 }
 body.dashboard-mode.theme-gta-v .dash-zoom{gap:8px;padding:10px 8px}
 body.dashboard-mode.theme-gta-v .dash-zoom button{
