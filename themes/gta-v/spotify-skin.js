@@ -1,21 +1,13 @@
 /* ============================================================
    WayStation — GTA V Spotify skin (dashboard mode only).
    ------------------------------------------------------------
-   The supplied concept art (themes/gta-v/spotify/hud.png,
-   1155x1362 with transparency) IS the widget: it is overlaid as
-   one unified skin/chrome layer and live HTML is positioned into
-   its defined openings. The art dictates the DOM placement.
-
-   Measured openings (fractions of the hud):
-   - album frame   : x 0.0649-0.3333, y 0.3561-0.5837
-                     (the frame interior is OPAQUE black, so live
-                     album art layers OVER the hud here)
-   - dark panel    : right of the frame, x ~0.38-0.92,
-                     y ~0.37-0.57 (title, artist, progress, lyrics)
-   - transport     : over the sunset panel, bottom center
-
-   Z-order: hud < album art < lyrics / track / controls / idle.
-   The map shows through transparent pixels.
+   Radio console rebuild: a charcoal/black glass console, not
+   an image overlay. Structure:
+   - header: WAYSTATION RADIO + status
+   - main: album art (148px) + track title/artist/device
+   - progress: thin bar with times
+   - controls: shuffle, prev, play, next, repeat
+   - lyrics stage OR ambient skyline
 
    LYRICS: owned by the shared kinetic karaoke engine (lyrics.js,
      LRCLIB provider) mounted into [data-lyrics-stage] via
@@ -34,6 +26,8 @@
     pause: '<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>',
     prev: '<svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg>',
     next: '<svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg>',
+    shuffle: '<svg viewBox="0 0 24 24"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>',
+    repeat: '<svg viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>',
     note: '<svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>',
   };
 
@@ -60,13 +54,21 @@
     function build() {
       root = el('div', 'gvsp');
       root.innerHTML =
-        '<div class="gvsp-art-idle">' + SVG.note + '</div>' +
-        '<img class="gvsp-hud" src="' + ART + 'hud.png" alt="" aria-hidden="true">' +
-        '<img class="gvsp-art a" alt="">' +
-        '<img class="gvsp-art b" alt="">' +
-        '<div class="gvsp-track">' +
-          '<div class="gvsp-title">Los Santos Radio</div>' +
-          '<div class="gvsp-artist">Connect Spotify to play</div>' +
+        '<div class="gvsp-header">' +
+          '<span class="gvsp-header-title">Waystation Radio</span>' +
+          '<span class="gvsp-header-status" data-header-status>Los Santos</span>' +
+        '</div>' +
+        '<div class="gvsp-main">' +
+          '<div class="gvsp-artwrap">' +
+            '<div class="gvsp-art-idle">' + SVG.note + '</div>' +
+            '<img class="gvsp-art a" alt="">' +
+            '<img class="gvsp-art b" alt="">' +
+          '</div>' +
+          '<div class="gvsp-track">' +
+            '<div class="gvsp-title">Los Santos Radio</div>' +
+            '<div class="gvsp-artist">Connect Spotify to play</div>' +
+            '<div class="gvsp-device" data-device></div>' +
+          '</div>' +
         '</div>' +
         '<div class="gvsp-progress">' +
           '<div class="gvsp-bar" role="slider" aria-label="Seek" tabindex="0" aria-valuemin="0" aria-valuemax="100">' +
@@ -76,11 +78,17 @@
           '<div class="gvsp-times"><span class="gvsp-elapsed">0:00</span><span class="gvsp-duration">0:00</span></div>' +
         '</div>' +
         '<div class="gvsp-controls">' +
+          '<button class="gvsp-tbtn" data-act="shuffle" aria-label="Shuffle">' + SVG.shuffle + '</button>' +
           '<button class="gvsp-tbtn" data-act="prev" aria-label="Previous">' + SVG.prev + '</button>' +
           '<button class="gvsp-tbtn big" data-act="toggle" aria-label="Play or pause">' + SVG.play + '</button>' +
           '<button class="gvsp-tbtn" data-act="next" aria-label="Next">' + SVG.next + '</button>' +
+          '<button class="gvsp-tbtn" data-act="repeat" aria-label="Repeat">' + SVG.repeat + '</button>' +
         '</div>' +
         '<div class="gvsp-lyrics" data-lyrics-stage="1"></div>' +
+        '<div class="gvsp-ambient">' +
+          '<div class="gvsp-ambient-skyline"></div>' +
+          '<div class="gvsp-ambient-label">Waystation Radio &mdash; Los Santos</div>' +
+        '</div>' +
         '<div class="gvsp-idle">' +
           '<div class="gvsp-idle-kicker">Los Santos Radio</div>' +
           '<button class="gvsp-connect-btn" type="button">Connect Spotify</button>' +
@@ -112,24 +120,38 @@
       const s = core.getState();
       const idle = q('.gvsp-idle');
       const connected = core.isConnected();
+      /* State bug fix: idle and playback UI are mutually exclusive.
+         When connected, idle is hidden and playback UI shows.
+         When disconnected, playback UI is hidden and idle shows. */
       idle.hidden = connected;
       root.classList.toggle('is-idle', !connected);
+      root.classList.toggle('is-connected', connected);
       const title = q('.gvsp-title'), artist = q('.gvsp-artist');
+      const deviceEl = q('[data-device]');
+      const headerStatus = q('[data-header-status]');
       const toggle = q('.gvsp-tbtn[data-act="toggle"]');
+      const shuffleBtn = q('.gvsp-tbtn[data-act="shuffle"]');
+      const repeatBtn = q('.gvsp-tbtn[data-act="repeat"]');
       if (!connected) {
-        // Disconnected state stays inside the one widget: themed idle
-        // text on the frame's band, connect CTA in the stage.
+        // Disconnected: show idle, hide all playback UI
         stopTick();
         title.textContent = 'Los Santos Radio';
         artist.textContent = 'Connect Spotify to play';
         artist.classList.remove('gvsp-status');
+        if (deviceEl) deviceEl.textContent = '';
+        if (headerStatus) headerStatus.textContent = 'Offline';
+        if (shuffleBtn) shuffleBtn.classList.remove('active');
+        if (repeatBtn) { repeatBtn.classList.remove('active'); repeatBtn.dataset.mode = 'off'; }
         setArt('');
         renderLyrics(null);
+        updateProgress(0, 0);
         return;
       }
+      if (headerStatus) headerStatus.textContent = 'Los Santos';
       if (!s || !s.item) {
         title.textContent = 'Nothing playing';
         artist.textContent = 'Press play in Spotify';
+        if (deviceEl) deviceEl.textContent = '';
         setArt('');
         toggle.innerHTML = SVG.play;
         q('.gvsp-duration').textContent = '0:00';
@@ -141,33 +163,65 @@
       title.textContent = item.name || '—';
       artist.textContent = (item.artists || []).map(a => a.name).join(', ') || '—';
       artist.classList.remove('gvsp-status');
+      if (deviceEl) {
+        deviceEl.textContent = s.device && s.device.name ? 'On ' + s.device.name : '';
+      }
       const imgs = item.album && item.album.images;
       setArt(imgs && imgs.length ? (imgs[1] || imgs[0]).url : '');
       toggle.innerHTML = s.is_playing ? SVG.pause : SVG.play;
+      if (shuffleBtn) shuffleBtn.classList.toggle('active', !!s.shuffle_state);
+      if (repeatBtn) {
+        const rs = s.repeat_state || 'off';
+        repeatBtn.classList.toggle('active', rs !== 'off');
+        repeatBtn.dataset.mode = rs;
+      }
       q('.gvsp-duration').textContent = fmt(item.duration_ms);
       if (s.device && s.device.name) title.title = 'On ' + s.device.name;
       renderLyrics(s);
       startTick();
     }
 
-    /* Lyrics stage: a renderer (future LRCLIB pass) owns this DOM.
-       With no provider, the stage stays ambient — never fake words. */
     /* Lyrics stage: owned by the shared kinetic karaoke engine
        (lyrics.js, LRCLIB). A custom lyricsRenderer set via the mount
-       api still overrides the engine. Never fake words. */
+       api still overrides the engine. Never fake words.
+       When no lyrics: show the ambient skyline panel instead of dead text. */
     function renderLyrics(s) {
       const box = q('.gvsp-lyrics');
-      if (lyricsRenderer && s && s.item) {
+      const ambient = q('.gvsp-ambient');
+      const hasRenderer = lyricsRenderer && s && s.item;
+      if (hasRenderer) {
         try {
           if (window.WSLyrics) WSLyrics.destroy(box);
           box.innerHTML = '';
           const node = lyricsRenderer(s.item);
-          if (node) { box.appendChild(node); box.classList.add('has-lyrics'); }
-          else box.classList.remove('has-lyrics');
-        } catch (e) { box.classList.remove('has-lyrics'); }
+          if (node) {
+            box.appendChild(node);
+            box.classList.add('has-lyrics');
+            if (ambient) ambient.hidden = true;
+          } else {
+            box.classList.remove('has-lyrics');
+            if (ambient) ambient.hidden = false;
+          }
+        } catch (e) {
+          box.classList.remove('has-lyrics');
+          if (ambient) ambient.hidden = false;
+        }
         return;
       }
-      if (window.WSLyrics) WSLyrics.render(box, core, s && s.item, 'gta-v');
+      if (window.WSLyrics) {
+        /* WSLyrics.render returns truthy if lyrics were rendered */
+        const rendered = WSLyrics.render(box, core, s && s.item, 'gta-v');
+        if (rendered) {
+          box.classList.add('has-lyrics');
+          if (ambient) ambient.hidden = true;
+        } else {
+          box.classList.remove('has-lyrics');
+          if (ambient) ambient.hidden = false;
+        }
+      } else {
+        box.classList.remove('has-lyrics');
+        if (ambient) ambient.hidden = false;
+      }
     }
 
     /* ---------- album art crossfade (art sits UNDER the frame) ---------- */
@@ -224,6 +278,24 @@
           toggle: () => {
             const s = core.getState();
             return (s && s.is_playing) ? core.pause() : core.play();
+          },
+          shuffle: () => {
+            const s = core.getState();
+            const on = !(s && s.shuffle_state);
+            return core.setShuffle(on).then(() => {
+              btn.classList.toggle('active', on);
+              if (s) s.shuffle_state = on;
+            });
+          },
+          repeat: () => {
+            const s = core.getState();
+            const cur = s && s.repeat_state;
+            const nextState = cur === 'off' ? 'context' : cur === 'context' ? 'track' : 'off';
+            return core.setRepeat(nextState).then(() => {
+              btn.classList.toggle('active', nextState !== 'off');
+              btn.dataset.mode = nextState;
+              if (s) s.repeat_state = nextState;
+            });
           },
         }[act];
         if (run) run().catch(err => {

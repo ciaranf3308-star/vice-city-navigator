@@ -345,11 +345,19 @@
     return handleRedirectCallback();
   }
 
+  function setShuffle(state) {
+    return guarded(() => api('/me/player/shuffle', { method: 'PUT', query: { state: state ? 'true' : 'false' } }));
+  }
+  function setRepeat(state) {
+    /* state: 'track', 'context', or 'off' */
+    return guarded(() => api('/me/player/repeat', { method: 'PUT', query: { state } }));
+  }
+
   window.SpotifyCore = {
     init, isConnected, connect, disconnect,
     handleRedirectCallback, reloadAuth,
     getState, getPosition, refreshNow,
-    play, pause, next, previous, seek,
+    play, pause, next, previous, seek, setShuffle, setRepeat,
     startPolling, stopPolling,
     onBeforeRedirect(fn) { beforeRedirectHook = fn; },
     on(name, fn) {

@@ -71,8 +71,8 @@ body.dashboard-mode.theme-gta-v .dash-brand{
   pointer-events:none;
 }
 body.dashboard-mode.theme-gta-v .dash-brand::before{
-  content:'';display:block;width:520px;height:173px;flex:none;
-  background:url('dashboard/logo-v.png') 50% 0%/520px 173px no-repeat;
+  content:'';display:block;width:400px;height:133px;flex:none;
+  background:url('dashboard/logo-v.png') 50% 0%/400px 133px no-repeat;
   filter:drop-shadow(0 0 22px rgba(44,230,140,.28)) drop-shadow(0 4px 12px rgba(0,0,0,.6));
 }
 body.dashboard-mode.theme-gta-v .dash-logo{
@@ -88,12 +88,15 @@ body.dashboard-mode.theme-gta-v .vc-logo,
 body.dashboard-mode.theme-gta-v .rdr2-logo{display:none !important}
 /* Weather: real DOM classes are .dash-wx / #dash-temp / #dash-wxicon.
    The shared stylesheet paints .dash-wx cyan — override it here. */
-/* Weather clusters with the brand (fills the dead zone left of the clock) */
+/* Header info group: weather + date + time as ONE centered composition.
+   Total group ~430px wide, centered at 50%. */
 body.dashboard-mode.theme-gta-v .dash-wx{
-  position:absolute;top:50%;transform:translateY(-50%);
-  left:510px;
+  position:absolute;top:50%;left:50%;
+  transform:translate(-218px,-50%);
   display:flex;align-items:center;gap:10px;
   color:#2ce68c;
+  padding-right:22px;
+  border-right:1px solid rgba(154,163,168,.25);
 }
 body.dashboard-mode.theme-gta-v #dash-temp{
   font-family:'Chalet Comprime','Arial Narrow',sans-serif;
@@ -106,7 +109,8 @@ body.dashboard-mode.theme-gta-v #dash-wxicon{
 }
 /* Clock: real DOM uses #dash-date / #dash-time IDs (not classes) */
 body.dashboard-mode.theme-gta-v .dash-clock{
-  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  position:absolute;left:50%;top:50%;
+  transform:translate(-92px,-50%);
   display:flex;align-items:baseline;gap:20px;
 }
 body.dashboard-mode.theme-gta-v #dash-date{
@@ -147,7 +151,7 @@ body.dashboard-mode.theme-gta-v .dash-tabs button{
   gap:8px;min-width:112px;padding:0 20px;flex:none;
   background:transparent;border:none;
   border-right:1px solid rgba(242,245,242,.07);
-  cursor:pointer;color:#9aa3a8;opacity:1;text-shadow:none;
+  cursor:pointer;color:#b8bfc4;opacity:1;text-shadow:none;
   font-family:'Chalet Comprime','Arial Narrow',sans-serif;
 }
 body.dashboard-mode.theme-gta-v .dash-tabs button:first-child{
@@ -157,7 +161,7 @@ body.dashboard-mode.theme-gta-v .dash-tabs button svg{display:none}
 body.dashboard-mode.theme-gta-v .dash-tabs button::before{
   content:'';width:42px;height:42px;flex:none;
   background:50% 50%/contain no-repeat;
-  opacity:.7;
+  opacity:.85;
 }
 body.dashboard-mode.theme-gta-v .dash-tabs button[data-dtab="map"]::before{background-image:url('dashboard/tab-map.png')}
 body.dashboard-mode.theme-gta-v .dash-tabs button[data-dtab="radio"]::before{background-image:url('dashboard/tab-radio.png')}
@@ -166,19 +170,19 @@ body.dashboard-mode.theme-gta-v .dash-tabs button[data-dtab="vehicle"]::before{b
 body.dashboard-mode.theme-gta-v .dash-tabs button[data-dtab="settings"]::before{background-image:url('dashboard/tab-settings.png')}
 body.dashboard-mode.theme-gta-v .dash-tabs button span{
   font-family:'Chalet Comprime','Arial Narrow',sans-serif;font-weight:600;
-  font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#9aa3a8;
+  font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#b8bfc4;
   text-shadow:none;white-space:nowrap;
 }
 /* Active tab: white label + green underline (pause-menu selection) */
 body.dashboard-mode.theme-gta-v .dash-tabs button::after{
-  content:'';position:absolute;left:22px;right:22px;bottom:16px;height:2px;
-  background:transparent;
+  content:'';position:absolute;left:22px;right:22px;bottom:16px;height:3px;
+  background:transparent;border-radius:2px;
 }
 body.dashboard-mode.theme-gta-v .dash-tabs button.on{
   color:#f2f5f2;opacity:1;text-shadow:none;
 }
-body.dashboard-mode.theme-gta-v .dash-tabs button.on::before{opacity:1;filter:drop-shadow(0 0 7px rgba(44,230,140,.35))}
-body.dashboard-mode.theme-gta-v .dash-tabs button.on::after{background:#2ce68c;box-shadow:0 0 10px rgba(44,230,140,.6)}
+body.dashboard-mode.theme-gta-v .dash-tabs button.on::before{opacity:1;filter:drop-shadow(0 0 8px rgba(44,230,140,.45))}
+body.dashboard-mode.theme-gta-v .dash-tabs button.on::after{background:#2ce68c;box-shadow:0 0 12px rgba(44,230,140,.75)}
 body.dashboard-mode.theme-gta-v .dash-tabs button.on span{color:#f2f5f2}
 /* Center: locality plate — tracked-out Chalet with a mint rule
    beneath (menu-section treatment), not a bland box.

@@ -173,7 +173,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v106"), 'SW theme cache v76');
+ok(swSrc.includes("ws-theme-v107"), 'SW theme cache v107');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -326,15 +326,15 @@ ok(!fs.existsSync(path.join(REPO, 'themes/gta-v/spotify/header.png')), 'GV chopp
 ok(gvSkinJs.includes("register('gta-v'"), 'GV skin registers as gta-v');
 ok(gvSkinJs.includes('data-lyrics-stage'), 'GV lyric stage hook present');
 ok(gvSkinJs.includes('setLyricsRenderer') && gvSkinJs.includes('clearLyrics'), 'GV lyric renderer hooks present');
-ok(/\.gvsp-art\s*\{[^}]*left:\s*3\.03%[^}]*top:\s*29\.00%[^}]*width:\s*30\.30%[^}]*height:\s*27\.17%/.test(gvSkinCss),
-  'GV art rect matches the hud frame opening');
-ok(gvSkinJs.includes('hud.png'), 'GV skin overlays the single hud art');
+ok(/\.gvsp-artwrap\s*\{[^}]*width:\s*148px[^}]*height:\s*148px/.test(gvSkinCss),
+  'GV art rect matches the console frame (148px square)');
+ok(!gvSkinJs.includes('hud.png'), 'GV skin does not use the hud art overlay');
 const gvSkinJsCode = stripComments(gvSkinJs), gvSkinCssCode = stripComments(gvSkinCss);
 for (const banned of ['miniviz', 'stagepeek', 'fullstage', 'gvsp-viz', 'spectrum', 'spotify-close', 'background-size: cover', 'vcsp-']) {
   ok(!gvSkinJsCode.includes(banned) && !gvSkinCssCode.includes(banned), `GV skin has no ${banned}`);
 }
 ok(gvSkinJsCode.includes('gvsp-') && gvSkinCssCode.includes('.gvsp'), 'GV skin uses gvsp- prefix');
-ok(gvSkinCssCode.includes('#7CFF6B') && gvSkinCssCode.includes('#05070a'), 'GV skin neon-green on dark panel');
+ok(gvSkinCssCode.includes('#2ce68c') && gvSkinCssCode.includes('#0b0b0b'), 'GV skin muted mint on charcoal console');
 ok(gvSkinCssCode.includes("'SignPainter'") && gvSkinCssCode.includes("'Chalet London'"), 'GV skin SignPainter script + Chalet London');
 ok(!/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(gvSkinJsCode) && !/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(gvSkinCssCode), 'GV skin has no emojis');
 
@@ -780,7 +780,7 @@ ok(!vcSkinSrc.includes('rotate(6deg)'), 'VC widget is straight (hero has no tilt
 // every theme widget: explicit larger size, ~6-7 degree tilt (except VC hero-match), no-overlap idle states
 // (san-andreas pass 4: straight Radio Los Santos bezel, asserted in the pass 4 block)
 const skinSpecs = [
-  ['gta-v', 'gvsp', 'rotate(6.5deg)', 'width: 540px'],
+  ['gta-v', 'gvsp', 'border-radius: 18px', 'width: 520px'],
   ['rdr2', 'rdsp', 'rotate(-6.5deg)', 'width: 600px'],
 ];
 for (const [theme, cls, tilt, size] of skinSpecs) {
@@ -908,10 +908,9 @@ ok(vcRoad !== vcPlace, 'VC: road labels a different tone from place labels');
 
 
 /* ---------- Spotify skins: single-hud overlays, art-registered openings ----------
-   (san-andreas pass 4 left the hud.png regime for the Radio Los Santos
-   bezel; its assertions live in the pass 4 block) */
+   (gta-v left the hud.png regime for the radio console rebuild;
+   san-andreas pass 4 left it for the Radio Los Santos bezel) */
 const HUD_EXPECTED = {
-  'gta-v':       { w: 1155, h: 1362, art: ['3.03%', '29.00%', '30.30%', '27.17%'], over: true },
   'rdr2':        { w: 1254, h: 1254, art: ['15.55%', '27.91%', '29.11%', '28.71%'], over: false },
 };
 for (const [theme, exp] of Object.entries(HUD_EXPECTED)) {
