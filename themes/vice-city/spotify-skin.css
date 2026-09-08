@@ -26,7 +26,7 @@
   position: absolute; z-index: 1;
   right: 70px; top: 48%; translate: 0 -50%;
   width: 720px; aspect-ratio: 1448 / 1086;
-  transform: rotate(6deg); transform-origin: center;
+  transform: none; transform-origin: center;
   container-type: size;
   pointer-events: auto;
   background: transparent;

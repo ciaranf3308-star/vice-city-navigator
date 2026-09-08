@@ -1415,7 +1415,8 @@ async function refreshDashWeather() {
   let lat = null, lng = null;
   if (typeof userPos !== 'undefined' && userPos) { lng = userPos[0]; lat = userPos[1]; }
   else if (map) { try { const c = map.getCenter(); lat = c.lat; lng = c.lng; } catch (e) {} }
-  if (lat === null) return;
+  /* Fall back to Dublin when the map has no center (e.g. WebGL unavailable). */
+  if (lat === null) { lat = 53.3498; lng = -6.2603; }
   try {
     const r = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat.toFixed(3) +
       '&longitude=' + lng.toFixed(3) + '&current=temperature_2m,weather_code&timezone=Europe%2FDublin');

@@ -16,6 +16,12 @@ body.dashboard-mode.theme-vice-city #dash-topbar{
   pointer-events:none;
 }
 body.dashboard-mode.theme-vice-city #dash-topbar::before{display:none}
+/* Hero skyline silhouette on the right of the top bar */
+body.dashboard-mode.theme-vice-city #dash-topbar::after{
+  content:'';position:absolute;right:0;top:0;bottom:0;width:600px;pointer-events:none;
+  background:url('dashboard/topbar-skyline-right.png') right center/contain no-repeat;
+  opacity:.9;
+}
 body.dashboard-mode.theme-vice-city #dash-topbar::after{display:none}
 body.dashboard-mode.theme-vice-city #dash-topbar .dash-chrome{
   position:absolute;inset:0;display:flex;align-items:center;gap:28px;
@@ -28,7 +34,7 @@ body.dashboard-mode.theme-vice-city .dash-logo{
   transform:rotate(-3deg);white-space:nowrap;
   background:none!important;
 }
-body.dashboard-mode.theme-vice-city .dash-palm{display:none}
+body.dashboard-mode.theme-vice-city .dash-palm{display:inline-block;width:28px;height:38px;vertical-align:-6px;margin-left:6px}
 body.dashboard-mode.theme-vice-city .dash-wx{
   display:flex;align-items:center;gap:10px;
   font-family:var(--vclabel);font-size:28px;font-weight:700;color:var(--cyan);
