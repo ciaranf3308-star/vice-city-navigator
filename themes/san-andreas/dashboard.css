@@ -22,7 +22,13 @@ body.dashboard-mode.theme-san-andreas #dash-topbar{
 body.dashboard-mode.theme-san-andreas #dash-topbar .dash-chrome{
   position:absolute;left:0;right:0;top:0;height:72px;z-index:1;
   display:flex;align-items:center;justify-content:center;
-  gap:16px;background:none;padding:0;
+  gap:16px;background:none;padding:0 0 0 300px;box-sizing:border-box;
+}
+/* the baked logo owns the left ~450px — the live clock group centres
+   in the remaining space so weather never sits under the wordmark */
+body.dashboard-mode.theme-san-andreas .dash-wx,
+body.dashboard-mode.theme-san-andreas .dash-clock{
+  text-shadow:0 2px 4px #000,0 0 14px rgba(0,0,0,.85);
 }
 /* branding lives in the art now — no DOM wordmark */
 body.dashboard-mode.theme-san-andreas .dash-brand{display:none}
@@ -62,7 +68,7 @@ body.dashboard-mode.theme-san-andreas #dash-bottombar{
 }
 body.dashboard-mode.theme-san-andreas #dash-bottombar .dash-chrome{
   position:absolute;inset:0;display:flex;align-items:center;gap:14px;
-  padding:0 250px 0 22px;background:none;
+  padding:0 270px 0 22px;background:none;
 }
 /* tabs: hero-style icon-only, cream line icons, cream dividers */
 body.dashboard-mode.theme-san-andreas .dash-tabs{
