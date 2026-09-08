@@ -289,9 +289,34 @@ function maybeShowPoiDebug() {
     'border-radius:8px;max-width:82vw;max-height:60vh;overflow:auto;';
   const pre = document.createElement('div');
   pre.style.whiteSpace = 'pre-wrap';
+  // Sticky action-result line: survives the 2s tick refresh below.
+  const actionLine = document.createElement('div');
+  actionLine.style.cssText = 'white-space:pre-wrap;color:#f5d020;margin-bottom:6px;min-height:1em;';
   const btn = document.createElement('button');
   btn.textContent = 'refresh POIs now';
   btn.style.cssText = 'margin-top:8px;padding:8px 12px;font:12px monospace;touch-action:manipulation;';
+  const copyBtn = document.createElement('button');
+  copyBtn.textContent = 'copy';
+  copyBtn.style.cssText = 'margin-top:8px;margin-left:8px;padding:8px 12px;font:12px monospace;touch-action:manipulation;';
+  copyBtn.onclick = () => {
+    try {
+      const s = window.VCNPlaces ? window.VCNPlaces.status() : null;
+      const txt = (actionLine.textContent ? actionLine.textContent + '\n' : '') + JSON.stringify(s, null, 1);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(
+          () => { actionLine.textContent = 'copied ✓'; },
+          () => { actionLine.textContent = 'copy failed'; });
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = txt;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); actionLine.textContent = 'copied ✓'; }
+        catch (e) { actionLine.textContent = 'copy failed'; }
+        document.body.removeChild(ta);
+      }
+    } catch (e) { actionLine.textContent = 'ERR ' + e.message; }
+  };
   btn.onclick = () => {
     try {
       const m = (window.VCN && window.VCN._map) ? window.VCN._map() : null;
@@ -299,11 +324,13 @@ function maybeShowPoiDebug() {
       window.VCNPlaces.maybeRefresh(c);
       if (window.VCNPlaces.renderPois) window.VCNPlaces.renderPois();
       const s = window.VCNPlaces ? window.VCNPlaces.status() : null;
-      pre.textContent = 'after render: ' + JSON.stringify(s) + '\n' + pre.textContent;
-    } catch (e) { pre.textContent = 'ERR ' + e.message; }
+      actionLine.textContent = 'after render: ' + JSON.stringify(s);
+    } catch (e) { actionLine.textContent = 'ERR ' + e.message; }
   };
+  el.appendChild(actionLine);
   el.appendChild(pre);
   el.appendChild(btn);
+  el.appendChild(copyBtn);
   document.body.appendChild(el);
   const tick = () => {
     try {
