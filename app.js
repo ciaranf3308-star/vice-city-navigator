@@ -390,8 +390,11 @@ async function applyTheme(id) {
   const isStale = () => gen !== themeSwitchGen;
   const priorId = VCNThemes.currentId();
   const priorTheme = VCNThemes.current();
-  // Show intent in the selector immediately; the persisted theme only
-  // changes once the new style has actually loaded.
+  // Apply the chrome immediately so the dropdown and body can never go out
+  // of sync (a map style hiccup must not leave the old theme's chrome up).
+  // The persisted theme still only commits once the new style is live.
+  applyBodyTheme(id);
+  try { mountSpotifySkin(id); } catch (e) { console.error('[ws] spotify skin swap failed', e); }
   const sel = document.getElementById('theme-select');
   if (sel) sel.value = id;
   let style = null, priorStyle = null;
@@ -404,6 +407,9 @@ async function applyTheme(id) {
     ]);
   } catch (e) {
     if (isStale()) return;
+    // Roll the chrome back too — it was applied optimistically above.
+    applyBodyTheme(priorId);
+    try { mountSpotifySkin(priorId); } catch (e2) {}
     syncThemeSelector();
     toast('Could not load the ' + theme.name + ' map style.');
     return;
@@ -425,6 +431,8 @@ async function applyTheme(id) {
       }
     } catch (e2) { console.error('[ws] prior-style restore failed', e2); }
     if (isStale()) return;
+    applyBodyTheme(priorId);
+    try { mountSpotifySkin(priorId); } catch (e3) {}
     syncThemeSelector();
     toast('Could not load the ' + theme.name + ' map style.');
     return;
