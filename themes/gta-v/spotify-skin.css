@@ -166,25 +166,27 @@
 
 /* ---------- lyrics stage ---------- */
 .gvsp-lyrics {
-  min-height: 120px; max-height: 180px;
+  position: relative;
+  container-type: inline-size;
+  min-height: 140px; max-height: 200px;
   overflow: hidden;
-  display: flex; flex-direction: column; justify-content: center;
-  padding: 16px 20px;
-  gap: 8px;
+  padding: 0;
   pointer-events: none;
 }
 .gvsp-lyrics.has-lyrics { pointer-events: auto; }
-.gv-lyric-line {
-  font-size: 17px; line-height: 1.4; color: #cfe8d4; opacity: .55;
-  text-shadow: 0 1px 3px #000;
-  transition: opacity .3s ease;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+/* WSLyrics builds .wslyr with absolute slots — contain them here */
+.gvsp-lyrics .wslyr {
+  position: absolute; inset: 0;
 }
-.gv-lyric-line.ghost { opacity: .3; font-size: 15px; }
-.gv-lyric-line.next { opacity: .45; }
-.gv-lyric-line.active {
-  opacity: 1; font-size: 19px; color: #2ce68c; font-weight: 600;
-}
+/* Override the old overlay font sizes (cqw was tuned for the hud) */
+.gvsp-lyrics .wslyr-hero.s-xl { font-size: 28px; }
+.gvsp-lyrics .wslyr-hero.s-lg { font-size: 22px; }
+.gvsp-lyrics .wslyr-hero.s-md { font-size: 18px; }
+.gvsp-lyrics .wslyr-hero.s-sm { font-size: 15px; }
+.gvsp-lyrics .wslyr-prev { font-size: 14px; }
+.gvsp-lyrics .wslyr-next { font-size: 13px; }
+.gvsp-lyrics .wslyr-state .wslyr-wait { font-size: 32px; }
+.gvsp-lyrics .wslyr-state .wslyr-cap { font-size: 12px; }
 
 /* ---------- ambient: skyline when no lyrics ---------- */
 .gvsp-ambient {
