@@ -56,6 +56,7 @@ body.dashboard-mode.theme-gta-v #dash-topbar .dash-chrome{
   position:absolute;inset:0;z-index:1;
   overflow:visible;
 }
+body.dashboard-mode.theme-gta-v #dash-stage{overflow:visible}
 body.dashboard-mode.theme-gta-v #dash-topbar .dash-chrome::after{
   content:'Los Santos';position:absolute;right:64px;bottom:24px;z-index:2;
   font-family:'SignPainter','Chalet London',cursive;font-size:40px;color:#f2f5f2;
@@ -65,7 +66,7 @@ body.dashboard-mode.theme-gta-v #dash-topbar .dash-chrome::after{
 /* Brand: the user's WayStation V lockup, prominent (~80px tall).
    The lockup already carries the wordmark, so the text span hides. */
 body.dashboard-mode.theme-gta-v .dash-brand{
-  position:fixed;left:24px;top:32px;
+  position:absolute;left:24px;top:32px;
   display:flex;align-items:center;z-index:60;
   pointer-events:none;
 }
