@@ -166,7 +166,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v26"), 'SW theme cache v26');
+ok(swSrc.includes("ws-theme-v27"), 'SW theme cache v27');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
@@ -420,7 +420,7 @@ ok(cssSrc.includes('vc-logo-script'), 'VC hero logo script styled');
    layouts and drive-HUD clearances, not one shared silhouette ---------- */
 const barHeights = {
   'vice-city': ['76px', '88px'],
-  'san-andreas': ['86px', '96px'],
+  'san-andreas': ['110px', '96px'],
   'gta-v': ['56px', '64px'],
   'rdr2': ['72px', '72px'],
 };

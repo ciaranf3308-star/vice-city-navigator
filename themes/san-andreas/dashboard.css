@@ -3,7 +3,7 @@ body.theme-san-andreas .dest-pin{ background-image:url('assets/themes/san-andrea
 body.dashboard-mode.theme-san-andreas #search-bar{display:none} /* hero composition: no search pill */
 body.dashboard-mode.theme-gta-v #search-bar{top:calc(68px + env(safe-area-inset-top))}
 body.dashboard-mode.theme-san-andreas #dash-topbar{
-  display:block;position:absolute;left:0;right:0;top:0;height:86px;z-index:25;
+  display:block;position:absolute;left:0;right:0;top:0;height:110px;z-index:25;
   background:#0a0e1a url('dashboard/topbar-panorama.jpg') center/cover no-repeat;
   box-shadow:0 5px 10px rgba(0,0,0,.55);
   pointer-events:none;
@@ -153,8 +153,8 @@ body.dashboard-mode.theme-san-andreas .dash-zoom{display:none}
 /* (tagline script positioning lives with the right-column rules below) */
 /* ---------- maneuver card: authored frame, stats row underneath ---------- */
 body.dashboard-mode.theme-san-andreas.nav-driving #maneuver-card{
-  top:calc(100px + env(safe-area-inset-top));left:24px;right:auto;
-  width:520px;max-width:520px;height:208px;
+  top:calc(124px + env(safe-area-inset-top));left:24px;right:auto;
+  width:440px;max-width:440px;height:220px;
   background:url('dashboard/maneuver.png') 50% 50%/100% 100% no-repeat;
   border:0;border-radius:0;box-shadow:none;
   backdrop-filter:none;-webkit-backdrop-filter:none;
@@ -187,7 +187,7 @@ body.dashboard-mode.theme-san-andreas #next-stats{
    "GOOD MUSIC BETTER DAYS" tag, so no separate scene panel or script. */
 body.dashboard-mode.theme-san-andreas #sa-grove-panel{display:none;}
 body.dashboard-mode.theme-san-andreas .sasp{
-  width:520px;right:70px;top:calc(120px + env(safe-area-inset-top));bottom:auto;
+  width:520px;right:70px;top:calc(80px + env(safe-area-inset-top));bottom:auto;
   translate:none;transform:none;
 }
 /* bottom-bar right slot: palm sunset panel with the gold tagline script, hero-style */
