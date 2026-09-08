@@ -26,7 +26,7 @@ body.dashboard-mode.theme-san-andreas #dash-topbar{
 }
 /* skyline art: right-side panel only, blended into the black base */
 body.dashboard-mode.theme-san-andreas #dash-topbar::after{
-  content:"";position:absolute;top:0;bottom:0;right:0;width:37%;z-index:0;
+  content:"";position:absolute;top:0;bottom:5px;right:0;width:37%;z-index:0;
   background:url('dashboard/skyline-strip.jpg') 70% 38%/cover no-repeat;
   -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 32%);
   mask-image:linear-gradient(90deg,transparent 0,#000 32%);
