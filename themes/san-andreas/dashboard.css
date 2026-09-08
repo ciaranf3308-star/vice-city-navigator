@@ -32,9 +32,9 @@ body.dashboard-mode.theme-san-andreas .dash-brand .dash-logo,
 body.dashboard-mode.theme-san-andreas .dash-brand .dash-palm{display:none}
 /* hero wordmark: large, overlapping the topbar bottom edge onto the map */
 body.dashboard-mode.theme-san-andreas #dash-topbar .sa-logo{
-  display:block;position:absolute;left:20px;top:-6px;
-  height:168px;width:auto;max-width:34vw;object-fit:contain;
-  z-index:30;pointer-events:none;
+  display:block;position:absolute;left:20px;top:-2px;
+  height:180px;width:auto;max-width:36vw;object-fit:contain;
+  z-index:50;pointer-events:none;
   filter:drop-shadow(0 4px 8px rgba(0,0,0,.9));
 }
 /* "A Better Tomorrow" script rides the photo at far right, hero-style */
