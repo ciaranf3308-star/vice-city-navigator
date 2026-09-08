@@ -32,7 +32,7 @@
 (function () {
   var LRCLIB = 'https://lrclib.net/api/get';
   var TICK_MS = 400;
-  var OFFSET_MS = -100;         // tuned: was 1s early at +600, 0.3s slow at -400
+  var OFFSET_MS = 100;          // tuned: 0.3s slow at -400, 0.2s slow at -100
   var WORD_WINDOW_MAX = 12000;  // cap the word-spread window per line
   var AMBIENT_CYCLE_MS = 6000;
   var CACHE_MAX = 50;
