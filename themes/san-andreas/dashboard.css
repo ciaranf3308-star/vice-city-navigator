@@ -78,7 +78,7 @@ body.dashboard-mode.theme-san-andreas #dash-time{
 }
 /* ---------- bottom console: designed CSS console, no photo strip ---------- */
 body.dashboard-mode.theme-san-andreas #dash-bottombar{
-  display:block;position:absolute;left:0;right:0;bottom:0;height:110px;z-index:25;
+  display:block;position:absolute;left:0;right:0;bottom:0;height:130px;z-index:25;
   background:
     repeating-linear-gradient(90deg,rgba(255,255,255,.022) 0 2px,transparent 2px 5px),
     radial-gradient(ellipse 400px 60px at 20% 80%, rgba(255,255,255,.03) 0%, transparent 70%),
@@ -86,15 +86,16 @@ body.dashboard-mode.theme-san-andreas #dash-bottombar{
     linear-gradient(180deg,#1e1810 0%,#12100a 30%,#0a0806 70%,#050403 100%);
   box-shadow:inset 0 -14px 22px rgba(0,0,0,.8), inset 0 30px 18px rgba(255,220,150,.04);
   pointer-events:auto;
-  /* hero's machined profile: DEEP sharp notches, tabs ride the contour */
-  clip-path:polygon(0 100%,0 45%,1% 40%,2% 25%,3% 25%,4% 40%,5% 45%,6% 45%,7% 30%,8% 15%,9% 15%,10% 30%,11% 45%,12% 45%,13% 35%,14% 20%,15% 20%,16% 35%,17% 45%,18% 45%,19% 30%,20% 15%,21% 15%,22% 30%,23% 45%,24% 45%,25% 35%,26% 20%,27% 20%,28% 35%,29% 45%,30% 45%,31% 30%,32% 15%,33% 15%,34% 30%,35% 45%,55% 45%,56% 35%,57% 25%,58% 25%,59% 35%,60% 45%,61% 45%,62% 30%,63% 18%,64% 18%,65% 30%,66% 45%,67% 45%,68% 35%,69% 22%,70% 22%,71% 35%,72% 45%,73% 45%,74% 30%,75% 18%,76% 18%,77% 30%,78% 45%,79% 40%,80% 30%,81% 30%,82% 40%,83% 45%,84% 45%,85% 35%,86% 25%,87% 25%,88% 35%,89% 45%,90% 45%,91% 35%,92% 25%,93% 25%,94% 35%,95% 45%,96% 45%,97% 40%,98% 40%,99% 45%,100% 45%,100% 100%);
+  /* hero: bold machined profile — wide flats, sharp angular cuts */
+  clip-path:polygon(0 100%,0 30%,3% 30%,5% 12%,7% 12%,9% 30%,15% 30%,17% 12%,19% 12%,21% 30%,27% 30%,29% 12%,31% 12%,33% 30%,39% 30%,41% 12%,43% 12%,45% 30%,55% 30%,57% 18%,59% 18%,61% 30%,67% 30%,69% 15%,71% 15%,73% 30%,79% 30%,81% 20%,83% 20%,85% 30%,91% 30%,93% 22%,95% 22%,97% 30%,100% 30%,100% 100%);
 }
 /* machined brass trim along the top edge */
 body.dashboard-mode.theme-san-andreas #dash-bottombar::before{
-  content:"";position:absolute;left:0;right:0;top:0;height:32px;
-  background:url('dashboard/bottombar-trim.jpg') 50% 0/1920px 64px no-repeat;
-  clip-path:polygon(0 100%,0 45%,2% 25%,4% 40%,8% 15%,10% 30%,14% 20%,16% 35%,20% 15%,22% 30%,26% 20%,28% 35%,32% 15%,34% 30%,56% 35%,58% 25%,60% 45%,63% 18%,65% 30%,69% 22%,71% 35%,75% 18%,77% 30%,80% 30%,82% 40%,86% 25%,88% 35%,92% 25%,94% 35%,98% 40%,100% 45%,100% 100%);
+  content:"";position:absolute;left:0;right:0;top:0;height:36px;
+  background:linear-gradient(180deg,#d8b36a 0%,#8a6f3a 50%,#4a3a20 100%);
+  clip-path:polygon(0 32%,3% 32%,5% 14%,7% 14%,9% 32%,15% 32%,17% 14%,19% 14%,21% 32%,27% 32%,29% 14%,31% 14%,33% 32%,39% 32%,41% 14%,43% 14%,45% 32%,55% 32%,57% 20%,59% 20%,61% 32%,67% 32%,69% 17%,71% 17%,73% 32%,79% 32%,81% 22%,83% 22%,85% 32%,91% 32%,93% 24%,95% 24%,97% 32%,100% 32%,100% 36%,97% 36%,95% 28%,93% 28%,91% 36%,85% 36%,83% 26%,81% 26%,79% 36%,73% 36%,71% 21%,69% 21%,67% 36%,61% 36%,59% 24%,57% 24%,55% 36%,45% 36%,43% 18%,41% 18%,39% 36%,33% 36%,31% 18%,29% 18%,27% 36%,21% 36%,19% 18%,17% 18%,15% 36%,9% 36%,7% 18%,5% 18%,3% 36%,0 36%);
   filter:brightness(1.1) contrast(1.05);
+  opacity:.9;
 }
 body.dashboard-mode.theme-san-andreas #dash-bottombar .dash-chrome{
   position:absolute;inset:0;display:flex;align-items:center;gap:12px;
@@ -120,22 +121,23 @@ body.dashboard-mode.theme-san-andreas .dash-tabs button:nth-child(3){transform:t
 body.dashboard-mode.theme-san-andreas .dash-tabs button:nth-child(4){transform:translateY(10px)}
 body.dashboard-mode.theme-san-andreas .dash-tabs button:nth-child(5){transform:translateY(-18px)}
 body.dashboard-mode.theme-san-andreas .dash-tabs button{
-  position:static;padding:10px 18px;cursor:pointer;pointer-events:auto;
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:17px;font-weight:700;
+  position:static;padding:14px 24px;cursor:pointer;pointer-events:auto;
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:20px;font-weight:700;
   letter-spacing:3px;color:#c9b98a;background:none;border:0;border-radius:12px;
   text-shadow:0 2px 0 #000;opacity:1;white-space:nowrap;text-transform:uppercase;
-  display:flex;flex-direction:column;align-items:center;gap:3px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
 }
-body.dashboard-mode.theme-san-andreas .dash-tabs button svg{width:30px;height:30px}
+body.dashboard-mode.theme-san-andreas .dash-tabs button svg{width:38px;height:38px}
 /* hero MAP: solid green box, black icon + lowercase label */
 body.dashboard-mode.theme-san-andreas .dash-tabs button.on{
   background:linear-gradient(180deg,#9ccb84,#7aa862);color:#101408;text-shadow:none;
   box-shadow:0 3px 0 rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.35);
-  border-radius:14px;padding:12px 22px;
+  border-radius:16px;padding:16px 28px;
 }
 body.dashboard-mode.theme-san-andreas .dash-tabs button.on span{
-  text-transform:lowercase;font-weight:800;letter-spacing:1px;
+  text-transform:lowercase;font-weight:800;letter-spacing:1px;font-size:22px;
 }
+body.dashboard-mode.theme-san-andreas .dash-tabs button.on svg{width:42px;height:42px}
 /* locality: inset plate, flexes to fill */
 body.dashboard-mode.theme-san-andreas .dash-dest{
   position:static;flex:1;display:flex;align-items:center;justify-content:center;

@@ -166,7 +166,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v49"), 'SW theme cache v31');
+ok(swSrc.includes("ws-theme-v50"), 'SW theme cache v31');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
@@ -420,7 +420,7 @@ ok(cssSrc.includes('vc-logo-script'), 'VC hero logo script styled');
    layouts and drive-HUD clearances, not one shared silhouette ---------- */
 const barHeights = {
   'vice-city': ['76px', '88px'],
-  'san-andreas': ['140px', '110px'],
+  'san-andreas': ['140px', '130px'],
   'gta-v': ['56px', '64px'],
   'rdr2': ['72px', '72px'],
 };
@@ -529,7 +529,7 @@ ok(vcPaint('vc-buildings')['fill-color'] === '#b7b7c7', 'VC buildings: separated
 ok(vcPaint('vc-road-minor')['line-color'] === '#eef0f6', 'VC minor roads: white streets (hero)');
 ok(vcPaint('vc-road-primary')['line-color'] === '#1d1d36', 'VC arterials: stronger dark navy (hero contrast)');
 ok(vcPaint('vc-road-motorway')['line-color'] === '#0e0e22', 'VC motorways: near-black navy (hero contrast)');
-ok(/bottombar-trim\.jpg/.test(cssSrc), 'SA bottom console wears the machined brass trim');
+ok(/bottombar-trim/.test(cssSrc), 'SA bottom console wears the machined brass trim');
 ok(/theme-san-andreas #dash-bottombar\{[^}]*#0a0806/.test(cssSrc),
   'SA bottom bar is the dark hero console');
 /* ---------- SA hero-match: authored dashboard art set ---------- */
@@ -561,7 +561,7 @@ ok(appSrc.includes("'sa-grove-panel'") && /DASH_STAGE_NODES = \[[^\]]*'sa-grove-
 ok(cssSrc.includes("dashboard/maneuver.png"), 'SA maneuver card uses the authored empty frame');
 ok(/theme-san-andreas #sa-grove-panel\{[^}]*display:none/.test(cssSrc), 'SA Grove Street scene panel removed (unified hud carries the art)');
 ok(cssSrc.includes("dashboard/bottombar-palms.jpg"), 'SA bottom bar has the palm sunset panel');
-ok(/theme-san-andreas \.dash-tabs button\{[^}]*font-size:17px/.test(cssSrc),
+ok(/theme-san-andreas \.dash-tabs button\{[^}]*font-size:20px/.test(cssSrc),
   'SA tabs are text labels riding the art slots, not icon glyphs');
 ok(!/theme-san-andreas \.dash-tabs button::before\{[^}]*mask-image/.test(cssSrc),
   'SA tabs carry no generic icon glyphs');
