@@ -53,11 +53,16 @@
   const CACHE_MAX = 24;
   const FETCH_TIMEOUT_MS = 12000;
   const PREGEN_DEPTH = 5;
+  /* Route-start announcements may wait this long for the persona voice so
+     the driver doesn't hear the robot for one line and the DJ from the
+     second. Mid-drive maneuvers never wait. */
+  const FIRST_SPEAK_GRACE_MS = 5000;
+  const delay = ms => new Promise(res => setTimeout(res, ms));
 
   /* Defaults: full themed voice — banter + profanity on. */
   const settings = { mode: 'banter', profanity: true, endpoint: '', muted: false };
   const audioCache = new Map(); // key -> { url, text }
-  const inflight = new Map(); // key -> { ctrl, theme, epoch }
+  const inflight = new Map(); // key -> { ctrl, theme, epoch, promise }
   let audioEl = null;
   let endpointWarned = false;
   let routeEpoch = 0; // bumped on reroute/theme change; stale fetches drop results
@@ -151,63 +156,75 @@
       }
     }
   }
-  async function fetchTts(text) {
+  /* Returns a promise for the cache entry (or null). Shared by concurrent
+     callers for the same text — the fetch runs once. */
+  function fetchTts(text) {
     const key = cacheKey(text);
-    if (audioCache.has(key) || inflight.has(key)) return; // dedupe concurrent
+    const hit = audioCache.get(key);
+    if (hit) return Promise.resolve(hit);
+    const dup = inflight.get(key);
+    if (dup) return dup.promise; // dedupe concurrent
     const url = functionUrl();
-    if (!url) return;
+    if (!url) return Promise.resolve(null);
     const profile = voiceProfile();
     const theme = themeId();
     const epoch = routeEpoch;
     const ctrl = new AbortController();
-    inflight.set(key, { ctrl, theme, epoch });
+    let resolveEntry;
+    const promise = new Promise(res => { resolveEntry = res; });
+    inflight.set(key, { ctrl, theme, epoch, promise });
     const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
-    try {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: supabaseHeaders(),
-        body: JSON.stringify({
-          text,
-          theme,
-          profile: profile.profile,
-          personaVersion: profile.personaVersion,
-          mode: settings.mode, // 'themed' | 'banter'
-          profanity: !!settings.profanity,
-        }),
-        signal: ctrl.signal,
-      });
-      if (res.status === 429) throw new Error('voice daily cap reached');
-      if (!res.ok) throw new Error('voice ' + res.status);
-      const data = await res.json();
-      const b64 = data && data.audio;
-      const line = (data && data.line) || text;
-      if (typeof b64 !== 'string' || !b64.length) throw new Error('empty audio');
-      /* Stale check: a reroute or theme switch while this was in flight
-         means this audio belongs to a dead route/theme — drop it. */
-      const rec = inflight.get(key);
-      if (!rec || rec.epoch !== routeEpoch || rec.theme !== themeId()) return;
-      const bin = atob(b64);
-      const bytes = new Uint8Array(bin.length);
-      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-      const blob = new Blob([bytes], { type: (data && data.mime) || 'audio/mpeg' });
-      if (!blob.size) throw new Error('empty audio');
-      const objUrl = URL.createObjectURL(blob);
-      audioCache.set(key, { url: objUrl, text: line });
-      while (audioCache.size > CACHE_MAX) {
-        const oldest = audioCache.keys().next().value;
-        const evicted = audioCache.get(oldest);
-        audioCache.delete(oldest);
-        try { URL.revokeObjectURL(evicted.url); } catch (e) {}
+    (async () => {
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: supabaseHeaders(),
+          body: JSON.stringify({
+            text,
+            theme,
+            profile: profile.profile,
+            personaVersion: profile.personaVersion,
+            mode: settings.mode, // 'themed' | 'banter'
+            profanity: !!settings.profanity,
+          }),
+          signal: ctrl.signal,
+        });
+        if (res.status === 429) throw new Error('voice daily cap reached');
+        if (!res.ok) throw new Error('voice ' + res.status);
+        const data = await res.json();
+        const b64 = data && data.audio;
+        const line = (data && data.line) || text;
+        if (typeof b64 !== 'string' || !b64.length) throw new Error('empty audio');
+        /* Stale check: a reroute or theme switch while this was in flight
+           means this audio belongs to a dead route/theme — drop it. */
+        const rec = inflight.get(key);
+        if (!rec || rec.epoch !== routeEpoch || rec.theme !== themeId()) { resolveEntry(null); return; }
+        const bin = atob(b64);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        const blob = new Blob([bytes], { type: (data && data.mime) || 'audio/mpeg' });
+        if (!blob.size) throw new Error('empty audio');
+        const objUrl = URL.createObjectURL(blob);
+        const entry = { url: objUrl, text: line };
+        audioCache.set(key, entry);
+        while (audioCache.size > CACHE_MAX) {
+          const oldest = audioCache.keys().next().value;
+          const evicted = audioCache.get(oldest);
+          audioCache.delete(oldest);
+          try { URL.revokeObjectURL(evicted.url); } catch (e) {}
+        }
+        resolveEntry(entry);
+      } catch (e) { resolveEntry(null); /* silent: fallback already spoke; stays retryable */ }
+      finally {
+        clearTimeout(timer);
+        const rec = inflight.get(key);
+        if (rec && rec.ctrl === ctrl) inflight.delete(key);
       }
-    } catch (e) { /* silent: fallback already spoke; stays retryable */ }
-    finally {
-      clearTimeout(timer);
-      const rec = inflight.get(key);
-      if (rec && rec.ctrl === ctrl) inflight.delete(key);
-    }
+    })();
+    return promise;
   }
 
-  function themedSpeak(text) {
+  async function themedSpeak(text, opts) {
     const url = functionUrl();
     if (!url) {
       if (!endpointWarned) {
@@ -220,16 +237,27 @@
     const key = cacheKey(text);
     const hit = audioCache.get(key);
     if (hit) { playCached(hit); return; }
+    // Route-start announcements may briefly wait for the persona voice so
+    // the driver doesn't hear the robot for one line and the DJ from the
+    // second. Anything already in flight for this text is shared, not
+    // re-fetched. If the persona isn't ready in time, standard speaks.
+    if (opts && opts.awaitThemed) {
+      const entry = await Promise.race([fetchTts(text), delay(FIRST_SPEAK_GRACE_MS).then(() => null)]);
+      if (entry && !settings.muted && settings.mode !== 'off' && audioCache.get(key) === entry) {
+        playCached(entry);
+        return;
+      }
+    }
     // Never wait for AI on an immediate maneuver: deterministic browser
     // speech now, themed audio warms the cache in the background.
     synthSpeak(text);
     fetchTts(text);
   }
 
-  function speakInternal(text) {
+  function speakInternal(text, opts) {
     if (!text || settings.muted || settings.mode === 'off') return;
     if (settings.mode === 'standard') synthSpeak(text);
-    else themedSpeak(text);
+    else themedSpeak(text, opts);
   }
 
   window.VCNVoice = {
@@ -255,8 +283,17 @@
       return settings.muted;
     },
 
-    /* Announcements ("Starting navigation", "Rerouting", "You have arrived") */
-    speakText: text => speakInternal(text),
+    /* Announcements ("Starting navigation", "Rerouting", "You have arrived").
+       opts.awaitThemed lets route-start announcements briefly wait for the
+       persona voice instead of always opening with the robot. */
+    speakText: (text, opts) => speakInternal(text, opts),
+
+    /* One-tap voice check from Settings: a sample line through the full
+       themed pipeline — waits briefly for the persona voice. */
+    preview() {
+      if (settings.muted || settings.mode === 'off') return;
+      speakInternal('Turn right onto Main Street.', { awaitThemed: true });
+    },
 
     /* Maneuver speech. text = deterministic canonical instruction
        built by app.js from the OSRM maneuver (the on-screen text). */

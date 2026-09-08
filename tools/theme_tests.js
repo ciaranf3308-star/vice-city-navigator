@@ -321,6 +321,8 @@ ok(appSrc.includes('spotify.skin'), 'skin resolved from theme config');
 ok(!indexSrc.includes('music-btn') && !indexSrc.includes('drive-music-btn'), 'no player buttons in chrome');
 ok(!indexSrc.includes('spotify-close'), 'no close button on pane');
 ok(indexSrc.includes('id="dashboard-toggle"'), 'dashboard toggle in menu');
+ok(indexSrc.includes('id="voice-preview"'), 'voice preview button in menu');
+ok(!indexSrc.includes('Gemini free tier'), 'no stale Gemini copy in voice settings');
 ok(indexSrc.includes('id="spotify-connect"') && indexSrc.includes('id="spotify-disconnect"'), 'menu connect/disconnect');
 ok(indexSrc.includes('id="spotify-status"'), 'menu Spotify status');
 ok(indexSrc.includes('themes/vice-city/spotify-skin.js'), 'VC skin script path');
@@ -676,7 +678,20 @@ ok(/max_tokens: 60/.test(voiceFn), 'OpenAI rewrite output capped at 60 tokens');
 ok(/maxOutputTokens: 60/.test(voiceFn), 'Gemini rewrite output capped at 60 tokens');
 // Client: the active theme's voice block drives every request.
 ok(/const inflight = new Map\(\)/.test(voiceClient), 'voice client: controller-backed in-flight map');
-ok(/inflight\.has\(key\)/.test(voiceClient), 'voice client: concurrent generation deduplicated');
+ok(/const dup = inflight\.get\(key\);\s*\n?\s*if \(dup\) return dup\.promise;/.test(voiceClient),
+  'voice client: concurrent generation deduplicated via a shared promise');
+ok(/FIRST_SPEAK_GRACE_MS = 5000/.test(voiceClient),
+  'voice client: route-start announcements may wait 5s for the persona voice');
+ok(/opts && opts\.awaitThemed/.test(voiceClient) && /Promise\.race\(\[fetchTts\(text\), delay\(FIRST_SPEAK_GRACE_MS\)/.test(voiceClient),
+  'voice client: awaitThemed races generation against the grace timeout');
+ok(voiceClient.includes('speakText: (text, opts) => speakInternal(text, opts)'),
+  'voice client: speakText passes options through');
+ok(/preview\(\) \{/.test(voiceClient), 'voice client: one-tap preview() method exists');
+ok(appJsCode.includes("speak(`Starting navigation.") && appJsCode.includes('{ awaitThemed: true }'),
+  'app.js: route start waits briefly for the persona voice');
+ok(appJsCode.includes("speak(`New route.") && appJsCode.includes('{ awaitThemed: true }'),
+  'app.js: reroute announcement waits briefly for the persona voice');
+ok(appJsCode.includes("VCNVoice.preview()"), 'app.js: voice preview button is wired');
 ok(voiceClient.includes('onThemeChanged'), 'voice client: onThemeChanged aborts stale theme generation');
 ok(appJsCode.includes('VCNVoice.onThemeChanged'), 'app.js: theme switch notifies the voice client');
 ok(/routeEpoch\+\+/.test(voiceClient), 'voice client: reroute/theme bumps the generation epoch');

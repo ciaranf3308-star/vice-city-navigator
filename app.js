@@ -74,8 +74,8 @@ function etaString(remainSec) {
 /* Voice goes through the theme-aware voice engine (voice.js):
    standard speechSynthesis, themed OpenAI TTS, or off.
    The deterministic text stays on screen regardless. */
-function speak(text) {
-  if (window.VCNVoice) window.VCNVoice.speakText(text);
+function speak(text, opts) {
+  if (window.VCNVoice) window.VCNVoice.speakText(text, opts);
 }
 
 /* ---------------- WayStation semantic blips ----------------
@@ -792,7 +792,9 @@ function startNav() {
   enableCompass(); // map follows the direction the user faces, not just GPS travel
   updateBanner();
   const first = steps[0];
-  speak(`Starting navigation. ${instrText(first)}. Total ${speakDist(totalDist)}.`);
+  // The opening announcement briefly waits for the persona voice (up to 5s)
+  // so the route doesn't open with the robot and switch to the DJ mid-drive.
+  speak(`Starting navigation. ${instrText(first)}. Total ${speakDist(totalDist)}.`, { awaitThemed: true });
   // Pre-generate themed voice for upcoming maneuvers — background only,
   // navigation never waits for it. Canonical texts are stable ("In 300
   // meters, …") so they match exactly what maybeAnnounce will speak.
@@ -911,7 +913,7 @@ async function reroute() {
       VCNVoice.pruneCache([]);
       VCNVoice.pregenerate(upcomingManeuverTexts());
     }
-    speak(`New route. ${instrText(steps[0])}.`);
+    speak(`New route. ${instrText(steps[0])}.`, { awaitThemed: true });
   } catch (e) { toast('Reroute failed — staying on current route.'); }
   rerouting = false;
 }
@@ -1512,6 +1514,9 @@ function wireControls() {
   });
   $('profanity-toggle').addEventListener('change', e => {
     if (window.VCNVoice) VCNVoice.setConfig({ profanity: e.target.checked });
+  });
+  $('voice-preview').addEventListener('click', () => {
+    if (window.VCNVoice) VCNVoice.preview();
   });
 
   // menu: live traffic (single master toggle)
