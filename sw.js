@@ -65,7 +65,10 @@ function isThemeAsset(path) {
 }
 function staleWhileRevalidate(req) {
   return caches.match(req).then(cached => {
-    const network = fetch(req).then(res => {
+    // Bypass the browser HTTP cache on revalidation: without this, a
+    // stale HTTP-cached copy can be re-stored as "fresh" and updates
+    // never reach return visitors (seen 2026-09-08 with a theme PNG).
+    const network = fetch(new Request(req, { cache: 'reload' })).then(res => {
       if (res && res.ok) {
         const copy = res.clone();
         caches.open(CACHE).then(c => c.put(req, copy)).catch(()=>{});

@@ -176,6 +176,8 @@ ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
 ok(swSrc.includes("ws-theme-v74"), 'SW theme cache v74');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
+ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
+  'SW shell revalidation bypasses the HTTP cache too');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
