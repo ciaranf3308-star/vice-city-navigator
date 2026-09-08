@@ -579,8 +579,8 @@ ok(appSrc.includes("applyBodyTheme(VCNThemes.currentId())") && /Paint the theme 
   'theme chrome paints before tiles arrive (no chrome-less dashboard offline)');
 ok(indexSrc.includes('class="sa-logo"'), 'SA dashboard mounts the standalone wordmark element');
 ok(indexSrc.includes('dashboard/sa-logo.png'), 'SA wordmark uses the extracted logo art');
-ok(/theme-san-andreas #dash-topbar \.sa-logo\{[^}]*height:180px/.test(cssSrc),
-  'SA wordmark is hero-sized and overlaps the map');
+ok(/theme-san-andreas #dash-topbar \.sa-logo\{[^}]*height:140px/.test(cssSrc),
+  'SA wordmark is sized to fit without clipping');
 ok(/theme-san-andreas #dash-bottombar \.dash-chrome\{[^}]*display:flex/.test(cssSrc),
   'SA bottom console lays out with flex, not art-slot coordinates');
 ok(/theme-san-andreas \.dash-tabs button\{[^}]*border:0/.test(cssSrc),
