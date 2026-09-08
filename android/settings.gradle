@@ -1,0 +1,19 @@
+// WayStation — Android Auto car shell (personal/internal test build).
+// Thin native wrapper: the real app stays the web dashboard, rendered in a
+// WebView on the car Surface. See android/README.md.
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+rootProject.name = "waystation-auto"
+include(":app")

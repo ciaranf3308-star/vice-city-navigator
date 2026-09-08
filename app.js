@@ -1027,6 +1027,12 @@ function initAppMode() {
   try {
     const q = new URLSearchParams(location.search);
     const param = q.get('dashboard');
+    if (window.__WAYSTATION_CAR) {
+      // Car head-unit session: always the dashboard, never persisted —
+      // the phone/PWA keeps whatever mode the user chose there.
+      appMode = 'dashboard';
+      return;
+    }
     if (param === '1') { appMode = 'dashboard'; localStorage.setItem(APP_MODE_KEY, 'dashboard'); }
     else if (param === '0') { appMode = 'normal'; localStorage.setItem(APP_MODE_KEY, 'normal'); }
     else appMode = localStorage.getItem(APP_MODE_KEY) === 'dashboard' ? 'dashboard' : 'normal';
@@ -1215,6 +1221,68 @@ window.WayStation = window.WayStation || {};
 window.WayStation.setAppMode = setAppMode;
 window.WayStation.getAppMode = () => appMode;
 window.WayStation.dashboardActive = dashboardLayoutActive;
+
+/* ---------------- car-mode bridge (?car=1) ----------------
+   The Android Auto native shell renders this exact dashboard inside a
+   WebView on the car Surface (see android/). It drives the car through
+   this tiny bridge — no second dashboard, no native UI rewrite:
+
+   - setVisibleArea / setStableArea: rects forwarded from the host's
+     onVisibleAreaChanged / onStableAreaChanged, exposed as CSS vars
+     (--car-visible-*, --car-stable-*) so chrome can stay clear of any
+     host overlay without redesigning the dashboard.
+   - setSpotifyAuth: thin token handoff — the native shell performs the
+     Spotify PKCE flow once (Custom Tab on the phone) and hands the
+     {access_token, refresh_token, expires_at} JSON here; it lands in the
+     exact localStorage key the web auth flow uses, then the core reloads.
+   - getState: nav/spotify/theme snapshot polled by the native shell so
+     Android Auto knows a navigation session is active.
+   - The native shell also injects window.WayStationCarNative (a
+     JavascriptInterface); feature-detect it, never assume it. */
+function installCarBridge() {
+  if (!window.__WAYSTATION_CAR) return;
+  const root = document.documentElement;
+  function setAreaVars(prefix, r) {
+    if (!r) return;
+    try {
+      root.style.setProperty('--car-' + prefix + '-left', r.left + 'px');
+      root.style.setProperty('--car-' + prefix + '-top', r.top + 'px');
+      root.style.setProperty('--car-' + prefix + '-right', r.right + 'px');
+      root.style.setProperty('--car-' + prefix + '-bottom', r.bottom + 'px');
+    } catch (e) {}
+  }
+  window.WayStationCar = {
+    isCar: function () { return true; },
+    setVisibleArea: function (r) { setAreaVars('visible', r); },
+    setStableArea: function (r) { setAreaVars('stable', r); },
+    setSpotifyAuth: function (json) {
+      try {
+        const auth = (typeof json === 'string') ? JSON.parse(json) : json;
+        if (!auth || !auth.refresh_token) return false;
+        localStorage.setItem('vcn.spotify.auth', JSON.stringify(auth));
+        if (window.SpotifyCore && SpotifyCore.reloadAuth) SpotifyCore.reloadAuth();
+        return true;
+      } catch (e) { return false; }
+    },
+    isSpotifyConnected: function () {
+      return !!(window.SpotifyCore && SpotifyCore.isConnected && SpotifyCore.isConnected());
+    },
+    getState: function () {
+      let theme = null, nav = false;
+      try { theme = (typeof wsThemeId === 'function') ? wsThemeId() : null; } catch (e) {}
+      try { nav = (typeof navActive !== 'undefined') ? !!navActive : false; } catch (e) {}
+      return { car: true, theme: theme, navActive: nav,
+               spotify: this.isSpotifyConnected() };
+    },
+  };
+  try { document.body.classList.add('car-mode'); } catch (e) {}
+  try {
+    root.style.setProperty('--car-visible-left', '0px');
+    root.style.setProperty('--car-visible-top', '0px');
+    root.style.setProperty('--car-visible-right', '100%');
+    root.style.setProperty('--car-visible-bottom', '100%');
+  } catch (e) {}
+}
 
 /* ---------------- dashboard car chrome: top status bar + bottom menu --------
    The head-unit bars from the visual benchmark: live weather + clock up top,
@@ -1627,6 +1695,7 @@ wireSpotifyMenu();
 initMap();
 applyAppMode();
 initSpotify();
+installCarBridge(); // ?car=1: Android Auto WebView bridge (no-op otherwise)
 
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));

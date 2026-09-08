@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  WayStation car shell — Android Auto discovery.
+
+  NAVIGATION category + navigation/template uses: this is a navigation app
+  that draws its own map on the host Surface. The ACCESS_SURFACE permission
+  is declared for the SurfaceCallback rendering path.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="androidx.car.app.ACCESS_SURFACE" />
+    <uses-feature android:name="android.hardware.type.automotive" android:required="false" />
+
+    <application
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="WayStation"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.WayStationCar">
+
+        <!-- Android Auto host discovery -->
+        <meta-data
+            android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc" />
+        <meta-data
+            android:name="androidx.car.app.minCarApiLevel"
+            android:value="1" />
+
+        <!-- The car app entry point. Appears in the Android Auto launcher
+             as "WayStation" under the NAVIGATION category. -->
+        <service
+            android:name=".WayStationCarAppService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="androidx.car.app.CarAppService" />
+                <category android:name="androidx.car.app.category.NAVIGATION" />
+            </intent-filter>
+        </service>
+
+        <!-- Spotify OAuth redirect target for the native PKCE handoff.
+             waystation://spotify-callback must be registered as a redirect
+             URI in the Spotify developer dashboard (see android/README.md). -->
+        <activity
+            android:name=".SpotifyCallbackActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="waystation" android:host="spotify-callback" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

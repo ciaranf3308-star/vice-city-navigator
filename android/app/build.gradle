@@ -1,0 +1,51 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace 'com.waystation.auto'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.waystation.auto'
+        minSdk 23
+        targetSdk 34
+        versionCode 1
+        versionName '1.0.0-car'
+    }
+
+    buildTypes {
+        debug {
+            // WebView remote debugging (chrome://inspect) for DHU sessions.
+            buildConfigField 'boolean', 'WEBVIEW_DEBUG', 'true'
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField 'boolean', 'WEBVIEW_DEBUG', 'false'
+        }
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+}
+
+dependencies {
+    // Car App Library 1.7.0 (stable) — CarAppService, NavigationTemplate,
+    // AppManager.setSurfaceCallback, NavigationManager.
+    implementation 'androidx.car.app:app:1.7.0'
+    implementation 'androidx.car.app:app-projected:1.7.0'
+    // Custom Tabs for the one-time Spotify PKCE login on the phone.
+    implementation 'androidx.browser:browser:1.8.0'
+    implementation 'androidx.core:core-ktx:1.13.1'
+}

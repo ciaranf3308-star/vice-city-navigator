@@ -315,6 +315,20 @@
     if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
   }
 
+  /* ---------------- car-mode token handoff ----------------
+     The Android Auto shell performs Spotify PKCE natively (Custom Tab on
+     the phone) and hands the resulting auth JSON here via
+     window.WayStationCar.setSpotifyAuth(). Same storage key and shape as
+     the web flow — no second Spotify implementation. */
+  function reloadAuth() {
+    const was = isConnected();
+    loadAuth();
+    const now = isConnected();
+    if (now) { startPolling(); refreshNow(); }
+    else if (was) { stopPolling(); }
+    emit('auth', now);
+  }
+
   /* ---------------- init ---------------- */
   function init(options) {
     cfg = {
@@ -333,7 +347,7 @@
 
   window.SpotifyCore = {
     init, isConnected, connect, disconnect,
-    handleRedirectCallback,
+    handleRedirectCallback, reloadAuth,
     getState, getPosition, refreshNow,
     play, pause, next, previous, seek,
     startPolling, stopPolling,

@@ -146,7 +146,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v47"), 'SW shell cache v44');
+ok(swSrc.includes("ws-shell-v48"), 'SW shell cache v48');
 ok(swSrc.includes("ws-theme-v13"), 'SW theme cache v13');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
@@ -972,6 +972,71 @@ const html = fs.readFileSync(path.join(REPO, 'index.html'), 'utf8');
 ok(html.includes('<script src="lyrics.js"></script>'), 'lyrics: index.html loads lyrics.js');
 const sw = fs.readFileSync(path.join(REPO, 'sw.js'), 'utf8');
 ok(sw.includes("'lyrics.js'"), 'lyrics: service worker precaches lyrics.js');
+
+/* ---------- car mode (?car=1): Android Auto WebView adapter ---------- */
+const carJs = fs.readFileSync(path.join(REPO, 'car.js'), 'utf8');
+ok(/get\('car'\) === '1'/.test(carJs) && carJs.includes('window.__WAYSTATION_CAR = true'),
+  'car: ?car=1 plants the car flag before app.js boots');
+ok(html.indexOf('<script src="car.js"></script>') !== -1 &&
+   html.indexOf('<script src="car.js"></script>') < html.indexOf('<script src="app.js"></script>'),
+  'car: index.html loads car.js before app.js');
+ok(appSrc.includes('if (window.__WAYSTATION_CAR)') && appSrc.includes("appMode = 'dashboard';"),
+  'car: car mode forces dashboard mode for the session');
+ok(/function installCarBridge\(\)/.test(appSrc) && appSrc.includes('installCarBridge(); // ?car=1'),
+  'car: WayStationCar bridge installed at boot');
+for (const m of ['setVisibleArea', 'setStableArea', 'setSpotifyAuth', 'isSpotifyConnected', 'getState']) {
+  ok(new RegExp(m + ':\\s*function').test(appSrc), `car: bridge exposes ${m}`);
+}
+ok(appSrc.includes('--car-visible-') && appSrc.includes('--car-stable-'),
+  'car: visible/stable areas exposed as CSS variables');
+const spCore = fs.readFileSync(path.join(REPO, 'spotify-core.js'), 'utf8');
+ok(/function reloadAuth\(\)/.test(spCore) && spCore.includes('reloadAuth,'),
+  'car: SpotifyCore exposes reloadAuth for the native token handoff');
+ok(sw.includes("'car.js'"), 'car: service worker precaches car.js');
+
+/* ---------- android/ car shell (personal/internal test build) ---------- */
+const AND = path.join(REPO, 'android');
+const manifest = fs.readFileSync(path.join(AND, 'app/src/main/AndroidManifest.xml'), 'utf8');
+ok(manifest.includes('android:name=".WayStationCarAppService"'), 'android: CarAppService declared');
+ok(manifest.includes('androidx.car.app.CarAppService'), 'android: CarAppService intent action');
+ok(manifest.includes('androidx.car.app.category.NAVIGATION'), 'android: NAVIGATION category');
+ok(manifest.includes('androidx.car.app.ACCESS_SURFACE'), 'android: ACCESS_SURFACE declared');
+ok(manifest.includes('com.google.android.gms.car.application'), 'android: car application metadata');
+ok(manifest.includes('@xml/automotive_app_desc'), 'android: automotive_app_desc referenced');
+ok(manifest.includes('waystation') && manifest.includes('spotify-callback'), 'android: Spotify deep-link scheme');
+const desc = fs.readFileSync(path.join(AND, 'app/src/main/res/xml/automotive_app_desc.xml'), 'utf8');
+ok(desc.includes('<uses name="navigation"') && desc.includes('<uses name="template"'),
+  'android: automotive_app_desc declares navigation + template');
+const appGradle = fs.readFileSync(path.join(AND, 'app/build.gradle'), 'utf8');
+ok(appGradle.includes('androidx.car.app:app:1.7.0'), 'android: Car App Library app:1.7.0');
+ok(appGradle.includes('androidx.car.app:app-projected:1.7.0'), 'android: Car App Library app-projected:1.7.0');
+const svc = fs.readFileSync(path.join(AND, 'app/src/main/java/com/waystation/auto/WayStationCarAppService.kt'), 'utf8');
+ok(svc.includes('HostValidator.ALLOW_ALL_HOSTS_VALIDATOR'), 'android: permissive host validator (internal build)');
+const screen = fs.readFileSync(path.join(AND, 'app/src/main/java/com/waystation/auto/WayStationScreen.kt'), 'utf8');
+ok(screen.includes('NavigationTemplate.Builder()'), 'android: NavigationTemplate keeps host chrome minimal');
+ok(screen.includes('setSurfaceCallback'), 'android: SurfaceCallback registered via AppManager');
+ok(screen.includes('navigationStarted()') && screen.includes('navigationEnded()'),
+  'android: NavigationManager session start/end signals');
+const rend = fs.readFileSync(path.join(AND, 'app/src/main/java/com/waystation/auto/CarWebViewRenderer.kt'), 'utf8');
+ok(rend.includes('?dashboard=1&car=1'), 'android: WebView loads the car dashboard URL');
+ok(rend.includes('createVirtualDisplay'), 'android: VirtualDisplay from the SurfaceContainer');
+ok(rend.includes('Presentation('), 'android: Presentation hosts the WebView');
+ok(rend.includes('javaScriptEnabled = true'), 'android: WebView JS enabled');
+for (const m of ['onSurfaceAvailable', 'onSurfaceDestroyed', 'onVisibleAreaChanged',
+                 'onStableAreaChanged', 'onClick', 'onScroll', 'onScale', 'onFling']) {
+  ok(screen.includes(m) || rend.includes(m), `android: SurfaceCallback ${m} handled`);
+}
+ok(rend.includes('dispatchTouchEvent'), 'android: touch forwarded as synthetic MotionEvents');
+ok(rend.includes('WayStationCar.setVisibleArea('), 'android: visible area forwarded into JS');
+ok(rend.includes('WayStationCar.setSpotifyAuth('), 'android: Spotify token handoff into the page');
+ok(rend.includes('virtualDisplay?.release()') && rend.includes('presentation?.dismiss()'),
+  'android: surface teardown releases VirtualDisplay + Presentation');
+const spotKt = fs.readFileSync(path.join(AND, 'app/src/main/java/com/waystation/auto/SpotifyAuthManager.kt'), 'utf8');
+ok(spotKt.includes('accounts.spotify.com/authorize') && spotKt.includes('code_challenge'),
+  'android: native Spotify PKCE flow (Custom Tab)');
+ok(spotKt.includes('expires_at'), 'android: handoff token matches the web auth shape');
+ok(fs.existsSync(path.join(AND, 'gradlew')), 'android: gradle wrapper script present');
+ok(fs.existsSync(path.join(AND, 'gradle/wrapper/gradle-wrapper.jar')), 'android: gradle wrapper jar present');
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
