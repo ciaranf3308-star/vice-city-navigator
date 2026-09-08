@@ -148,11 +148,18 @@ body.dashboard-mode.theme-gta-v .dash-dest{
   padding:0 40px;min-width:0;
 }
 body.dashboard-mode.theme-gta-v #dash-dest{
+  visibility:hidden;
+  position:relative;
+  font-family:'Chalet Comprime',sans-serif;
+}
+body.dashboard-mode.theme-gta-v .dash-dest::after{
+  content:'LOS SANTOS COUNTY';
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
   display:flex;align-items:center;gap:14px;
   font-family:'Chalet Comprime',sans-serif;font-weight:700;
   font-size:21px;letter-spacing:2.5px;text-transform:uppercase;color:#f2f5f2;
   text-shadow:0 1px 3px rgba(0,0,0,.85);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
+  white-space:nowrap;pointer-events:none;
 }
 body.dashboard-mode.theme-gta-v #dash-dest::before,
 body.dashboard-mode.theme-gta-v #dash-dest::after{
@@ -163,7 +170,9 @@ body.dashboard-mode.theme-gta-v #dash-dest::after{
 body.dashboard-mode.theme-gta-v .dash-zoom{display:none !important}
 /* Right: compass + trip info */
 body.dashboard-mode.theme-gta-v .dash-trip{
-  display:flex;align-items:center;gap:14px;padding:0 30px 0 10px;margin-left:auto;
+  display:flex;align-items:center;gap:12px;padding:0 20px 0 10px;margin-left:auto;
+  flex:none;max-width:28%;
+  overflow:hidden;
 }
 body.dashboard-mode.theme-gta-v #dash-compass{
   font-size:0;width:44px;height:44px;flex:none;
@@ -180,7 +189,7 @@ body.dashboard-mode.theme-gta-v .dash-tag{display:none !important}
 
 /* ============ RIGHT MUSIC PANEL (.gvsp) ============ */
 body.dashboard-mode.theme-gta-v .gvsp{
-  left:auto;right:20px;top:132px;bottom:132px;width:440px;
+  left:auto;right:20px;top:132px;bottom:140px;width:440px;
   transform:none;translate:none;z-index:25;overflow:hidden;
   background:url('dashboard/widget-bg.png') 50% 50%/cover no-repeat, #0a0c0e;
   border:1px solid rgba(255,255,255,.09);border-radius:3px;
