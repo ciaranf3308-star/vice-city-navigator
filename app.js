@@ -202,6 +202,9 @@ async function initMap() {
   // Paint the theme chrome (bars, menu docking, Spotify skin) immediately:
   // the dashboard must never depend on vector tiles arriving.
   try { if (window.VCNThemes) applyBodyTheme(VCNThemes.currentId()); } catch (e) {}
+  // Sync the Spotify skin on init too — applyBodyTheme doesn't cover it,
+  // and a stale skin (e.g. SA) with a VC body is the classic mismatch.
+  try { if (window.VCNThemes) mountSpotifySkin(VCNThemes.currentId()); } catch (e) {}
   const theme = wsTheme();
   const styleUrl = (theme && theme.map.styleUrl) || 'themes/vice-city/style.json';
   let style;
@@ -458,6 +461,11 @@ async function applyTheme(id) {
 function syncThemeSelector() {
   const sel = document.getElementById('theme-select');
   if (sel && window.VCNThemes) sel.value = VCNThemes.currentId();
+  // VC hero tagline: "Good Roads Better Times" (other themes keep "Good Music")
+  try {
+    const tag = document.querySelector('.dash-tag .tag-line:first-child');
+    if (tag) tag.textContent = (window.VCNThemes && VCNThemes.currentId() === 'vice-city') ? 'Good Roads' : 'Good Music';
+  } catch (e) {}
 }
 function buildThemeSelector() {
   const sel = document.getElementById('theme-select');

@@ -583,7 +583,7 @@ ok(/theme-san-andreas #dash-bottombar \.dash-chrome\{[^}]*display:flex/.test(css
   'SA bottom console lays out with flex, not art-slot coordinates');
 ok(/theme-san-andreas \.dash-tabs button\{[^}]*border:0/.test(cssSrc),
   'SA tabs are borderless icon+label like the hero');
-ok(indexSrc.includes('Good Music<br>Better Times'), 'dashboard tagline reads "Good Music Better Times"');
+ok(indexSrc.includes('Good Music</span><span class="tag-line">Better Times'), 'dashboard tagline reads "Good Music Better Times"');
 /* ---------- SA map: deeper palette, denser road labels ---------- */
 const saStyle2 = JSON.parse(fs.readFileSync(path.join(REPO, 'themes/san-andreas/style.json'), 'utf8'));
 const saPaint = id => saStyle2.layers.find(l => l.id === id).paint;
