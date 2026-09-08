@@ -117,7 +117,7 @@ body.dashboard-mode.theme-san-andreas #dash-dest{
   font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:15px;font-weight:700;
   letter-spacing:3px;color:#f0e6c8;cursor:pointer;background:none;border:0;
   padding:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
-  text-shadow:0 2px 0 #000;
+  text-shadow:0 2px 0 #000;width:100%;text-align:center;
 }
 /* right cluster: compact compass + arrival in the visible sliver (x1106-1219) */
 body.dashboard-mode.theme-san-andreas .dash-trip{
