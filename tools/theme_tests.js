@@ -146,7 +146,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v44"), 'SW shell cache v44');
+ok(swSrc.includes("ws-shell-v45"), 'SW shell cache v44');
 ok(swSrc.includes("ws-theme-v13"), 'SW theme cache v13');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
@@ -393,6 +393,19 @@ ok(/theme-gta-v \.dash-tag\{display:none\}/.test(cssSrc), 'V drops the 80s scrip
 ok(/theme-rdr2 \.dash-tag\{display:none\}/.test(cssSrc), 'RDR2 drops the 80s script tagline');
 ok(/theme-rdr2 \.dash-brand\{[^}]*margin:0 auto/.test(cssSrc), 'RDR2 centers its ornate title plate');
 ok(/theme-rdr2 \.dash-tabs button\.on::after/.test(cssSrc), 'RDR2 active tab gets the gold diamond marker');
+/* ---------- dashboard-mode settings: car-scale menu panel ---------- */
+ok(/body\.dashboard-mode #menu-panel\{[^}]*width:min\(540px,94vw\)/.test(cssSrc),
+  'dashboard settings panel is car-scale (540px), not phone-sized');
+ok(/body\.dashboard-mode #menu-panel\{[^}]*z-index:60/.test(cssSrc),
+  'dashboard settings panel paints above the dash stage');
+for (const id of ['san-andreas', 'gta-v', 'rdr2']) {
+  ok(cssSrc.includes(`body.dashboard-mode.theme-${id} #menu-panel`),
+    `${id} settings panel docks clear of its own bar heights`);
+}
+ok(/body\.dashboard-mode \.menu-section input\[type="checkbox"\]\{[^}]*width:36px/.test(cssSrc),
+  'dashboard settings checkboxes are car-size touch targets');
+ok(/body\.dashboard-mode \.vc-title\{[^}]*font-size:52px/.test(cssSrc),
+  'dashboard settings title is car-legible');
 
 /* ---------- bespoke dashboard bar assets (authentic game-UI textures) ---------- */
 const dashAssets = [

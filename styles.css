@@ -720,6 +720,43 @@ body.dashboard-mode.theme-rdr2 .dash-trip{order:3;padding:8px 18px 8px 8px}
 body.dashboard-mode.theme-rdr2 #dash-compass{color:#d8b36a;text-shadow:none}
 body.dashboard-mode.theme-rdr2 #dash-eta{color:#d8b36a;text-shadow:none;font-size:20px}
 body.dashboard-mode.theme-rdr2 .dash-tag{display:none}
+/* ---------- dashboard-mode settings: car-scale menu panel ----------
+   On a car display the phone-sized menu (360px, 12-16px type) is unreadable
+   at arm's length. In dashboard mode the panel becomes a left-docked
+   settings console: big type, big touch targets, docked clear of that
+   theme's dash bars. All controls and wiring are unchanged — the existing
+   per-theme menu skins (pink / gold / green / brass) carry over. */
+body.dashboard-mode #menu-panel{
+  z-index:60;
+  top:88px;bottom:100px;left:12px;
+  width:min(540px,94vw);
+  padding:26px 30px calc(26px + env(safe-area-inset-bottom));
+  border-radius:18px;
+  overflow-y:auto;
+}
+/* dock clear of each theme's real bar heights */
+body.dashboard-mode.theme-san-andreas #menu-panel{top:84px;bottom:96px}
+body.dashboard-mode.theme-gta-v #menu-panel{top:68px;bottom:76px}
+body.dashboard-mode.theme-rdr2 #menu-panel{top:84px;bottom:84px}
+/* car-scale type + touch targets */
+body.dashboard-mode .menu-head{margin-bottom:10px;align-items:center}
+body.dashboard-mode .vc-title{font-size:52px;letter-spacing:4px}
+body.dashboard-mode #menu-close{width:68px;height:68px;font-size:28px;flex:none}
+body.dashboard-mode .menu-section{margin-top:28px;padding-top:20px}
+body.dashboard-mode .menu-section h3{font-size:20px;letter-spacing:5px;margin:0 0 16px}
+body.dashboard-mode .menu-section .row{font-size:24px;margin:16px 0;gap:18px}
+body.dashboard-mode .menu-section .stack{font-size:20px;margin:16px 0}
+body.dashboard-mode .menu-section select,
+body.dashboard-mode .menu-section input[type="url"]{
+  font-size:22px;padding:18px;margin-top:12px;border-radius:14px;
+}
+body.dashboard-mode .menu-section input[type="checkbox"]{width:36px;height:36px;flex:none}
+body.dashboard-mode .menu-section details.advanced summary{font-size:20px;padding:10px 0;cursor:pointer}
+body.dashboard-mode .stats{font-size:21px;margin:12px 0}
+body.dashboard-mode .hint{font-size:17px;line-height:1.65;margin-top:14px}
+body.dashboard-mode .ghost-btn{font-size:21px;padding:16px 24px;margin-top:14px;border-radius:14px}
+body.dashboard-mode .attrib{font-size:16px;margin-top:24px}
+
 /* ---------- toast ---------- */
 #toast{
   position:absolute;left:50%;transform:translateX(-50%);
