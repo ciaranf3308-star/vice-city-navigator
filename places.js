@@ -417,6 +417,10 @@
   }
   function renderPois() {
     if (!map || !map.getSource('vcn-pois')) return;
+    // Self-healing: if the layer was dropped (theme switch, style reload),
+    // recreate it now — the source and images are already in place.
+    if (!map.getLayer(POI_LAYER_ID)) ensureLayers();
+    if (!map.getLayer(POI_LAYER_ID)) return;
     const now = Date.now(), ttl = ttlMs();
     const band = bandForZoom(map.getZoom());
     let picked = [];
