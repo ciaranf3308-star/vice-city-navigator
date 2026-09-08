@@ -172,7 +172,9 @@ body.dashboard-mode.theme-gta-v .dash-tag{display:none !important}
 
 body.dashboard-mode.theme-gta-v::before{
   content:'';position:absolute;inset:0;z-index:24;pointer-events:none;
-  background:url('dashboard/overlay.png') 50% 50%/100% 100% no-repeat;
+  background:url('dashboard/overlay.png') 50% 50%/contain no-repeat;
+  /* Maintain 8:3 aspect — do not stretch. On 8:3 screens (car) this fills
+     perfectly. On other aspects it letterboxes rather than distorting. */
 }
 /* In dashboard mode, the widget chrome comes from the overlay.
    Hide the old floating hud, reposition live elements into the overlay.
