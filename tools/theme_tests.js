@@ -166,7 +166,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v52"), 'SW theme cache v31');
+ok(swSrc.includes("ws-theme-v53"), 'SW theme cache v31');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
@@ -420,7 +420,7 @@ ok(cssSrc.includes('vc-logo-script'), 'VC hero logo script styled');
    layouts and drive-HUD clearances, not one shared silhouette ---------- */
 const barHeights = {
   'vice-city': ['76px', '88px'],
-  'san-andreas': ['140px', '130px'],
+  'san-andreas': ['140px', '120px'],
   'gta-v': ['56px', '64px'],
   'rdr2': ['72px', '72px'],
 };
@@ -530,8 +530,8 @@ ok(vcPaint('vc-road-minor')['line-color'] === '#eef0f6', 'VC minor roads: white 
 ok(vcPaint('vc-road-primary')['line-color'] === '#1d1d36', 'VC arterials: stronger dark navy (hero contrast)');
 ok(vcPaint('vc-road-motorway')['line-color'] === '#0e0e22', 'VC motorways: near-black navy (hero contrast)');
 ok(/theme-san-andreas #dash-bottombar::before/.test(cssSrc), 'SA bottom console wears the machined brass trim');
-ok(/theme-san-andreas #dash-bottombar\{[^}]*#0a0806/.test(cssSrc),
-  'SA bottom bar is the dark hero console');
+ok(/theme-san-andreas #dash-bottombar\{[^}]*#0e0c08/.test(cssSrc),
+  'SA bottom bar is the dark console');
 /* ---------- SA hero-match: authored dashboard art set ---------- */
 const saDash = (f) => path.join(REPO, 'themes/san-andreas/dashboard', f);
 for (const f of ['topbar.png', 'bottombar.png', 'maneuver.png', 'grove-panel.png', 'script-tomorrow.png', 'script-music.png', 'sa-logo.png']) {
@@ -547,8 +547,8 @@ ok(/topbar-composite\.jpg/.test(cssSrc),
   'SA top bar panorama is photographic art (not a CSS gradient)');
 ok(/theme-san-andreas #dash-topbar::before\{[^}]*clip-path:polygon/.test(cssSrc),
   'SA top bar has the hero machined angular edge');
-ok(/theme-san-andreas #dash-bottombar\{[^}]*clip-path:polygon/.test(cssSrc),
-  'SA bottom bar has the hero machined angular edge');
+ok(/theme-san-andreas #dash-bottombar\{[^}]*border-top:3px solid/.test(cssSrc),
+  'SA bottom bar has a clean brass top border');
 ok(indexSrc.includes('dash-tomorrow'),
   'SA top bar places the A Better Tomorrow script (hero detail)');
 const saMan = pngSize(saDash('maneuver.png'));
