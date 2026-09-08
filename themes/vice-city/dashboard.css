@@ -56,7 +56,7 @@ body.dashboard-mode.theme-vice-city .dash-tomorrow{display:none}
 /* ============ MANEUVER CARD: dark glass, pink neon frame ============ */
 body.dashboard-mode.theme-vice-city #maneuver-card{display:none}
 body.dashboard-mode.theme-vice-city #vc-maneuver{
-  display:block;position:absolute;left:18px;top:104px;width:380px;z-index:24;
+  display:block;position:absolute;left:18px;top:120px;width:360px;z-index:24;
   background:linear-gradient(180deg,rgba(10,6,24,.92),rgba(16,8,36,.88));
   border:2px solid #ff2e88;border-radius:14px;
   clip-path:polygon(0 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,18px 100%,0 calc(100% - 18px));
@@ -114,17 +114,19 @@ body.dashboard-mode.theme-vice-city #vc-right-panel .vc-sunset{
   box-shadow:0 0 20px rgba(1,205,254,.3),0 0 40px rgba(255,46,136,.2);
   clip-path:polygon(0 0,100% 0,100% calc(100% - 24px),calc(100% - 24px) 100%,24px 100%,0 calc(100% - 24px));
 }
-body.dashboard-mode.theme-vice-city #vc-right-panel .vc-sunset-script{
+/* Lyrics spawn here: neon script over the sunset */
+body.dashboard-mode.theme-vice-city #vc-right-panel .vcsp-lyrics{
   position:absolute;inset:0;display:flex;flex-direction:column;
   align-items:center;justify-content:center;text-align:center;
-  font-family:'Yellowtail',cursive;font-size:34px;line-height:1.4;color:#ff9de2;
+  padding:24px;pointer-events:none;
+}
+body.dashboard-mode.theme-vice-city #vc-right-panel .vcsp-lyrics .wslyr-hero{
+  font-family:'Yellowtail',cursive;font-size:32px;line-height:1.4;color:#ff9de2;
   text-shadow:0 0 12px rgba(255,46,136,.9),0 2px 8px rgba(0,0,0,.6);
-  transform:rotate(-4deg);
+  transform:rotate(-3deg);
 }
-body.dashboard-mode.theme-vice-city #vc-right-panel .vc-sunset-script em{
-  font-style:normal;color:#7df9ff;
-  text-shadow:0 0 12px rgba(1,205,254,.9),0 2px 8px rgba(0,0,0,.6);
-}
+/* Hide the skin's internal lyrics div in dashboard mode (lyrics are in the sunset panel) */
+body.dashboard-mode.theme-vice-city .vcsp .vcsp-lyrics{display:none}
 /* Spotify sits between the logo and the sunset panel */
 body.dashboard-mode.theme-vice-city #spotify-pane{
   position:absolute;right:18px;top:300px;width:340px;z-index:25;
@@ -190,11 +192,15 @@ body.dashboard-mode.theme-vice-city #dash-eta{
 }
 body.dashboard-mode.theme-vice-city #dash-eta .eta-label{color:var(--cyan);text-shadow:0 0 8px rgba(1,205,254,.7)}
 body.dashboard-mode.theme-vice-city #dash-eta .eta-min{color:#ff71ce;text-shadow:0 0 10px rgba(255,46,136,.9);font-size:28px}
-/* Tagline script */
+/* Tagline script — VC hero says "Good Roads Better Times" */
 body.dashboard-mode.theme-vice-city .dash-tag{
+  font-size:0;line-height:0;
+}
+body.dashboard-mode.theme-vice-city .dash-tag::after{
+  content:"Good Roads\ABetter Times";white-space:pre;
   font-family:'Yellowtail',cursive;font-size:20px;color:#ff71ce;
   text-shadow:0 0 8px rgba(255,46,136,.7);transform:rotate(-3deg);
-  text-align:right;line-height:1.2;white-space:nowrap;
+  display:block;text-align:right;line-height:1.2;
 }
 /* Hide SA-specific elements */
 body.dashboard-mode.theme-vice-city .sa-logo{display:none!important}

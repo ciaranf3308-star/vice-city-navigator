@@ -155,7 +155,9 @@
        (lyrics.js, LRCLIB). A custom lyricsRenderer set via the mount
        api still overrides the engine. Never fake words. */
     function renderLyrics(s) {
-      const box = q('.vcsp-lyrics');
+      // Hero: lyrics spawn in the sunset panel (outside the skin root).
+      // Fall back to the internal stage for non-dashboard modes.
+      const box = document.querySelector('#vc-right-panel .vcsp-lyrics') || q('.vcsp-lyrics');
       if (lyricsRenderer && s && s.item) {
         try {
           if (window.WSLyrics) WSLyrics.destroy(box);
