@@ -166,7 +166,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v43"), 'SW theme cache v31');
+ok(swSrc.includes("ws-theme-v44"), 'SW theme cache v31');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
@@ -746,7 +746,7 @@ ok(vcRoad !== vcPlace, 'VC: road labels a different tone from place labels');
 /* ---------- Spotify skins: single-hud overlays, art-registered openings ---------- */
 const HUD_EXPECTED = {
   'gta-v':       { w: 1155, h: 1362, art: ['6.49%', '35.61%', '26.84%', '22.76%'], over: true },
-  'san-andreas': { w: 1254, h: 1254, art: ['6.1%', '30.70%', '40.67%', '39.07%'], over: false },
+  'san-andreas': { w: 1254, h: 1254, art: ['6.1%', '30.70%', '42%', '39.07%'], over: false },
   'rdr2':        { w: 1254, h: 1254, art: ['15.55%', '27.91%', '29.11%', '28.71%'], over: false },
 };
 for (const [theme, exp] of Object.entries(HUD_EXPECTED)) {
