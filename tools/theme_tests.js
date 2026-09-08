@@ -613,9 +613,9 @@ ok(voiceFn.includes('OpenAI-primary voice for EVERY theme'), 'voice function: Op
 // Every theme profile: cached audio -> OpenAI rewrite -> OpenAI TTS.
 // Gemini is never attempted first for any of them.
 const THEME_VOICES = {
-  'vice-city': 'echo',
+  'vice-city': 'shimmer',
   'san-andreas': 'onyx',
-  'gta-v': 'alloy',
+  'gta-v': 'ash',
   'rdr2': 'fable',
 };
 for (const [theme, voice] of Object.entries(THEME_VOICES)) {
@@ -628,7 +628,7 @@ for (const [theme, voice] of Object.entries(THEME_VOICES)) {
   ok(src.includes(`ttsModel: 'gpt-4o-mini-tts'`), `${theme} voice profile: gpt-4o-mini-tts`);
   ok(src.includes(`rewriteModel: 'gpt-4o-mini'`), `${theme} voice profile: gpt-4o-mini rewrite`);
   ok(/cacheAudio:\s*true/.test(src), `${theme} voice profile: server audio cache on`);
-  ok(/personaVersion:\s*'v3'/.test(src), `${theme} voice profile: persona version v3`);
+  ok(/personaVersion:\s*'v4'/.test(src), `${theme} voice profile: persona version v4`);
 }
 // No shipped profile opts into the explicit gemini-first slot, so the
 // normal path can never run Gemini — before OpenAI or at all.
@@ -663,16 +663,16 @@ for (const rule of BREVITY_RULES) {
   ok(voicePrompts.includes(rule), `server rewrite rule present: "${rule}"`);
 }
 // Per-theme TTS persona markers (the exact delivery spec for each voice).
-for (const marker of ['late-night FM swagger', 'corporate announcer']) {
+for (const marker of ['late-70s nightclub energy', 'Never bubbly, breathless']) {
   ok(voiceFn.includes(marker), `VC TTS persona marker present: "${marker}"`);
 }
-for (const marker of ['baritone, warm low end', 'AAVE', 'South Central', 'calm power, never shouting', 'cartoon gangster']) {
+for (const marker of ['Heavy warm baritone', 'AAVE', 'South Central', 'Calm authority', 'cartoon-gangster']) {
   ok(voiceFn.includes(marker), `SA TTS persona marker present: "${marker}"`);
 }
-for (const marker of ['slick Los Santos local with a little attitude', 'slightly cynical', 'game-show energy']) {
+for (const marker of ['mildly cynical', 'slightly rough edge', 'announcer-like']) {
   ok(voiceFn.includes(marker), `GTA V TTS persona marker present: "${marker}"`);
 }
-for (const marker of ['old-soul steadiness', 'wry rather than', 'theatrical cowboy']) {
+for (const marker of ['old-soul delivery', 'Never booming', 'cartoon-cowboy']) {
   ok(voiceFn.includes(marker), `RDR2 TTS persona marker present: "${marker}"`);
 }
 // Server audio cache: keyed by profile + persona version + normalized
@@ -730,7 +730,7 @@ for (const [theme, voice] of Object.entries(THEME_VOICES)) {
   ok(cfg.includes(`profile: '${theme}'`), `${theme} theme config: profile id`);
   ok(cfg.includes(`ttsVoice: '${voice}'`), `${theme} theme config: ${voice} voice`);
   ok(cfg.includes(`ttsModel: 'gpt-4o-mini-tts'`), `${theme} theme config: gpt-4o-mini-tts`);
-  ok(/personaVersion:\s*'v3'/.test(cfg), `${theme} theme config: persona version v3`);
+  ok(/personaVersion:\s*'v4'/.test(cfg), `${theme} theme config: persona version v4`);
   // Brevity pass, client side: the theme's own rewrite prompt carries the
   // same mandatory instruction + word-count ceilings as the server mirror.
   const ri = T.get(theme).voice.rewriteInstructions;
@@ -743,10 +743,10 @@ for (const [theme, voice] of Object.entries(THEME_VOICES)) {
 // Distinct personality markers per theme — four recognisable voices, not
 // four versions of one GPS voice.
 const THEME_MARKERS = {
-  'vice-city': ['hotshot', 'Take this left, baby'],
+  'vice-city': ['Left here, sugar', 'Straight ahead, handsome'],
   'san-andreas': ['homie', 'fool'],
-  'gta-v': ['genius', 'Try not to miss it'],
-  'rdr2': ['partner', 'Bear left here'],
+  'gta-v': ['Take the next right.', 'Straight ahead.'],
+  'rdr2': ['Right at the next road.', 'Easy now. Left here.'],
 };
 for (const [theme, markers] of Object.entries(THEME_MARKERS)) {
   const ri = T.get(theme).voice.rewriteInstructions;
