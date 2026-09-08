@@ -218,7 +218,8 @@ async function initMap() {
     toast('Could not load the map style. Check your connection.');
     return;
   }
-  if (window.maplibregl && !maplibregl.supported()) {
+  const glOk = !window.maplibregl || typeof maplibregl.supported !== 'function' || maplibregl.supported();
+  if (!glOk) {
     mapEl.innerHTML = '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#ff71ce;font:16px sans-serif;text-align:center;padding:20px">Map needs WebGL.<br>Try a browser with hardware acceleration enabled.</div>';
     toast('Map could not start: WebGL unavailable.');
     return;
@@ -1250,7 +1251,8 @@ function fitDashboardStage() {
    margin and the widget — never the raw screen center. The map itself is
    never resized; this only shifts the camera target point. */
 function syncDashPadding() {
-  if (!window.map || !map.setPadding) return;
+  const m = window.map;
+  if (!m || typeof m.setPadding !== 'function') return;
   const b = document.body.classList;
   // Dash bars are always visible in dashboard mode (every theme), so
   // keep the camera target clear of them whether driving or exploring.

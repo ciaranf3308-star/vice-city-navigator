@@ -10,7 +10,7 @@
      default Vice City set.
    Map tiles, routing and search always go to the network. */
 const CACHE = 'ws-shell-v59';
-const THEME_CACHE = 'ws-theme-v28';
+const THEME_CACHE = 'ws-theme-v29';
 const VC_BLIPS = ['airYard','barbers','burgerShot','cash','chicken','dateDisco','dateDrink',
   'dateFood','diner','fuel','girlfriend','gym','hostpital','modGarage','north','parking',
   'pizza','police','propertyG','qmark','race','runway','saveGame','school','spray','tattoo','waypoint'];
@@ -66,7 +66,10 @@ function isThemeAsset(path) {
 function staleWhileRevalidate(req) {
   return caches.match(req).then(cached => {
     const network = fetch(req).then(res => {
-      if (res && res.ok) caches.open(CACHE).then(c => c.put(req, res.clone()));
+      if (res && res.ok) {
+        const copy = res.clone();
+        caches.open(CACHE).then(c => c.put(req, copy)).catch(()=>{});
+      }
       return res;
     }).catch(() => cached);
     return cached || network;
@@ -88,7 +91,10 @@ self.addEventListener('fetch', e => {
     e.respondWith(
       caches.open(THEME_CACHE).then(c => c.match(e.request).then(cached => {
         const network = fetch(e.request).then(res => {
-          if (res && res.ok) c.put(e.request, res.clone());
+          if (res && res.ok) {
+            const copy = res.clone();
+            c.put(e.request, copy).catch(()=>{});
+          }
           return res;
         }).catch(() => cached);
         return cached || network;
