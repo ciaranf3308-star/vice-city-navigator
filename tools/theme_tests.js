@@ -166,7 +166,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v31"), 'SW theme cache v31');
+ok(swSrc.includes("ws-theme-v32"), 'SW theme cache v31');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
@@ -383,7 +383,7 @@ ok(appSrc.includes('nav-driving') && /setUiMode/.test(appSrc), 'drive-mode chrom
 ok(cssSrc.includes('body.dashboard-mode.nav-driving #maneuver-card'), 'drive HUD clears the top bar on every theme');
 ok(cssSrc.includes('body.dashboard-mode.nav-driving #drive-bar'), 'drive trip bar clears the bottom bar on every theme');
 ok(!cssSrc.includes('.dash-skyline') && !indexSrc.includes('dash-skyline'), 'old skyline img fully retired in favour of the authored top bar strip');
-ok(/topbar-panorama\.jpg/.test(cssSrc),
+ok(/topbar-composite\.jpg/.test(cssSrc),
   'SA top bar is one seamless night-to-sunset panorama (hero, not two smushed pics)');
 ok(!/tbar-night/.test(indexSrc) && !/tbar-sunset/.test(indexSrc),
   'SA top bar has no split-panel divs');
@@ -420,7 +420,7 @@ ok(cssSrc.includes('vc-logo-script'), 'VC hero logo script styled');
    layouts and drive-HUD clearances, not one shared silhouette ---------- */
 const barHeights = {
   'vice-city': ['76px', '88px'],
-  'san-andreas': ['110px', '96px'],
+  'san-andreas': ['140px', '96px'],
   'gta-v': ['56px', '64px'],
   'rdr2': ['72px', '72px'],
 };
@@ -540,12 +540,12 @@ for (const f of ['topbar.png', 'bottombar.png', 'maneuver.png', 'grove-panel.png
 }
 const saLogo = pngSize(saDash('sa-logo.png'));
 ok(saLogo && saLogo.w >= 500 && saLogo.h >= 150, 'SA standalone wordmark extracted with transparency');
-ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/topbar-panorama.jpg')),
+ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/topbar-composite.jpg')),
   'SA top bar seamless panorama art exists');
 
-ok(/topbar-panorama\.jpg/.test(cssSrc),
+ok(/topbar-composite\.jpg/.test(cssSrc),
   'SA top bar panorama is photographic art (not a CSS gradient)');
-ok(/theme-san-andreas #dash-topbar\{[^}]*clip-path:polygon/.test(cssSrc),
+ok(/theme-san-andreas #dash-topbar::before\{[^}]*clip-path:polygon/.test(cssSrc),
   'SA top bar has the hero machined angular edge');
 ok(/theme-san-andreas #dash-bottombar\{[^}]*clip-path:polygon/.test(cssSrc),
   'SA bottom bar has the hero machined angular edge');
@@ -579,7 +579,7 @@ ok(appSrc.includes("applyBodyTheme(VCNThemes.currentId())") && /Paint the theme 
   'theme chrome paints before tiles arrive (no chrome-less dashboard offline)');
 ok(indexSrc.includes('class="sa-logo"'), 'SA dashboard mounts the standalone wordmark element');
 ok(indexSrc.includes('dashboard/sa-logo.png'), 'SA wordmark uses the extracted logo art');
-ok(/theme-san-andreas #dash-topbar \.sa-logo\{[^}]*height:96px/.test(cssSrc),
+ok(/theme-san-andreas #dash-topbar \.sa-logo\{[^}]*height:190px/.test(cssSrc),
   'SA wordmark is hero-sized and overlaps the map');
 ok(/theme-san-andreas #dash-bottombar \.dash-chrome\{[^}]*display:flex/.test(cssSrc),
   'SA bottom console lays out with flex, not art-slot coordinates');
