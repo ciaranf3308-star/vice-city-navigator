@@ -39,14 +39,14 @@ body.dashboard-mode.theme-san-andreas #dash-topbar .sa-logo{
 }
 /* "A Better Tomorrow" script rides the photo at far right, hero-style */
 body.dashboard-mode.theme-san-andreas #dash-topbar .dash-tomorrow{
-  position:absolute;right:28px;top:50%;transform:translateY(-50%);
-  height:84px;width:auto;max-width:340px;object-fit:contain;
+  position:absolute;right:28px;top:54%;transform:translateY(-50%);
+  height:78px;width:auto;max-width:320px;object-fit:contain;
   filter:drop-shadow(0 2px 6px rgba(0,0,0,.9));pointer-events:none;z-index:5;
 }
 /* "Los Santos" script sits left of the Tomorrow tag, hero-style */
 body.dashboard-mode.theme-san-andreas #dash-topbar .dash-los-santos{
-  display:block;position:absolute;right:340px;top:50%;transform:translateY(-50%);
-  height:72px;width:auto;max-width:380px;object-fit:contain;
+  display:block;position:absolute;right:330px;top:54%;transform:translateY(-50%);
+  height:66px;width:auto;max-width:360px;object-fit:contain;
   filter:drop-shadow(0 2px 6px rgba(0,0,0,.9));pointer-events:none;z-index:5;
 }
 /* live overlays, placed with intent: temp+icon left/centre, date centre,
