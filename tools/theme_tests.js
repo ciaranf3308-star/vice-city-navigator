@@ -146,7 +146,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v51"), 'SW shell cache v50');
+ok(swSrc.includes("ws-shell-v52"), 'SW shell cache v52');
 ok(swSrc.includes("ws-theme-v14"), 'SW theme cache v14');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
@@ -373,7 +373,7 @@ ok(indexSrc.includes('class="dash-palm"'), 'top bar has a neon palm beside the w
 ok(indexSrc.includes('dashboard/skyline.png'), 'VC top bar uses the illustrated skyline art');
 /* ---------- VC asset-pack polish: authored chrome ---------- */
 const sky = pngSize(path.join(REPO, 'assets/themes/vice-city/dashboard/skyline.png'));
-ok(sky && sky.w >= 1500 && sky.h >= 500, 'VC skyline art: dense authored strip (asset pack #1)');
+ok(sky && sky.w >= 1400 && sky.h >= 400, 'VC skyline art: dense authored strip (asset pack #1, sun-framed crop)');
 const mfr = pngSize(path.join(REPO, 'assets/themes/vice-city/dashboard/maneuver-frame.png'));
 ok(mfr && mfr.w === 1650 && mfr.h === 565, 'VC maneuver HUD frame present at authored size (asset pack #3)');
 ok(fs.existsSync(path.join(REPO, 'themes/vice-city/dashboard/bottombar.jpg')),
