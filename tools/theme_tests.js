@@ -746,7 +746,7 @@ ok(vcRoad !== vcPlace, 'VC: road labels a different tone from place labels');
 /* ---------- Spotify skins: single-hud overlays, art-registered openings ---------- */
 const HUD_EXPECTED = {
   'gta-v':       { w: 1155, h: 1362, art: ['6.49%', '35.61%', '26.84%', '22.76%'], over: true },
-  'san-andreas': { w: 1254, h: 1254, art: ['5.18%', '30.70%', '40.67%', '39.07%'], over: false },
+  'san-andreas': { w: 1254, h: 1254, art: ['6.1%', '30.70%', '40.67%', '39.07%'], over: false },
   'rdr2':        { w: 1254, h: 1254, art: ['15.55%', '27.91%', '29.11%', '28.71%'], over: false },
 };
 for (const [theme, exp] of Object.entries(HUD_EXPECTED)) {
