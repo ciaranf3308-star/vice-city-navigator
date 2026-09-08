@@ -143,7 +143,10 @@ class CarWebViewRenderer(private val carContext: CarContext) {
             javaScriptEnabled = true
             domStorageEnabled = true
             databaseEnabled = true
-            geolocationEnabled = true
+            // NOTE: property syntax (geolocationEnabled = true) does not
+            // resolve under this toolchain; the explicit setter is the
+            // documented API and compiles fine.
+            setGeolocationEnabled(true)
             mediaPlaybackRequiresUserGesture = false
             loadWithOverviewMode = true
             useWideViewPort = true

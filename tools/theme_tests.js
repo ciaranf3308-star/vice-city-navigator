@@ -1043,7 +1043,7 @@ for (const m of ['onSurfaceAvailable', 'onSurfaceDestroyed', 'onVisibleAreaChang
 ok(rend.includes('dispatchTouchEvent'), 'android: touch forwarded as synthetic MotionEvents');
 ok(rend.includes('WayStationCar.setVisibleArea('), 'android: visible area forwarded into JS');
 ok(rend.includes('WayStationCar.setSpotifyAuth('), 'android: Spotify token handoff into the page');
-ok(rend.includes('geolocationEnabled = true'), 'android: WebView geolocation enabled');
+ok(rend.includes('setGeolocationEnabled(true)'), 'android: WebView geolocation enabled');
 ok(rend.includes('onGeolocationPermissionsShowPrompt') && rend.includes('WAYSTATION_ORIGIN'),
   'android: geolocation prompt gated to the WayStation origin');
 ok(rend.includes('locationPermissionGranted?.invoke()'), 'android: geolocation only after native permission granted');
