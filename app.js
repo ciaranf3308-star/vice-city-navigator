@@ -233,6 +233,7 @@ async function initMap() {
     try { map.on('move', syncDashCompass); } catch (e) {}
     try { map.on('moveend', queueDashLocality); } catch (e) {}
     try { syncDashPadding(); } catch (e) {}
+    try { applyDashboardMapPaint(); } catch (e) {}
     // Each module init is isolated: one failing module must never
     // silently prevent the others (e.g. POIs) from starting.
     try { if (window.VCNThemes) applyBodyTheme(VCNThemes.currentId()); }
@@ -328,6 +329,28 @@ function maybeShowPoiDebug() {
    style.load and caused false "failed to load" rollbacks — and the
    new theme is only persisted once the style actually loads. */
 let themeSwitchGen = 0;
+/* Vice City dashboard-only map contrast (hero convergence pass 4).
+   The base style.json is the phone-mode palette; in dashboard mode the
+   theme's dashboardPaint list is applied on top via setPaintProperty and
+   reverted when leaving dashboard mode. A full style rebuild wipes paint,
+   so the flag is reset wherever setStyle completes. */
+let dashPaintActive = false;
+function applyDashboardMapPaint() {
+  if (!map || !window.VCNThemes) return;
+  const theme = VCNThemes.get('vice-city');
+  const list = theme && theme.map && theme.map.dashboardPaint;
+  if (!list || !list.length) return;
+  const want = document.body.classList.contains('dashboard-mode') &&
+               document.body.classList.contains('theme-vice-city');
+  if (want === dashPaintActive) return;
+  for (const [layer, prop, dashVal, baseVal] of list) {
+    try {
+      if (typeof map.getLayer === 'function' && !map.getLayer(layer)) continue;
+      map.setPaintProperty(layer, prop, want ? dashVal : baseVal);
+    } catch (e) { /* one missing layer must not break the pass */ }
+  }
+  dashPaintActive = want;
+}
 function restoreRouteOverlay() {
   ensureRouteLayers();
   if (routeCoords.length) {
@@ -464,6 +487,8 @@ async function applyTheme(id) {
   try { refreshPlayerMarkerArt(); } catch (e) { console.error('[ws] marker rehydrate failed', e); }
   try { mountSpotifySkin(id); } catch (e) { console.error('[ws] spotify skin swap failed', e); }
   try { syncDashPadding(); } catch (e) {}
+  dashPaintActive = false; // full rebuild wiped paint — force reapply below
+  try { applyDashboardMapPaint(); } catch (e) { console.error('[ws] dash paint failed', e); }
   toast(theme.name + ' theme active.');
 }
 function syncThemeSelector() {
@@ -1283,6 +1308,7 @@ function applyAppMode() {
   }
   if (map && map.resize) { try { map.resize(); } catch (e) {} }
   syncDashPadding();
+  try { applyDashboardMapPaint(); } catch (e) {}
   syncDashboardToggle();
   return on;
 }

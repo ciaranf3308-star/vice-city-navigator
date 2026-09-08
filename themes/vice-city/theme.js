@@ -21,6 +21,26 @@
       routeGlowOpacity: 0.5,
       playerMarker: 'assets/themes/vice-city/player.png',
       fontStack: 'PricedownBl',
+      /* Dashboard-only contrast pass (hero convergence). Applied at runtime
+         via setPaintProperty — never written into style.json, so phone mode
+         keeps the base palette untouched. Each entry:
+         [layer, paint-property, dashboard-value, base-value]. */
+      dashboardPaint: [
+        ['vc-land', 'background-color', '#7b7d91', '#9294a7'],
+        ['vc-parks', 'fill-color', '#4e825d', '#619972'],
+        ['vc-park-areas', 'fill-color', '#4e825d', '#619972'],
+        ['vc-grass', 'fill-color', '#66a177', '#6cab7f'],
+        ['vc-golf', 'fill-color', '#66a177', '#6cab7f'],
+        ['vc-gardens', 'fill-color', '#66a177', '#6cab7f'],
+        ['vc-recreation', 'fill-color', '#66a177', '#6cab7f'],
+        ['vc-woods', 'fill-color', '#66a177', '#6cab7f'],
+        ['vc-playing-fields', 'fill-color', '#66a177', '#6cab7f'],
+        ['vc-cemeteries', 'fill-color', '#66a177', '#6cab7f'],
+        ['vc-road-primary-casing', 'line-color', '#8b8b90', '#b1b1b7'],
+        ['vc-road-motorway-casing', 'line-color', '#838388', '#a8a8ae'],
+        ['vc-label-place', 'text-color', '#ff2ba6', '#d42796'],
+        ['vc-label-place', 'text-halo-width', 4.0, 3.2],
+      ],
     },
 
     pois: {

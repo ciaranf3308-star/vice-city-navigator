@@ -166,7 +166,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v57"), 'SW theme cache v32');
+ok(swSrc.includes("ws-theme-v58"), 'SW theme cache v32');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
@@ -436,7 +436,8 @@ ok(/theme-vice-city #dash-bottombar\{[^}]*clip-path:polygon/.test(cssSrc), 'VC b
 ok(cssSrc.includes('#dash-eta .eta-time'), 'VC arrival time uses the live eta-time hook');
 /* ---------- pass 3: hero convergence refinements ---------- */
 ok(/theme-vice-city \.vcsp\{[^}]*bottom:118px/.test(cssSrc), 'VC widget bottom-anchored 18px above the footer');
-ok(cssSrc.includes("dashboard/topbar-skyline.png"), 'VC skyline uses the full palm/sun art, masked organically');
+ok(cssSrc.includes("dashboard/skyline-sunset.png"), 'VC skyline uses the supplied sunset scenery asset');
+ok(!cssSrc.includes("dashboard/topbar-skyline.png"), 'old glitch-strip skyline treatment fully retired');
 ok(/theme-vice-city #dash-topbar\{[^}]*97\.5% 100%/.test(cssSrc), 'VC header has a skyline pocket in its silhouette');
 ok(/theme-vice-city #vc-maneuver::before/.test(cssSrc), 'VC maneuver card uses a double-layer pink neon border');
 ok(/theme-vice-city #vc-maneuver::after/.test(cssSrc), 'VC maneuver card carries a cyan secondary accent');
@@ -451,6 +452,41 @@ ok(/theme-gta-v \.dash-tag\{display:none\}/.test(cssSrc), 'V drops the 80s scrip
 ok(/theme-rdr2 \.dash-tag\{display:none\}/.test(cssSrc), 'RDR2 drops the 80s script tagline');
 ok(/theme-rdr2 \.dash-brand\{[^}]*margin:0 auto/.test(cssSrc), 'RDR2 centers its ornate title plate');
 ok(/theme-rdr2 \.dash-tabs button\.on::after/.test(cssSrc), 'RDR2 active tab gets the gold diamond marker');
+/* ---------- pass 4: narrow hero corrections ---------- */
+// skyline: supplied sunset scenery, left edge feathered, no pixel treatment
+ok(/theme-vice-city #dash-topbar::after\{[^}]*skyline-sunset\.png/.test(cssSrc), 'VC skyline pocket wears the sunset scenery asset');
+ok(/theme-vice-city #dash-topbar::after\{[^}]*mask-image:linear-gradient\(90deg,transparent/.test(cssSrc), 'VC skyline left edge feathers into black');
+ok(!/theme-vice-city #dash-topbar::after\{[^}]*contrast/.test(cssSrc), 'VC skyline keeps natural colours (no glitch treatment)');
+ok(fs.existsSync(path.join(REPO, 'themes/vice-city/dashboard/skyline-sunset.png')), 'VC sunset skyline asset on disk');
+// header cyan secondary chrome: notch floor + pocket chamfer kiss, pink dominant
+ok(/theme-vice-city #dash-topbar\{[^}]*rgba\(1,205,254,\.9\) 39%/.test(cssSrc), 'VC header keeps the cyan notch-floor segment');
+ok(/theme-vice-city #dash-topbar\{[^}]*rgba\(1,205,254,\.5\) 69\.5%/.test(cssSrc), 'VC header adds a dim cyan kiss on the pocket chamfer');
+ok(/theme-vice-city #dash-topbar\{[^}]*height:78px/.test(cssSrc), 'VC header height frozen at 78px');
+// navy grain on header/footer chrome only
+ok(/theme-vice-city #dash-topbar::before\{[^}]*feTurbulence/.test(cssSrc), 'VC header chrome carries faint navy grain');
+ok(/theme-vice-city #dash-bottombar::before\{[^}]*feTurbulence/.test(cssSrc), 'VC footer chrome carries faint navy grain');
+// footer: quieter inactive tabs, brighter plate outline, cyan/pink separator
+ok(/theme-vice-city \.dash-tabs button\{[^}]*rgba\(1,205,254,\.25\)/.test(cssSrc), 'VC inactive tabs glow ~10% quieter');
+ok(/theme-vice-city \.dash-dest\{[^}]*background:#01cdfe/.test(cssSrc), 'VC locality plate outline brighter (dimensions frozen)');
+ok(/theme-vice-city \.dash-north::after\{[^}]*rgba\(255,46,136/.test(cssSrc), 'VC compass/arrival separator blends cyan into pink');
+ok(/theme-vice-city #dash-eta\{[^}]*min-width:220px/.test(cssSrc), 'VC arrival zone reserves a stable live width');
+// tagline: 15px left, 4px up, +5% scale
+ok(/theme-vice-city \.dash-tag\{[^}]*margin:0 61px 0 14px/.test(cssSrc), 'VC tagline eased 15px left of the corner');
+ok(/theme-vice-city \.dash-tag\{[^}]*top:-4px/.test(cssSrc), 'VC tagline lifted 4px');
+ok(/theme-vice-city \.dash-tag::after\{[^}]*font-size:23px/.test(cssSrc), 'VC tagline scaled +5%');
+// dashboard-only map contrast: base style.json untouched, runtime paint list
+const vcThemeSrc = fs.readFileSync(path.join(REPO, 'themes/vice-city/theme.js'), 'utf8');
+ok(/dashboardPaint:\s*\[/.test(vcThemeSrc), 'VC theme declares a dashboard-only paint list');
+ok(vcThemeSrc.includes("'#8b8b90'") && vcThemeSrc.includes("'#838388'"), 'VC dashboard deepens major road casings');
+ok(vcThemeSrc.includes("'#7b7d91'"), 'VC dashboard deepens urban land');
+ok(vcThemeSrc.includes("'#4e825d'") && vcThemeSrc.includes("'#66a177'"), 'VC dashboard deepens greens');
+ok(vcThemeSrc.includes("'#ff2ba6'"), 'VC dashboard pops locality labels');
+const vcPaint4 = id => vcStyle.layers.find(l => l.id === id).paint;
+ok(vcPaint4('vc-road-primary-casing')['line-color'] === '#b1b1b7', 'VC style.json keeps the base major casing (phone untouched)');
+ok(vcPaint4('vc-label-place')['text-color'] === '#d42796', 'VC style.json keeps the base label pink (phone untouched)');
+ok(appSrc.includes('function applyDashboardMapPaint'), 'app applies the VC dashboard paint at runtime');
+ok(/map\.on\('load'[^]*applyDashboardMapPaint/.test(appSrc), 'dashboard paint applies on map load');
+ok(/dashPaintActive = false;[^]*applyDashboardMapPaint/.test(appSrc), 'dashboard paint re-applies after a theme style rebuild');
 /* ---------- dashboard-mode settings: car-scale menu panel ---------- */
 ok(/body\.dashboard-mode #menu-panel\{[^}]*width:min\(540px,94vw\)/.test(cssSrc),
   'dashboard settings panel is car-scale (540px), not phone-sized');
@@ -534,9 +570,9 @@ ok(cssSrc.includes('Yellowtail'), 'VC wordmark uses the neon script font');
 /* ---------- VC map matches the hero target ---------- */
 const vcStyle2 = JSON.parse(fs.readFileSync(path.join(REPO, 'themes/vice-city/style.json'), 'utf8'));
 const vcPaint = id => vcStyle2.layers.find(l => l.id === id).paint;
-ok(vcPaint('vc-land')['background-color'] === '#84869c', 'VC land: darker urban gray (hero punch)');
+ok(vcPaint('vc-land')['background-color'] === '#9294a7', 'VC land keeps the base phone palette (dashboard deepens it at runtime)');
 ok(vcPaint('vc-water')['fill-color'] === '#48a8e8', 'VC water: vivid blue (hero)');
-ok(vcPaint('vc-parks')['fill-color'] === '#538a63', 'VC parks: deepened green (hero punch)');
+ok(vcPaint('vc-parks')['fill-color'] === '#619972', 'VC parks keep the base phone palette (dashboard deepens it at runtime)');
 ok(vcPaint('vc-buildings')['fill-color'] === '#b7b7c7', 'VC buildings: separated from land (hero contrast)');
 ok(vcPaint('vc-road-minor')['line-color'] === '#eef0f6', 'VC minor roads: white streets (hero)');
 ok(vcPaint('vc-road-primary')['line-color'] === '#18182d', 'VC arterials: darker navy core (hero punch)');
@@ -622,7 +658,7 @@ ok(/theme-gta-v \.dash-tabs button\{[^}]*var\(--vcfont\)/.test(cssSrc) && !/them
 ok(/theme-rdr2 #dash-topbar \.dash-chrome\{[^}]*selection_box_bg_1a\.png/.test(cssSrc), 'RDR2 bars wear the grunge panel texture');
 // service worker: VC dashboard art is shell-precached (default theme), the
 // other themes' dashboard art rides the on-demand theme-asset cache
-ok(swSrc.includes('themes/vice-city/dashboard/topbar-skyline-right.png'), 'SW precaches the VC skyline');
+ok(swSrc.includes('themes/vice-city/dashboard/skyline-sunset.png'), 'SW precaches the VC sunset skyline');
 ok(SW.isThemeAsset('/themes/san-andreas/dashboard/sa-logo.png'), 'isThemeAsset: SA wordmark');
 ok(SW.isThemeAsset('/assets/themes/gta-v/dashboard/topbar-skyline.jpg'), 'isThemeAsset: V dashboard art');
 ok(SW.isThemeAsset('/assets/themes/rdr2/dashboard/menu_header_1a.png'), 'isThemeAsset: RDR2 dashboard art');

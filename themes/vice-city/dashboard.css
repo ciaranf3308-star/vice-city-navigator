@@ -10,44 +10,50 @@ body.dashboard-mode.theme-vice-city #search-bar{display:none}
    Double-layer clip-path: the bar itself is hot pink, an inset dark layer
    reveals a crisp 2-3px neon edge that follows every chamfer. The lower edge
    steps down at the centre AND drops into a raised skyline pocket on the
-   right (~29%) where the art rises into the black chrome. A restrained cyan
-   segment glows along the centre notch floor. Height unchanged. */
+   right (~27%) where the art rises into the black chrome. Restrained cyan
+   secondary chrome: a segment along the centre notch floor (wings kissing the
+   chamfers) plus a short dim kiss on the pocket's left chamfer — pink stays
+   dominant. Height unchanged. */
 body.dashboard-mode.theme-vice-city #dash-topbar{
   display:block;position:absolute;left:0;right:0;top:0;height:78px;z-index:25;
   background:
-    linear-gradient(90deg,transparent 36%,rgba(1,205,254,.9) 40%,rgba(1,205,254,.9) 60%,transparent 64%),
+    linear-gradient(90deg,transparent 33%,rgba(1,205,254,.45) 36%,rgba(1,205,254,.9) 39%,rgba(1,205,254,.9) 61%,rgba(1,205,254,.45) 64%,transparent 67%),
+    linear-gradient(90deg,transparent 67.5%,rgba(1,205,254,.5) 69.5%,rgba(1,205,254,.5) 71.5%,transparent 73%),
     #ff2e88;
-  background-size:100% 2px,auto;
-  background-position:0 100%,0 0;
+  background-size:100% 2px,100% 2px,auto;
+  background-position:0 100%,0 100%,0 0;
   background-repeat:no-repeat;
   clip-path:polygon(0 0,100% 0,100% calc(100% - 14px),97.5% 100%,72% 100%,69% calc(100% - 14px),64% calc(100% - 14px),60% 100%,38% 100%,34% calc(100% - 14px),0 calc(100% - 14px));
   filter:drop-shadow(0 0 14px rgba(255,46,136,.55)) drop-shadow(0 6px 18px rgba(255,46,136,.25));
   pointer-events:none;
 }
-/* inner dark layer: 2px pink crown at top, 3px neon along every stepped edge */
+/* inner dark layer: 2px pink crown at top, 3px neon along every stepped edge.
+   Finished with a whisper of navy grain (faint, non-repeating at this
+   opacity) so the black chrome has material depth, not a digital flat. */
 body.dashboard-mode.theme-vice-city #dash-topbar::before{
   content:'';position:absolute;inset:0;z-index:0;
   display:block;
   background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.10 0 0 0 0 0.12 0 0 0 0 0.28 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23n)'/%3E%3C/svg%3E"),
     radial-gradient(ellipse 800px 120px at 30% 0%, rgba(255,46,136,.07) 0%, transparent 70%),
     linear-gradient(180deg,#0d0719 0%,#060310 60%,#030208 100%);
+  background-repeat:repeat,repeat,repeat;
   clip-path:polygon(0 2px,100% 2px,100% calc(100% - 17px),97.5% calc(100% - 3px),72% calc(100% - 3px),69% calc(100% - 17px),64% calc(100% - 17px),60% calc(100% - 3px),38% calc(100% - 3px),34% calc(100% - 17px),0 calc(100% - 17px));
 }
-/* Hero skyline: palms, buildings and the striped sun rise from the pocket
-   floor into the black chrome. The art box overflows the bar top (clipped by
-   the bar shape) so silhouettes stay tall; left edge feathered deep into the
-   black, no rectangular boundary, no bottom fade — it meets the pink edge. */
+/* Hero skyline: the supplied sunset asset used as scenery, not a banner.
+   The pocket-height art box shows the image's sun/building band (striped sun
+   near the far right, palms, towers rising from the pocket floor); the water
+   is cropped away by the header edge. Left edge feathered deep into black —
+   no rectangular boundary, no pixel/glitch treatment, natural colours. */
 body.dashboard-mode.theme-vice-city #dash-topbar::after{
-  content:'';position:absolute;right:0;bottom:0;width:29.5%;height:170px;pointer-events:none;
-  background-image:url('dashboard/topbar-skyline.png');
-  background-position:50% 100%;
+  content:'';position:absolute;right:0;bottom:0;width:27%;height:78px;pointer-events:none;
+  background-image:url('dashboard/skyline-sunset.png');
+  background-position:100% 20%;
   background-size:cover;
   background-repeat:no-repeat;
-  opacity:.95;z-index:1;
-  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 30%),linear-gradient(180deg,transparent 46%,#000 68%);
-  -webkit-mask-composite:source-in;
-  mask-image:linear-gradient(90deg,transparent 0%,#000 30%),linear-gradient(180deg,transparent 46%,#000 68%);
-  mask-composite:intersect;
+  z-index:1;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 45%);
+  mask-image:linear-gradient(90deg,transparent 0%,#000 45%);
 }
 body.dashboard-mode.theme-vice-city #dash-topbar .dash-chrome{
   position:absolute;inset:0;display:flex;align-items:center;gap:28px;
@@ -186,13 +192,16 @@ body.dashboard-mode.theme-vice-city #dash-bottombar{
   clip-path:polygon(30px 16px,34% 16px,37.5% 2px,62.5% 2px,66% 16px,calc(100% - 30px) 16px,100% 40px,100% calc(100% - 2px),0 calc(100% - 2px),0 40px);
   filter:drop-shadow(0 0 14px rgba(255,46,136,.55)) drop-shadow(0 -6px 18px rgba(255,46,136,.22));
 }
-/* inner dark navy layer: 3px pink along the stepped top edge, 2px at the base */
+/* inner dark navy layer: 3px pink along the stepped top edge, 2px at the base.
+   Same whisper of navy grain as the header for material depth. */
 body.dashboard-mode.theme-vice-city #dash-bottombar::before{
   content:'';position:absolute;inset:0;z-index:0;
   display:block;
   background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.10 0 0 0 0 0.12 0 0 0 0 0.28 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23n)'/%3E%3C/svg%3E"),
     radial-gradient(ellipse 700px 90px at 50% 100%, rgba(255,46,136,.06) 0%, transparent 70%),
     linear-gradient(180deg,#0a0616 0%,#05030c 70%,#030208 100%);
+  background-repeat:repeat,repeat,repeat;
   clip-path:polygon(30px 19px,34% 19px,37.5% 5px,62.5% 5px,66% 19px,calc(100% - 30px) 19px,100% 43px,100% calc(100% - 2px),0 calc(100% - 2px),0 43px);
 }
 body.dashboard-mode.theme-vice-city #dash-bottombar .dash-chrome{
@@ -209,7 +218,7 @@ body.dashboard-mode.theme-vice-city .dash-tabs{
 body.dashboard-mode.theme-vice-city .dash-tabs button{
   background:none;border:0;box-shadow:none;
   font-family:var(--vcfont);font-size:30px;letter-spacing:3px;text-transform:uppercase;
-  color:var(--cyan);text-shadow:0 0 7px rgba(1,205,254,.28);
+  color:var(--cyan);text-shadow:0 0 7px rgba(1,205,254,.25);
   padding:0 20px;opacity:.75;display:flex;align-items:center;gap:8px;
   line-height:1;
 }
@@ -224,9 +233,9 @@ body.dashboard-mode.theme-vice-city .dash-tabs button.on{
 body.dashboard-mode.theme-vice-city .dash-dest{
   position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
   flex:none;min-width:0;max-width:410px;padding:3px;
-  background:rgba(1,205,254,.95);
+  background:#01cdfe;
   clip-path:polygon(22px 0,calc(100% - 22px) 0,100% 50%,calc(100% - 22px) 100%,22px 100%,0 50%);
-  box-shadow:0 0 22px rgba(1,205,254,.6);
+  box-shadow:0 0 22px rgba(1,205,254,.68);
 }
 body.dashboard-mode.theme-vice-city .dash-dest::before{
   content:'';position:absolute;inset:3px;
@@ -258,14 +267,15 @@ body.dashboard-mode.theme-vice-city .dash-north{
   display:inline-block;min-width:20px;text-align:center;
   position:relative;padding-right:16px;margin-right:2px;
 }
-/* hairline divider between compass and arrival */
+/* thin vertical cyan/pink separator between compass and arrival */
 body.dashboard-mode.theme-vice-city .dash-north::after{
   content:'';position:absolute;right:0;top:15%;bottom:15%;width:2px;
-  background:linear-gradient(180deg,transparent,rgba(1,205,254,.6),transparent);
+  background:linear-gradient(180deg,transparent,rgba(1,205,254,.7) 30%,rgba(255,46,136,.7) 70%,transparent);
 }
 body.dashboard-mode.theme-vice-city #dash-eta{
-  display:flex;align-items:baseline;gap:10px;white-space:nowrap;
+  display:flex;align-items:baseline;justify-content:center;gap:10px;white-space:nowrap;
   font-size:22px;font-weight:700;letter-spacing:1px;
+  min-width:220px; /* reserved arrival zone: stable width while live, empty when idle */
 }
 body.dashboard-mode.theme-vice-city #dash-eta .eta-label{
   color:var(--cyan);font-size:17px;letter-spacing:3px;text-transform:uppercase;
@@ -275,12 +285,13 @@ body.dashboard-mode.theme-vice-city #dash-eta .eta-time{
   color:#ff71ce;font-size:32px;
   text-shadow:0 0 12px rgba(255,46,136,.95),0 0 34px rgba(255,46,136,.45);
 }
-/* Tagline: hero copy, integrated into the footer, eased well in from the edge.
-   Angled hairline divider separates the arrival zone from the slogan. */
+/* Tagline: hero copy, incorporated into the HUD — eased left and lifted off
+   the corner, +5% scale. Angled hairline divider separates the arrival zone
+   from the slogan. */
 body.dashboard-mode.theme-vice-city .dash-tag{
-  position:relative;
+  position:relative;top:-4px;
   flex:0 0 auto;font-size:0;line-height:0;
-  padding:0 0 0 20px;margin:0 46px 0 14px;
+  padding:0 0 0 20px;margin:0 61px 0 14px;
   transform:none;white-space:normal;
 }
 body.dashboard-mode.theme-vice-city .dash-tag::before{
@@ -292,7 +303,7 @@ body.dashboard-mode.theme-vice-city .dash-tag .tag-line{display:none}
 body.dashboard-mode.theme-vice-city .dash-tag::after{
   content:'Good Roads\A Better Times';white-space:pre;
   display:block;
-  font-family:'Yellowtail',cursive;font-size:22px;line-height:1.25;color:#ff71ce;
+  font-family:'Yellowtail',cursive;font-size:23px;line-height:1.25;color:#ff71ce;
   text-shadow:0 0 10px rgba(255,46,136,.8);transform:rotate(-3deg);
   text-align:right;
 }
