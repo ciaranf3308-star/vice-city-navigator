@@ -1079,7 +1079,7 @@ const DASH_STAGE_NODES = ['map', 'fx', 'explore-ui', 'drive-hud', 'spotify-pane'
    layoutDashMenu() scales these by the live stage zoom. */
 const DASH_BAR_HEIGHTS = {
   'vice-city':   { top: 76, bottom: 88 },
-  'san-andreas': { top: 170, bottom: 130 },
+  'san-andreas': { top: 86, bottom: 86 },
   'gta-v':       { top: 56, bottom: 64 },
   'rdr2':        { top: 72, bottom: 72 },
 };
@@ -1636,9 +1636,15 @@ function wireControls() {
         return;
       }
       if (t === 'vehicle' || t === 'settings') { openMenu(); setDashTab(t); return; }
+      const saDash = document.body.classList.contains('dashboard-mode') &&
+        document.body.classList.contains('theme-san-andreas');
+      const dismissing = !$('menu-panel').hidden || document.body.classList.contains('radio-off');
       closeMenu();
       document.body.classList.remove('radio-off');
       setDashTab('map');
+      // SA dashboard hides the search pill for the hero composition; the MAP
+      // tab is the explicit entry point to route planning there.
+      if (t === 'map' && saDash && !dismissing) openPlanning('search');
     });
   });
   initDashClock();
