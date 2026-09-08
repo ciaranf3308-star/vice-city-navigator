@@ -616,10 +616,9 @@ ok(SW.isThemeAsset('/assets/themes/gta-v/dashboard/topbar-skyline.jpg'), 'isThem
 ok(SW.isThemeAsset('/assets/themes/rdr2/dashboard/menu_header_1a.png'), 'isThemeAsset: RDR2 dashboard art');
 const vcSkinSrc = fs.readFileSync(path.join(REPO, 'themes/vice-city/spotify-skin.css'), 'utf8');
 ok(vcSkinSrc.includes('width: 720px'), 'VC widget scaled down for hero integration');
-ok(vcSkinSrc.includes('rotate(6deg)'), 'VC widget carries its 6-degree tilt');
-// every theme widget: explicit larger size, ~6-7 degree tilt, no-overlap idle states
+ok(!vcSkinSrc.includes('rotate(6deg)'), 'VC widget is straight (hero has no tilt)');
+// every theme widget: explicit larger size, ~6-7 degree tilt (except VC hero-match), no-overlap idle states
 const skinSpecs = [
-  ['vice-city', 'vcsp', 'rotate(6deg)', 'width: 720px'],
   ['san-andreas', 'sasp', 'rotate(-6deg)', 'width: 600px'],
   ['gta-v', 'gvsp', 'rotate(6.5deg)', 'width: 540px'],
   ['rdr2', 'rdsp', 'rotate(-6.5deg)', 'width: 600px'],
