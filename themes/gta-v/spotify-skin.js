@@ -184,12 +184,27 @@
     /* Lyrics stage: owned by the shared kinetic karaoke engine
        (lyrics.js, LRCLIB). A custom lyricsRenderer set via the mount
        api still overrides the engine. Never fake words.
-       When no lyrics: show the ambient skyline panel instead of dead text. */
-    function renderLyrics(s) {
+       The ambient skyline shows when WSLyrics has no lyrics
+       (no 'has-lyrics' class) — watched via MutationObserver
+       since the lyric fetch is async. */
+    let lyricsObserver = null;
+    function syncAmbient() {
       const box = q('.gvsp-lyrics');
       const ambient = q('.gvsp-ambient');
-      const hasRenderer = lyricsRenderer && s && s.item;
-      if (hasRenderer) {
+      if (!box || !ambient) return;
+      const hasLyrics = box.classList.contains('has-lyrics');
+      ambient.hidden = hasLyrics;
+      box.style.display = hasLyrics ? '' : 'none';
+    }
+    function renderLyrics(s) {
+      const box = q('.gvsp-lyrics');
+      if (!box) return;
+      // Watch for WSLyrics toggling has-lyrics after async fetch
+      if (!lyricsObserver) {
+        lyricsObserver = new MutationObserver(syncAmbient);
+        lyricsObserver.observe(box, { attributes: true, attributeFilter: ['class'] });
+      }
+      if (lyricsRenderer && s && s.item) {
         try {
           if (window.WSLyrics) WSLyrics.destroy(box);
           box.innerHTML = '';
@@ -197,30 +212,22 @@
           if (node) {
             box.appendChild(node);
             box.classList.add('has-lyrics');
-            if (ambient) ambient.hidden = true;
           } else {
             box.classList.remove('has-lyrics');
-            if (ambient) ambient.hidden = false;
           }
         } catch (e) {
           box.classList.remove('has-lyrics');
-          if (ambient) ambient.hidden = false;
         }
+        syncAmbient();
         return;
       }
       if (window.WSLyrics) {
-        /* WSLyrics.render returns truthy if lyrics were rendered */
-        const rendered = WSLyrics.render(box, core, s && s.item, 'gta-v');
-        if (rendered) {
-          box.classList.add('has-lyrics');
-          if (ambient) ambient.hidden = true;
-        } else {
-          box.classList.remove('has-lyrics');
-          if (ambient) ambient.hidden = false;
-        }
+        WSLyrics.render(box, core, s && s.item, 'gta-v');
+        // syncAmbient will fire via observer when fetch completes
+        syncAmbient();
       } else {
         box.classList.remove('has-lyrics');
-        if (ambient) ambient.hidden = false;
+        syncAmbient();
       }
     }
 
@@ -367,6 +374,7 @@
       offs = [];
       stopTick();
       if (statusTimer) { clearTimeout(statusTimer); statusTimer = null; }
+      if (lyricsObserver) { lyricsObserver.disconnect(); lyricsObserver = null; }
       core.stopPolling();
       if (root && root.parentNode) root.parentNode.removeChild(root);
       root = null;
