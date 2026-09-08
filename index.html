@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Outfit:wght@400;500;600;700&family=Yellowtail&display=swap" rel="stylesheet">
 <link href="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.css" rel="stylesheet">
 <link href="styles.css" rel="stylesheet">
 <link href="themes/vice-city/dashboard.css" rel="stylesheet">
@@ -206,6 +206,18 @@
 </aside>
 <!-- San Andreas dashboard: Grove Street scene panel above the music widget -->
 <div id="sa-grove-panel" aria-hidden="true"></div>
+<!-- Vice City dashboard: hero chrome (maneuver card, right scene panel, neon logos) -->
+<div id="vc-maneuver" aria-hidden="true">
+  <svg class="vc-man-arrow" viewBox="0 0 64 64"><path d="M40 8 L16 32 L32 32 L32 56 L44 56 L44 32 L60 32 Z" fill="#ff71ce" stroke="#ff71ce" stroke-width="2"/></svg>
+  <div class="vc-man-text"><strong>350 m</strong><span>Rathmines Road</span></div>
+  <div class="vc-man-meta"><span>12 min</span><i>•</i><span>6.8 km</span><i>•</i><span>21:36</span></div>
+  <span class="vc-man-script">Vice city</span>
+</div>
+<div id="vc-right-panel" aria-hidden="true">
+  <div class="vc-logo-script">Vice city</div>
+  <div class="vc-tagline">GOOD MUSIC<br>BETTER TIMES</div>
+  <div class="vc-sunset"><span class="vc-sunset-script">Driving through<br>the city lights<br><em>Good music<br>better times</em></span></div>
+</div>
 
 <script src="places-config.js"></script>
 <script src="supabase-config.js"></script>

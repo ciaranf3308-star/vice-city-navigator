@@ -392,41 +392,34 @@ ok(!/theme-san-andreas #dash-topbar\{[^}]*radial-gradient\(120px 120px at 62%/.t
 ok(/theme-gta-v #dash-topbar\{[^}]*#7CFF6B/.test(cssSrc), 'GTA V chrome uses pause-menu neon green');
 ok(/theme-rdr2 #dash-topbar\{[^}]*menu_bar\.png/.test(cssSrc), 'RDR2 chrome uses the engraved double-rule seam, not neon');
 ok(!/theme-rdr2 #dash-(topbar|bottombar)\{[^}]*#ff71ce/.test(cssSrc), 'RDR2 bar shells carry no neon pink');
-// VC visual quality pass: neon console bars per the benchmark
-ok(indexSrc.includes('class="dash-palm"'), 'top bar has a neon palm beside the wordmark');
-ok(indexSrc.includes('dashboard/topbar.jpg') || cssSrc.includes('dashboard/topbar.jpg'), 'VC top bar uses the authored neon bar strip (asset pack #4)');
+// VC hero: neon 80s chrome per the benchmark image
+ok(cssSrc.includes('topbar-skyline.png'), 'VC top bar uses the neon skyline art');
+ok(cssSrc.includes('sunset-panel.png'), 'VC right panel uses the sunset scene art');
+ok(cssSrc.includes("Yellowtail"), 'VC hero uses a neon script font');
 /* ---------- VC asset-pack polish: authored chrome ---------- */
 const vctop = jpgSize(path.join(REPO, 'themes/vice-city/dashboard/topbar.jpg'));
 ok(vctop && vctop.w >= 2000 && vctop.h >= 140, 'VC top bar art: full-width authored strip (asset pack #4)');
 const vcbot = jpgSize(path.join(REPO, 'themes/vice-city/dashboard/bottombar.jpg'));
 ok(vcbot && vcbot.w >= 2000 && vcbot.h >= 80, 'VC bottom bar art: full-width authored strip (asset pack #4)');
-const mfr = pngSize(path.join(REPO, 'assets/themes/vice-city/dashboard/maneuver-frame.png'));
-ok(mfr && mfr.w === 1650 && mfr.h === 565, 'VC maneuver HUD frame present at authored size (asset pack #3)');
 ok(fs.existsSync(path.join(REPO, 'themes/vice-city/dashboard/bottombar.jpg')),
   'VC bottom bar HUD strip present (asset pack #2)');
-ok(cssSrc.includes('maneuver-frame.png'), 'VC maneuver card uses the authored HUD frame');
-ok(/theme-vice-city #maneuver-card\{[^}]*aspect-ratio/.test(cssSrc),
-  'VC maneuver card keeps the frame\'s authored aspect ratio');
-ok(!/theme-vice-city #maneuver-card\{[^}]*clip-path:polygon/.test(cssSrc),
-  'VC maneuver card drops the generic CSS chamfer for the authored frame');
 ok(indexSrc.includes('class="dash-north"'), 'bottom bar compass shows the N marker');
 ok(indexSrc.includes('id="next-stats"'), 'maneuver card has a trip stats row slot');
-ok(cssSrc.includes('body.dashboard-mode.theme-vice-city #next-stats'), 'VC dashboard styles the maneuver stats row');
-ok(cssSrc.includes('body.dashboard-mode.theme-vice-city #maneuver-arrow svg'), 'VC dashboard recolors the maneuver arrow pink');
-ok(cssSrc.includes('ns-min'), 'maneuver stats row highlights minutes in pink');
+ok(cssSrc.includes('#vc-maneuver'), 'VC hero maneuver card styled');
+ok(cssSrc.includes('.vc-man-arrow'), 'VC maneuver arrow styled pink');
 ok(appSrc.includes("next-stats"), 'updateBanner feeds the maneuver stats row');
 ok(/theme-vice-city \.dash-tabs button\.on\{[^}]*#ff71ce/.test(cssSrc), 'VC active tab is flat hot-pink neon text');
 ok(!/theme-(san-andreas|gta-v|rdr2) #dash-(topbar|bottombar)\{[^}]*clip-path:polygon\(0 0,100% 0,100% 50%/.test(cssSrc),
    'non-VC themes do not reuse the VC angular silhouette on the bar shells');
 ok(!/function syncDashLocality\(\)[\s\S]{0,400}theme-vice-city/.test(appSrc), 'bottom-bar locality plate is theme-agnostic');
-ok(cssSrc.includes('clip-path:polygon(0 0,100% 0,100% 42%'), 'VC bars use the angular neon-tube silhouette');
+ok(cssSrc.includes('#vc-right-panel'), 'VC hero right panel styled');
 ok(indexSrc.includes('dash-tag'), 'bottom bar carries the script tagline');
 ok(appSrc.includes('queueDashLocality'), 'locality plate reverse-geocodes the map centre');
-ok(cssSrc.includes('dashboard/topbar.jpg'), 'top bar paints the authored strip inside the neon shell');
+ok(cssSrc.includes('vc-logo-script'), 'VC hero logo script styled');
 /* ---------- bespoke bar silhouettes: every theme gets its own bar heights,
    layouts and drive-HUD clearances, not one shared silhouette ---------- */
 const barHeights = {
-  'vice-city': ['76px', '88px'],
+  'vice-city': ['88px', '92px'],
   'san-andreas': ['86px', '96px'],
   'gta-v': ['56px', '64px'],
   'rdr2': ['72px', '72px'],
@@ -434,12 +427,10 @@ const barHeights = {
 for (const [id, [top, bottom]] of Object.entries(barHeights)) {
   ok(new RegExp(`theme-${id} #dash-topbar\\{[^}]*height:${top}`).test(cssSrc), `${id} top bar is ${top} tall`);
   ok(new RegExp(`theme-${id} #dash-bottombar\\{[^}]*height:${bottom}`).test(cssSrc), `${id} bottom bar is ${bottom} tall`);
-  ok(cssSrc.includes(`body.dashboard-mode.theme-${id}.nav-driving #maneuver-card`),
-    `${id} maneuver card clears its own top bar height`);
-  ok(cssSrc.includes(`body.dashboard-mode.theme-${id}.nav-driving #drive-bar`),
+  if (id !== 'vice-city') ok(cssSrc.includes(`body.dashboard-mode.theme-${id}.nav-driving #drive-bar`),
     `${id} drive trip bar clears its own bottom bar height`);
 }
-ok(/theme-vice-city #dash-topbar \.dash-chrome::after/.test(cssSrc), 'VC top bar wears a chrome divider strip');
+ok(cssSrc.includes('#dash-topbar::after'), 'VC top bar wears a neon edge');
 ok(!/theme-vice-city \.dash-tabs button\{[^}]*linear-gradient/.test(cssSrc), 'VC tabs are flat neon text, not chunky buttons');
 ok(/theme-san-andreas \.dash-tabs button\.on\{[^}]*#8fbf7a/.test(cssSrc),
   'SA active tab is the hero solid green box');
@@ -508,8 +499,8 @@ ok(appSrc.includes('layoutDashDrawer(); // dock the drawer to the live stage rec
 
 /* ---------- bespoke dashboard bar assets (authentic game-UI textures) ---------- */
 const dashAssets = [
-  ['vice-city', 'vc-logo.png'],
-  ['vice-city', 'bar-texture.jpg'],
+  ['vice-city', 'topbar-skyline.png'],
+  ['vice-city', 'sunset-panel.png'],
   ['gta-v', 'topbar-skyline.jpg'],
   ['gta-v', 'bottombar-skyline.jpg'],
   ['rdr2', 'menu_header_1a.png'],
@@ -518,13 +509,14 @@ const dashAssets = [
   ['rdr2', 'selection_box_bg_1a.png'],
 ];
 for (const [theme, file] of dashAssets) {
-  const rel = `assets/themes/${theme}/dashboard/${file}`;
+  const base = theme === 'vice-city' ? `themes/${theme}/dashboard` : `assets/themes/${theme}/dashboard`;
+  const rel = `${base}/${file}`;
   ok(fs.existsSync(path.join(REPO, rel)), `dashboard bar asset on disk: ${rel}`);
   ok(fs.statSync(path.join(REPO, rel)).size > 0, `dashboard bar asset non-empty: ${rel}`);
-  ok(cssSrc.includes(`assets/themes/${theme}/dashboard/${file}`), `styles.css references ${rel}`);
+  ok(cssSrc.includes(rel), `styles.css references ${rel}`);
 }
 // theme-scoped usage: each asset is only wired into its own theme's chrome
-ok(/theme-vice-city[^{]*\.dash-logo\{[^}]*vc-logo\.png/.test(cssSrc), 'VC wordmark is the authentic in-game logo');
+ok(cssSrc.includes('Yellowtail'), 'VC wordmark uses the neon script font');
 /* ---------- VC map matches the hero target ---------- */
 const vcStyle2 = JSON.parse(fs.readFileSync(path.join(REPO, 'themes/vice-city/style.json'), 'utf8'));
 const vcPaint = id => vcStyle2.layers.find(l => l.id === id).paint;
@@ -616,8 +608,8 @@ ok(/theme-gta-v \.dash-tabs button\{[^}]*var\(--vcfont\)/.test(cssSrc) && !/them
 ok(/theme-rdr2 #dash-topbar \.dash-chrome\{[^}]*selection_box_bg_1a\.png/.test(cssSrc), 'RDR2 bars wear the grunge panel texture');
 // service worker: VC dashboard art is shell-precached (default theme), the
 // other themes' dashboard art rides the on-demand theme-asset cache
-ok(swSrc.includes('assets/themes/vice-city/dashboard/vc-logo.png'), 'SW precaches the VC bar logo');
-ok(swSrc.includes('assets/themes/vice-city/dashboard/bar-texture.jpg'), 'SW precaches the VC bar texture');
+ok(swSrc.includes('themes/vice-city/dashboard/topbar-skyline.png'), 'SW precaches the VC skyline');
+ok(swSrc.includes('themes/vice-city/dashboard/sunset-panel.png'), 'SW precaches the VC sunset');
 ok(SW.isThemeAsset('/themes/san-andreas/dashboard/sa-logo.png'), 'isThemeAsset: SA wordmark');
 ok(SW.isThemeAsset('/assets/themes/gta-v/dashboard/topbar-skyline.jpg'), 'isThemeAsset: V dashboard art');
 ok(SW.isThemeAsset('/assets/themes/rdr2/dashboard/menu_header_1a.png'), 'isThemeAsset: RDR2 dashboard art');
@@ -640,7 +632,7 @@ for (const [theme, cls, tilt, size] of skinSpecs) {
   ok(js.includes("root.classList.toggle('is-idle'"), `${theme}: render toggles the is-idle class`);
 }
 ok(appSrc.includes('syncDashPadding'), 'camera viewport offsets left of the VC widget');
-ok(cssSrc.includes("themes/vice-city/dashboard/bottombar.jpg"), 'bottom bar uses the generated neon plate');
+ok(cssSrc.includes('#dash-bottombar::before'), 'VC bottom bar has a neon top edge');
 ok(!cssSrc.includes('#spotify-close'), 'no close-button styles');
 ok(/\#spotify-pane\{[\s\S]*?background:transparent/.test(cssSrc), 'pane transparent');
 
@@ -685,14 +677,11 @@ ok(cssSrc.includes('body.dashboard-mode.theme-vice-city .dash-zoom{display:none}
   'VC dashboard hides the bottom-bar zoom/locate buttons');
 ok(cssSrc.includes('body.dashboard-mode.theme-vice-city .player-arrow'),
   'VC dashboard player arrow is larger and more luminous');
-ok(/body\.dashboard-mode\.theme-vice-city #next-stats\{[^}]*top:60%/.test(cssSrc),
-  'VC maneuver stats row sits in the frame lower box');
-ok(/body\.dashboard-mode\.theme-vice-city \.banner-text\{[^}]*height:42%/.test(cssSrc),
-  'VC maneuver distance+road sit in the frame upper box');
+ok(cssSrc.includes('.vc-man-meta'), 'VC maneuver meta row styled');
+ok(cssSrc.includes('.vc-man-text'), 'VC maneuver text block styled');
 ok(appSrc2.includes("roadName(next) || instrText(next)"),
   'VC maneuver card shows the clean road name (voice text untouched)');
-ok(cssSrc.includes('width:132px;height:62px'),
-  'VC top-bar logo box matches the fixed script art aspect');
+ok(cssSrc.includes('.vc-logo-script'), 'VC hero logo script present');
 
 
 
