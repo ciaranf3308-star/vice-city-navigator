@@ -173,7 +173,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v120"), 'SW theme cache v120');
+ok(swSrc.includes("ws-theme-v121"), 'SW theme cache v121');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -404,7 +404,7 @@ ok(!/theme-san-andreas #dash-topbar\{[^}]*radial-gradient\(120px 120px at 62%/.t
   'SA top bar no longer uses the CSS-painted sun disc');
 ok(/theme-gta-v #dash-topbar\{[^}]*background:#0b0b0b/.test(cssSrc), 'GTA V top bar is flat pause-menu black (researched)');
 ok(/theme-gta-v #dash-bottombar\{[^}]*background:#0b0b0b/.test(cssSrc), 'GTA V bottom bar is flat pause-menu black (researched)');
-ok(/theme-rdr2 #dash-topbar::after\{[^}]*menu_bar\.png/.test(cssSrc), 'RDR2 header wears the torn grunge edge, not neon');
+ok(/theme-rdr2 #dash-topbar::after\{[^}]*gold-divider\.png/.test(cssSrc), 'RDR2 header wears the ornate gold divider, not neon');
 ok(!/theme-rdr2 #dash-(topbar|bottombar)\{[^}]*#ff71ce/.test(cssSrc), 'RDR2 bar shells carry no neon pink');
 // VC hero: neon 80s chrome per the benchmark image
 ok(true, "VC top bar uses CSS neon (no image)");
@@ -568,9 +568,9 @@ ok(appSrc.includes('layoutDashDrawer(); // dock the drawer to the live stage rec
 // Note: gta-v dashboard art lives in themes/gta-v/dashboard/ — asserted separately below
 const dashAssets = [
   ['rdr2', 'menu_header_1a.png'],
-  ['rdr2', 'menu_bar.png'],
+  ['rdr2', 'gold-divider.png'],
   ['rdr2', 'title_divider.png'],
-  ['rdr2', 'menu_bar.png'],
+  ['rdr2', 'gold-divider.png'],
 ];
 for (const [theme, file] of dashAssets) {
   const base = theme === 'vice-city' ? `themes/${theme}/dashboard` : `assets/themes/${theme}/dashboard`;
@@ -762,12 +762,12 @@ ok(/theme-gta-v \.gvsp\{[^}]*background:#0b0b0b/.test(cssSrc), 'V music panel is
 ok(/theme-gta-v \.dash-tabs button\{[^}]*background:transparent/.test(cssSrc), 'V tabs are transparent icon+text buttons');
 ok(/theme-rdr2 #dash-dest\{[^}]*border-image-source:url\('assets\/themes\/rdr2\/dashboard\/menu_header_1a\.png'\)/.test(cssSrc),
    'RDR2 destination plate uses the ornate menu-header frame');
-ok(/theme-rdr2 #dash-topbar\{[^}]*border-bottom:2px solid rgba\(216,179,106/.test(cssSrc), 'RDR2 header has the aged-gold rule');
+ok(/theme-rdr2 #dash-topbar::after\{[^}]*gold-divider\.png/.test(cssSrc), 'RDR2 header has the gold divider ornament');
 ok(/theme-rdr2 \.dash-dest::before/.test(cssSrc) && cssSrc.includes('title_divider.png'), 'RDR2 destination plate is flanked by divider ornaments');
 ok(/theme-gta-v \.dash-logo\{[^}]*'Chalet Comprime'/.test(cssSrc), 'V wordmark uses Chalet (hero typography)');
 ok(/theme-gta-v #dash-dest\{[^}]*'Chalet Comprime'/.test(cssSrc), 'V destination uses Chalet (hero typography)');
 ok(/theme-gta-v \.dash-tabs button span\{[^}]*text-transform:uppercase/.test(cssSrc), 'V tabs carry uppercase text labels under the icons');
-ok(/theme-rdr2 #dash-bottombar::before\{[^}]*menu_bar\.png/.test(cssSrc), 'RDR2 footer wears the torn grunge edge');
+ok(/theme-rdr2 #dash-bottombar::before\{[^}]*gold-divider\.png/.test(cssSrc), 'RDR2 footer wears the ornate gold divider');
 // service worker: VC dashboard art is shell-precached (default theme), the
 // other themes' dashboard art rides the on-demand theme-asset cache
 ok(swSrc.includes('themes/vice-city/dashboard/skyline-sunset.png'), 'SW precaches the VC sunset skyline');
