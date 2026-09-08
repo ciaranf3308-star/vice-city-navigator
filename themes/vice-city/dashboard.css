@@ -180,8 +180,9 @@ body.dashboard-mode.theme-vice-city .dash-trip{
   font-family:var(--vclabel);
 }
 body.dashboard-mode.theme-vice-city .dash-north{
-  font-size:24px;font-weight:700;color:var(--cyan);
+  font-size:24px;font-weight:700;color:#01cdfe;
   text-shadow:0 0 10px rgba(1,205,254,.85);
+  display:inline-block;min-width:20px;text-align:center;
 }
 body.dashboard-mode.theme-vice-city #dash-eta{
   font-size:22px;font-weight:700;letter-spacing:1px;
