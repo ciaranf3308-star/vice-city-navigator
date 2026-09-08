@@ -146,7 +146,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v52"), 'SW shell cache v52');
+ok(swSrc.includes("ws-shell-v53"), 'SW shell cache v53');
 ok(swSrc.includes("ws-theme-v14"), 'SW theme cache v14');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
@@ -499,13 +499,13 @@ ok(/theme-vice-city[^{]*\.dash-logo\{[^}]*vc-logo\.png/.test(cssSrc), 'VC wordma
 /* ---------- VC map matches the hero target ---------- */
 const vcStyle2 = JSON.parse(fs.readFileSync(path.join(REPO, 'themes/vice-city/style.json'), 'utf8'));
 const vcPaint = id => vcStyle2.layers.find(l => l.id === id).paint;
-ok(vcPaint('vc-land')['background-color'] === '#b8b8c8', 'VC land: light cool gray (hero)');
+ok(vcPaint('vc-land')['background-color'] === '#a9aabe', 'VC land: deeper cool gray (hero contrast)');
 ok(vcPaint('vc-water')['fill-color'] === '#48a8e8', 'VC water: vivid blue (hero)');
-ok(vcPaint('vc-parks')['fill-color'] === '#78b888', 'VC parks: soft desaturated green (hero)');
-ok(vcPaint('vc-buildings')['fill-color'] === '#c4c4d2', 'VC buildings: subtle, blend into land (hero)');
+ok(vcPaint('vc-parks')['fill-color'] === '#6cab7f', 'VC parks: deeper green (hero contrast)');
+ok(vcPaint('vc-buildings')['fill-color'] === '#b7b7c7', 'VC buildings: separated from land (hero contrast)');
 ok(vcPaint('vc-road-minor')['line-color'] === '#eef0f6', 'VC minor roads: white streets (hero)');
-ok(vcPaint('vc-road-primary')['line-color'] === '#262640', 'VC arterials: dark navy (hero)');
-ok(vcPaint('vc-road-motorway')['line-color'] === '#15152c', 'VC motorways: near-black navy (hero)');
+ok(vcPaint('vc-road-primary')['line-color'] === '#1d1d36', 'VC arterials: stronger dark navy (hero contrast)');
+ok(vcPaint('vc-road-motorway')['line-color'] === '#0e0e22', 'VC motorways: near-black navy (hero contrast)');
 ok(/theme-san-andreas #dash-topbar \.dash-chrome\{[^}]*menu-bgmap\.jpg/.test(cssSrc), 'SA top bar uses the engraved state-map texture');
 ok(/theme-san-andreas #dash-bottombar \.dash-chrome\{[^}]*menu-bgmap\.jpg/.test(cssSrc), 'SA bottom bar uses the engraved state-map texture');
 ok(/theme-gta-v #dash-topbar \.dash-chrome\{[^}]*topbar-skyline\.jpg/.test(cssSrc), 'V top bar uses the v-hud skyline strip');
@@ -527,11 +527,11 @@ ok(SW.isThemeAsset('/assets/themes/san-andreas/dashboard/menu-bgmap.jpg'), 'isTh
 ok(SW.isThemeAsset('/assets/themes/gta-v/dashboard/topbar-skyline.jpg'), 'isThemeAsset: V dashboard art');
 ok(SW.isThemeAsset('/assets/themes/rdr2/dashboard/menu_header_1a.png'), 'isThemeAsset: RDR2 dashboard art');
 const vcSkinSrc = fs.readFileSync(path.join(REPO, 'themes/vice-city/spotify-skin.css'), 'utf8');
-ok(vcSkinSrc.includes('width: 780px'), 'VC widget is the larger size');
+ok(vcSkinSrc.includes('width: 720px'), 'VC widget scaled down for hero integration');
 ok(vcSkinSrc.includes('rotate(6deg)'), 'VC widget carries its 6-degree tilt');
 // every theme widget: explicit larger size, ~6-7 degree tilt, no-overlap idle states
 const skinSpecs = [
-  ['vice-city', 'vcsp', 'rotate(6deg)', 'width: 780px'],
+  ['vice-city', 'vcsp', 'rotate(6deg)', 'width: 720px'],
   ['san-andreas', 'sasp', 'rotate(-6deg)', 'width: 600px'],
   ['gta-v', 'gvsp', 'rotate(6.5deg)', 'width: 540px'],
   ['rdr2', 'rdsp', 'rotate(-6.5deg)', 'width: 600px'],
@@ -581,8 +581,23 @@ ok(T.get('gta-v').map.routeColor === '#a86fd6', 'V route stays purple (as in-gam
 const appSrc2 = fs.readFileSync(path.join(REPO, 'app.js'), 'utf8');
 ok(appSrc2.includes("id: 'vcn-route-glow'"), 'route glow layer exists');
 ok(appSrc2.includes("'line-blur'"), 'route glow uses line-blur');
-ok(T.get('vice-city').map.routeGlowColor === '#f5d020', 'VC route glow: hero yellow halo');
-ok(T.get('vice-city').map.routeGlowOpacity === 0.45, 'VC route glow: visible halo opacity');
+ok(T.get('vice-city').map.routeGlowColor === '#ffd200', 'VC route glow: saturated hero yellow halo');
+ok(T.get('vice-city').map.routeGlowOpacity === 0.5, 'VC route glow: visible halo opacity');
+/* ---------- VC dashboard hero match: declutter + hierarchy ---------- */
+ok(cssSrc.includes('body.dashboard-mode.theme-vice-city #drive-bar{display:none}'),
+  'VC dashboard hides the floating drive-bar pill');
+ok(cssSrc.includes('body.dashboard-mode.theme-vice-city .dash-zoom{display:none}'),
+  'VC dashboard hides the bottom-bar zoom/locate buttons');
+ok(cssSrc.includes('body.dashboard-mode.theme-vice-city .player-arrow'),
+  'VC dashboard player arrow is larger and more luminous');
+ok(/body\.dashboard-mode\.theme-vice-city #next-stats\{[^}]*top:60%/.test(cssSrc),
+  'VC maneuver stats row sits in the frame lower box');
+ok(/body\.dashboard-mode\.theme-vice-city \.banner-text\{[^}]*height:42%/.test(cssSrc),
+  'VC maneuver distance+road sit in the frame upper box');
+ok(appSrc2.includes("roadName(next) || instrText(next)"),
+  'VC maneuver card shows the clean road name (voice text untouched)');
+ok(cssSrc.includes('width:132px;height:62px'),
+  'VC top-bar logo box matches the fixed script art aspect');
 
 
 

@@ -13,12 +13,12 @@
 
     map: {
       styleUrl: 'themes/vice-city/style.json',
-      routeColor: '#f5d020',
-      routeCasingColor: '#f5d020',
-      routeWidth: 5,
-      routeCasingWidth: 9,
-      routeGlowColor: '#f5d020',
-      routeGlowOpacity: 0.45,
+      routeColor: '#ffd200',
+      routeCasingColor: '#ffd200',
+      routeWidth: 6,
+      routeCasingWidth: 10,
+      routeGlowColor: '#ffd200',
+      routeGlowOpacity: 0.5,
       playerMarker: 'assets/themes/vice-city/player.png',
       fontStack: 'PricedownBl',
     },

@@ -946,7 +946,9 @@ function updateBanner(dMan) {
 
   $('maneuver-arrow').innerHTML = arrowSvg(arrowKind(next.maneuver));
   $('next-dist').textContent = fmtDist(dMan);
-  $('next-instr').textContent = instrText(next);
+  /* dashboard hero: the card shows the clean road name; the full spoken
+     instruction stays in instrText() for voice. */
+  $('next-instr').textContent = roadName(next) || instrText(next);
 
   const remainDist = steps.slice(nextIdx).reduce((a, s) => a + s.dist, 0) + dMan;
   const remainDur = totalDur * (totalDist ? remainDist / totalDist : 0);

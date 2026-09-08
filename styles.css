@@ -249,6 +249,9 @@ body{
 
 /* ---------- player arrow (Vice City radar arrow) ---------- */
 .player-arrow{width:46px;height:46px;filter:drop-shadow(0 1px 3px rgba(60,45,25,.55))}
+/* dashboard hero match: the player arrow reads instantly against the map */
+body.dashboard-mode.theme-vice-city .player-arrow{width:64px;height:64px;
+  filter:drop-shadow(0 0 12px rgba(255,251,150,.95)) drop-shadow(0 2px 4px rgba(0,0,0,.6))}
 .player-arrow img{width:100%;height:100%;transition:transform .25s ease-out}
 .dest-pin{
   width:48px;height:48px;
@@ -412,10 +415,16 @@ body.dashboard-mode.theme-vice-city #map-tools{display:none}
 body.dashboard-mode.nav-driving #drive-bar{bottom:calc(88px + env(safe-area-inset-bottom))}
 body.dashboard-mode.theme-vice-city.nav-driving #maneuver-card{top:calc(88px + env(safe-area-inset-top))}
 body.dashboard-mode.theme-vice-city.nav-driving #drive-bar{bottom:calc(98px + env(safe-area-inset-bottom))}
+/* Hero match: the floating utility pill (trip meta + search/voice/recenter/
+   stop) and the bottom-bar zoom/locate buttons are gone from the finished
+   VC car HUD — the maneuver card, bottom ETA and destination plate already
+   carry that information. Phone mode is untouched. */
+body.dashboard-mode.theme-vice-city #drive-bar{display:none}
+body.dashboard-mode.theme-vice-city .dash-zoom{display:none}
 /* Authentic in-game script logo as the wordmark (text hidden, logo shown). */
 body.dashboard-mode.theme-vice-city .dash-logo{
   font-size:0;line-height:0;
-  width:224px;height:56px;flex:none;
+  width:132px;height:62px;flex:none;
   background:url('assets/themes/vice-city/dashboard/vc-logo.png') 50% 50%/contain no-repeat;
   filter:drop-shadow(0 0 12px rgba(255,46,136,.9));
   transform:rotate(-2deg);
@@ -477,18 +486,20 @@ body.dashboard-mode.theme-vice-city .dash-tabs{padding:14px 6px 14px 44px;gap:6p
 body.dashboard-mode.theme-vice-city .dash-tabs button{
   background:none;border:0;box-shadow:none;clip-path:none;border-radius:0;
   font-family:var(--vcfont);font-size:34px;letter-spacing:3px;text-transform:uppercase;
-  color:var(--cyan);text-shadow:0 0 10px rgba(1,205,254,.75);padding:0 22px;opacity:.88;
+  color:var(--cyan);text-shadow:0 0 8px rgba(1,205,254,.55);padding:0 22px;opacity:.8;
 }
 body.dashboard-mode.theme-vice-city .dash-tabs button.on{
   color:#ff71ce;background:none;border:0;box-shadow:none;opacity:1;
-  text-shadow:0 0 12px rgba(255,46,136,.95),0 0 38px rgba(255,46,136,.55);
+  text-shadow:0 0 12px rgba(255,46,136,1),0 0 38px rgba(255,46,136,.6),0 0 70px rgba(255,46,136,.35);
 }
 body.dashboard-mode.theme-vice-city #dash-dest{
   color:#ff71ce;text-shadow:0 0 14px rgba(255,46,136,.95);
+  font-size:24px;padding:6px 28px;letter-spacing:5px;
   background:rgba(5,2,12,.88);border-color:rgba(1,205,254,.7);
   box-shadow:0 0 18px rgba(1,205,254,.4),inset 0 0 24px rgba(1,205,254,.12);
   clip-path:polygon(14px 0,100% 0,calc(100% - 14px) 100%,0 100%);
 }
+body.dashboard-mode.theme-vice-city .dash-trip{gap:10px;padding:12px 10px}
 /* VC dashboard maneuver card: neon console card like the benchmark —
    pink tube border, chamfered corners, hot-pink distance, cyan road,
    and a trip stats row. Phone / other themes are untouched. */
@@ -504,13 +515,16 @@ body.dashboard-mode.theme-vice-city #maneuver-arrow{
   position:absolute;left:3.5%;top:12%;width:30.5%;height:67%;
   display:flex;align-items:center;justify-content:center;
 }
-body.dashboard-mode.theme-vice-city #maneuver-arrow svg{width:84px;height:84px}
+body.dashboard-mode.theme-vice-city #maneuver-arrow svg{width:96px;height:96px}
+/* text zones sit INSIDE the frame's authored boxes: distance + road in the
+   upper box, the stats row in the lower box — never straddling the divider */
 body.dashboard-mode.theme-vice-city .banner-text{
-  position:absolute;left:37.5%;top:12%;width:58.5%;height:67%;
-  display:flex;flex-direction:column;min-width:0;
+  position:absolute;left:36%;top:11%;width:54%;height:42%;
+  display:flex;flex-direction:column;justify-content:center;min-width:0;
 }
-body.dashboard-mode.theme-vice-city #next-dist{margin-top:4px}
-body.dashboard-mode.theme-vice-city #next-stats{margin-top:auto;margin-bottom:6px}
+body.dashboard-mode.theme-vice-city #next-dist{margin:0}
+body.dashboard-mode.theme-vice-city #next-instr{padding-right:8px}
+body.dashboard-mode.theme-vice-city #next-stats{margin:0}
 body.dashboard-mode.theme-vice-city #maneuver-arrow svg{
   stroke:#ff2e88;filter:drop-shadow(0 0 9px rgba(255,46,136,.95));
 }
@@ -522,9 +536,10 @@ body.dashboard-mode.theme-vice-city #next-instr{
   text-shadow:0 0 10px rgba(1,205,254,.8);margin-top:4px;
 }
 body.dashboard-mode.theme-vice-city #next-stats{
-  display:block;margin-top:6px;font-family:var(--vclabel);font-size:20px;font-weight:600;
+  display:flex;position:absolute;left:36%;top:60%;width:58%;height:26%;
+  align-items:center;margin:0;white-space:nowrap;overflow:hidden;
+  font-family:var(--vclabel);font-size:20px;font-weight:600;
   letter-spacing:2px;color:var(--cyan);text-shadow:0 0 8px rgba(1,205,254,.7);
-  white-space:nowrap;
 }
 body.dashboard-mode.theme-vice-city #next-stats .ns-min{color:#ff71ce;text-shadow:0 0 10px rgba(255,46,136,.9)}
 body.dashboard-mode.theme-vice-city #next-stats .ns-sep{opacity:.7}
