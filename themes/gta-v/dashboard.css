@@ -14,6 +14,12 @@ body.dashboard-mode.theme-gta-v #search-bar,
 body.dashboard-mode.theme-gta-v #map-tools{
   display:none !important;
 }
+/* Night-driving vignette over the map edges — atmosphere only, the map
+   stays dominant. Sits under the bars/widget (z 25/26). */
+body.dashboard-mode.theme-gta-v::before{
+  content:'';position:fixed;inset:0;z-index:20;pointer-events:none;
+  background:radial-gradient(ellipse 115% 105% at 50% 42%, transparent 60%, rgba(0,0,0,.34) 100%);
+}
 body.dashboard-mode.theme-gta-v #search-bar{top:calc(132px + env(safe-area-inset-top))}
 /* Attribution: minimized + repositioned, never removed */
 body.dashboard-mode.theme-gta-v .maplibregl-ctrl-attrib{
@@ -24,14 +30,36 @@ body.dashboard-mode.theme-gta-v .maplibregl-ctrl-attrib{
 }
 body.dashboard-mode.theme-gta-v .maplibregl-ctrl-attrib a{color:#9aa3a8 !important}
 
-/* ============ TOP BAR — pause-menu header, 120px ============ */
+/* ============ TOP BAR — pause-menu header, 120px ============
+   Personality: Los Santos night skyline as scenery on the empty right
+   side (feathered into black, VC mask technique — its chrome base merges
+   with the bar edge), SignPainter "Los Santos" over it like the Vinewood
+   sign, whisper of grain for material, mint edge light. */
 body.dashboard-mode.theme-gta-v #dash-topbar{
   display:block;position:absolute;left:0;right:0;top:0;height:120px;z-index:25;
   background:#0b0b0b;
-  border-bottom:1px solid rgba(44,230,140,.25);
+  border-bottom:1px solid rgba(44,230,140,.35);
+  box-shadow:0 1px 0 rgba(44,230,140,.16), 0 6px 22px rgba(44,230,140,.07);
+}
+body.dashboard-mode.theme-gta-v #dash-topbar::before{
+  content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:url('dashboard/noise.png');background-size:180px;opacity:.05;
+}
+body.dashboard-mode.theme-gta-v #dash-topbar::after{
+  content:'';position:absolute;right:20px;bottom:0;width:340px;height:110px;
+  z-index:0;pointer-events:none;
+  background:url('dashboard/skyline-divider.png') 100% 100%/auto 110px no-repeat;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 42%);
+  mask-image:linear-gradient(90deg,transparent 0%,#000 42%);
 }
 body.dashboard-mode.theme-gta-v #dash-topbar .dash-chrome{
-  position:absolute;inset:0;
+  position:absolute;inset:0;z-index:1;
+}
+body.dashboard-mode.theme-gta-v #dash-topbar .dash-chrome::after{
+  content:'Los Santos';position:absolute;right:64px;bottom:24px;z-index:2;
+  font-family:'SignPainter','Chalet London',cursive;font-size:40px;color:#f2f5f2;
+  transform:rotate(-4deg);text-shadow:0 2px 14px rgba(0,0,0,.85);
+  pointer-events:none;white-space:nowrap;
 }
 /* Brand: the user's WayStation V lockup, prominent (~80px tall).
    The lockup already carries the wordmark, so the text span hides. */
@@ -42,6 +70,7 @@ body.dashboard-mode.theme-gta-v .dash-brand{
 body.dashboard-mode.theme-gta-v .dash-brand::before{
   content:'';display:block;width:280px;height:84px;flex:none;
   background:url('dashboard/logo-v.png') 50% 50%/contain no-repeat;
+  filter:drop-shadow(0 0 16px rgba(44,230,140,.22));
 }
 body.dashboard-mode.theme-gta-v .dash-logo{
   font-family:'Chalet Comprime','Arial Narrow',sans-serif;display:none;
@@ -56,15 +85,16 @@ body.dashboard-mode.theme-gta-v .vc-logo,
 body.dashboard-mode.theme-gta-v .rdr2-logo{display:none !important}
 /* Weather: real DOM classes are .dash-wx / #dash-temp / #dash-wxicon.
    The shared stylesheet paints .dash-wx cyan — override it here. */
+/* Weather clusters with the brand (fills the dead zone left of the clock) */
 body.dashboard-mode.theme-gta-v .dash-wx{
   position:absolute;top:50%;transform:translateY(-50%);
-  right:calc(50% + 200px);
+  left:348px;
   display:flex;align-items:center;gap:10px;
   color:#2ce68c;
 }
 body.dashboard-mode.theme-gta-v #dash-temp{
   font-family:'Chalet Comprime','Arial Narrow',sans-serif;
-  font-size:26px;font-weight:700;letter-spacing:1px;color:#2ce68c;
+  font-size:28px;font-weight:700;letter-spacing:1px;color:#2ce68c;
   font-variant-numeric:tabular-nums;white-space:nowrap;
 }
 body.dashboard-mode.theme-gta-v #dash-wxicon{
@@ -78,23 +108,30 @@ body.dashboard-mode.theme-gta-v .dash-clock{
 }
 body.dashboard-mode.theme-gta-v #dash-date{
   font-family:'Chalet Comprime','Arial Narrow',sans-serif;
-  font-size:20px;font-weight:600;letter-spacing:3px;color:#9aa3a8;
+  font-size:21px;font-weight:600;letter-spacing:4px;color:#9aa3a8;
   text-transform:uppercase;white-space:nowrap;
 }
 body.dashboard-mode.theme-gta-v #dash-time{
   font-family:'Chalet Comprime','Arial Narrow',sans-serif;
-  font-size:32px;font-weight:700;letter-spacing:1px;color:#f2f5f2;
+  font-size:40px;font-weight:700;letter-spacing:2px;color:#f2f5f2;
   font-variant-numeric:tabular-nums;white-space:nowrap;
+  text-shadow:0 2px 12px rgba(0,0,0,.75);
 }
 
-/* ============ BOTTOM BAR — pause-menu footer, 120px ============ */
+/* ============ BOTTOM BAR — pause-menu footer, 120px ============
+   Grain for material + mint edge light, mirroring the top bar. */
 body.dashboard-mode.theme-gta-v #dash-bottombar{
   display:block;position:absolute;left:0;right:0;bottom:0;height:120px;z-index:25;
   background:#0b0b0b;
-  border-top:1px solid rgba(44,230,140,.25);
+  border-top:1px solid rgba(44,230,140,.35);
+  box-shadow:0 -1px 0 rgba(44,230,140,.16), 0 -6px 22px rgba(44,230,140,.07);
+}
+body.dashboard-mode.theme-gta-v #dash-bottombar::before{
+  content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:url('dashboard/noise.png');background-size:180px;opacity:.05;
 }
 body.dashboard-mode.theme-gta-v #dash-bottombar .dash-chrome{
-  position:absolute;inset:0;display:flex;align-items:stretch;
+  position:absolute;inset:0;z-index:1;display:flex;align-items:stretch;
 }
 /* Tabs: icon + uppercase label; hairline dividers for structure.
    The shared stylesheet paints tabs cyan/pink — every bit of that
@@ -137,24 +174,27 @@ body.dashboard-mode.theme-gta-v .dash-tabs button::after{
 body.dashboard-mode.theme-gta-v .dash-tabs button.on{
   color:#f2f5f2;opacity:1;text-shadow:none;
 }
-body.dashboard-mode.theme-gta-v .dash-tabs button.on::before{opacity:1}
-body.dashboard-mode.theme-gta-v .dash-tabs button.on::after{background:#2ce68c}
+body.dashboard-mode.theme-gta-v .dash-tabs button.on::before{opacity:1;filter:drop-shadow(0 0 7px rgba(44,230,140,.35))}
+body.dashboard-mode.theme-gta-v .dash-tabs button.on::after{background:#2ce68c;box-shadow:0 0 10px rgba(44,230,140,.6)}
 body.dashboard-mode.theme-gta-v .dash-tabs button.on span{color:#f2f5f2}
-/* Center: LOS SANTOS COUNTY identity plate */
+/* Center: LOS SANTOS COUNTY — tracked-out Chalet with a mint rule
+   beneath (menu-section treatment), not a bland box. */
 body.dashboard-mode.theme-gta-v .dash-dest{
   flex:1;display:flex;align-items:center;justify-content:center;
   min-width:0;position:relative;
 }
 body.dashboard-mode.theme-gta-v #dash-dest{visibility:hidden;position:relative}
+body.dashboard-mode.theme-gta-v .dash-dest::before{
+  content:'';position:absolute;left:50%;top:calc(50% + 24px);transform:translateX(-50%);
+  width:76px;height:2px;background:#2ce68c;
+  box-shadow:0 0 10px rgba(44,230,140,.65);
+}
 body.dashboard-mode.theme-gta-v .dash-dest::after{
   content:'LOS SANTOS COUNTY';
   position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
   font-family:'Chalet Comprime','Arial Narrow',sans-serif;font-weight:700;
-  font-size:22px;letter-spacing:4px;text-transform:uppercase;color:#f2f5f2;
+  font-size:24px;letter-spacing:5px;text-transform:uppercase;color:#f2f5f2;
   white-space:nowrap;pointer-events:none;
-  border:1px solid rgba(242,245,242,.14);
-  background:rgba(242,245,242,.03);
-  padding:12px 34px;
 }
 body.dashboard-mode.theme-gta-v .dash-zoom{display:none !important}
 body.dashboard-mode.theme-gta-v .dash-tag{display:none}
@@ -184,16 +224,29 @@ body.dashboard-mode.theme-gta-v .gvsp{
   transform:none;translate:0 0;aspect-ratio:auto;z-index:25;overflow:hidden;
   background:#0b0b0b;
   border:1px solid rgba(242,245,242,.12);
+  box-shadow:0 10px 34px rgba(0,0,0,.6);
   color:#f2f5f2;
 }
 body.dashboard-mode.theme-gta-v .gvsp-hud{display:none}
+/* Grain over the panel + NOW PLAYING kicker (pause-menu section header) */
+body.dashboard-mode.theme-gta-v .gvsp::before{
+  content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:url('dashboard/noise.png');background-size:180px;opacity:.05;
+}
+body.dashboard-mode.theme-gta-v .gvsp::after{
+  content:'NOW PLAYING';position:absolute;z-index:5;left:0;right:0;top:5px;
+  text-align:center;pointer-events:none;
+  font-family:'Chalet Comprime','Arial Narrow',sans-serif;font-weight:700;
+  font-size:11px;letter-spacing:4px;color:#2ce68c;
+}
 /* Album art: ~40% of panel width, centered */
 body.dashboard-mode.theme-gta-v .gvsp-art,
 body.dashboard-mode.theme-gta-v .gvsp-art-idle{
   position:absolute;z-index:2;
-  left:50%;transform:translateX(-50%);top:20px;
+  left:50%;transform:translateX(-50%);top:24px;
   width:184px;height:184px;
   border:1px solid rgba(242,245,242,.14);
+  box-shadow:0 0 0 1px rgba(44,230,140,.22), 0 10px 30px rgba(0,0,0,.6);
 }
 body.dashboard-mode.theme-gta-v .gvsp-art{object-fit:cover;background:#0b0b0b}
 body.dashboard-mode.theme-gta-v .gvsp-art-idle{
@@ -262,12 +315,14 @@ body.dashboard-mode.theme-gta-v .gvsp-tbtn:active{transform:scale(.94)}
 body.dashboard-mode.theme-gta-v .gvsp-tbtn svg{
   width:46%;height:46%;fill:currentColor;filter:none;
 }
-/* Lyrics: quiet stage in the panel's lower third */
+/* Lyrics: quiet stage with the Los Santos night skyline faint behind it */
 body.dashboard-mode.theme-gta-v .gvsp-lyrics{
   position:absolute;z-index:3;left:20px;right:20px;top:418px;bottom:14px;
   overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;gap:6px;padding:10px 14px;pointer-events:none;
-  background:rgba(242,245,242,.02);
+  background:
+    linear-gradient(rgba(11,11,11,.9),rgba(11,11,11,.9)),
+    url('dashboard/skyline-divider.png') 50% 100%/cover no-repeat;
   border:1px solid rgba(242,245,242,.07);
 }
 body.dashboard-mode.theme-gta-v .gv-lyric-line{
@@ -305,16 +360,17 @@ body.dashboard-mode.theme-gta-v .gvsp-idle-hint{
 body.dashboard-mode.theme-gta-v #maneuver-card{
   position:absolute;left:24px;top:144px;z-index:26;
   min-width:300px;max-width:380px;
-  background:rgba(11,11,11,.95);
+  background:linear-gradient(180deg,rgba(18,20,18,.97),rgba(11,11,11,.95));
   border:1px solid rgba(242,245,242,.12);
   border-left:3px solid #2ce68c;
+  box-shadow:0 10px 30px rgba(0,0,0,.55);
   padding:16px 20px;display:none;
 }
 body.dashboard-mode.theme-gta-v.nav-driving #maneuver-card{display:block}
 body.dashboard-mode.theme-gta-v #maneuver-card::before{
   content:'NEXT TURN';display:block;
   font-family:'Chalet Comprime','Arial Narrow',sans-serif;font-weight:700;
-  font-size:11px;letter-spacing:2.5px;color:#9aa3a8;text-transform:uppercase;
+  font-size:11px;letter-spacing:2.5px;color:#2ce68c;text-transform:uppercase;
   margin-bottom:8px;
 }
 body.dashboard-mode.theme-gta-v #maneuver-arrow{
