@@ -18,7 +18,7 @@
 
 .sasp {
   position: absolute; left: auto; right: 70px; top: 50%; translate: 0 -50%;
-  width: 600px; aspect-ratio: 1 / 1;
+  width: 600px; max-width: calc(100vh - 300px); aspect-ratio: 1 / 1;
   transform: rotate(-6deg); transform-origin: center;
   container-type: size;
   pointer-events: auto;
@@ -31,7 +31,7 @@
 /* ---------- album art: UNDER the hud, through the frame ---------- */
 .sasp-art {
   position: absolute; z-index: 1;
-  left: 5.18%; top: 30.70%; width: 40.67%; height: 39.07%;
+  left: 6.1%; top: 30.70%; width: 40.67%; height: 39.07%;
   object-fit: cover;
   opacity: 0; transition: opacity .45s ease;
   background: #0a120c;
@@ -39,7 +39,7 @@
 .sasp-art.on { opacity: 1; }
 .sasp-art-idle {
   position: absolute; z-index: 1;
-  left: 5.18%; top: 30.70%; width: 40.67%; height: 39.07%;
+  left: 6.1%; top: 30.70%; width: 40.67%; height: 39.07%;
   display: flex; align-items: center; justify-content: center;
   background: radial-gradient(70% 70% at 50% 40%, #16241a 0%, #0a120c 75%);
 }
