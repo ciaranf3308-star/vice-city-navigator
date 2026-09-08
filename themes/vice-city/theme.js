@@ -17,6 +17,8 @@
       routeCasingColor: '#f5d020',
       routeWidth: 5,
       routeCasingWidth: 9,
+      routeGlowColor: '#f5d020',
+      routeGlowOpacity: 0.45,
       playerMarker: 'assets/themes/vice-city/player.png',
       fontStack: 'PricedownBl',
     },

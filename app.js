@@ -685,18 +685,29 @@ async function osrmRoute(from, to) {
 function routeTheme() {
   const t = wsTheme();
   const m = (t && t.map) || {};
+  const core = m.routeColor || '#f5d020';
   return {
-    core: m.routeColor || '#f5d020',
+    core,
     casing: m.routeCasingColor || '#f5d020',
     width: m.routeWidth || 5,
     casingWidth: m.routeCasingWidth || 9,
     dash: m.routeDash || null,
+    glow: m.routeGlowColor || core,
+    glowOpacity: m.routeGlowOpacity != null ? m.routeGlowOpacity : 0.35,
   };
 }
 function ensureRouteLayers() {
   if (map.getSource('vcn-route')) return;
   const rt = routeTheme();
   map.addSource('vcn-route', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+  map.addLayer({
+    id: 'vcn-route-glow', type: 'line', source: 'vcn-route',
+    layout: { 'line-cap': 'round', 'line-join': 'round' },
+    paint: {
+      'line-color': rt.glow, 'line-width': rt.casingWidth + 12,
+      'line-opacity': rt.glowOpacity, 'line-blur': 8
+    }
+  });
   map.addLayer({
     id: 'vcn-route-casing', type: 'line', source: 'vcn-route',
     layout: { 'line-cap': 'round', 'line-join': 'round' },
@@ -715,6 +726,9 @@ function ensureRouteLayers() {
 function paintRouteTheme() {
   if (!map || !map.getLayer('vcn-route-core')) return;
   const rt = routeTheme();
+  map.setPaintProperty('vcn-route-glow', 'line-color', rt.glow);
+  map.setPaintProperty('vcn-route-glow', 'line-width', rt.casingWidth + 12);
+  map.setPaintProperty('vcn-route-glow', 'line-opacity', rt.glowOpacity);
   map.setPaintProperty('vcn-route-casing', 'line-color', rt.casing);
   map.setPaintProperty('vcn-route-casing', 'line-width', rt.casingWidth);
   map.setPaintProperty('vcn-route-core', 'line-color', rt.core);

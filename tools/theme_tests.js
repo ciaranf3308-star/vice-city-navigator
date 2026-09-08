@@ -565,6 +565,12 @@ for (const id of ['v-road-minor', 'v-road-primary', 'v-road-motorway'])
 ok(vPaint('v-label-road-major')['text-color'] === '#d8d8d8', 'V road labels: pale grey');
 ok(vPaint('v-label-place')['text-halo-color'] === '#000000', 'V place labels: black halo');
 ok(T.get('gta-v').map.routeColor === '#a86fd6', 'V route stays purple (as in-game)');
+/* ---------- route glow (hero treatment) ---------- */
+const appSrc2 = fs.readFileSync(path.join(REPO, 'app.js'), 'utf8');
+ok(appSrc2.includes("id: 'vcn-route-glow'"), 'route glow layer exists');
+ok(appSrc2.includes("'line-blur'"), 'route glow uses line-blur');
+ok(T.get('vice-city').map.routeGlowColor === '#f5d020', 'VC route glow: hero yellow halo');
+ok(T.get('vice-city').map.routeGlowOpacity === 0.45, 'VC route glow: visible halo opacity');
 
 
 
