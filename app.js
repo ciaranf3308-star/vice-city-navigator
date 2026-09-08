@@ -1467,10 +1467,15 @@ function queueDashLocality() {
 }
 async function syncDashLocality() {
   const el = $('dash-dest');
-  if (!el || !window.map) return;
+  if (!el) return;
   if (!document.body.classList.contains('dashboard-mode')) return;
   if (typeof navActive !== 'undefined' && navActive) return; /* nav shows the destination */
-  let c; try { c = map.getCenter(); } catch (e) { return; }
+  /* If the map failed (e.g. no WebGL), fall back to the default Dublin center
+     so the plate still names the city instead of showing a blank dash. */
+  let c;
+  try {
+    c = (window.map && map.getCenter) ? map.getCenter() : { lat: 53.3498, lng: -6.2603 };
+  } catch (e) { c = { lat: 53.3498, lng: -6.2603 }; }
   const key = c.lat.toFixed(3) + ',' + c.lng.toFixed(3);
   if (key === dashLocKey) return;
   dashLocKey = key;
