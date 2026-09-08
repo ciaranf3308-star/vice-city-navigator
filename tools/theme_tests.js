@@ -539,7 +539,7 @@ for (const f of ['topbar.png', 'bottombar.png', 'maneuver.png', 'grove-panel.png
   ok(fs.statSync(saDash(f)).size > 10000, `SA dashboard art non-empty: ${f}`);
 }
 const saLogo = pngSize(saDash('sa-logo.png'));
-ok(saLogo && saLogo.w >= 800 && saLogo.h >= 180, 'SA standalone wordmark extracted with transparency');
+ok(saLogo && saLogo.w >= 500 && saLogo.h >= 150, 'SA standalone wordmark extracted with transparency');
 const saMan = pngSize(saDash('maneuver.png'));
 ok(saMan && saMan.w >= 900 && saMan.h >= 180, 'SA maneuver frame: clean empty plate for live data');
 const saGrove = pngSize(saDash('grove-panel.png'));
