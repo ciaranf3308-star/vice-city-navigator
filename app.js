@@ -1741,7 +1741,7 @@ function wireControls() {
         setDashTab(off ? 'map' : 'radio');
         return;
       }
-      if (t === 'vehicle' || t === 'settings') { openMenu(); setDashTab(t); return; }
+      if (t === 'settings') { openMenu(); setDashTab(t); return; }
       const saDash = document.body.classList.contains('dashboard-mode') &&
         document.body.classList.contains('theme-san-andreas');
       const dismissing = !$('menu-panel').hidden || document.body.classList.contains('radio-off');
