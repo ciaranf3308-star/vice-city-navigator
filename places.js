@@ -2,13 +2,17 @@
    Vice City Navigator — ambient POIs from Google Places API (New)
    ------------------------------------------------------------
    As the player moves, nearby real-world businesses are fetched
-   with Nearby Search (New) and rendered as authentic Vice City
-   radar blips. No user search required.
+   with Nearby Search (New) and rendered as authentic game radar
+   blips. No user search required.
 
    Pipeline: GPS fix / 750 m movement -> searchNearby (5 category
-   groups) -> cache (memory + localStorage, 24 h TTL) -> GeoJSON
-   source -> single symbol layer with importance-based,
-   zoom-band visibility -> tap for VC place card.
+   groups) -> cache (memory + localStorage, 24 h TTL) -> DOM
+   markers with importance-based, zoom-band visibility ->
+   tap for place card.
+
+   Markers are plain DOM elements (maplibregl.Marker), NOT a
+   MapLibre symbol layer: setStyle() cannot remove them, and there
+   is no image registry or icon-expression machinery to go stale.
 
    Visibility is a pure render rule over the cache: zooming out
    never triggers new Google fetches, and zooming back in
@@ -164,32 +168,12 @@
      categories and asks the active theme for art + image ids. */
   function themeId() { return (window.VCNThemes && VCNThemes.currentId()) || 'vice-city'; }
   function activeTheme() { return window.VCNThemes ? VCNThemes.get(themeId()) : null; }
-  /* Semantic category -> this theme's blip file stem. */
-  function iconStemFor(semantic) {
-    const t = activeTheme();
-    const m = (t && t.pois && t.pois.semanticIconMap) || {};
-    return m[semantic] || semantic || ((t && t.pois && t.pois.fallbackIcon) || 'qmark');
-  }
-  /* Namespaced MapLibre image id so four themes' blips can coexist. */
-  function themeImageId(stem) { return 'poi-' + themeId() + '-' + stem; }
   /* Per-theme blip art scale: themes whose blip PNGs ship larger than the
      shared 16px nominal size declare pois.blipScale to compensate. */
   function blipScale() {
     const t = activeTheme();
     const s = t && t.pois && t.pois.blipScale;
     return typeof s === 'number' && s > 0 ? s : 1;
-  }
-  function iconSizeExpr() {
-    return ['*',
-      ['interpolate', ['linear'], ['zoom'], 10, 2.2, 14, 2.6, 16, 3.0, 18, 3.4],
-      blipScale()];
-  }
-  function allIconStems() {
-    const t = activeTheme();
-    const stems = new Set(Object.values((t && t.pois && t.pois.semanticIconMap) || {}));
-    Object.keys(IMPORTANCE_BY_SEMANTIC).forEach(s => stems.add(s));
-    stems.add((t && t.pois && t.pois.fallbackIcon) || 'qmark');
-    return [...stems];
   }
 
   function semanticForPlace(primaryType, types) {
@@ -363,89 +347,67 @@
   }
 
   /* ---------------- map rendering ---------------- */
-  /* One symbol layer; visibility is computed in JS from the zoom
-     band, so zooming is purely a rendering rule over the existing
-     cache — no extra Google fetches, and cached POIs reappear
-     instantly when zooming back in. */
-  const POI_LAYER_ID = 'vcn-poi';
-  let lastImageError = null;
-  function preloadBlipImages() {
-    // NOTE: plain <img> loading, NOT map.loadImage — MapLibre's loader
-    // silently fails for these assets on the user's mobile Safari while
-    // plain <img> (player arrow) works fine. Decode via Image, register
-    // the element directly with addImage.
-    const t = activeTheme();
-    const assetPath = (t && t.pois && t.pois.assetPath) || '';
-    const filePrefix = (t && t.pois && t.pois.filePrefix) || '';
-    for (const stem of allIconStems()) {
-      const id = themeImageId(stem);
-      if (map.hasImage(id)) continue;
-      const img = new Image();
-      img.onload = () => {
-        try {
-          if (!map.hasImage(id)) map.addImage(id, img, { sdf: false });
-        } catch (e) { lastImageError = id + ': addImage threw ' + (e && e.message); }
-        renderPois(); // paint any features that were waiting on this blip
-      };
-      img.onerror = () => { lastImageError = id + ': <img> onerror for ' + img.src; };
-      img.src = assetPath + filePrefix + stem + '.png';
+  /* DOM markers (NOT a MapLibre symbol layer): visibility is computed
+     in JS from the zoom band, so zooming is purely a rendering rule
+     over the existing cache — no extra Google fetches, and cached
+     POIs reappear instantly when zooming back in. DOM markers are
+     plain HTML in the map container: setStyle() cannot remove them,
+     and there is no image-registry/layer/expression machinery to
+     go stale. */
+  const poiMarkers = new Map(); // placeId -> { marker, sem, el, img }
+  let lastPickedCount = 0;
+
+  /* GTA-like zoom scaling for marker art (px), times theme blipScale. */
+  function markerPxForZoom(z) {
+    const pts = [[10, 22], [12, 26], [14, 30], [16, 36], [18, 42]];
+    if (z <= pts[0][0]) return pts[0][1];
+    for (let i = 1; i < pts.length; i++) {
+      if (z <= pts[i][0]) {
+        const z0 = pts[i - 1][0], s0 = pts[i - 1][1];
+        const z1 = pts[i][0], s1 = pts[i][1];
+        return s0 + (s1 - s0) * (z - z0) / (z1 - z0);
+      }
     }
+    return pts[pts.length - 1][1];
   }
-  let lastLayerError = null;
-  function nukeAndRebuild() {
-    try {
-      if (map.getLayer(POI_LAYER_ID)) map.removeLayer(POI_LAYER_ID);
-    } catch (e) { /* ignore */ }
-    try {
-      if (map.getSource('vcn-pois')) map.removeSource('vcn-pois');
-    } catch (e) { /* ignore */ }
-    lastLayerError = null;
-    const styleLoaded = map.isStyleLoaded ? map.isStyleLoaded() : 'unknown';
-    ensureLayers();
-    preloadBlipImages();
-    renderPois();
-    return {
-      sourceExists: !!map.getSource('vcn-pois'),
-      layerExists: !!map.getLayer(POI_LAYER_ID),
-      lastLayerError,
-      styleLoaded,
-    };
+  function markerSizePx() {
+    if (!map) return 30;
+    return Math.round(markerPxForZoom(map.getZoom()) * blipScale());
   }
-  function ensureLayers() {
-    if (!map.getSource('vcn-pois')) {
-      map.addSource('vcn-pois', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
-    }
-    if (map.getLayer(POI_LAYER_ID)) return;
-    try {
-      map.addLayer({
-        id: POI_LAYER_ID, type: 'symbol', source: 'vcn-pois',
-        layout: {
-          // icon resolves to the ACTIVE theme's namespaced image id,
-          // computed per feature in renderPois() — shared code never
-          // names a blip file.
-          'icon-image': ['get', 'icon'],
-          'icon-size': iconSizeExpr(),
-          'icon-anchor': 'center',
-          'icon-allow-overlap': false,
-          'icon-ignore-placement': false,
-          'icon-padding': 2,
-          // MapLibre gives LOWER sort-key values placement priority, so
-          // the stored key is inverted: airports/hospitals win collisions
-          // over restaurants/bars. See sortKey in renderPois().
-          'symbol-sort-key': ['get', 'sortKey'],
-        },
+  function poiIconUrl(sem) {
+    try { return window.VCNThemes ? VCNThemes.poiIconUrl(sem, themeId()) : ''; }
+    catch (e) { return ''; }
+  }
+  function createPoiMarker(rec, sem) {
+    const el = document.createElement('div');
+    el.className = 'ws-poi-marker';
+    const img = document.createElement('img');
+    img.src = poiIconUrl(sem);
+    img.alt = '';
+    img.draggable = false;
+    el.appendChild(img);
+    const size = markerSizePx();
+    el.style.width = size + 'px';
+    el.style.height = size + 'px';
+    // Tap opens the existing place card; don't let it pan/select the map.
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      showCard({
+        placeId: rec.placeId, name: rec.displayName,
+        type: rec.primaryType || '', semantic: sem || '',
+        lng: rec.lng, lat: rec.lat,
       });
-      lastLayerError = null;
-    } catch (e) {
-      lastLayerError = 'addLayer: ' + (e && e.message);
-    }
+    });
+    const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
+      .setLngLat([rec.lng, rec.lat])
+      .addTo(map);
+    return { marker, sem, el, img };
   }
+  /* Recompute which POIs should be visible and diff the DOM markers:
+     same picked list as before (zoom band, importance, viewport cap),
+     then remove stale markers and create new ones. */
   function renderPois() {
-    if (!map || !map.getSource('vcn-pois')) return;
-    // Self-healing: if the layer was dropped (theme switch, style reload),
-    // recreate it now — the source and images are already in place.
-    if (!map.getLayer(POI_LAYER_ID)) ensureLayers();
-    if (!map.getLayer(POI_LAYER_ID)) return;
+    if (!map) return;
     const now = Date.now(), ttl = ttlMs();
     const band = bandForZoom(map.getZoom());
     let picked = [];
@@ -465,20 +427,36 @@
       picked.sort((a, b) => b[0] - a[0]);
       if (picked.length > band.cap) picked.length = band.cap;
     }
-    const features = picked.map(([imp, sem, rec]) => ({
-      type: 'Feature',
-      geometry: { type: 'Point', coordinates: [rec.lng, rec.lat] },
-      properties: {
-        placeId: rec.placeId, name: rec.displayName,
-        type: rec.primaryType || '', semantic: sem || '',
-        icon: themeImageId(iconStemFor(sem)),
-        importance: imp,
-        // inverted: MapLibre prioritises LOWER sort-keys, so major
-        // landmarks (high importance) must carry the lowest keys
-        sortKey: 100 - imp,
-      },
-    }));
-    map.getSource('vcn-pois').setData({ type: 'FeatureCollection', features });
+    lastPickedCount = picked.length;
+    const wantIds = new Set();
+    const size = markerSizePx();
+    for (const [imp, sem, rec] of picked) {
+      wantIds.add(rec.placeId);
+      const existing = poiMarkers.get(rec.placeId);
+      if (existing) {
+        existing.sem = sem;
+        existing.el.style.width = size + 'px';
+        existing.el.style.height = size + 'px';
+      } else {
+        poiMarkers.set(rec.placeId, createPoiMarker(rec, sem));
+      }
+    }
+    for (const [id, entry] of poiMarkers) {
+      if (!wantIds.has(id)) {
+        try { entry.marker.remove(); } catch (e) { /* already gone */ }
+        poiMarkers.delete(id);
+      }
+    }
+  }
+  /* Theme switch: repoint every visible marker's art at the new theme.
+     Cache, positions, and marker count are untouched. */
+  function refreshMarkerArt() {
+    const size = markerSizePx();
+    for (const entry of poiMarkers.values()) {
+      entry.img.src = poiIconUrl(entry.sem);
+      entry.el.style.width = size + 'px';
+      entry.el.style.height = size + 'px';
+    }
   }
 
   /* ---------------- place card ---------------- */
@@ -510,47 +488,27 @@
       });
     };
   }
-  function wireCard() {
-    const layerIds = [POI_LAYER_ID];
-    const onPoiClick = e => {
-      const f = e.features && e.features[0];
-      if (!f) return;
-      const p = f.properties, c = f.geometry.coordinates;
-      showCard({ placeId: p.placeId, name: p.name, type: p.type, semantic: p.semantic, lng: c[0], lat: c[1] });
-    };
-    for (const id of layerIds) map.on('click', id, onPoiClick);
-  }
-
   /* ---------------- public API ---------------- */
   window.VCNPlaces = {
     init(m, h) {
       map = m; hooks = h || {};
       loadPersistedCache();
       loadQueryHistory();
-      ensureLayers();
-      preloadBlipImages();
       renderPois();   // show cached POIs immediately
-      wireCard();
       initialized = true;
       // re-evaluate visibility on pan/zoom — purely a render rule,
       // the cache is untouched so zooming back in is instant
       map.on('moveend', renderPois);
+      map.on('zoomend', renderPois);
     },
     maybeRefresh,
     renderPois,
-    nukeAndRebuild,
     cacheSize: () => memCache.size,
-    /* Rebuild map-side state after a style change (setStyle drops all
-       custom sources/layers/images). Cache and data are untouched. */
+    /* Theme/style change: DOM markers survive setStyle untouched —
+       just repoint their art at the new theme and re-render. */
     rehydrate() {
       if (!map) return;
-      ensureLayers();
-      try {
-        if (map.getLayer(POI_LAYER_ID)) {
-          map.setLayoutProperty(POI_LAYER_ID, 'icon-size', iconSizeExpr());
-        }
-      } catch (e) { /* layer not ready yet — ensureLayers set it */ }
-      preloadBlipImages();
+      refreshMarkerArt();
       renderPois();
     },
     /* Diagnostic snapshot for the ?poi-debug panel and console probing. */
@@ -561,24 +519,13 @@
         initialized,
         keyReady: !!keyReady(),
         cacheSize: memCache.size,
+        pickedCount: lastPickedCount,
+        markerCount: poiMarkers.size,
+        zoom: map ? +map.getZoom().toFixed(2) : null,
+        theme: themeId(),
         lastRefresh: lastRefreshInfo,
         budgetToday: budget && budget.date === new Date().toISOString().slice(0, 10) ? budget.count : 0,
         queryHistory: queryHistory.length,
-        layerOnMap: !!(map && map.getSource('vcn-pois')),
-        layerExists: !!(map && typeof map.getLayer === 'function' && map.getLayer('vcn-poi')),
-        zoom: map ? +map.getZoom().toFixed(2) : null,
-        featuresInSource: (() => {
-          try { const s = map.getSource('vcn-pois'); return s && s._data ? s._data.features.length : null; }
-          catch (e) { return 'err:' + e.message; }
-        })(),
-        blipImages: (() => {
-          try {
-            const tid = themeId();
-            const missing = allIconStems().filter(s => !map.hasImage('poi-' + tid + '-' + s));
-            return { theme: tid, total: allIconStems().length, missing, lastImageError };
-          } catch (e) { return { error: String(e && e.message || e) }; }
-        })(),
-        lastLayerError,
         cooldownMsLeft: Math.max(0, failCooldownUntil - Date.now()),
       };
     },

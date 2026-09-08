@@ -190,6 +190,10 @@ body{
 #poi-detail{margin-top:14px}
 #poi-drive{width:100%}
 #poi-detail .poi-secondary{width:100%;margin-top:10px}
+/* Ambient POI DOM markers — plain <div><img> via maplibregl.Marker.
+   Size is set inline per zoom; art must never stretch. */
+.ws-poi-marker{cursor:pointer;pointer-events:auto;line-height:0}
+.ws-poi-marker img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}
 .poi-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
 .poi-head img{image-rendering:pixelated;filter:drop-shadow(0 0 8px rgba(1,205,254,.55))}
 #poi-name{font-family:var(--vclabel);font-weight:600;font-size:18px;letter-spacing:.5px;display:block}

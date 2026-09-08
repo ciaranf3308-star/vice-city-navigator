@@ -173,7 +173,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v128"), 'SW theme cache v128');
+ok(swSrc.includes("ws-theme-v129"), 'SW theme cache v129');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -220,7 +220,9 @@ ok(rdrPlace && rdrPlace.layout['text-letter-spacing'] === 0.18, 'RDR2 place labe
 /* ---------- POI importance ordering + inverse sort key ---------- */
 const placesSrc = fs.readFileSync(path.join(REPO, 'places.js'), 'utf8');
 ok(placesSrc.includes('blipScale'), 'places.js honors pois.blipScale');
-ok(placesSrc.includes('iconSizeExpr'), 'places.js scales POI icon-size per theme');
+ok(placesSrc.includes('ws-poi-marker'), 'places.js renders POIs as DOM markers');
+ok(placesSrc.includes('markerPxForZoom'), 'places.js scales POI marker size by zoom');
+ok(!placesSrc.includes('POI_LAYER_ID'), 'places.js has no POI symbol layer');
 const impMatch = placesSrc.match(/const IMPORTANCE_BY_SEMANTIC = \{([\s\S]*?)\};/);
 ok(!!impMatch, 'IMPORTANCE_BY_SEMANTIC table found');
 const impBox = {};
@@ -233,7 +235,7 @@ ok(IMP.airport > IMP.hospital && IMP.hospital > IMP.fuel && IMP.fuel > IMP.resta
    'importance ordering airport > hospital > fuel > restaurant > bar');
 // inverse key: higher importance -> lower sortKey -> wins MapLibre collisions
 const key = imp => 100 - imp;
-ok(placesSrc.includes('sortKey: 100 - imp'), 'renderPois uses inverted sortKey');
+ok(placesSrc.includes('picked.sort'), 'renderPois sorts picked POIs by importance');
 ok(key(IMP.airport) < key(IMP.bar), 'airport sortKey lower than bar (wins collisions)');
 ok(key(IMP.hospital) < key(IMP.fuel), 'hospital sortKey lower than fuel');
 
