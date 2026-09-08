@@ -64,7 +64,7 @@ body.dashboard-mode.theme-gta-v #dash-topbar .dash-chrome::after{
 /* Brand: the user's WayStation V lockup, prominent (~80px tall).
    The lockup already carries the wordmark, so the text span hides. */
 body.dashboard-mode.theme-gta-v .dash-brand{
-  position:absolute;left:24px;top:-18px;
+  position:absolute;left:24px;top:0;
   display:flex;align-items:center;z-index:40;
   pointer-events:none;
 }
