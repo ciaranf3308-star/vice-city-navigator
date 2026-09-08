@@ -627,18 +627,19 @@ body.dashboard-mode.theme-san-andreas #dash-time{
 }
 /* ---------- bottom console: designed CSS console, no photo strip ---------- */
 body.dashboard-mode.theme-san-andreas #dash-bottombar{
-  display:block;position:absolute;left:0;right:0;bottom:0;height:86px;z-index:25;
-  background:linear-gradient(180deg,#4a3a20 0%,#2a2010 16%,#14100a 55%,#0b0906 100%);
-  box-shadow:inset 0 4px 8px rgba(255,220,150,.22), inset 0 -12px 20px rgba(0,0,0,.65);
+  display:block;position:absolute;left:0;right:0;bottom:0;height:92px;z-index:25;
+  background:#0c0a07;
+  box-shadow:inset 0 -14px 22px rgba(0,0,0,.7);
   pointer-events:auto;
-  /* hero's machined top edge: chamfered corners, angular console profile */
-  clip-path:polygon(0 100%,0 28%,2.5% 0,97.5% 0,100% 28%,100% 100%);
+  /* hero's machined profile: stepped top edge, angled ends */
+  clip-path:polygon(0 100%,0 22%,1.8% 8%,3.2% 8%,4.5% 0,95.5% 0,96.8% 8%,98.2% 8%,100% 22%,100% 100%);
 }
-/* gold edge follows the chamfer */
+/* machined brass trim along the top edge */
 body.dashboard-mode.theme-san-andreas #dash-bottombar::before{
-  content:"";position:absolute;left:0;right:0;top:0;height:3px;
-  background:linear-gradient(90deg,transparent,#d8b34a 8%,#f5d67b 50%,#d8b34a 92%,transparent);
-  clip-path:polygon(0 100%,2.5% 0,97.5% 0,100% 100%);
+  content:"";position:absolute;left:0;right:0;top:0;height:16px;
+  background:url('themes/san-andreas/dashboard/bottombar-trim.jpg') 50% 0/1920px 16px no-repeat;
+  clip-path:polygon(0 100%,0 30%,1.8% 8%,3.2% 8%,4.5% 0,95.5% 0,96.8% 8%,98.2% 8%,100% 30%,100% 100%);
+  opacity:.95;
 }
 body.dashboard-mode.theme-san-andreas #dash-bottombar .dash-chrome{
   position:absolute;inset:0;display:flex;align-items:center;gap:12px;
@@ -658,15 +659,17 @@ body.dashboard-mode.theme-san-andreas .dash-tabs{
   position:static;display:flex;align-items:center;gap:8px;padding:0;background:none;pointer-events:none;
 }
 body.dashboard-mode.theme-san-andreas .dash-tabs button{
-  position:static;padding:12px 20px;cursor:pointer;pointer-events:auto;
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:17px;font-weight:600;
-  letter-spacing:3px;color:#c9b98a;background:rgba(0,0,0,.35);
-  border:1px solid rgba(201,162,39,.4);border-radius:10px;
+  position:static;padding:10px 18px;cursor:pointer;pointer-events:auto;
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:17px;font-weight:700;
+  letter-spacing:3px;color:#c9b98a;background:none;border:0;border-radius:12px;
   text-shadow:0 2px 0 #000;opacity:1;white-space:nowrap;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
 }
+body.dashboard-mode.theme-san-andreas .dash-tabs button svg{width:30px;height:30px}
+/* hero MAP: solid green box, black icon + label */
 body.dashboard-mode.theme-san-andreas .dash-tabs button.on{
-  background:#f2e8c9;color:#2a2118;text-shadow:none;border-color:#f2e8c9;
-  box-shadow:0 3px 0 rgba(0,0,0,.5);
+  background:linear-gradient(180deg,#8fbf7a,#6da055);color:#101408;text-shadow:none;
+  box-shadow:0 3px 0 rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.35);
 }
 /* locality: inset plate, flexes to fill */
 body.dashboard-mode.theme-san-andreas .dash-dest{
@@ -674,12 +677,13 @@ body.dashboard-mode.theme-san-andreas .dash-dest{
   min-width:0;margin:0;padding:0;
 }
 body.dashboard-mode.theme-san-andreas #dash-dest{
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:22px;font-weight:600;
-  letter-spacing:2px;color:#f2e8c9;background:rgba(0,0,0,.5);
-  border:1px solid rgba(201,162,39,.55);border-radius:10px;
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:24px;font-weight:700;
+  letter-spacing:3px;color:#f2e8c9;background:rgba(0,0,0,.55);
+  border:2px solid #6da055;
+  clip-path:polygon(14px 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,14px 100%,0 50%);
   box-shadow:inset 0 2px 8px rgba(0,0,0,.75);
   text-shadow:0 2px 0 #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  max-width:100%;padding:10px 30px;clip-path:none;
+  max-width:100%;padding:10px 34px;
 }
 /* compass + ETA */
 body.dashboard-mode.theme-san-andreas .dash-trip{
@@ -691,15 +695,21 @@ body.dashboard-mode.theme-san-andreas #dash-compass{
 body.dashboard-mode.theme-san-andreas .dash-north{display:none}
 body.dashboard-mode.theme-san-andreas #dash-eta{
   position:static;font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:22px;
-  font-weight:600;letter-spacing:1px;color:#7ec850;text-shadow:0 2px 0 #000;white-space:nowrap;
+  font-weight:700;letter-spacing:1px;color:#8fbf7a;text-shadow:0 2px 0 #000;white-space:nowrap;
+  text-transform:uppercase;
 }
 body.dashboard-mode.theme-san-andreas .dash-zoom{display:none}
-/* script tagline */
+/* right palm panel: photographic sunset with the tagline script over it, hero-style */
 body.dashboard-mode.theme-san-andreas .dash-tag{
-  position:static;width:150px;height:58px;flex:0 0 auto;
+  position:static;width:300px;height:76px;flex:0 0 auto;
   font-size:0;line-height:0;color:transparent;text-shadow:none;transform:none;
   display:block;padding:0;white-space:normal;
-  background:url('themes/san-andreas/dashboard/script-music.png') 50% 50%/contain no-repeat;
+  background:
+    url('themes/san-andreas/dashboard/script-music.png') 50% 50%/220px auto no-repeat,
+    url('themes/san-andreas/dashboard/bottombar-palms.jpg') 50% 50%/cover no-repeat;
+  border:1px solid rgba(201,162,39,.5);
+  clip-path:polygon(12px 0,100% 0,100% 100%,0 100%,0 12px);
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.6));
 }
 /* ---------- maneuver card: authored frame, stats row underneath ---------- */
 body.dashboard-mode.theme-san-andreas.nav-driving #maneuver-card{

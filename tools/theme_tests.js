@@ -423,7 +423,7 @@ ok(cssSrc.includes('dashboard/topbar.jpg'), 'top bar paints the authored strip i
    layouts and drive-HUD clearances, not one shared silhouette ---------- */
 const barHeights = {
   'vice-city': ['76px', '88px'],
-  'san-andreas': ['86px', '86px'],
+  'san-andreas': ['86px', '92px'],
   'gta-v': ['56px', '64px'],
   'rdr2': ['72px', '72px'],
 };
@@ -437,8 +437,8 @@ for (const [id, [top, bottom]] of Object.entries(barHeights)) {
 }
 ok(/theme-vice-city #dash-topbar \.dash-chrome::after/.test(cssSrc), 'VC top bar wears a chrome divider strip');
 ok(!/theme-vice-city \.dash-tabs button\{[^}]*linear-gradient/.test(cssSrc), 'VC tabs are flat neon text, not chunky buttons');
-ok(/theme-san-andreas \.dash-tabs button\.on\{[^}]*background:#f2e8c9/.test(cssSrc),
-  'SA active tab wears the cream menu box (concept mock)');
+ok(/theme-san-andreas \.dash-tabs button\.on\{[^}]*#8fbf7a/.test(cssSrc),
+  'SA active tab is the hero solid green box');
 ok(/theme-gta-v \.dash-tabs button\{[^}]*border-left:1px solid/.test(cssSrc), 'V tab strip uses hairline separators');
 ok(/theme-gta-v \.dash-tag\{display:none\}/.test(cssSrc), 'V drops the 80s script tagline');
 ok(/theme-rdr2 \.dash-tag\{display:none\}/.test(cssSrc), 'RDR2 drops the 80s script tagline');
@@ -531,9 +531,9 @@ ok(vcPaint('vc-buildings')['fill-color'] === '#b7b7c7', 'VC buildings: separated
 ok(vcPaint('vc-road-minor')['line-color'] === '#eef0f6', 'VC minor roads: white streets (hero)');
 ok(vcPaint('vc-road-primary')['line-color'] === '#1d1d36', 'VC arterials: stronger dark navy (hero contrast)');
 ok(vcPaint('vc-road-motorway')['line-color'] === '#0e0e22', 'VC motorways: near-black navy (hero contrast)');
-ok(cssSrc.includes("#dash-bottombar::before") && cssSrc.includes("#d8b34a"), 'SA bottom console wears its own gold chamfer');
-ok(/theme-san-andreas #dash-bottombar\{[^}]*linear-gradient\(180deg,#4a3a20/.test(cssSrc),
-  'SA bottom bar is a designed CSS console, not a fitted photo strip');
+ok(/bottombar-trim\.jpg/.test(cssSrc), 'SA bottom console wears the machined brass trim');
+ok(/theme-san-andreas #dash-bottombar\{[^}]*background:#0c0a07/.test(cssSrc),
+  'SA bottom bar is the dark hero console');
 /* ---------- SA hero-match: authored dashboard art set ---------- */
 const saDash = (f) => path.join(REPO, 'themes/san-andreas/dashboard', f);
 for (const f of ['topbar.png', 'bottombar.png', 'maneuver.png', 'grove-panel.png', 'script-tomorrow.png', 'script-music.png', 'sa-logo.png']) {
@@ -585,8 +585,8 @@ ok(/theme-san-andreas \.sa-logo\{[^}]*height:112px/.test(cssSrc),
   'SA wordmark is hero-sized and overlaps the map');
 ok(/theme-san-andreas #dash-bottombar \.dash-chrome\{[^}]*display:flex/.test(cssSrc),
   'SA bottom console lays out with flex, not art-slot coordinates');
-ok(/theme-san-andreas \.dash-tabs button\{[^}]*border:1px solid rgba\(201,162,39/.test(cssSrc),
-  'SA tabs are bordered text buttons on the designed console');
+ok(/theme-san-andreas \.dash-tabs button\{[^}]*border:0/.test(cssSrc),
+  'SA tabs are borderless icon+label like the hero');
 ok(indexSrc.includes('Good Music<br>Better Times'), 'dashboard tagline reads "Good Music Better Times"');
 /* ---------- SA map: deeper palette, denser road labels ---------- */
 const saStyle2 = JSON.parse(fs.readFileSync(path.join(REPO, 'themes/san-andreas/style.json'), 'utf8'));
@@ -1233,3 +1233,8 @@ ok(/theme-san-andreas \.sa-logo\{[^}]*height:112px/.test(cssSrc),
   'SA logo is hero-big (112px) overlapping the map, not clipped');
 ok(indexSrc.indexOf('class="sa-logo"') > indexSrc.indexOf('</header>'),
   'SA logo sits outside the clipped topbar so it can overlap');
+ok(/bottombar-trim\.jpg/.test(cssSrc), 'SA bottom bar has the machined brass top trim');
+ok(/bottombar-palms\.jpg/.test(cssSrc), 'SA bottom bar has the palm sunset panel');
+ok(/\.dash-tabs button\.on\{[^}]*#8fbf7a/.test(cssSrc), 'SA active tab is the hero solid green MAP box');
+ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/bottombar-trim.jpg')), 'SA bottom bar trim art exists');
+ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/bottombar-palms.jpg')), 'SA bottom bar palm art exists');
