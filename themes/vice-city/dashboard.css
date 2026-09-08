@@ -93,6 +93,9 @@ body.dashboard-mode.theme-vice-city #vc-right-panel{
   display:block;position:absolute;right:18px;top:92px;width:340px;z-index:24;
   pointer-events:none;
 }
+/* hud.png already crowns the widget with the Vice city logo — hide the duplicate */
+body.dashboard-mode.theme-vice-city #vc-right-panel .vc-logo-script,
+body.dashboard-mode.theme-vice-city #vc-right-panel .vc-tagline{display:none}
 body.dashboard-mode.theme-vice-city #vc-right-panel .vc-logo-script{
   font-family:'Yellowtail',cursive;font-size:64px;color:#ff71ce;text-align:center;
   text-shadow:0 0 10px rgba(255,113,206,1),0 0 30px rgba(255,46,136,.8),0 0 60px rgba(255,46,136,.4);
@@ -113,9 +116,9 @@ body.dashboard-mode.theme-vice-city #spotify-pane{
   /* The .vcsp skin positions itself (right:70px;top:48%) relative to the
      viewport — the pane must NOT create a positioning context. */
 }
-/* Widget sits below the Vice city logo in the right panel */
+/* Widget sits below the top bar, clear of the bottom bar */
 body.dashboard-mode.theme-vice-city .vcsp{
-  top:210px;translate:none;
+  top:100px;translate:none;
 }
 
 /* ============ BOTTOM BAR: exact hero match ============ */

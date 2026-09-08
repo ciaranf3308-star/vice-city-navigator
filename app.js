@@ -1453,7 +1453,8 @@ function syncDashTrip(remainSec) {
     dst.textContent = (label || 'EN ROUTE').toUpperCase().slice(0, 28);
   } else {
     eta.textContent = '—';
-    dst.textContent = '—';
+    /* dst (locality plate) is owned by syncDashLocality when not navigating —
+       don't wipe it here. */
   }
 }
 
@@ -1473,14 +1474,20 @@ async function syncDashLocality() {
   const key = c.lat.toFixed(3) + ',' + c.lng.toFixed(3);
   if (key === dashLocKey) return;
   dashLocKey = key;
+  /* Fallback: if reverse-geocode fails but we're near the default Dublin
+     center, show DUBLIN rather than a blank plate. */
+  const nearDublin = Math.hypot(c.lat - 53.3498, c.lng - (-6.2603)) < 0.2;
   try {
     const r = await fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' +
       c.lat.toFixed(5) + '&lon=' + c.lng.toFixed(5) + '&zoom=14');
-    if (!r.ok) return;
+    if (!r.ok) throw new Error('geo ' + r.status);
     const j = await r.json(), a = (j && j.address) || {};
     const name = a.suburb || a.town || a.city || a.village || a.hamlet || a.county || '';
     if (name && (typeof navActive === 'undefined' || !navActive)) el.textContent = name.toUpperCase().slice(0, 28);
-  } catch (e) { /* locality stays as-is */ }
+    else if (nearDublin) el.textContent = 'DUBLIN';
+  } catch (e) {
+    if (nearDublin && el.textContent.trim() === '—') el.textContent = 'DUBLIN';
+  }
 }
 
 /* ---------------- Spotify: theme-independent core + dashboard skin ----------------
