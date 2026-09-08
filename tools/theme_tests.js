@@ -173,7 +173,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v94"), 'SW theme cache v76');
+ok(swSrc.includes("ws-theme-v95"), 'SW theme cache v76');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -203,9 +203,9 @@ ok(vRoadFonts.size === 1 && vRoadFonts.has('SignPainter'), 'V road labels use Si
 const vLabelFonts = new Set(vStyle.layers.filter(l => /label-/.test(l.id)).map(l => l.layout['text-font'][0]));
 ok(vLabelFonts.size === 1 && vLabelFonts.has('SignPainter'), 'V labels all use SignPainter stack (script everywhere)');
 const vLay = id => vStyle.layers.find(l => l.id === id);
-ok(vLay('v-land').paint['background-color'] === '#101010', 'V pause-menu land is near-black');
-ok(vLay('v-water').paint['fill-color'] === '#2c3a42', 'V pause-menu water is dark slate');
-ok(vLay('v-road-motorway').paint['line-color'] === '#9a9a9a', 'V pause-menu motorways are thin pale lines');
+ok(vLay('v-land').paint['background-color'] === '#181818', 'V pause-menu land is charcoal (researched)');
+ok(vLay('v-water').paint['fill-color'] === '#101314', 'V pause-menu water is near-black (researched)');
+ok(vLay('v-road-motorway').paint['line-color'] === '#efefef', 'V pause-menu motorways are bright white (researched)');
 ok(vLay('v-label-place').paint['text-halo-color'] === '#000000', 'V labels keep black halos on the dark map');
 const vcStyle = JSON.parse(fs.readFileSync(path.join(REPO, 'themes/vice-city/style.json'), 'utf8'));
 const vcRoadFonts = new Set(vcStyle.layers.filter(l => /label-road/.test(l.id)).map(l => l.layout['text-font'][0]));
@@ -402,8 +402,8 @@ ok(!/tbar-night/.test(indexSrc) && !/tbar-sunset/.test(indexSrc),
   'SA top bar has no split-panel divs');
 ok(!/theme-san-andreas #dash-topbar\{[^}]*radial-gradient\(120px 120px at 62%/.test(cssSrc),
   'SA top bar no longer uses the CSS-painted sun disc');
-ok(cssSrc.includes('dashboard/topbar-bg.png'), 'GTA V top bar uses the generated bar art');
-ok(cssSrc.includes('dashboard/bottombar-bg.png'), 'GTA V bottom bar uses the generated bar art');
+ok(/theme-gta-v #dash-topbar\{[^}]*background:#0b0b0b/.test(cssSrc), 'GTA V top bar is flat pause-menu black (researched)');
+ok(/theme-gta-v #dash-bottombar\{[^}]*background:#0b0b0b/.test(cssSrc), 'GTA V bottom bar is flat pause-menu black (researched)');
 ok(/theme-rdr2 #dash-topbar\{[^}]*menu_bar\.png/.test(cssSrc), 'RDR2 chrome uses the engraved double-rule seam, not neon');
 ok(!/theme-rdr2 #dash-(topbar|bottombar)\{[^}]*#ff71ce/.test(cssSrc), 'RDR2 bar shells carry no neon pink');
 // VC hero: neon 80s chrome per the benchmark image
@@ -756,16 +756,16 @@ ok(saLayer('sa-label-road-minor').minzoom >= 16, 'SA minor road labels start at 
 ok(saLayer('sa-buildings').minzoom === 15, 'SA buildings appear at zoom 15 (less tiny clutter)');
 ok(saLayer('sa-label-road-major').minzoom === 10, 'SA major road labels start at zoom 10');
 ok(!/theme-san-andreas #map::after/.test(cssSrc), 'SA map has no vignette overlay (clean hero map)');
-ok(cssSrc.includes('dashboard/topbar-bg.png'), 'V top bar chrome comes from generated bar art');
-ok(cssSrc.includes('dashboard/bottombar-bg.png'), 'V bottom bar chrome comes from generated bar art');
-ok(cssSrc.includes('dashboard/widget-bg.png'), 'V music panel uses the generated widget art');
+ok(/theme-gta-v #dash-topbar\{[^}]*background:#0b0b0b/.test(cssSrc), 'V top bar is flat pause-menu black (researched)');
+ok(/theme-gta-v #dash-bottombar\{[^}]*background:#0b0b0b/.test(cssSrc), 'V bottom bar is flat pause-menu black (researched)');
+ok(/theme-gta-v \.gvsp\{[^}]*background:#0b0b0b/.test(cssSrc), 'V music panel is flat pause-menu black (researched)');
 ok(/theme-gta-v \.dash-tabs button\{[^}]*background:transparent/.test(cssSrc), 'V tabs are transparent icon+text buttons');
 ok(/theme-rdr2 #dash-dest\{[^}]*border-image-source:url\('assets\/themes\/rdr2\/dashboard\/menu_header_1a\.png'\)/.test(cssSrc),
    'RDR2 destination plate uses the ornate menu-header frame');
 ok(/theme-rdr2 #dash-topbar\{[^}]*menu_bar\.png/.test(cssSrc), 'RDR2 top bar seam uses the authentic double-rule');
 ok(/theme-rdr2 \.dash-dest::before/.test(cssSrc) && cssSrc.includes('title_divider.png'), 'RDR2 destination plate is flanked by divider ornaments');
 ok(/theme-gta-v \.dash-logo\{[^}]*'Chalet Comprime'/.test(cssSrc), 'V wordmark uses Chalet (hero typography)');
-ok(/theme-gta-v #dash-dest\{[^}]*'Chalet Comprime'/.test(cssSrc), 'V destination uses Chalet (hero typography)');
+ok(/theme-gta-v \.dash-dest::after\{[^}]*'Chalet Comprime'/.test(cssSrc), 'V destination uses Chalet (hero typography)');
 ok(/theme-gta-v \.dash-tabs button span\{[^}]*text-transform:uppercase/.test(cssSrc), 'V tabs carry uppercase text labels under the icons');
 ok(/theme-rdr2 #dash-topbar \.dash-chrome\{[^}]*selection_box_bg_1a\.png/.test(cssSrc), 'RDR2 bars wear the grunge panel texture');
 // service worker: VC dashboard art is shell-precached (default theme), the
@@ -812,16 +812,20 @@ ok(appSrc.includes('VCNThemes.setCurrent(id)') && /await loadP;[\s\S]*?VCNThemes
    'theme persisted only after the new style actually loads');
 ok(!appSrc.includes('window.map && map.resize'), 'no window.map/map null mismatch on resize guards');
 
-/* ---------- GTA V palette matches the in-game pause map ---------- */
+/* ---------- GTA V palette matches the researched pause-menu map ---------- */
+/* Palette researched from jfalcone456/gta-v-map, a recreation of the
+   actual GTA V pause-menu cartography: charcoal land, near-black water,
+   white-to-gray road hierarchy. */
 const vPaint = id => vStyle.layers.find(l => l.id === id).paint;
-ok(vPaint('v-land')['background-color'] === '#101010', 'V land: near-black pause map');
-ok(vPaint('v-water')['fill-color'] === '#2c3a42', 'V water: dark slate');
+ok(vPaint('v-land')['background-color'] === '#181818', 'V land: charcoal pause map (researched)');
+ok(vPaint('v-water')['fill-color'] === '#101314', 'V water: near-black (researched)');
 for (const id of ['v-parks', 'v-grass', 'v-golf', 'v-gardens', 'v-recreation', 'v-park-areas', 'v-playing-fields'])
-  ok(/^(#1a2415|#1d2818)$/.test(vPaint(id)['fill-color']), `V ${id}: near-black green`);
-ok(vPaint('v-woods')['fill-color'] === '#141c10', 'V woods: near-black green');
-for (const id of ['v-road-minor', 'v-road-primary', 'v-road-motorway'])
-  ok(/^#[89]/.test(vPaint(id)['line-color']), `V ${id}: pale road core on black`);
-ok(vPaint('v-label-road-major')['text-color'] === '#d8d8d8', 'V road labels: pale grey');
+  ok(vPaint(id)['fill-color'] === '#20251d', `V ${id}: faint green (researched)`);
+ok(vPaint('v-woods')['fill-color'] === '#1c211a', 'V woods: faint green-gray (researched)');
+ok(vPaint('v-road-minor')['line-color'] === '#8f8f8f', 'V v-road-minor: grey (researched)');
+ok(vPaint('v-road-primary')['line-color'] === '#d6d6d6', 'V v-road-primary: pale grey (researched)');
+ok(vPaint('v-road-motorway')['line-color'] === '#efefef', 'V v-road-motorway: near-white (researched)');
+ok(vPaint('v-label-road-major')['text-color'] === '#cfcfcf', 'V road labels: pale grey (researched)');
 ok(vPaint('v-label-place')['text-halo-color'] === '#000000', 'V place labels: black halo');
 ok(T.get('gta-v').map.routeColor === '#a86fd6', 'V route stays purple (as in-game)');
 /* ---------- route glow (hero treatment) ---------- */
