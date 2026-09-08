@@ -56,7 +56,7 @@ body.dashboard-mode.theme-vice-city .dash-tomorrow{display:none}
 /* ============ MANEUVER CARD: dark glass, pink neon frame ============ */
 body.dashboard-mode.theme-vice-city #maneuver-card{display:none}
 body.dashboard-mode.theme-vice-city #vc-maneuver{
-  display:block;position:absolute;left:18px;top:120px;width:360px;z-index:24;
+  display:block;position:absolute;left:18px;top:92px;width:360px;z-index:24;
   background:linear-gradient(180deg,rgba(10,6,24,.92),rgba(16,8,36,.88));
   border:2px solid #ff2e88;border-radius:14px;
   clip-path:polygon(0 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,18px 100%,0 calc(100% - 18px));
@@ -93,7 +93,7 @@ body.dashboard-mode.theme-vice-city #vc-maneuver .vc-man-script{
 
 /* ============ RIGHT PANEL: logo script + sunset scene ============ */
 body.dashboard-mode.theme-vice-city #vc-right-panel{
-  display:block;position:absolute;right:18px;top:104px;width:340px;z-index:24;
+  display:block;position:absolute;right:18px;top:92px;width:340px;z-index:24;
   pointer-events:none;
 }
 body.dashboard-mode.theme-vice-city #vc-right-panel .vc-logo-script{
