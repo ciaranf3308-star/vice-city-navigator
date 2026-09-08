@@ -379,7 +379,10 @@ ok(appSrc.includes('nav-driving') && /setUiMode/.test(appSrc), 'drive-mode chrom
 ok(cssSrc.includes('body.dashboard-mode.nav-driving #maneuver-card'), 'drive HUD clears the top bar on every theme');
 ok(cssSrc.includes('body.dashboard-mode.nav-driving #drive-bar'), 'drive trip bar clears the bottom bar on every theme');
 ok(!cssSrc.includes('.dash-skyline') && !indexSrc.includes('dash-skyline'), 'old skyline img fully retired in favour of the authored top bar strip');
-ok(/theme-san-andreas #dash-topbar\{[^}]*dashboard\/topbar-thin\.png/.test(cssSrc), 'SA top bar is the thin panoramic strip (hero 12%)');
+ok(/theme-san-andreas #dash-topbar\{[^}]*radial-gradient\(120px 120px at 62%/.test(cssSrc),
+  'SA top bar is a designed CSS sunset with its own sun disc (hero 12%)');
+ok(!/theme-san-andreas #dash-topbar\{[^}]*\.png/.test(cssSrc),
+  'SA top bar uses no photo strip');
 ok(/theme-gta-v #dash-topbar\{[^}]*#7CFF6B/.test(cssSrc), 'GTA V chrome uses pause-menu neon green');
 ok(/theme-rdr2 #dash-topbar\{[^}]*menu_bar\.png/.test(cssSrc), 'RDR2 chrome uses the engraved double-rule seam, not neon');
 ok(!/theme-rdr2 #dash-(topbar|bottombar)\{[^}]*#ff71ce/.test(cssSrc), 'RDR2 bar shells carry no neon pink');
@@ -526,18 +529,15 @@ ok(vcPaint('vc-buildings')['fill-color'] === '#b7b7c7', 'VC buildings: separated
 ok(vcPaint('vc-road-minor')['line-color'] === '#eef0f6', 'VC minor roads: white streets (hero)');
 ok(vcPaint('vc-road-primary')['line-color'] === '#1d1d36', 'VC arterials: stronger dark navy (hero contrast)');
 ok(vcPaint('vc-road-motorway')['line-color'] === '#0e0e22', 'VC motorways: near-black navy (hero contrast)');
-ok(cssSrc.includes("themes/san-andreas/dashboard/topbar-thin.png"), 'SA top bar paints the thin panoramic strip');
-ok(cssSrc.includes("themes/san-andreas/dashboard/bottombar-hero.png"), 'SA bottom bar paints the hero 5-slot console');
+ok(cssSrc.includes("inset 0 2px 0 #d8b34a"), 'SA bottom console wears its own gold chamfer');
+ok(/theme-san-andreas #dash-bottombar\{[^}]*linear-gradient\(180deg,#4a3a20/.test(cssSrc),
+  'SA bottom bar is a designed CSS console, not a fitted photo strip');
 /* ---------- SA hero-match: authored dashboard art set ---------- */
 const saDash = (f) => path.join(REPO, 'themes/san-andreas/dashboard', f);
-for (const f of ['topbar.png', 'bottombar.png', 'maneuver.png', 'grove-panel.png', 'script-tomorrow.png', 'script-music.png', 'topbar-thin.png', 'bottombar-hero.png', 'sa-logo.png']) {
+for (const f of ['topbar.png', 'bottombar.png', 'maneuver.png', 'grove-panel.png', 'script-tomorrow.png', 'script-music.png', 'sa-logo.png']) {
   ok(fs.existsSync(saDash(f)), `SA dashboard art on disk: ${f}`);
   ok(fs.statSync(saDash(f)).size > 10000, `SA dashboard art non-empty: ${f}`);
 }
-const saTop = pngSize(saDash('topbar-thin.png'));
-ok(saTop && saTop.w >= 2000 && saTop.h >= 100, 'SA thin top bar art: panoramic strip');
-const saBot = pngSize(saDash('bottombar-hero.png'));
-ok(saBot && saBot.w >= 2000 && saBot.h >= 100, 'SA hero bottom bar art: 5-slot console strip');
 const saLogo = pngSize(saDash('sa-logo.png'));
 ok(saLogo && saLogo.w >= 800 && saLogo.h >= 180, 'SA standalone wordmark extracted with transparency');
 const saMan = pngSize(saDash('maneuver.png'));
@@ -560,10 +560,12 @@ ok(/theme-san-andreas \.sasp\{[^}]*transform:none/.test(cssSrc),
   'SA Spotify widget sits straight inside the map area without touching the bars');
 ok(indexSrc.includes('class="sa-logo"'), 'SA dashboard mounts the standalone wordmark element');
 ok(indexSrc.includes('dashboard/sa-logo.png'), 'SA wordmark uses the extracted logo art');
-for (const dtab of ['map', 'radio', 'phone', 'vehicle', 'settings']) {
-  ok(cssSrc.includes(`theme-san-andreas .dash-tabs button[data-dtab="${dtab}"]{left:`),
-    `SA text tab ${dtab} is pinned to its art slot`);
-}
+ok(/theme-san-andreas \.sa-logo\{[^}]*height:64px/.test(cssSrc),
+  'SA wordmark is sized by bar height so it always fits with breathing room');
+ok(/theme-san-andreas #dash-bottombar \.dash-chrome\{[^}]*display:flex/.test(cssSrc),
+  'SA bottom console lays out with flex, not art-slot coordinates');
+ok(/theme-san-andreas \.dash-tabs button\{[^}]*border:1px solid rgba\(201,162,39/.test(cssSrc),
+  'SA tabs are bordered text buttons on the designed console');
 ok(indexSrc.includes('Good Music<br>Better Times'), 'dashboard tagline reads "Good Music Better Times"');
 /* ---------- SA map: deeper palette, denser road labels ---------- */
 const saStyle2 = JSON.parse(fs.readFileSync(path.join(REPO, 'themes/san-andreas/style.json'), 'utf8'));
@@ -590,8 +592,6 @@ ok(/theme-rdr2 #dash-topbar \.dash-chrome\{[^}]*selection_box_bg_1a\.png/.test(c
 // other themes' dashboard art rides the on-demand theme-asset cache
 ok(swSrc.includes('assets/themes/vice-city/dashboard/vc-logo.png'), 'SW precaches the VC bar logo');
 ok(swSrc.includes('assets/themes/vice-city/dashboard/bar-texture.jpg'), 'SW precaches the VC bar texture');
-ok(SW.isThemeAsset('/themes/san-andreas/dashboard/topbar-thin.png'), 'isThemeAsset: SA thin top bar');
-ok(SW.isThemeAsset('/themes/san-andreas/dashboard/bottombar-hero.png'), 'isThemeAsset: SA hero bottom bar');
 ok(SW.isThemeAsset('/themes/san-andreas/dashboard/sa-logo.png'), 'isThemeAsset: SA wordmark');
 ok(SW.isThemeAsset('/assets/themes/gta-v/dashboard/topbar-skyline.jpg'), 'isThemeAsset: V dashboard art');
 ok(SW.isThemeAsset('/assets/themes/rdr2/dashboard/menu_header_1a.png'), 'isThemeAsset: RDR2 dashboard art');

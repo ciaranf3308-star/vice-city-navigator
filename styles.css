@@ -547,16 +547,26 @@ body.dashboard-mode.theme-vice-city #next-stats .ns-sep{opacity:.7}
 /* VC bottom bar: the authored strip carries the tab slots, dest plate and
    sunset — the live plate drops its own box and lets the art frame it. */
 
-/* ---------- San Andreas dashboard chrome: thin hero bars ----------
-   Kit strips (themes/san-andreas/dashboard/): topbar-thin.png is the
-   panoramic sunset header (no baked wordmark), bottombar-hero.png the
-   5-slot console, sa-logo.png the keyed standalone wordmark.
-   Bars are 86px (~12%); the map dominates. Phone mode untouched. */
+/* ---------- San Andreas dashboard chrome: designed bars, hero-chasing ----------
+   Both bars are designed in CSS (no fitted photo strips): the top bar is a
+   layered sunset gradient with its own sun disc + gold baseline; the bottom
+   bar is a dark gold-chamfered console with flex layout. sa-logo.png is the
+   keyed standalone wordmark, sized by bar height. Bars are 86px (~12%);
+   the map dominates. Phone mode untouched. */
 .sa-logo{display:none}
 body.dashboard-mode.theme-san-andreas #dash-topbar{
   display:block;position:absolute;left:0;right:0;top:0;height:86px;z-index:25;
-  background:url('themes/san-andreas/dashboard/topbar-thin.png') 50% 70%/cover no-repeat #140e04;
+  background:
+    radial-gradient(120px 120px at 62% 94%, #ffedbe 0%, #ffd271 46%, rgba(255,190,90,0) 72%),
+    radial-gradient(520px 360px at 62% 135%, rgba(255,170,70,.55), rgba(255,140,40,.16) 55%, transparent 75%),
+    linear-gradient(180deg,#0b0703 0%,#1d0f05 30%,#5c2408 58%,#b25a17 80%,#e8933a 100%);
+  box-shadow:0 2px 0 #c9a227, 0 5px 10px rgba(0,0,0,.55);
   pointer-events:none;
+}
+/* dark haze along the bottom edge: skyline suggestion */
+body.dashboard-mode.theme-san-andreas #dash-topbar::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:30px;
+  background:linear-gradient(180deg,transparent,rgba(8,4,2,.55));
 }
 body.dashboard-mode.theme-san-andreas #dash-topbar .dash-chrome{
   position:absolute;inset:0;display:block;background:none;overflow:visible;padding:0;
@@ -567,7 +577,7 @@ body.dashboard-mode.theme-san-andreas .dash-brand{
 }
 body.dashboard-mode.theme-san-andreas .dash-brand .dash-logo,
 body.dashboard-mode.theme-san-andreas .dash-brand .dash-palm{display:none}
-body.dashboard-mode.theme-san-andreas .sa-logo{display:block;width:300px;height:auto}
+body.dashboard-mode.theme-san-andreas .sa-logo{display:block;height:64px;width:auto;max-width:24vw}
 /* live overlays, placed with intent: temp+icon left/centre, date centre,
    time right-centre; cream HUD text with a subtle black shadow */
 body.dashboard-mode.theme-san-andreas .dash-wx{
@@ -589,66 +599,61 @@ body.dashboard-mode.theme-san-andreas #dash-time{
   position:absolute;left:64%;top:50%;transform:translate(-50%,-50%);
   font-size:32px;font-weight:600;color:#ffd34d;text-shadow:0 2px 4px rgba(0,0,0,.85);
 }
-/* ---------- bottom console: hero 5-slot strip, live text tabs ---------- */
+/* ---------- bottom console: designed CSS console, no photo strip ---------- */
 body.dashboard-mode.theme-san-andreas #dash-bottombar{
   display:block;position:absolute;left:0;right:0;bottom:0;height:86px;z-index:25;
-  background:url('themes/san-andreas/dashboard/bottombar-hero.png') 50% 50%/100% 100% no-repeat #100d05;
+  background:linear-gradient(180deg,#4a3a20 0%,#2a2010 16%,#14100a 55%,#0b0906 100%);
+  box-shadow:inset 0 2px 0 #d8b34a, inset 0 4px 8px rgba(255,220,150,.22), inset 0 -12px 20px rgba(0,0,0,.65);
   pointer-events:auto;
 }
 body.dashboard-mode.theme-san-andreas #dash-bottombar .dash-chrome{
-  position:absolute;inset:0;display:block;background:none;overflow:visible;padding:0;
+  position:absolute;inset:0;display:flex;align-items:center;gap:12px;
+  padding:0 18px;background:none;overflow:visible;
 }
-/* text labels ride the art's five slots; the active tab takes the cream box */
+/* text tabs: khaki on dark, active takes the cream box */
 body.dashboard-mode.theme-san-andreas .dash-tabs{
-  position:absolute;inset:0;display:block;padding:0;background:none;pointer-events:none;
+  position:static;display:flex;align-items:center;gap:8px;padding:0;background:none;pointer-events:none;
 }
 body.dashboard-mode.theme-san-andreas .dash-tabs button{
-  position:absolute;top:17px;height:53px;padding:0 0 0 3px;cursor:pointer;pointer-events:auto;
+  position:static;padding:12px 20px;cursor:pointer;pointer-events:auto;
   font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:17px;font-weight:600;
-  letter-spacing:3px;color:#c9b98a;background:transparent;border:0;border-radius:12px;
-  text-shadow:0 2px 0 #000;opacity:1;white-space:nowrap;overflow:hidden;
+  letter-spacing:3px;color:#c9b98a;background:rgba(0,0,0,.35);
+  border:1px solid rgba(201,162,39,.4);border-radius:10px;
+  text-shadow:0 2px 0 #000;opacity:1;white-space:nowrap;
 }
-body.dashboard-mode.theme-san-andreas .dash-tabs button[data-dtab="map"]{left:34px;width:116px}
-body.dashboard-mode.theme-san-andreas .dash-tabs button[data-dtab="radio"]{left:184px;width:116px}
-body.dashboard-mode.theme-san-andreas .dash-tabs button[data-dtab="phone"]{left:334px;width:116px}
-body.dashboard-mode.theme-san-andreas .dash-tabs button[data-dtab="vehicle"]{left:484px;width:116px}
-body.dashboard-mode.theme-san-andreas .dash-tabs button[data-dtab="settings"]{left:634px;width:116px}
 body.dashboard-mode.theme-san-andreas .dash-tabs button.on{
-  background:#f2e8c9;color:#2a2118;text-shadow:none;
+  background:#f2e8c9;color:#2a2118;text-shadow:none;border-color:#f2e8c9;
   box-shadow:0 3px 0 rgba(0,0,0,.5);
 }
-/* locality rides the art's long centre plate */
+/* locality: inset plate, flexes to fill */
 body.dashboard-mode.theme-san-andreas .dash-dest{
-  position:absolute;left:825px;top:0;bottom:0;width:403px;
-  display:flex;align-items:center;justify-content:center;padding:0;min-width:0;
+  position:static;flex:1;display:flex;align-items:center;justify-content:center;
+  min-width:0;margin:0;padding:0;
 }
 body.dashboard-mode.theme-san-andreas #dash-dest{
   font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:22px;font-weight:600;
-  letter-spacing:2px;color:#f2e8c9;background:none;border:0;clip-path:none;
-  box-shadow:none;text-shadow:0 2px 0 #000;white-space:nowrap;overflow:hidden;
-  text-overflow:ellipsis;max-width:100%;padding:0;
+  letter-spacing:2px;color:#f2e8c9;background:rgba(0,0,0,.5);
+  border:1px solid rgba(201,162,39,.55);border-radius:10px;
+  box-shadow:inset 0 2px 8px rgba(0,0,0,.75);
+  text-shadow:0 2px 0 #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  max-width:100%;padding:10px 30px;clip-path:none;
 }
-/* compass + ETA ride their slots; zoom lives in the menu on this theme */
+/* compass + ETA */
 body.dashboard-mode.theme-san-andreas .dash-trip{
-  position:absolute;inset:0;pointer-events:none;display:block;padding:0;
+  position:static;display:flex;align-items:center;gap:14px;padding:0;pointer-events:none;
 }
 body.dashboard-mode.theme-san-andreas #dash-compass{
-  position:absolute;left:1266px;top:0;bottom:0;width:65px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:40px;color:#e8dcc0;text-shadow:0 2px 0 #000;transform-origin:50% 50%;
+  position:static;font-size:34px;color:#e8dcc0;text-shadow:0 2px 0 #000;transform-origin:50% 50%;
 }
 body.dashboard-mode.theme-san-andreas .dash-north{display:none}
 body.dashboard-mode.theme-san-andreas #dash-eta{
-  position:absolute;left:1388px;top:0;bottom:0;width:225px;
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:23px;font-weight:600;
-  letter-spacing:1px;color:#7ec850;text-shadow:0 2px 0 #000;
-  white-space:nowrap;overflow:hidden;
+  position:static;font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:22px;
+  font-weight:600;letter-spacing:1px;color:#7ec850;text-shadow:0 2px 0 #000;white-space:nowrap;
 }
 body.dashboard-mode.theme-san-andreas .dash-zoom{display:none}
-/* gold script tagline past the strip's right tip */
+/* script tagline */
 body.dashboard-mode.theme-san-andreas .dash-tag{
-  position:absolute;left:auto;right:8px;top:0;bottom:0;width:220px;
+  position:static;width:150px;height:58px;flex:0 0 auto;
   font-size:0;line-height:0;color:transparent;text-shadow:none;transform:none;
   display:block;padding:0;white-space:normal;
   background:url('themes/san-andreas/dashboard/script-music.png') 50% 50%/contain no-repeat;
