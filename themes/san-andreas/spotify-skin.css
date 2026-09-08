@@ -39,7 +39,7 @@ body.dashboard-mode.theme-san-andreas .sasp-main{
 /* LEFT panel: album art, inside the art's cream border,
    chamfered top corners like the panel */
 body.dashboard-mode.theme-san-andreas .sasp-artwrap{
-  position:absolute;left:40px;top:107px;width:183px;height:230px;
+  position:absolute;left:82px;top:163px;width:156px;height:194px;
   background:#000;overflow:hidden;pointer-events:none;
   clip-path:polygon(12px 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%,0 12px);
 }
@@ -52,10 +52,12 @@ body.dashboard-mode.theme-san-andreas .sasp-art{
   position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;
 }
 body.dashboard-mode.theme-san-andreas .sasp-art.on{opacity:1}
-/* RIGHT panel: track meta up top, lyrics fill the rest */
+/* RIGHT panel: opaque black backing (no map bleed), track meta up top,
+   lyrics fill the rest */
 body.dashboard-mode.theme-san-andreas .sasp-side{
-  position:absolute;left:274px;top:121px;width:277px;height:216px;
+  position:absolute;left:388px;top:193px;width:214px;height:189px;
   display:flex;flex-direction:column;min-height:0;min-width:0;pointer-events:none;
+  background:#0b0a07;
 }
 body.dashboard-mode.theme-san-andreas .sasp-track{margin-bottom:6px;min-width:0;flex:0 0 auto}
 body.dashboard-mode.theme-san-andreas .sasp-title{
@@ -73,7 +75,7 @@ body.dashboard-mode.theme-san-andreas .sasp-lyrics{
 }
 /* progress: live bar drawn exactly over the art's bar */
 body.dashboard-mode.theme-san-andreas .sasp-progress{
-  position:absolute;left:33px;top:406px;width:267px;pointer-events:auto;
+  position:absolute;left:80px;top:441px;width:220px;pointer-events:auto;
 }
 body.dashboard-mode.theme-san-andreas .sasp-bar{
   position:relative;height:8px;background:rgba(240,230,200,.16);
@@ -105,10 +107,10 @@ body.dashboard-mode.theme-san-andreas .sasp-tbtn{
 }
 body.dashboard-mode.theme-san-andreas .sasp-tbtn svg{width:22px;height:22px;fill:currentColor;
   filter:drop-shadow(0 2px 2px rgba(0,0,0,.8))}
-body.dashboard-mode.theme-san-andreas .sasp-tbtn[data-act="prev"]{left:85px;top:443px}
-body.dashboard-mode.theme-san-andreas .sasp-tbtn[data-act="next"]{left:197px;top:443px}
+body.dashboard-mode.theme-san-andreas .sasp-tbtn[data-act="prev"]{left:120px;top:458px}
+body.dashboard-mode.theme-san-andreas .sasp-tbtn[data-act="next"]{left:242px;top:458px}
 body.dashboard-mode.theme-san-andreas .sasp-tbtn[data-act="toggle"]{
-  left:141px;top:438px;width:56px;height:56px;
+  left:172px;top:452px;width:56px;height:56px;
   background:#0e0a05;border:2px solid #f0e6c8;
   box-shadow:0 0 0 1px rgba(0,0,0,.6);
 }
@@ -117,7 +119,7 @@ body.dashboard-mode.theme-san-andreas .sasp-tbtn:active{transform:scale(.92)}
 /* idle: covers both panels, one branding moment */
 body.dashboard-mode.theme-san-andreas .sasp-idle{
   position:absolute;z-index:2;
-  left:33px;top:100px;width:539px;height:244px;
+  left:75px;top:155px;width:535px;height:235px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:10px;text-align:center;
   background:rgba(13,15,10,.94);
