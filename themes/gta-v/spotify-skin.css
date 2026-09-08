@@ -182,11 +182,21 @@
 .gvsp-lyrics .wslyr-hero.s-xl { font-size: 28px; }
 .gvsp-lyrics .wslyr-hero.s-lg { font-size: 22px; }
 .gvsp-lyrics .wslyr-hero.s-md { font-size: 18px; }
-.gvsp-lyrics .wslyr-hero.s-sm { font-size: 15px; }
+.gvsp-lyrics .wslyr-hero.s-sm { font-size: 17px; } /* never tiny */
 .gvsp-lyrics .wslyr-prev { font-size: 14px; }
 .gvsp-lyrics .wslyr-next { font-size: 13px; }
 .gvsp-lyrics .wslyr-state .wslyr-wait { font-size: 32px; }
 .gvsp-lyrics .wslyr-state .wslyr-cap { font-size: 12px; }
+/* Clamp lyric composition extremes: keep the variation, lose the
+   tiny / lost-in-corner / washed-out outliers. */
+.gvsp-lyrics .wslyr-hero.v-up { top: 20%; max-height: 66%; }
+.gvsp-lyrics .wslyr-hero.v-low { top: 40%; max-height: 52%; }
+.gvsp-lyrics .wslyr-hero { left: 8%; right: 8%; } /* keep inside the panel */
+.gvsp-lyrics .wslyr-prev,
+.gvsp-lyrics .wslyr-next { opacity: .55; } /* never wash out */
+.gvsp-lyrics .wslyr-hero .wslyr-w {
+  text-shadow: 0 2px 8px rgba(0,0,0,.85), 0 0 2px rgba(0,0,0,.9);
+} /* guarantee contrast on any panel tone */
 
 /* ---------- ambient: skyline when no lyrics ---------- */
 .gvsp-ambient {
