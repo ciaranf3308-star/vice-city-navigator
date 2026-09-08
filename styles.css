@@ -368,12 +368,10 @@ body.dashboard-mode.theme-vice-city #dash-topbar .dash-chrome{
   inset:0 0 5px 0;
   clip-path:polygon(0 0,100% 0,100% 42%,94.5% 100%,5.5% 100%,0 42%);
   background:
-    url('assets/themes/vice-city/dashboard/bar-texture.jpg'),
-    repeating-linear-gradient(45deg,rgba(255,255,255,.022) 0 2px,transparent 2px 5px),
+    url('themes/vice-city/dashboard/topbar.jpg') 50% 50%/cover no-repeat,
     linear-gradient(180deg,#0d0619 0%,#170b30 60%,#1e0e3d 100%);
-  background-size:240px auto,auto,auto;
-  background-blend-mode:multiply;
-  gap:34px;padding:0 48px;
+  background-color:#0d0619;
+  gap:34px;padding:0 48px 0 200px;
 }
 /* chrome divider strip along the console's lower edge */
 body.dashboard-mode.theme-vice-city #dash-topbar .dash-chrome::after{
@@ -391,12 +389,9 @@ body.dashboard-mode.theme-vice-city .dash-north{
   display:inline-block;font-family:var(--vclabel);font-size:22px;font-weight:700;
   color:var(--cyan);text-shadow:0 0 10px rgba(1,205,254,.85);margin-left:-8px;
 }
-/* vector sunset scene: crisp at any size, never stretches */
-/* illustrated sunset skyline: oversized, anchored so the sun + towers sit
-   in the bar's sightline; soft left fade melts it into the console */
-.dash-skyline{position:absolute;right:0;bottom:-50%;height:215%;width:auto;pointer-events:none;
-  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 22%);
-  mask-image:linear-gradient(90deg,transparent 0,#000 22%)}
+/* Authored top/bottom bar strips (asset pack #4): the neon tubes stay in
+   the CSS shell so the silhouette is unchanged; the strips paint the
+   palms, tab slots, plates and sunset inside. */
 body.dashboard-mode.theme-vice-city #dash-bottombar .dash-chrome{
   inset:5px 0 0 0;
   clip-path:polygon(5.5% 0,94.5% 0,100% 58%,100% 100%,0 100%,0 58%);
@@ -482,11 +477,11 @@ body.dashboard-mode.theme-vice-city .dash-logo{
 }
 /* VC console tabs: flat neon text like the benchmark — cyan glow resting,
    hot pink glow on the active tab. No chunky buttons. */
-body.dashboard-mode.theme-vice-city .dash-tabs{padding:14px 6px 14px 44px;gap:6px}
+body.dashboard-mode.theme-vice-city .dash-tabs{padding:14px 6px 14px 138px;gap:6px}
 body.dashboard-mode.theme-vice-city .dash-tabs button{
   background:none;border:0;box-shadow:none;clip-path:none;border-radius:0;
   font-family:var(--vcfont);font-size:34px;letter-spacing:3px;text-transform:uppercase;
-  color:var(--cyan);text-shadow:0 0 8px rgba(1,205,254,.55);padding:0 22px;opacity:.8;
+  color:var(--cyan);text-shadow:0 0 8px rgba(1,205,254,.55);padding:0 16px;opacity:.8;
 }
 body.dashboard-mode.theme-vice-city .dash-tabs button.on{
   color:#ff71ce;background:none;border:0;box-shadow:none;opacity:1;
@@ -494,11 +489,16 @@ body.dashboard-mode.theme-vice-city .dash-tabs button.on{
 }
 body.dashboard-mode.theme-vice-city #dash-dest{
   color:#ff71ce;text-shadow:0 0 14px rgba(255,46,136,.95);
-  font-size:24px;padding:6px 28px;letter-spacing:5px;
-  background:rgba(5,2,12,.88);border-color:rgba(1,205,254,.7);
-  box-shadow:0 0 18px rgba(1,205,254,.4),inset 0 0 24px rgba(1,205,254,.12);
-  clip-path:polygon(14px 0,100% 0,calc(100% - 14px) 100%,0 100%);
+  font-size:24px;letter-spacing:5px;padding:6px 12px;
+  background:none;border:0;box-shadow:none;clip-path:none;
 }
+/* the authored strip's plates are fixed geometry: pin the dest text to the
+   center plate and push the trip cluster right so it rides the long plate */
+body.dashboard-mode.theme-vice-city .dash-dest{
+  flex:none;position:absolute;left:42.8%;right:42.7%;top:0;bottom:0;
+  display:flex;align-items:center;justify-content:center;padding:0 10px;
+}
+body.dashboard-mode.theme-vice-city .dash-trip{margin-left:auto}
 body.dashboard-mode.theme-vice-city .dash-trip{gap:10px;padding:12px 10px}
 /* VC dashboard maneuver card: neon console card like the benchmark —
    pink tube border, chamfered corners, hot-pink distance, cyan road,
@@ -544,8 +544,8 @@ body.dashboard-mode.theme-vice-city #next-stats{
 body.dashboard-mode.theme-vice-city #next-stats .ns-min{color:#ff71ce;text-shadow:0 0 10px rgba(255,46,136,.9)}
 body.dashboard-mode.theme-vice-city #next-stats .ns-sep{opacity:.7}
 
-/* The Vice City skyline art is VC artwork: never on other themes. */
-body.dashboard-mode:not(.theme-vice-city) .dash-skyline{display:none}
+/* VC bottom bar: the authored strip carries the tab slots, dest plate and
+   sunset — the live plate drops its own box and lets the art frame it. */
 
 /* ---------- San Andreas dashboard chrome: Grove Street menu console ----------
    The SA pause-menu language: deep olive-black panels, a gold chamfered

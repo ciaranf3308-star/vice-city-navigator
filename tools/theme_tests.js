@@ -20,6 +20,21 @@ function pngSize(p) {
   if (b.readUInt32BE(0) !== 0x89504e47) throw new Error('not a png: ' + p);
   return { w: b.readUInt32BE(16), h: b.readUInt32BE(20) };
 }
+// JPEG SOFn: width/height are big-endian uint16 5/7 bytes past the marker
+function jpgSize(p) {
+  const b = fs.readFileSync(p);
+  if (b.readUInt16BE(0) !== 0xffd8) throw new Error('not a jpeg: ' + p);
+  let o = 2;
+  while (o < b.length) {
+    if (b[o] !== 0xff) throw new Error('bad jpeg: ' + p);
+    const m = b[o + 1];
+    if (m >= 0xc0 && m <= 0xcf && m !== 0xc4 && m !== 0xc8 && m !== 0xcc) {
+      return { h: b.readUInt16BE(o + 5), w: b.readUInt16BE(o + 7) };
+    }
+    o += 2 + b.readUInt16BE(o + 2);
+  }
+  throw new Error('no SOF in jpeg: ' + p);
+}
 
 /* ---------- load registry + theme defs in a stubbed window ---------- */
 const sandbox = {
@@ -363,17 +378,19 @@ ok(appSrc.includes("classList.toggle('nav-driving'"), 'nav-driving class toggles
 ok(appSrc.includes('nav-driving') && /setUiMode/.test(appSrc), 'drive-mode chrome state lives in setUiMode');
 ok(cssSrc.includes('body.dashboard-mode.nav-driving #maneuver-card'), 'drive HUD clears the top bar on every theme');
 ok(cssSrc.includes('body.dashboard-mode.nav-driving #drive-bar'), 'drive trip bar clears the bottom bar on every theme');
-ok(cssSrc.includes('body.dashboard-mode:not(.theme-vice-city) .dash-skyline'), 'VC skyline art hidden on other themes');
+ok(!cssSrc.includes('.dash-skyline') && !indexSrc.includes('dash-skyline'), 'old skyline img fully retired in favour of the authored top bar strip');
 ok(/theme-san-andreas #dash-topbar\{[^}]*#e8a33d/.test(cssSrc), 'SA chrome uses gold, not neon');
 ok(/theme-gta-v #dash-topbar\{[^}]*#7CFF6B/.test(cssSrc), 'GTA V chrome uses pause-menu neon green');
 ok(/theme-rdr2 #dash-topbar\{[^}]*menu_bar\.png/.test(cssSrc), 'RDR2 chrome uses the engraved double-rule seam, not neon');
 ok(!/theme-rdr2 #dash-(topbar|bottombar)\{[^}]*#ff71ce/.test(cssSrc), 'RDR2 bar shells carry no neon pink');
 // VC visual quality pass: neon console bars per the benchmark
 ok(indexSrc.includes('class="dash-palm"'), 'top bar has a neon palm beside the wordmark');
-ok(indexSrc.includes('dashboard/skyline.png'), 'VC top bar uses the illustrated skyline art');
+ok(indexSrc.includes('dashboard/topbar.jpg') || cssSrc.includes('dashboard/topbar.jpg'), 'VC top bar uses the authored neon bar strip (asset pack #4)');
 /* ---------- VC asset-pack polish: authored chrome ---------- */
-const sky = pngSize(path.join(REPO, 'assets/themes/vice-city/dashboard/skyline.png'));
-ok(sky && sky.w >= 1400 && sky.h >= 400, 'VC skyline art: dense authored strip (asset pack #1, sun-framed crop)');
+const vctop = jpgSize(path.join(REPO, 'themes/vice-city/dashboard/topbar.jpg'));
+ok(vctop && vctop.w >= 2000 && vctop.h >= 140, 'VC top bar art: full-width authored strip (asset pack #4)');
+const vcbot = jpgSize(path.join(REPO, 'themes/vice-city/dashboard/bottombar.jpg'));
+ok(vcbot && vcbot.w >= 2000 && vcbot.h >= 80, 'VC bottom bar art: full-width authored strip (asset pack #4)');
 const mfr = pngSize(path.join(REPO, 'assets/themes/vice-city/dashboard/maneuver-frame.png'));
 ok(mfr && mfr.w === 1650 && mfr.h === 565, 'VC maneuver HUD frame present at authored size (asset pack #3)');
 ok(fs.existsSync(path.join(REPO, 'themes/vice-city/dashboard/bottombar.jpg')),
@@ -396,7 +413,7 @@ ok(!/function syncDashLocality\(\)[\s\S]{0,400}theme-vice-city/.test(appSrc), 'b
 ok(cssSrc.includes('clip-path:polygon(0 0,100% 0,100% 42%'), 'VC bars use the angular neon-tube silhouette');
 ok(indexSrc.includes('dash-tag'), 'bottom bar carries the script tagline');
 ok(appSrc.includes('queueDashLocality'), 'locality plate reverse-geocodes the map centre');
-ok(indexSrc.includes('dash-skyline'), 'top bar uses the illustrated skyline art, masked to melt into the console');
+ok(cssSrc.includes('dashboard/topbar.jpg'), 'top bar paints the authored strip inside the neon shell');
 /* ---------- bespoke bar silhouettes: every theme gets its own bar heights,
    layouts and drive-HUD clearances, not one shared silhouette ---------- */
 const barHeights = {
