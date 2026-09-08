@@ -494,13 +494,23 @@ body.dashboard-mode.theme-vice-city #dash-dest{
    and a trip stats row. Phone / other themes are untouched. */
 #next-stats{display:none}
 body.dashboard-mode.theme-vice-city #maneuver-card{
-  background:linear-gradient(180deg,rgba(10,3,24,.96),rgba(22,7,44,.96));
-  border:2px solid #ff2e88;border-radius:0;
-  clip-path:polygon(20px 0,100% 0,100% calc(100% - 20px),calc(100% - 20px) 100%,0 100%,0 20px);
-  box-shadow:0 0 28px rgba(255,46,136,.5),inset 0 0 34px rgba(255,46,136,.09);
-  padding:16px 24px;gap:20px;max-width:580px;backdrop-filter:none;-webkit-backdrop-filter:none;
+  background:url('assets/themes/vice-city/dashboard/maneuver-frame.png') 0 0/100% 100% no-repeat;
+  border:0;border-radius:0;clip-path:none;box-shadow:none;
+  padding:0;gap:0;width:580px;max-width:580px;aspect-ratio:1650/565;
+  backdrop-filter:none;-webkit-backdrop-filter:none;
+  display:block;
 }
-body.dashboard-mode.theme-vice-city #maneuver-arrow{flex:0 0 76px;width:76px;height:76px}
+body.dashboard-mode.theme-vice-city #maneuver-arrow{
+  position:absolute;left:3.5%;top:12%;width:30.5%;height:67%;
+  display:flex;align-items:center;justify-content:center;
+}
+body.dashboard-mode.theme-vice-city #maneuver-arrow svg{width:84px;height:84px}
+body.dashboard-mode.theme-vice-city .banner-text{
+  position:absolute;left:37.5%;top:12%;width:58.5%;height:67%;
+  display:flex;flex-direction:column;min-width:0;
+}
+body.dashboard-mode.theme-vice-city #next-dist{margin-top:4px}
+body.dashboard-mode.theme-vice-city #next-stats{margin-top:auto;margin-bottom:6px}
 body.dashboard-mode.theme-vice-city #maneuver-arrow svg{
   stroke:#ff2e88;filter:drop-shadow(0 0 9px rgba(255,46,136,.95));
 }

@@ -371,6 +371,18 @@ ok(!/theme-rdr2 #dash-(topbar|bottombar)\{[^}]*#ff71ce/.test(cssSrc), 'RDR2 bar 
 // VC visual quality pass: neon console bars per the benchmark
 ok(indexSrc.includes('class="dash-palm"'), 'top bar has a neon palm beside the wordmark');
 ok(indexSrc.includes('dashboard/skyline.png'), 'VC top bar uses the illustrated skyline art');
+/* ---------- VC asset-pack polish: authored chrome ---------- */
+const sky = pngSize(path.join(REPO, 'assets/themes/vice-city/dashboard/skyline.png'));
+ok(sky && sky.w >= 1500 && sky.h >= 500, 'VC skyline art: dense authored strip (asset pack #1)');
+const mfr = pngSize(path.join(REPO, 'assets/themes/vice-city/dashboard/maneuver-frame.png'));
+ok(mfr && mfr.w === 1650 && mfr.h === 565, 'VC maneuver HUD frame present at authored size (asset pack #3)');
+ok(fs.existsSync(path.join(REPO, 'themes/vice-city/dashboard/bottombar.jpg')),
+  'VC bottom bar HUD strip present (asset pack #2)');
+ok(cssSrc.includes('maneuver-frame.png'), 'VC maneuver card uses the authored HUD frame');
+ok(/theme-vice-city #maneuver-card\{[^}]*aspect-ratio/.test(cssSrc),
+  'VC maneuver card keeps the frame\'s authored aspect ratio');
+ok(!/theme-vice-city #maneuver-card\{[^}]*clip-path:polygon/.test(cssSrc),
+  'VC maneuver card drops the generic CSS chamfer for the authored frame');
 ok(indexSrc.includes('class="dash-north"'), 'bottom bar compass shows the N marker');
 ok(indexSrc.includes('id="next-stats"'), 'maneuver card has a trip stats row slot');
 ok(cssSrc.includes('body.dashboard-mode.theme-vice-city #next-stats'), 'VC dashboard styles the maneuver stats row');
