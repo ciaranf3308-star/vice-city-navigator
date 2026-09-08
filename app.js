@@ -1505,10 +1505,11 @@ function syncDashTrip(remainSec) {
     const label = (typeof dest !== 'undefined' && dest && dest.label) ? dest.label : '';
     dst.textContent = (label || 'EN ROUTE').toUpperCase().slice(0, 28);
   } else {
-    /* VC/SA idle: compass only, no arrival placeholder. Other themes keep theirs. */
+    /* VC/SA/RDR2 idle: compass only, no arrival placeholder. Other themes keep theirs. */
     const isVC = document.body.classList.contains('theme-vice-city');
     const isSA = document.body.classList.contains('theme-san-andreas');
-    const compassOnly = isVC || isSA;
+    const isRDR2 = document.body.classList.contains('theme-rdr2');
+    const compassOnly = isVC || isSA || isRDR2;
     eta.innerHTML = compassOnly ? '' : '<span class="eta-label">Arrive in</span><span class="eta-time">—</span>';
     eta.style.display = compassOnly ? 'none' : '';
     /* dst (locality plate) is owned by syncDashLocality when not navigating —

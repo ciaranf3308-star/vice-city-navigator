@@ -8,18 +8,18 @@
    - blood red #C00000 used sparingly (active accents only)
    - sharp corners everywhere, no border-radius */
 body.theme-rdr2 .dest-pin{ background-image:url('assets/themes/rdr2/blips/waypoint.png'); }
-body.dashboard-mode.theme-rdr2 #search-bar{top:calc(96px + env(safe-area-inset-top))}
+body.dashboard-mode.theme-rdr2 #search-bar{top:calc(116px + env(safe-area-inset-top))}
 
 /* ---------- HEADER: the frontier badge bar ----------
    User's WAYSTATION logo crowns the bar. Weather left, date/time right,
    all in Hapna-condensed caps with letterpress shadows. Thin aged-gold
    rule along the bottom edge — the RDR2 index-panel divider language. */
 body.dashboard-mode.theme-rdr2 #dash-topbar{
-  display:block;position:absolute;left:0;right:0;top:0;height:88px;z-index:25;
+  display:block;position:absolute;left:0;right:0;top:0;height:104px;z-index:25;
   background:
-    linear-gradient(180deg,#1e1d16 0%,#171812 60%,#100f0b 100%);
-  border-bottom:2px solid rgba(216,179,106,.5);
-  box-shadow:0 2px 12px rgba(0,0,0,.7);
+    linear-gradient(180deg,#23211a 0%,#171812 55%,#0e0d09 100%);
+  border-bottom:2px solid rgba(216,179,106,.55);
+  box-shadow:0 3px 16px rgba(0,0,0,.75), inset 0 1px 0 rgba(216,179,106,.12);
 }
 body.dashboard-mode.theme-rdr2 #dash-topbar::after{
   content:"";position:absolute;left:0;right:0;bottom:-7px;height:7px;
@@ -36,8 +36,8 @@ body.dashboard-mode.theme-rdr2 .dash-brand{order:2;margin:0 auto;display:flex;al
 body.dashboard-mode.theme-rdr2 .dash-brand .dash-logo{display:none}
 body.dashboard-mode.theme-rdr2 .dash-brand .dash-palm{display:none}
 body.dashboard-mode.theme-rdr2 .rdr2-logo{
-  display:block;height:76px;width:auto;max-width:min(520px,52vw);object-fit:contain;
-  filter:drop-shadow(0 3px 6px rgba(0,0,0,.8));
+  display:block;height:88px;width:auto;max-width:min(560px,54vw);object-fit:contain;
+  filter:drop-shadow(0 4px 8px rgba(0,0,0,.85)) drop-shadow(0 0 24px rgba(216,179,106,.12));
 }
 /* corner ink: weather left, clock right */
 body.dashboard-mode.theme-rdr2 .dash-wx{
@@ -61,7 +61,7 @@ body.dashboard-mode.theme-rdr2 #dash-time{
 body.dashboard-mode.theme-rdr2 .sa-logo,
 body.dashboard-mode.theme-rdr2 .dash-tomorrow,
 body.dashboard-mode.theme-rdr2 .dash-los-santos{display:none}
-body.dashboard-mode.theme-rdr2.nav-driving #maneuver-card{top:calc(100px + env(safe-area-inset-top))}
+body.dashboard-mode.theme-rdr2.nav-driving #maneuver-card{top:calc(116px + env(safe-area-inset-top))}
 
 /* ---------- FOOTER: frontier menu furniture ----------
    Near-black bar, gold rule along the top. Tabs are Hapna caps at 55%
@@ -127,14 +127,19 @@ body.dashboard-mode.theme-rdr2 .dash-tabs button.on::after{
   box-shadow:0 1px 0 rgba(0,0,0,.6),0 0 10px rgba(216,179,106,.55);
 }
 /* trip + zoom: right side */
-body.dashboard-mode.theme-rdr2 .dash-zoom{order:2;display:flex;align-items:center;gap:8px;padding:8px}
+body.dashboard-mode.theme-rdr2 .dash-zoom{order:2;display:flex;align-items:center;gap:10px;padding:8px}
 body.dashboard-mode.theme-rdr2 .dash-zoom button{
-  width:52px;height:52px;font-size:24px;color:#ede6d6;cursor:pointer;border-radius:0;
-  background:rgba(0,0,0,.45);border:2px solid #8a6f4d;
+  width:56px;height:56px;font-size:26px;color:#ede6d6;cursor:pointer;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #3a2c1e, #1a120c 75%);
+  border:2px solid rgba(216,179,106,.85);
+  box-shadow:0 2px 8px rgba(0,0,0,.6), inset 0 1px 2px rgba(216,179,106,.35);
   text-shadow:0 2px 0 rgba(0,0,0,.65);
-  transition:border-color .15s ease,color .15s ease;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .12s ease,border-color .15s ease;
+  -webkit-tap-highlight-color:transparent;
 }
 body.dashboard-mode.theme-rdr2 .dash-zoom button:hover{border-color:#d8b36a;color:#d8b36a}
+body.dashboard-mode.theme-rdr2 .dash-zoom button:active{transform:scale(.93)}
 body.dashboard-mode.theme-rdr2 .dash-trip{
   order:3;display:flex;align-items:center;gap:16px;padding:8px 24px 8px 8px;
   font-family:var(--vclabel);text-transform:uppercase;
@@ -148,7 +153,7 @@ body.dashboard-mode.theme-rdr2 #dash-eta{
   font-size:19px;letter-spacing:3px;
 }
 body.dashboard-mode.theme-rdr2 .dash-tag{display:none}
-body.dashboard-mode.theme-rdr2 #menu-panel{top:100px;bottom:96px}
+body.dashboard-mode.theme-rdr2 #menu-panel{top:116px;bottom:96px}
 body.theme-san-andreas .vc-title,
 body.theme-gta-v .vc-title,
 body.theme-rdr2 .vc-title{ text-shadow:0 2px 0 rgba(0,0,0,.55); }

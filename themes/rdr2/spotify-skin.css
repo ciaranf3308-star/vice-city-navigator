@@ -163,36 +163,29 @@
   filter: drop-shadow(0 1px 2px #000);
 }
 
-/* ---------- themed idle / connect: a notice pinned on the parchment ---------- */
+/* ---------- themed idle / connect: just the button, no DOM text ----------
+   The hud art already carries "Frontier Radio" baked in — the DOM only
+   adds the connect button, centered in the album opening. */
 .rdsp-idle {
   position: absolute; z-index: 4;
-  left: 20%; right: 8%; top: 54%; bottom: 8%;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; gap: 1.2cqh;
+  left: 15.55%; top: 27.91%; width: 29.11%; height: 28.71%;
+  display: flex; align-items: center; justify-content: center;
   pointer-events: none;
 }
 .rdsp-idle[hidden], .rdsp-idle.is-hidden { display: none !important; }
-/* Disconnected: the idle block owns the parchment — hide progress, the
-   lyric stage and the dead transport so nothing overlaps. */
-.rdsp.is-idle .rdsp-progress { display: none; }
+/* Disconnected: the idle button owns the album opening — hide the
+   lyric stage and transport so nothing overlaps. */
 .rdsp.is-idle .rdsp-lyrics { display: none; }
 .rdsp.is-idle .rdsp-controls { display: none; }
-.rdsp-idle-kicker {
-  font-family: 'Kirsty', 'RDR Lino', Georgia, serif;
-  font-size: 5.4cqw; letter-spacing: .08em;
-  color: #2a1f16;
-}
+.rdsp.is-idle .rdsp-progress { display: none; }
 .rdsp-connect-btn {
   pointer-events: auto;
-  padding: 1cqh 6cqw;
+  padding: 1.2cqh 5cqw;
   font-family: 'Kirsty', 'RDR Lino', Georgia, serif;
-  font-size: 4.6cqw; letter-spacing: .08em;
-  color: #e8d9b0; background: rgba(184,53,47,.85);
+  font-size: 4.2cqw; letter-spacing: .08em; text-transform: uppercase;
+  color: #ede6d6; background: rgba(184,53,47,.92);
   border: 2px solid #2a1f16; border-radius: 6px; cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0,0,0,.5);
+  box-shadow: 0 3px 10px rgba(0,0,0,.6);
+  white-space: nowrap;
 }
 .rdsp-connect-btn:active { transform: scale(.96); }
-.rdsp-idle-hint {
-  font-size: 3.2cqw; line-height: 1.5;
-  color: #5a4632; opacity: .95;
-}

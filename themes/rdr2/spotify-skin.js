@@ -86,9 +86,7 @@
         '</div>' +
         '<div class="rdsp-lyrics" data-lyrics-stage="1"></div>' +
         '<div class="rdsp-idle">' +
-          '<div class="rdsp-idle-kicker">Frontier Radio</div>' +
           '<button class="rdsp-connect-btn" type="button">Connect Spotify</button>' +
-          '<p class="rdsp-idle-hint">Music plays on your phone or car.<br>WayStation controls it.</p>' +
         '</div>';
       return root;
     }

@@ -173,7 +173,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v119"), 'SW theme cache v119');
+ok(swSrc.includes("ws-theme-v120"), 'SW theme cache v120');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -436,7 +436,7 @@ const barHeights = {
   'vice-city': ['78px', '100px'],
   'san-andreas': ['126px', '126px'], // hero7: bars are the hero art's own height
   'gta-v': ['120px', '120px'], // generated bar art: fixed 120px chrome
-  'rdr2': ['88px', '84px'], // 2026-09-08 redesign: badge header + frontier footer
+  'rdr2': ['104px', '84px'], // 2026-09-08 redesign: badge header + frontier footer
 };
 for (const [id, [top, bottom]] of Object.entries(barHeights)) {
   ok(new RegExp(`theme-${id} #dash-topbar\\{[^}]*height:${top}`).test(cssSrc), `${id} top bar is ${top} tall`);
@@ -543,7 +543,7 @@ ok(appSrc.includes('layoutDashMenu(); // dock (or undock) the body-level menu pa
    so dashboard users had no visible way to set a route. It now drops
    below the per-theme bar heights, and the planning drawer docks to the
    live stage rect in real pixels like the menu panel. */
-for (const [id, top] of [['gta-v', 132], ['rdr2', 96]]) {
+for (const [id, top] of [['gta-v', 132], ['rdr2', 116]]) {
   ok(new RegExp(`body\\.dashboard-mode\\.theme-${id} #search-bar\\{top:calc\\(${top}px`).test(cssSrc),
     `dashboard search bar clears the ${id} top bar (${top}px)`);
 }
