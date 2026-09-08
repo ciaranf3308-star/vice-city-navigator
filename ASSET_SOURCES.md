@@ -415,3 +415,17 @@ local (nothing hotlinked at runtime).
     grunge paper panel → subtle parchment texture overlay on the leather.
 - License/source note: community-redistributed extracted UI textures, same
   standing as the RDR2 blip extraction. Personal-use project.
+
+## 2026-09-08 — San Andreas dashboard chrome, hero7 refresh (refined user art)
+
+### Source artwork
+- Supplied by the user (refined hero PNG, 2048x768 RGBA, true transparency
+  in the map area): kept in-repo as
+  `themes/san-andreas/dashboard/hero7/hero-source.png`. Replaces the earlier
+  hero revision as the slice source; the earlier revision is superseded.
+- Slices cut directly from the source (PIL, re-runnable), served as the live
+  dashboard chrome — no generated approximations:
+  - `themes/san-andreas/dashboard/topbar-hero7.png` (1920x126 RGBA) — source rows 0-140
+  - `themes/san-andreas/dashboard/bottombar-hero7.png` (1920x126 RGBA) — source rows 634-768
+  - `themes/san-andreas/dashboard/radio-hero7.png` (701x544 RGBA) — source box (1300,88)-(2048,668)
+- License: user-supplied art for this personal project.
