@@ -1211,7 +1211,8 @@ function syncDashPadding() {
 function applyAppMode() {
   const on = dashboardLayoutActive();
   document.body.classList.toggle('dashboard-mode', on);
-  if (on) { buildDashboardStage(); fitDashboardStage(); }
+  if (on) { try { window.scrollTo(0, 0); } catch (e) {}
+    buildDashboardStage(); fitDashboardStage(); }
   else teardownDashboardStage();
   layoutDashMenu(); // dock (or undock) the body-level menu panel
   layoutDashDrawer(); // dock (or undock) the planning drawer

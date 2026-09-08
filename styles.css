@@ -294,6 +294,11 @@ body.theme-rdr2 .dest-pin{ background-image:url('assets/themes/rdr2/blips/waypoi
   position:fixed;width:1920px;height:720px;overflow:hidden;background:#000;
 }
 body.dashboard-mode{background:#000}
+/* Dashboard is a fixed car display: the document itself must never scroll.
+   (A scrolled document was shifting the whole stage, slicing the logo at
+   the viewport edge.) Menu/drawer keep their own internal scrolling. */
+html:has(body.dashboard-mode),body.dashboard-mode{overflow:hidden!important;height:100%}
+body.dashboard-mode{overscroll-behavior:none}
 /* Full-screen map: nothing is reserved for music — the widget floats above. */
 body.dashboard-mode #map{position:absolute;left:0;top:0;width:1920px;height:720px;right:auto;bottom:auto}
 body.dashboard-mode #fx{position:absolute;inset:0}

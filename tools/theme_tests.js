@@ -560,6 +560,10 @@ ok(/theme-san-andreas \.sasp\{[^}]*transform:none/.test(cssSrc),
   'SA Spotify widget sits straight inside the map area without touching the bars');
 ok(/theme-san-andreas #map-tools\{display:none\}/.test(cssSrc),
   'SA dashboard hides the floating zoom pills for the clean hero map');
+ok(/html:has\(body\.dashboard-mode\),body\.dashboard-mode\{overflow:hidden/.test(cssSrc),
+  'dashboard mode locks document scroll (stage can never shift/slice chrome)');
+ok(/window\.scrollTo\(0, 0\)/.test(appSrc),
+  'dashboard mode resets inherited scroll offset on engage');
 ok(appSrc.includes("applyBodyTheme(VCNThemes.currentId())") && /Paint the theme chrome/.test(appSrc),
   'theme chrome paints before tiles arrive (no chrome-less dashboard offline)');
 ok(indexSrc.includes('class="sa-logo"'), 'SA dashboard mounts the standalone wordmark element');
