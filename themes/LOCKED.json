@@ -1,0 +1,1 @@
+{"_note":"Theme style locks. When the user approves a theme's styling, set locked:true and record the sha256 of its dashboard.css. Tests fail if a locked theme's CSS changes without unlocking.","gta-v":{"locked":false,"sha256":null},"rdr2":{"locked":false,"sha256":null},"san-andreas":{"locked":false,"sha256":null},"vice-city":{"locked":false,"sha256":null}}

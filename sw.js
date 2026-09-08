@@ -18,6 +18,8 @@ const SHELL = [
   './', 'index.html', 'styles.css', 'app.js', 'places.js', 'places-config.js',
   'traffic.js', 'traffic-config.js',
   'discovery.js', 'voice.js', 'supabase-config.js',
+  'themes/vice-city/dashboard.css', 'themes/san-andreas/dashboard.css',
+  'themes/gta-v/dashboard.css', 'themes/rdr2/dashboard.css',
   'themes/registry.js',
   'themes/vice-city/theme.js', 'themes/san-andreas/theme.js',
   'themes/gta-v/theme.js', 'themes/rdr2/theme.js',

@@ -139,7 +139,11 @@ ok(T.get('gta-v').pois.blipScale === 0.5, 'gta-v declares blipScale 0.5');
 
 /* ---------- service worker classification ---------- */
 const swSrc = fs.readFileSync(path.join(REPO, 'sw.js'), 'utf8');
-const cssSrc = fs.readFileSync(path.join(REPO, 'styles.css'), 'utf8');
+const cssSrc = fs.readFileSync(path.join(REPO, 'styles.css'), 'utf8')
+  + ['vice-city','san-andreas','gta-v','rdr2'].map(t => {
+    try { return fs.readFileSync(path.join(REPO, `themes/${t}/dashboard.css`), 'utf8'); }
+    catch (e) { return ''; }
+  }).join('\n');
 const swBox = { self: { addEventListener() {} }, caches: undefined, console };
 vm.createContext(swBox);
 vm.runInContext(swSrc + '\nthis.__sw = { isShell, isThemeAsset, SHELL };', swBox, { filename: 'sw.js' });
@@ -1238,3 +1242,19 @@ ok(/bottombar-palms\.jpg/.test(cssSrc), 'SA bottom bar has the palm sunset panel
 ok(/\.dash-tabs button\.on\{[^}]*#8fbf7a/.test(cssSrc), 'SA active tab is the hero solid green MAP box');
 ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/bottombar-trim.jpg')), 'SA bottom bar trim art exists');
 ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/bottombar-palms.jpg')), 'SA bottom bar palm art exists');
+// Theme lock enforcement: a locked theme's dashboard.css must match its recorded hash.
+{
+  const crypto = require('crypto');
+  const lockPath = path.join(REPO, 'themes/LOCKED.json');
+  if (fs.existsSync(lockPath)) {
+    const locks = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
+    for (const [theme, info] of Object.entries(locks)) {
+      if (theme.startsWith('_') || !info.locked) continue;
+      const cssPath = path.join(REPO, `themes/${theme}/dashboard.css`);
+      const hash = crypto.createHash('sha256').update(fs.readFileSync(cssPath)).digest('hex');
+      ok(hash === info.sha256, `Theme ${theme} is LOCKED and unchanged (hash match)`);
+    }
+  }
+}
+ok(fs.existsSync(path.join(REPO, 'themes/vice-city/dashboard.css')), 'VC dashboard.css exists (factored)');
+ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard.css')), 'SA dashboard.css exists (factored)');

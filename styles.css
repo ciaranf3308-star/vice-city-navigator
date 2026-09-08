@@ -249,9 +249,6 @@ body{
 
 /* ---------- player arrow (Vice City radar arrow) ---------- */
 .player-arrow{width:46px;height:46px;filter:drop-shadow(0 1px 3px rgba(60,45,25,.55))}
-/* dashboard hero match: the player arrow reads instantly against the map */
-body.dashboard-mode.theme-vice-city .player-arrow{width:64px;height:64px;
-  filter:drop-shadow(0 0 12px rgba(255,251,150,.95)) drop-shadow(0 2px 4px rgba(0,0,0,.6))}
 .player-arrow img{width:100%;height:100%;transition:transform .25s ease-out}
 .dest-pin{
   width:48px;height:48px;
@@ -259,10 +256,6 @@ body.dashboard-mode.theme-vice-city .player-arrow{width:64px;height:64px;
   image-rendering:pixelated;
   filter:drop-shadow(0 0 10px rgba(255,45,70,.95));
 }
-body.theme-vice-city .dest-pin{ background-image:url('assets/themes/vice-city/blips/blip_waypoint.png'); }
-body.theme-san-andreas .dest-pin{ background-image:url('assets/themes/san-andreas/blips/waypoint.png'); }
-body.theme-gta-v .dest-pin{ background-image:url('assets/themes/gta-v/blips/waypoint.png'); }
-body.theme-rdr2 .dest-pin{ background-image:url('assets/themes/rdr2/blips/waypoint.png'); }
 
 /* ---------- Spotify pane (WayStation music widget) ---------- */
 /* Default (non-VC-theme) Spotify skin: plain transport, neutral styling. */
@@ -334,10 +327,6 @@ body.dashboard-mode[data-spotskin="vice-city"] #maneuver-card{right:900px}
    bottom-bar Settings/Vehicle tabs already open the menu, so it hides. */
 body.dashboard-mode #menu-btn{display:none}
 body.dashboard-mode #search-bar{left:12px;max-width:520px}
-body.dashboard-mode.theme-vice-city #search-bar{top:calc(88px + env(safe-area-inset-top))}
-body.dashboard-mode.theme-san-andreas #search-bar{display:none} /* hero composition: no search pill */
-body.dashboard-mode.theme-gta-v #search-bar{top:calc(68px + env(safe-area-inset-top))}
-body.dashboard-mode.theme-rdr2 #search-bar{top:calc(84px + env(safe-area-inset-top))}
 /* RADIO tab hides the music widget for a full-bleed map */
 body.dashboard-mode.radio-off #spotify-pane{display:none}
 
@@ -348,87 +337,17 @@ body.dashboard-mode.radio-off #spotify-pane{display:none}
    tab buttons and an LED-marquee destination plate. Pure overlays on the
    1920x720 canvas; the map is never resized or inset. */
 #dash-topbar,#dash-bottombar{display:none}
-/* Bespoke bars are always on in dashboard mode (every theme), driving or
-   exploring — exactly like Vice City's original dashboard chrome. */
-body.dashboard-mode.theme-vice-city #dash-topbar{
-  display:block;position:absolute;left:0;right:0;top:0;height:76px;z-index:25;
-  background:linear-gradient(180deg,#ff71ce,#ff2e88 55%,#b967ff);
-  clip-path:polygon(0 0,100% 0,100% 42%,94.5% 100%,5.5% 100%,0 42%);
-  filter:drop-shadow(0 2px 14px rgba(255,46,136,.55));
-  pointer-events:none;
-}
-body.dashboard-mode.theme-vice-city #dash-bottombar{
-  display:block;position:absolute;left:0;right:0;bottom:0;height:88px;z-index:25;
-  background:linear-gradient(0deg,#ff71ce,#ff2e88 55%,#b967ff);
-  clip-path:polygon(5.5% 0,94.5% 0,100% 58%,100% 100%,0 100%,0 58%);
-  filter:drop-shadow(0 -2px 14px rgba(255,46,136,.55));
-  pointer-events:auto;
-}
 /* inner layer: same silhouette inset by the neon edge width, so the pink
    outer layer reads as a continuous neon tube */
 #dash-topbar .dash-chrome,#dash-bottombar .dash-chrome{
   position:absolute;display:flex;align-items:center;overflow:hidden;
 }
-body.dashboard-mode.theme-vice-city #dash-topbar .dash-chrome{
-  inset:0 0 5px 0;
-  clip-path:polygon(0 0,100% 0,100% 42%,94.5% 100%,5.5% 100%,0 42%);
-  background:
-    url('themes/vice-city/dashboard/topbar.jpg') 50% 50%/cover no-repeat,
-    linear-gradient(180deg,#0d0619 0%,#170b30 60%,#1e0e3d 100%);
-  background-color:#0d0619;
-  gap:34px;padding:0 48px 0 200px;
-}
-/* chrome divider strip along the console's lower edge */
-body.dashboard-mode.theme-vice-city #dash-topbar .dash-chrome::after{
-  content:"";position:absolute;left:5.5%;right:5.5%;bottom:0;height:4px;
-  background:linear-gradient(180deg,#fdfdfd 0%,#9fb4c8 30%,#3c4a5c 50%,#dfe9f2 70%,#7d8ea0 100%);
-  box-shadow:0 1px 12px rgba(255,46,136,.85),0 2px 22px rgba(255,46,136,.4);
-}
 /* neon palm beside the wordmark + compass "N": VC dashboard only */
 .dash-palm,.dash-north{display:none}
-body.dashboard-mode.theme-vice-city .dash-palm{
-  display:block;width:44px;height:60px;flex:none;margin-left:-14px;
-  filter:drop-shadow(0 0 6px rgba(255,113,206,.9));transform:rotate(-4deg);
-}
-body.dashboard-mode.theme-vice-city .dash-north{
-  display:inline-block;font-family:var(--vclabel);font-size:22px;font-weight:700;
-  color:var(--cyan);text-shadow:0 0 10px rgba(1,205,254,.85);margin-left:-8px;
-}
-/* Authored top/bottom bar strips (asset pack #4): the neon tubes stay in
-   the CSS shell so the silhouette is unchanged; the strips paint the
-   palms, tab slots, plates and sunset inside. */
-body.dashboard-mode.theme-vice-city #dash-bottombar .dash-chrome{
-  inset:5px 0 0 0;
-  clip-path:polygon(5.5% 0,94.5% 0,100% 58%,100% 100%,0 100%,0 58%);
-  background:
-    url('assets/themes/vice-city/dashboard/bar-texture.jpg'),
-    url('themes/vice-city/dashboard/bottombar.jpg') 50% 50%/100% 100% no-repeat;
-  background-size:240px auto,100% 100%;
-  background-blend-mode:multiply;
-  background-color:#0b0518;
-  align-items:stretch;
-}
 /* Dash chrome owns the top/bottom of the canvas: keep the drive HUD
    clear of it on every theme (base fallback + per-theme exact offsets). */
 body.dashboard-mode.nav-driving #maneuver-card{top:calc(80px + env(safe-area-inset-top))}
-body.dashboard-mode.theme-vice-city #map-tools{display:none}
 body.dashboard-mode.nav-driving #drive-bar{bottom:calc(88px + env(safe-area-inset-bottom))}
-body.dashboard-mode.theme-vice-city.nav-driving #maneuver-card{top:calc(88px + env(safe-area-inset-top))}
-body.dashboard-mode.theme-vice-city.nav-driving #drive-bar{bottom:calc(98px + env(safe-area-inset-bottom))}
-/* Hero match: the floating utility pill (trip meta + search/voice/recenter/
-   stop) and the bottom-bar zoom/locate buttons are gone from the finished
-   VC car HUD — the maneuver card, bottom ETA and destination plate already
-   carry that information. Phone mode is untouched. */
-body.dashboard-mode.theme-vice-city #drive-bar{display:none}
-body.dashboard-mode.theme-vice-city .dash-zoom{display:none}
-/* Authentic in-game script logo as the wordmark (text hidden, logo shown). */
-body.dashboard-mode.theme-vice-city .dash-logo{
-  font-size:0;line-height:0;
-  width:132px;height:62px;flex:none;
-  background:url('assets/themes/vice-city/dashboard/vc-logo.png') 50% 50%/contain no-repeat;
-  filter:drop-shadow(0 0 12px rgba(255,46,136,.9));
-  transform:rotate(-2deg);
-}
 .dash-wx{display:flex;align-items:center;gap:10px;color:var(--cyan);font-family:var(--vclabel);
   font-size:26px;font-weight:600;letter-spacing:2px;text-shadow:0 0 10px rgba(1,205,254,.8)}
 .dash-wx svg{width:30px;height:30px;filter:drop-shadow(0 0 6px rgba(1,205,254,.8))}
@@ -480,74 +399,10 @@ body.dashboard-mode.theme-vice-city .dash-logo{
   font-family:var(--vclabel);font-size:24px;font-weight:600;letter-spacing:2px;
   color:var(--cyan);text-shadow:0 0 10px rgba(1,205,254,.8);white-space:nowrap;
 }
-/* VC console tabs: flat neon text like the benchmark — cyan glow resting,
-   hot pink glow on the active tab. No chunky buttons. */
-body.dashboard-mode.theme-vice-city .dash-tabs{padding:14px 6px 14px 138px;gap:6px}
-body.dashboard-mode.theme-vice-city .dash-tabs button{
-  background:none;border:0;box-shadow:none;clip-path:none;border-radius:0;
-  font-family:var(--vcfont);font-size:34px;letter-spacing:3px;text-transform:uppercase;
-  color:var(--cyan);text-shadow:0 0 8px rgba(1,205,254,.55);padding:0 16px;opacity:.8;
-}
-body.dashboard-mode.theme-vice-city .dash-tabs button.on{
-  color:#ff71ce;background:none;border:0;box-shadow:none;opacity:1;
-  text-shadow:0 0 12px rgba(255,46,136,1),0 0 38px rgba(255,46,136,.6),0 0 70px rgba(255,46,136,.35);
-}
-body.dashboard-mode.theme-vice-city #dash-dest{
-  color:#ff71ce;text-shadow:0 0 14px rgba(255,46,136,.95);
-  font-size:24px;letter-spacing:5px;padding:6px 12px;
-  background:none;border:0;box-shadow:none;clip-path:none;
-}
-/* the authored strip's plates are fixed geometry: pin the dest text to the
-   center plate and push the trip cluster right so it rides the long plate */
-body.dashboard-mode.theme-vice-city .dash-dest{
-  flex:none;position:absolute;left:42.8%;right:42.7%;top:0;bottom:0;
-  display:flex;align-items:center;justify-content:center;padding:0 10px;
-}
-body.dashboard-mode.theme-vice-city .dash-trip{margin-left:auto}
-body.dashboard-mode.theme-vice-city .dash-trip{gap:10px;padding:12px 10px}
 /* VC dashboard maneuver card: neon console card like the benchmark —
    pink tube border, chamfered corners, hot-pink distance, cyan road,
    and a trip stats row. Phone / other themes are untouched. */
 #next-stats{display:none}
-body.dashboard-mode.theme-vice-city #maneuver-card{
-  background:url('assets/themes/vice-city/dashboard/maneuver-frame.png') 0 0/100% 100% no-repeat;
-  border:0;border-radius:0;clip-path:none;box-shadow:none;
-  padding:0;gap:0;width:580px;max-width:580px;aspect-ratio:1650/565;
-  backdrop-filter:none;-webkit-backdrop-filter:none;
-  display:block;
-}
-body.dashboard-mode.theme-vice-city #maneuver-arrow{
-  position:absolute;left:3.5%;top:12%;width:30.5%;height:67%;
-  display:flex;align-items:center;justify-content:center;
-}
-body.dashboard-mode.theme-vice-city #maneuver-arrow svg{width:96px;height:96px}
-/* text zones sit INSIDE the frame's authored boxes: distance + road in the
-   upper box, the stats row in the lower box — never straddling the divider */
-body.dashboard-mode.theme-vice-city .banner-text{
-  position:absolute;left:36%;top:11%;width:54%;height:42%;
-  display:flex;flex-direction:column;justify-content:center;min-width:0;
-}
-body.dashboard-mode.theme-vice-city #next-dist{margin:0}
-body.dashboard-mode.theme-vice-city #next-instr{padding-right:8px}
-body.dashboard-mode.theme-vice-city #next-stats{margin:0}
-body.dashboard-mode.theme-vice-city #maneuver-arrow svg{
-  stroke:#ff2e88;filter:drop-shadow(0 0 9px rgba(255,46,136,.95));
-}
-body.dashboard-mode.theme-vice-city #next-dist{
-  color:#ff71ce;font-size:42px;text-shadow:0 0 14px rgba(255,46,136,.9);
-}
-body.dashboard-mode.theme-vice-city #next-instr{
-  color:var(--cyan);font-size:22px;font-weight:700;letter-spacing:1px;
-  text-shadow:0 0 10px rgba(1,205,254,.8);margin-top:4px;
-}
-body.dashboard-mode.theme-vice-city #next-stats{
-  display:flex;position:absolute;left:36%;top:60%;width:58%;height:26%;
-  align-items:center;margin:0;white-space:nowrap;overflow:hidden;
-  font-family:var(--vclabel);font-size:20px;font-weight:600;
-  letter-spacing:2px;color:var(--cyan);text-shadow:0 0 8px rgba(1,205,254,.7);
-}
-body.dashboard-mode.theme-vice-city #next-stats .ns-min{color:#ff71ce;text-shadow:0 0 10px rgba(255,46,136,.9)}
-body.dashboard-mode.theme-vice-city #next-stats .ns-sep{opacity:.7}
 
 /* VC bottom bar: the authored strip carries the tab slots, dest plate and
    sunset — the live plate drops its own box and lets the art frame it. */
@@ -559,384 +414,8 @@ body.dashboard-mode.theme-vice-city #next-stats .ns-sep{opacity:.7}
    keyed standalone wordmark, sized by bar height. Bars are 86px (~12%);
    the map dominates. Phone mode untouched. */
 .sa-logo{display:none}
-body.dashboard-mode.theme-san-andreas #dash-topbar{
-  display:block;position:absolute;left:0;right:0;top:0;height:86px;z-index:25;
-  background:#0a0e1a url('themes/san-andreas/dashboard/topbar-panorama.jpg') center/cover no-repeat;
-  box-shadow:0 5px 10px rgba(0,0,0,.55);
-  pointer-events:none;
-  /* hero's machined edge: straight profile, angled cuts at each end */
-  clip-path:polygon(0 0,100% 0,100% 80%,97.5% 100%,2.5% 100%,0 80%);
-}
-body.dashboard-mode.theme-san-andreas #dash-topbar::before{
-  content:"";position:absolute;left:0;right:0;bottom:0;height:3px;
-  background:linear-gradient(90deg,transparent,#f5c96b 6%,#f5c96b 94%,transparent);
-  clip-path:polygon(0 0,2.5% 100%,97.5% 100%,100% 0);
-}
-/* photographic bar: no painted haze needed; keep a whisper at the base for the gold edge */
-body.dashboard-mode.theme-san-andreas #dash-topbar::after{
-  content:"";position:absolute;left:0;right:0;bottom:0;height:18px;
-  background:linear-gradient(180deg,transparent,rgba(8,4,2,.35));
-}
-body.dashboard-mode.theme-san-andreas #dash-topbar .dash-chrome{
-  position:absolute;inset:0;display:block;background:none;overflow:visible;padding:0;
-}
-/* standalone wordmark: contained top-left with breathing room */
-body.dashboard-mode.theme-san-andreas .dash-brand{
-  display:flex;align-items:center;position:absolute;left:24px;top:0;bottom:0;margin:0;
-  overflow:hidden;
-}
-body.dashboard-mode.theme-san-andreas .dash-brand .dash-logo,
-body.dashboard-mode.theme-san-andreas .dash-brand .dash-palm{display:none}
-body.dashboard-mode.theme-san-andreas .sa-logo{
-  display:block;position:absolute;left:28px;top:10px;height:112px;width:auto;max-width:34vw;
-  z-index:30;pointer-events:none;
-  filter:drop-shadow(0 3px 6px rgba(0,0,0,.85)) drop-shadow(0 0 2px rgba(0,0,0,.9));
-}
-/* "A Better Tomorrow" script rides the photo at far right, hero-style */
-body.dashboard-mode.theme-san-andreas #dash-topbar .dash-tomorrow{
-  position:absolute;right:22px;top:50%;transform:translateY(-54%);
-  height:44px;width:auto;max-width:220px;object-fit:contain;
-  filter:drop-shadow(0 2px 4px rgba(0,0,0,.8));pointer-events:none;
-}
-/* live overlays, placed with intent: temp+icon left/centre, date centre,
-   time right-centre; cream HUD text with a subtle black shadow */
-body.dashboard-mode.theme-san-andreas .dash-wx{
-  position:absolute;left:30%;top:0;bottom:0;display:flex;align-items:center;gap:12px;
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:34px;font-weight:700;
-  letter-spacing:2px;color:#fff6d8;
-  -webkit-text-stroke:1.5px #0a0a0a;paint-order:stroke fill;
-  text-shadow:0 3px 6px rgba(0,0,0,.9);
-}
-body.dashboard-mode.theme-san-andreas #dash-wxicon{display:inline-flex;width:34px;height:34px}
-body.dashboard-mode.theme-san-andreas #dash-wxicon svg{width:100%;height:100%}
-body.dashboard-mode.theme-san-andreas .dash-clock{
-  position:absolute;left:0;right:0;top:0;bottom:0;margin:0;pointer-events:none;
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;letter-spacing:2px;
-}
-body.dashboard-mode.theme-san-andreas #dash-date{
-  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  font-size:28px;font-weight:700;color:#fff6d8;
-  -webkit-text-stroke:1.5px #0a0a0a;paint-order:stroke fill;
-  text-shadow:0 3px 6px rgba(0,0,0,.9);
-}
-body.dashboard-mode.theme-san-andreas #dash-time{
-  position:absolute;left:64%;top:50%;transform:translate(-50%,-50%);
-  font-size:38px;font-weight:700;color:#ffd34d;
-  -webkit-text-stroke:1.5px #0a0a0a;paint-order:stroke fill;
-  text-shadow:0 3px 6px rgba(0,0,0,.9);
-}
-/* ---------- bottom console: designed CSS console, no photo strip ---------- */
-body.dashboard-mode.theme-san-andreas #dash-bottombar{
-  display:block;position:absolute;left:0;right:0;bottom:0;height:96px;z-index:25;
-  background:
-    repeating-linear-gradient(90deg,rgba(255,255,255,.022) 0 2px,transparent 2px 5px),
-    linear-gradient(180deg,#2e2416 0%,#171208 30%,#0c0a07 70%,#060503 100%);
-  box-shadow:inset 0 -14px 22px rgba(0,0,0,.7), inset 0 30px 18px rgba(255,220,150,.06);
-  pointer-events:auto;
-  /* hero's machined profile: stepped top edge, angled ends */
-  clip-path:polygon(0 100%,0 22%,1.8% 8%,3.2% 8%,4.5% 0,95.5% 0,96.8% 8%,98.2% 8%,100% 22%,100% 100%);
-}
-/* machined brass trim along the top edge */
-body.dashboard-mode.theme-san-andreas #dash-bottombar::before{
-  content:"";position:absolute;left:0;right:0;top:0;height:28px;
-  background:url('themes/san-andreas/dashboard/bottombar-trim.jpg') 50% 0/1920px 28px no-repeat;
-  clip-path:polygon(0 100%,0 30%,1.8% 8%,3.2% 8%,4.5% 0,95.5% 0,96.8% 8%,98.2% 8%,100% 30%,100% 100%);
-  filter:brightness(1.35) contrast(1.15);
-}
-body.dashboard-mode.theme-san-andreas #dash-bottombar .dash-chrome{
-  position:absolute;inset:0;display:flex;align-items:center;gap:12px;
-  padding:0 18px;background:none;overflow:visible;
-}
-/* text tabs: khaki on dark, active takes the cream box */
-body.dashboard-mode.theme-san-andreas .dash-tabs button{
-  display:flex;flex-direction:column;align-items:center;gap:2px;
-  color:#cbb87f;background:none;border:0;cursor:pointer;
-  font-family:'Bank Gothic',sans-serif;font-size:13px;letter-spacing:.06em;
-  padding:6px 10px;
-}
-body.dashboard-mode.theme-san-andreas .dash-tabs button svg{width:26px;height:26px}
-body.dashboard-mode.theme-san-andreas .dash-tabs button.on{color:#f5e6b8}
-body.dashboard-mode.theme-san-andreas .dash-tabs button.on svg{filter:drop-shadow(0 0 4px rgba(245,214,123,.7))}
-body.dashboard-mode.theme-san-andreas .dash-tabs{
-  position:static;display:flex;align-items:center;gap:8px;padding:0;background:none;pointer-events:none;
-}
-body.dashboard-mode.theme-san-andreas .dash-tabs button{
-  position:static;padding:10px 18px;cursor:pointer;pointer-events:auto;
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:17px;font-weight:700;
-  letter-spacing:3px;color:#c9b98a;background:none;border:0;border-radius:12px;
-  text-shadow:0 2px 0 #000;opacity:1;white-space:nowrap;
-  display:flex;flex-direction:column;align-items:center;gap:3px;
-}
-body.dashboard-mode.theme-san-andreas .dash-tabs button svg{width:30px;height:30px}
-/* hero MAP: solid green box, black icon + label */
-body.dashboard-mode.theme-san-andreas .dash-tabs button.on{
-  background:linear-gradient(180deg,#8fbf7a,#6da055);color:#101408;text-shadow:none;
-  box-shadow:0 3px 0 rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.35);
-}
-/* locality: inset plate, flexes to fill */
-body.dashboard-mode.theme-san-andreas .dash-dest{
-  position:static;flex:1;display:flex;align-items:center;justify-content:center;
-  min-width:0;margin:0;padding:0;
-}
-body.dashboard-mode.theme-san-andreas #dash-dest{
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:24px;font-weight:700;
-  letter-spacing:3px;color:#f2e8c9;background:rgba(0,0,0,.55);
-  border:2px solid #6da055;
-  clip-path:polygon(14px 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,14px 100%,0 50%);
-  box-shadow:inset 0 2px 8px rgba(0,0,0,.75);
-  text-shadow:0 2px 0 #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  max-width:100%;min-width:280px;min-height:44px;padding:10px 34px;
-}
-/* compass + ETA */
-body.dashboard-mode.theme-san-andreas .dash-trip{
-  position:static;display:flex;align-items:center;gap:14px;padding:0;pointer-events:none;
-}
-body.dashboard-mode.theme-san-andreas #dash-compass{
-  position:static;font-size:34px;color:#e8dcc0;text-shadow:0 2px 0 #000;transform-origin:50% 50%;
-}
-body.dashboard-mode.theme-san-andreas .dash-north{display:none}
-body.dashboard-mode.theme-san-andreas #dash-eta{
-  position:static;font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:22px;
-  font-weight:700;letter-spacing:1px;color:#8fbf7a;text-shadow:0 2px 0 #000;white-space:nowrap;
-  text-transform:uppercase;
-}
-body.dashboard-mode.theme-san-andreas .dash-zoom{display:none}
-/* right palm panel: photographic sunset with the tagline script over it, hero-style */
-body.dashboard-mode.theme-san-andreas .dash-tag{
-  position:static;width:300px;height:76px;flex:0 0 auto;
-  font-size:0;line-height:0;color:transparent;text-shadow:none;transform:none;
-  display:block;padding:0;white-space:normal;
-  background:
-    url('themes/san-andreas/dashboard/script-music.png') 50% 50%/220px auto no-repeat,
-    url('themes/san-andreas/dashboard/bottombar-palms.jpg') 50% 50%/cover no-repeat;
-  border:1px solid rgba(201,162,39,.5);
-  clip-path:polygon(12px 0,100% 0,100% 100%,0 100%,0 12px);
-  filter:drop-shadow(0 2px 4px rgba(0,0,0,.6));
-}
-/* ---------- maneuver card: authored frame, stats row underneath ---------- */
-body.dashboard-mode.theme-san-andreas.nav-driving #maneuver-card{
-  top:calc(100px + env(safe-area-inset-top));left:24px;right:auto;
-  width:560px;max-width:560px;height:124px;
-  background:url('themes/san-andreas/dashboard/maneuver.png') 50% 50%/100% 100% no-repeat;
-  border:0;border-radius:0;box-shadow:none;
-  backdrop-filter:none;-webkit-backdrop-filter:none;
-  display:flex;align-items:center;gap:0 20px;padding:8px 30px 8px 34px;
-}
-body.dashboard-mode.theme-san-andreas #maneuver-arrow{flex:0 0 72px;width:72px;height:72px}
-body.dashboard-mode.theme-san-andreas #maneuver-arrow svg{
-  width:100%;height:100%;filter:drop-shadow(0 3px 3px rgba(0,0,0,.75))}
-body.dashboard-mode.theme-san-andreas .banner-text{
-  flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:0 18px;
-}
-body.dashboard-mode.theme-san-andreas #next-dist{
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:44px;font-weight:600;
-  letter-spacing:3px;color:#fff;text-shadow:0 3px 0 #000;line-height:1;
-}
-body.dashboard-mode.theme-san-andreas #next-instr{
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:24px;font-weight:600;
-  letter-spacing:2px;color:#ffd34d;text-shadow:0 2px 0 #000;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:300px;
-}
-body.dashboard-mode.theme-san-andreas #next-stats{
-  flex:0 0 100%;
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:17px;letter-spacing:2px;
-  color:#e8dcc0;text-shadow:0 2px 0 #000;opacity:.9;white-space:nowrap;overflow:hidden;
-  text-overflow:ellipsis;
-}
 /* ---------- right side: the music widget is the anchor (no scene panel) ---------- */
 #sa-grove-panel{display:none}
-body.dashboard-mode.theme-san-andreas #sa-grove-panel{display:none;background:none}
-body.dashboard-mode.theme-san-andreas .sasp{
-  width:540px;right:70px;top:90px;bottom:auto;translate:none;transform:none;
-}
-/* hero map is clean: no floating zoom pills on this theme */
-body.dashboard-mode.theme-san-andreas #map-tools{display:none}
-/* ---------- bar-height clearances ---------- */
-body.dashboard-mode.theme-san-andreas.nav-driving #drive-bar{bottom:calc(98px + env(safe-area-inset-bottom))}
-body.dashboard-mode.theme-san-andreas #menu-panel{top:96px;bottom:98px}
-/* ---------- illustrated-map vignette, dashboard only ---------- */
-body.dashboard-mode.theme-san-andreas #map::after{
-  content:"";position:absolute;inset:0;z-index:5;pointer-events:none;
-  background:radial-gradient(115% 100% at 50% 42%,transparent 58%,rgba(24,18,6,.45) 100%);
-}
-
-/* ---------- GTA V dashboard chrome: Los Santos minimal panel ----------
-   V's pause-menu language: near-black panels, hairline neon-green rules,
-   sharp rectangles, small-caps Chalet with wide tracking, and the green
-   underline on the active tab. Slim bars — more map, less chrome. */
-body.dashboard-mode.theme-gta-v #dash-topbar{
-  display:block;position:absolute;left:0;right:0;top:0;height:56px;z-index:25;
-  background:#0d1117;border-bottom:1px solid #7CFF6B;
-  box-shadow:0 1px 14px rgba(124,255,107,.2);
-  pointer-events:none;
-}
-body.dashboard-mode.theme-gta-v #dash-bottombar{
-  display:block;position:absolute;left:0;right:0;bottom:0;height:64px;z-index:25;
-  background:#0d1117;border-top:1px solid #7CFF6B;
-  box-shadow:0 -1px 14px rgba(124,255,107,.2);
-  pointer-events:auto;
-}
-body.dashboard-mode.theme-gta-v #dash-topbar .dash-chrome{
-  clip-path:none;inset:0;
-  background:
-    linear-gradient(180deg,rgba(13,17,23,.8) 0%,rgba(13,17,23,.94) 100%),
-    url('assets/themes/gta-v/dashboard/topbar-skyline.jpg') 50% 38%/cover no-repeat,
-    #0d1117;
-  gap:22px;padding:0 30px;
-}
-body.dashboard-mode.theme-gta-v #dash-bottombar .dash-chrome{
-  clip-path:none;inset:0;
-  background:
-    linear-gradient(0deg,rgba(13,17,23,.8) 0%,rgba(13,17,23,.94) 100%),
-    url('assets/themes/gta-v/dashboard/bottombar-skyline.jpg') 50% 62%/cover no-repeat,
-    #0d1117;
-  align-items:stretch;
-}
-body.dashboard-mode.theme-gta-v.nav-driving #maneuver-card{top:calc(68px + env(safe-area-inset-top))}
-body.dashboard-mode.theme-gta-v.nav-driving #drive-bar{bottom:calc(74px + env(safe-area-inset-bottom))}
-/* V's wordmark is a SignPainter script accent over the minimal panel —
-   functional text stays Chalet, display type goes script. */
-body.dashboard-mode.theme-gta-v .dash-logo{
-  font-family:'SignPainter','Pricedown Bl',cursive;font-weight:400;font-size:42px;
-  letter-spacing:0;text-transform:none;
-  color:#f2f5f2;transform:rotate(-2deg);text-shadow:0 0 12px rgba(124,255,107,.35);
-  white-space:nowrap;
-  display:flex;align-items:center;gap:14px;
-}
-body.dashboard-mode.theme-gta-v .dash-logo::before{
-  content:"";width:11px;height:11px;flex:none;background:#7CFF6B;
-  box-shadow:0 0 10px rgba(124,255,107,.8);
-}
-body.dashboard-mode.theme-gta-v .dash-wx{margin-left:auto;color:#c9d4c9;text-shadow:none;font-size:22px}
-body.dashboard-mode.theme-gta-v .dash-clock{margin:0;gap:12px}
-body.dashboard-mode.theme-gta-v #dash-date{color:#8a9a8c;text-shadow:none;font-size:20px}
-body.dashboard-mode.theme-gta-v #dash-time{color:#f2f5f2;text-shadow:none;font-size:26px}
-/* V's pause-menu tab strip: hairline separators, green underline on active */
-body.dashboard-mode.theme-gta-v .dash-tabs{flex:1;padding:0 0 0 20px;gap:0}
-body.dashboard-mode.theme-gta-v .dash-tabs button{
-  font-family:var(--vcfont);font-weight:600;font-size:25px;letter-spacing:5px;text-transform:uppercase;
-  color:#aebbae;background:none;border:0;border-left:1px solid rgba(255,255,255,.1);
-  border-radius:0;cursor:pointer;padding:0 30px;text-shadow:none;opacity:1;height:100%;
-  display:flex;align-items:center;
-}
-body.dashboard-mode.theme-gta-v .dash-tabs button:first-child{border-left:0}
-body.dashboard-mode.theme-gta-v .dash-tabs button.on{
-  color:#7CFF6B;text-shadow:none;opacity:1;
-  box-shadow:inset 0 -3px 0 #7CFF6B;
-}
-body.dashboard-mode.theme-gta-v .dash-dest{padding:10px 8px}
-body.dashboard-mode.theme-gta-v #dash-dest{
-  font-family:'SignPainter','Pricedown Bl',cursive;font-size:32px;font-weight:400;
-  letter-spacing:1px;text-transform:none;
-  color:#f2f5f2;background:rgba(255,255,255,.045);text-shadow:0 0 10px rgba(124,255,107,.3);
-  border:1px solid rgba(124,255,107,.5);border-radius:2px;clip-path:none;box-shadow:none;
-  padding:4px 26px;
-}
-body.dashboard-mode.theme-gta-v .dash-zoom{gap:8px;padding:10px 8px}
-body.dashboard-mode.theme-gta-v .dash-zoom button{
-  width:44px;height:44px;font-size:22px;color:#7CFF6B;cursor:pointer;
-  background:transparent;border:1px solid rgba(124,255,107,.55);border-radius:2px;
-  box-shadow:none;text-shadow:none;clip-path:none;
-}
-body.dashboard-mode.theme-gta-v .dash-zoom button:hover{background:rgba(124,255,107,.12)}
-body.dashboard-mode.theme-gta-v .dash-trip{padding:10px 8px;gap:10px}
-body.dashboard-mode.theme-gta-v #dash-compass{color:#7CFF6B;text-shadow:none;font-size:24px}
-body.dashboard-mode.theme-gta-v #dash-eta{color:#7CFF6B;text-shadow:none;font-size:20px}
-/* V has no use for the 80s script tagline */
-body.dashboard-mode.theme-gta-v .dash-tag{display:none}
-
-/* ---------- RDR2 dashboard chrome: frontier menu furniture ----------
-   RDR2's pause-menu language: dark leather, a centered ornate title plate
-   with double-rule seams running to the bar edges, engraved divider
-   ornaments, grunge-worn panels, Kirsty/RDR Lino letterpress. No neon. */
-body.dashboard-mode.theme-rdr2 #dash-topbar{
-  display:block;position:absolute;left:0;right:0;top:0;height:72px;z-index:25;
-  background:
-    url('assets/themes/rdr2/dashboard/menu_bar.png') 50% 100%/min(1100px,94%) 10px repeat-x,
-    linear-gradient(180deg,#241a12 0%,#160f09 100%);
-  filter:drop-shadow(0 2px 8px rgba(0,0,0,.6));
-  pointer-events:none;
-}
-body.dashboard-mode.theme-rdr2 #dash-bottombar{
-  display:block;position:absolute;left:0;right:0;bottom:0;height:72px;z-index:25;
-  background:
-    url('assets/themes/rdr2/dashboard/menu_bar.png') 50% 0%/min(1100px,94%) 10px repeat-x,
-    linear-gradient(0deg,#241a12 0%,#160f09 100%);
-  filter:drop-shadow(0 -2px 8px rgba(0,0,0,.6));
-  pointer-events:auto;
-}
-body.dashboard-mode.theme-rdr2 #dash-topbar .dash-chrome{
-  inset:0 0 10px 0;
-  background:
-    linear-gradient(180deg,rgba(46,32,22,.88) 0%,rgba(26,18,12,.93) 100%),
-    url('assets/themes/rdr2/dashboard/selection_box_bg_1a.png') 50% 50%/1400px auto repeat-x,
-    linear-gradient(180deg,#33241a 0%,#1c140d 100%);
-  padding:0 34px;justify-content:flex-start;
-}
-body.dashboard-mode.theme-rdr2 #dash-bottombar .dash-chrome{
-  inset:10px 0 0 0;
-  background:
-    linear-gradient(0deg,rgba(46,32,22,.88) 0%,rgba(26,18,12,.93) 100%),
-    url('assets/themes/rdr2/dashboard/selection_box_bg_1a.png') 50% 50%/1400px auto repeat-x,
-    linear-gradient(0deg,#33241a 0%,#1c140d 100%);
-  align-items:stretch;
-}
-body.dashboard-mode.theme-rdr2.nav-driving #maneuver-card{top:calc(84px + env(safe-area-inset-top))}
-body.dashboard-mode.theme-rdr2.nav-driving #drive-bar{bottom:calc(82px + env(safe-area-inset-bottom))}
-/* centered title plate, status ink pinned to the corners */
-body.dashboard-mode.theme-rdr2 .dash-brand{order:2;margin:0 auto;display:flex;align-items:center}
-body.dashboard-mode.theme-rdr2 .dash-wx{order:1;margin:0;color:#e8d9b0;text-shadow:0 2px 0 rgba(0,0,0,.65);font-size:22px}
-body.dashboard-mode.theme-rdr2 .dash-clock{order:3;margin:0;gap:12px}
-body.dashboard-mode.theme-rdr2 .dash-logo{
-  font-family:var(--vcfont);font-size:32px;letter-spacing:8px;color:#e8d9b0;transform:none;
-  text-shadow:0 2px 0 rgba(0,0,0,.65);white-space:nowrap;
-  border-top:2px solid rgba(216,179,106,.55);border-bottom:2px solid rgba(216,179,106,.55);
-  padding:5px 40px;
-}
-body.dashboard-mode.theme-rdr2 #dash-date{color:#d8b36a;text-shadow:0 2px 0 rgba(0,0,0,.65);font-size:20px}
-body.dashboard-mode.theme-rdr2 #dash-time{color:#e8d9b0;text-shadow:0 2px 0 rgba(0,0,0,.65);font-size:26px}
-/* bottom bar: destination plate left, tabs centered, trip right */
-body.dashboard-mode.theme-rdr2 .dash-dest{order:0;flex:none;padding:8px 4px 8px 18px}
-body.dashboard-mode.theme-rdr2 .dash-tabs{order:1;margin:0 auto;padding:8px;gap:2px}
-body.dashboard-mode.theme-rdr2 .dash-tabs button{
-  font-family:var(--vclabel);font-size:22px;letter-spacing:4px;text-transform:uppercase;
-  color:#e8d9b0;background:none;border:0;cursor:pointer;padding:8px 20px;opacity:1;
-  text-shadow:0 2px 0 rgba(0,0,0,.65);position:relative;
-}
-body.dashboard-mode.theme-rdr2 .dash-tabs button.on{color:#d8b36a;text-shadow:0 2px 0 rgba(0,0,0,.65)}
-body.dashboard-mode.theme-rdr2 .dash-tabs button.on::after{
-  content:"";position:absolute;left:50%;bottom:2px;width:8px;height:8px;
-  transform:translateX(-50%) rotate(45deg);background:#d8b36a;
-  box-shadow:0 1px 0 rgba(0,0,0,.6);
-}
-/* Ornate Victorian frame around the destination plate. */
-body.dashboard-mode.theme-rdr2 #dash-dest{
-  border:12px solid transparent;
-  border-image-source:url('assets/themes/rdr2/dashboard/menu_header_1a.png');
-  border-image-slice:44 fill;
-  border-image-width:12px;
-  border-image-repeat:round;
-  border-radius:0;clip-path:none;
-  background:rgba(0,0,0,.32);
-  color:#e8d9b0;text-shadow:0 2px 0 rgba(0,0,0,.65);
-  box-shadow:none;font-size:20px;letter-spacing:4px;padding:4px 24px;
-}
-/* Engraved divider ornaments flanking the destination plate. */
-body.dashboard-mode.theme-rdr2 .dash-dest::before,
-body.dashboard-mode.theme-rdr2 .dash-dest::after{
-  content:"";width:14px;height:44px;flex:none;align-self:center;opacity:.85;
-  background:url('assets/themes/rdr2/dashboard/title_divider.png') 50% 50%/contain no-repeat;
-}
-body.dashboard-mode.theme-rdr2 .dash-zoom{order:2;gap:8px;padding:8px}
-body.dashboard-mode.theme-rdr2 .dash-zoom button{
-  width:48px;height:48px;font-size:22px;color:#e8d9b0;cursor:pointer;
-  background:rgba(0,0,0,.4);border:2px solid #8a6f4d;
-  box-shadow:none;text-shadow:none;clip-path:none;border-radius:2px;
-}
-body.dashboard-mode.theme-rdr2 .dash-trip{order:3;padding:8px 18px 8px 8px}
-body.dashboard-mode.theme-rdr2 #dash-compass{color:#d8b36a;text-shadow:none}
-body.dashboard-mode.theme-rdr2 #dash-eta{color:#d8b36a;text-shadow:none;font-size:20px}
-body.dashboard-mode.theme-rdr2 .dash-tag{display:none}
 /* ---------- dashboard-mode settings: car-scale menu panel ----------
    On a car display the phone-sized menu (360px, 12-16px type) is unreadable
    at arm's length. In dashboard mode the panel becomes a left-docked
@@ -957,10 +436,6 @@ body.dashboard-mode #menu-panel{
   border-radius:18px;
   overflow-y:auto;
 }
-/* dock clear of each theme's real bar heights */
-body.dashboard-mode.theme-san-andreas #menu-panel{top:182px;bottom:142px}
-body.dashboard-mode.theme-gta-v #menu-panel{top:68px;bottom:76px}
-body.dashboard-mode.theme-rdr2 #menu-panel{top:84px;bottom:84px}
 /* car-scale type + touch targets */
 body.dashboard-mode .menu-head{margin-bottom:10px;align-items:center}
 body.dashboard-mode .vc-title{font-size:52px;letter-spacing:4px}
@@ -1002,79 +477,6 @@ body.dashboard-mode .attrib{font-size:16px;margin-top:24px}
 #incident-title{display:block;font-family:var(--vclabel);font-size:16px;letter-spacing:.5px;color:var(--yellow);margin-bottom:6px}
 #incident-desc{margin:0 0 8px;font-size:14px;line-height:1.4}
 #incident-meta{color:rgba(244,242,234,.72);font-size:12.5px}
-
-
-/* ---------- WayStation per-theme chrome tints ---------- */
-/* The map itself is fully re-skinned per theme via its own style.json;
-   these rules just tint the app chrome's key accents and drop the neon
-   title glow on non-Vice-City themes. */
-body.theme-san-andreas{ --pink:#e8a33d; --hot:#c07a1e;
-  /* SA pause-menu type: Beckett blackletter titles, Bank Gothic items. */
-  --vcfont:'Beckett','Pricedown Bl',serif;
-  --vclabel:'Bank Gothic','Arial Narrow',sans-serif; }
-body.theme-san-andreas .vc-title,
-body.theme-gta-v .vc-title,
-body.theme-rdr2 .vc-title{ text-shadow:0 2px 0 rgba(0,0,0,.55); }
-body.theme-san-andreas .vc-title span{ color:#7ec850; text-shadow:0 2px 0 rgba(0,0,0,.55); }
-body.theme-gta-v{ --pink:#a86fd6; --hot:#7a4fb0;
-  /* GTA V interface type: Chalet Comprime condensed titles, Chalet London body. */
-  --vcfont:'Chalet Comprime','Arial Narrow',sans-serif;
-  --vclabel:'Chalet London',system-ui,sans-serif; }
-body.theme-gta-v .vc-title span{ color:#8fd0ff; text-shadow:0 2px 0 rgba(0,0,0,.55); }
-body.theme-rdr2{ --pink:#b8352f; --hot:#8a2723;
-  /* RDR2 type: Kirsty slab titles, RDR Lino serif for menu/map-adjacent labels. */
-  --vcfont:'Kirsty',Georgia,serif;
-  --vclabel:'RDR Lino',Georgia,serif; }
-body.theme-rdr2 .vc-title span{ color:#d8b36a; text-shadow:0 2px 0 rgba(0,0,0,.55); }
-
-/* ---------- per-theme left menu: the whole panel re-skins ---------- */
-/* GTA V: near-black green-tinted panel, neon-green edge (pause-menu). */
-body.theme-gta-v #menu-panel{
-  background:rgba(13,17,23,.96);border-right:2px solid #7CFF6B;
-  box-shadow:0 0 30px rgba(124,255,107,.25), inset 0 0 40px rgba(124,255,107,.05);
-}
-body.theme-gta-v .menu-section{border-top:1px solid rgba(124,255,107,.3)}
-body.theme-gta-v .menu-section h3{color:#7CFF6B}
-body.theme-gta-v .menu-section .stack{color:#8a9a8c}
-body.theme-gta-v .menu-section select,body.theme-gta-v .menu-section input[type="url"]{
-  background:rgba(255,255,255,.05);border:1.5px solid #2f4a35;color:#f0f0f0}
-body.theme-gta-v .menu-section input[type="checkbox"]{accent-color:#7CFF6B}
-body.theme-gta-v .stats{color:#7CFF6B}
-body.theme-gta-v .hint{color:rgba(138,154,140,.85)}
-body.theme-gta-v .ghost-btn{color:#7CFF6B;border-color:#7CFF6B}
-body.theme-gta-v .attrib{color:rgba(124,255,107,.5)}
-/* San Andreas: deep green panel, cream ink, gold accents. */
-body.theme-san-andreas #menu-panel{
-  background:rgba(14,26,18,.96);border-right:2px solid #e8a33d;
-  box-shadow:0 0 30px rgba(232,163,61,.25), inset 0 0 40px rgba(126,200,80,.06);
-}
-body.theme-san-andreas .menu-section{border-top:1px solid rgba(232,163,61,.3)}
-body.theme-san-andreas .menu-section h3{color:#e8a33d}
-body.theme-san-andreas .menu-section .stack{color:#f0e6c8}
-body.theme-san-andreas .menu-section .row{color:#f0e6c8}
-body.theme-san-andreas .menu-section select,body.theme-san-andreas .menu-section input[type="url"]{
-  background:rgba(255,255,255,.06);border:1.5px solid #7ec850;color:#f0e6c8}
-body.theme-san-andreas .menu-section input[type="checkbox"]{accent-color:#7ec850}
-body.theme-san-andreas .stats{color:#7ec850}
-body.theme-san-andreas .hint{color:rgba(240,230,200,.7)}
-body.theme-san-andreas .ghost-btn{color:#e8a33d;border-color:#e8a33d}
-body.theme-san-andreas .attrib{color:rgba(232,163,61,.5)}
-/* RDR2: dark leather panel, parchment ink, ink-red accents. */
-body.theme-rdr2 #menu-panel{
-  background:rgba(42,31,22,.97);border-right:2px solid #b8352f;
-  box-shadow:0 0 30px rgba(184,53,47,.3), inset 0 0 40px rgba(0,0,0,.4);
-}
-body.theme-rdr2 .menu-section{border-top:1px solid rgba(216,179,106,.35)}
-body.theme-rdr2 .menu-section h3{color:#d8b36a}
-body.theme-rdr2 .menu-section .stack{color:#e8d9b0}
-body.theme-rdr2 .menu-section .row{color:#e8d9b0}
-body.theme-rdr2 .menu-section select,body.theme-rdr2 .menu-section input[type="url"]{
-  background:rgba(0,0,0,.3);border:1.5px solid #8a6f4d;color:#e8d9b0}
-body.theme-rdr2 .menu-section input[type="checkbox"]{accent-color:#b8352f}
-body.theme-rdr2 .stats{color:#d8b36a}
-body.theme-rdr2 .hint{color:rgba(232,217,176,.7)}
-body.theme-rdr2 .ghost-btn{color:#d8b36a;border-color:#8a6f4d}
-body.theme-rdr2 .attrib{color:rgba(216,179,106,.5)}
 
 /* ============================================================
    WayStation kinetic karaoke lyric engine (lyrics.js).
