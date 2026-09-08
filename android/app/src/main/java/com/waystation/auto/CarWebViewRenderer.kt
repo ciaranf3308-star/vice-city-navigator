@@ -13,6 +13,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
+import android.webkit.GeolocationPermissions
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.car.app.CarContext
@@ -47,6 +48,9 @@ class CarWebViewRenderer(private val carContext: CarContext) {
         private const val TAG = "WayStationCar"
         const val DASH_URL =
             "https://ciaranf3308-star.github.io/vice-city-navigator/?dashboard=1&car=1"
+
+        /** Only this origin is ever granted WebView geolocation. */
+        const val WAYSTATION_ORIGIN = "https://ciaranf3308-star.github.io"
         private const val POLL_MS = 2000L
     }
 
@@ -55,6 +59,9 @@ class CarWebViewRenderer(private val carContext: CarContext) {
 
     /** JS Spotify auth state → show/hide the native Connect action. */
     var onSpotifyConnected: ((Boolean) -> Unit)? = null
+
+    /** Native location permission state (wired in WayStationScreen). */
+    var locationPermissionGranted: (() -> Boolean)? = null
 
     private val main = Handler(Looper.getMainLooper())
     private val spotifyAuth = SpotifyAuthManager(carContext)
@@ -136,6 +143,7 @@ class CarWebViewRenderer(private val carContext: CarContext) {
             javaScriptEnabled = true
             domStorageEnabled = true
             databaseEnabled = true
+            geolocationEnabled = true
             mediaPlaybackRequiresUserGesture = false
             loadWithOverviewMode = true
             useWideViewPort = true
@@ -143,7 +151,24 @@ class CarWebViewRenderer(private val carContext: CarContext) {
             allowFileAccess = false
             allowContentAccess = false
         }
-        wv.webChromeClient = WebChromeClient()
+        wv.webChromeClient = object : WebChromeClient() {
+            /**
+             * Geolocation is granted ONLY to the WayStation origin and ONLY
+             * after the Android location permission is actually granted.
+             * Unknown origins are always denied. No second GPS
+             * implementation: phone location → WebView
+             * navigator.geolocation → the existing app.js logic.
+             */
+            override fun onGeolocationPermissionsShowPrompt(
+                origin: String,
+                callback: GeolocationPermissions.Callback
+            ) {
+                val granted = origin == WAYSTATION_ORIGIN &&
+                    (locationPermissionGranted?.invoke() == true)
+                Log.i(TAG, "geolocation prompt for $origin -> $granted")
+                callback.invoke(origin, granted, false)
+            }
+        }
         wv.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView, url: String, favicon: android.graphics.Bitmap?) {
                 handoffDone = false // new page → token handoff may run again
@@ -333,6 +358,22 @@ class CarWebViewRenderer(private val carContext: CarContext) {
             null
         )
         Log.i(TAG, "Spotify token handed to car WebView")
+    }
+
+    /** Host asked to stop navigation: forward into the JS app so it stops
+     *  the route, the voice and the driving state normally. */
+    fun stopNavigation() {
+        evalJs("window.WayStationCar&&WayStationCar.stopNavigation()")
+    }
+
+    /** Reload the dashboard page (used once after the location permission
+     *  is granted so the page's geolocation watch re-prompts). */
+    fun reloadPage() {
+        try {
+            webView?.reload()
+        } catch (e: Exception) {
+            Log.w(TAG, "reload failed", e)
+        }
     }
 
     /** Kick off the native Spotify PKCE login (Custom Tab on the phone).

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Android Auto app descriptor: WayStation is a navigation app that uses
-  the navigation template family. Internal test build.
+  Android Auto app descriptor: WayStation is a Car App Library templated
+  app. Navigation identity comes from the NAVIGATION category on the
+  CarAppService intent filter (see AndroidManifest.xml).
 -->
 <automotiveApp>
-    <uses name="navigation" />
     <uses name="template" />
 </automotiveApp>

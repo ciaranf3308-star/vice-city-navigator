@@ -1,10 +1,13 @@
 package com.waystation.auto
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.os.Handler
 import android.os.Looper
 import androidx.car.app.AppManager
 import androidx.car.app.CarContext
+import androidx.car.app.OnRequestPermissionsListener
 import androidx.car.app.Screen
 import androidx.car.app.SurfaceCallback
 import androidx.car.app.SurfaceContainer
@@ -14,6 +17,7 @@ import androidx.car.app.model.Template
 import androidx.car.app.navigation.NavigationManager
 import androidx.car.app.navigation.NavigationManagerCallback
 import androidx.car.app.navigation.model.NavigationTemplate
+import androidx.core.content.ContextCompat
 
 /**
  * The single car screen. It deliberately shows almost nothing native:
@@ -34,6 +38,7 @@ class WayStationScreen(carContext: CarContext) : Screen(carContext) {
 
     private var navActive = false
     private var spotifyConnected = false
+    private var locationGranted = false
 
     private val surfaceCallback = object : SurfaceCallback {
         override fun onSurfaceAvailable(surfaceContainer: SurfaceContainer) {
@@ -69,6 +74,13 @@ class WayStationScreen(carContext: CarContext) : Screen(carContext) {
             .setSurfaceCallback(surfaceCallback)
         navManager.setNavigationManagerCallback(object : NavigationManagerCallback {
             override fun onAutoDriveEnabled() { /* not used */ }
+
+            /** Host asked to stop navigation: forward into the JS app so it
+             *  stops the route, the voice and the driving state normally.
+             *  Navigation state itself stays in JS — nothing duplicated. */
+            override fun onStopNavigation() {
+                main.post { renderer.stopNavigation() }
+            }
         })
         // JS state (polled by the renderer) drives host nav metadata.
         renderer.onNavActive = { active ->
@@ -86,20 +98,79 @@ class WayStationScreen(carContext: CarContext) : Screen(carContext) {
                 invalidate() // show/hide the Connect Spotify action
             }
         }
+        renderer.locationPermissionGranted = { locationGranted }
+        refreshLocationState()
+    }
+
+    // ---------------- location permission ----------------
+
+    private fun refreshLocationState() {
+        locationGranted = ContextCompat.checkSelfPermission(
+            carContext, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(
+                carContext, Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun requestLocationPermission() {
+        carContext.requestPermissions(
+            listOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ),
+            ContextCompat.getMainExecutor(carContext),
+            OnRequestPermissionsListener { granted, _ ->
+                locationGranted = granted.contains(Manifest.permission.ACCESS_FINE_LOCATION) ||
+                    granted.contains(Manifest.permission.ACCESS_COARSE_LOCATION)
+                if (locationGranted) {
+                    // The page was denied geolocation while permission was
+                    // missing; reload once so its watchPosition re-prompts
+                    // and the native grant takes effect.
+                    renderer.reloadPage()
+                }
+                invalidate() // show/hide the Enable location action
+            }
+        )
     }
 
     override fun onGetTemplate(): Template {
         val builder = NavigationTemplate.Builder()
-        // Minimal host chrome. The only native action: kick off the Spotify
-        // PKCE login on the phone when the car WebView isn't connected yet.
-        // (Tapping "Connect Spotify" inside the dashboard widget also works —
-        // that runs the normal web flow inside the car WebView.)
-        if (!spotifyConnected) {
-            val connect = Action.Builder()
-                .setTitle("Connect Spotify")
-                .setOnClickListener { renderer.startSpotifyAuth() }
+        // REQUIRED for the host to deliver SurfaceCallback touch events
+        // (onClick/onScroll/onScale/onFling). On touchscreen hosts Android
+        // Auto hides the PAN button itself, but the strip must still be
+        // present. All actual touch handling stays in the WebView bridge.
+        builder.setMapActionStrip(
+            ActionStrip.Builder()
+                .addAction(Action.PAN)
                 .build()
-            builder.setActionStrip(ActionStrip.Builder().addAction(connect).build())
+        )
+        builder.setPanModeListener { _ ->
+            // Pan-mode UI is the dashboard itself; nothing native to do.
+        }
+        // Minimal host chrome. Native actions only for one-time setup the
+        // WebView cannot do itself.
+        val actions = mutableListOf<Action>()
+        if (!locationGranted) {
+            actions.add(
+                Action.Builder()
+                    .setTitle("Enable location")
+                    .setOnClickListener { requestLocationPermission() }
+                    .build()
+            )
+        }
+        if (!spotifyConnected) {
+            actions.add(
+                Action.Builder()
+                    .setTitle("Connect Spotify")
+                    .setOnClickListener { renderer.startSpotifyAuth() }
+                    .build()
+            )
+        }
+        if (actions.isNotEmpty()) {
+            val strip = ActionStrip.Builder()
+            actions.forEach { strip.addAction(it) }
+            builder.setActionStrip(strip.build())
         }
         return builder.build()
     }

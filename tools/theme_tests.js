@@ -1004,9 +1004,16 @@ ok(manifest.includes('androidx.car.app.ACCESS_SURFACE'), 'android: ACCESS_SURFAC
 ok(manifest.includes('com.google.android.gms.car.application'), 'android: car application metadata');
 ok(manifest.includes('@xml/automotive_app_desc'), 'android: automotive_app_desc referenced');
 ok(manifest.includes('waystation') && manifest.includes('spotify-callback'), 'android: Spotify deep-link scheme');
+for (const p of ['android.permission.INTERNET',
+                 'android.permission.ACCESS_COARSE_LOCATION',
+                 'android.permission.ACCESS_FINE_LOCATION',
+                 'androidx.car.app.NAVIGATION_TEMPLATES',
+                 'androidx.car.app.ACCESS_SURFACE']) {
+  ok(manifest.includes(p), `android: manifest permission ${p}`);
+}
 const desc = fs.readFileSync(path.join(AND, 'app/src/main/res/xml/automotive_app_desc.xml'), 'utf8');
-ok(desc.includes('<uses name="navigation"') && desc.includes('<uses name="template"'),
-  'android: automotive_app_desc declares navigation + template');
+ok(desc.includes('<uses name="template"'), 'android: automotive_app_desc declares template');
+ok(!desc.includes('<uses name="navigation"'), 'android: automotive_app_desc has no navigation uses (category covers it)');
 const appGradle = fs.readFileSync(path.join(AND, 'app/build.gradle'), 'utf8');
 ok(appGradle.includes('androidx.car.app:app:1.7.0'), 'android: Car App Library app:1.7.0');
 ok(appGradle.includes('androidx.car.app:app-projected:1.7.0'), 'android: Car App Library app-projected:1.7.0');
@@ -1017,6 +1024,13 @@ ok(screen.includes('NavigationTemplate.Builder()'), 'android: NavigationTemplate
 ok(screen.includes('setSurfaceCallback'), 'android: SurfaceCallback registered via AppManager');
 ok(screen.includes('navigationStarted()') && screen.includes('navigationEnded()'),
   'android: NavigationManager session start/end signals');
+ok(screen.includes('onStopNavigation') && screen.includes('renderer.stopNavigation()'),
+  'android: host stop-navigation forwarded into the JS app');
+ok(screen.includes('setMapActionStrip') && screen.includes('Action.PAN'),
+  'android: map action strip with Action.PAN (enables SurfaceCallback touch)');
+ok(screen.includes('setPanModeListener'), 'android: pan mode listener wired');
+ok(screen.includes('requestPermissions') && screen.includes('Enable location'),
+  'android: runtime location permission flow with Enable location action');
 const rend = fs.readFileSync(path.join(AND, 'app/src/main/java/com/waystation/auto/CarWebViewRenderer.kt'), 'utf8');
 ok(rend.includes('?dashboard=1&car=1'), 'android: WebView loads the car dashboard URL');
 ok(rend.includes('createVirtualDisplay'), 'android: VirtualDisplay from the SurfaceContainer');
@@ -1029,8 +1043,19 @@ for (const m of ['onSurfaceAvailable', 'onSurfaceDestroyed', 'onVisibleAreaChang
 ok(rend.includes('dispatchTouchEvent'), 'android: touch forwarded as synthetic MotionEvents');
 ok(rend.includes('WayStationCar.setVisibleArea('), 'android: visible area forwarded into JS');
 ok(rend.includes('WayStationCar.setSpotifyAuth('), 'android: Spotify token handoff into the page');
+ok(rend.includes('geolocationEnabled = true'), 'android: WebView geolocation enabled');
+ok(rend.includes('onGeolocationPermissionsShowPrompt') && rend.includes('WAYSTATION_ORIGIN'),
+  'android: geolocation prompt gated to the WayStation origin');
+ok(rend.includes('locationPermissionGranted?.invoke()'), 'android: geolocation only after native permission granted');
+ok(rend.includes('fun stopNavigation()') && rend.includes('WayStationCar.stopNavigation()'),
+  'android: renderer stopNavigation bridge into JS');
 ok(rend.includes('virtualDisplay?.release()') && rend.includes('presentation?.dismiss()'),
   'android: surface teardown releases VirtualDisplay + Presentation');
+ok(/stopNavigation:\s*function/.test(appSrc) && appSrc.includes('endNav()'),
+  'car: bridge stopNavigation ends the route/voice/driving state via endNav()');
+const wf = fs.readFileSync(path.join(REPO, '.github/workflows/android.yml'), 'utf8');
+ok(wf.includes('assembleDebug') && wf.includes('upload-artifact'),
+  'android: CI workflow builds the debug APK and uploads it');
 const spotKt = fs.readFileSync(path.join(AND, 'app/src/main/java/com/waystation/auto/SpotifyAuthManager.kt'), 'utf8');
 ok(spotKt.includes('accounts.spotify.com/authorize') && spotKt.includes('code_challenge'),
   'android: native Spotify PKCE flow (Custom Tab)');

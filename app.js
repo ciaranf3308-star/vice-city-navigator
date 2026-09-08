@@ -1267,6 +1267,16 @@ function installCarBridge() {
     isSpotifyConnected: function () {
       return !!(window.SpotifyCore && SpotifyCore.isConnected && SpotifyCore.isConnected());
     },
+    // Host stop-navigation (Android Auto): end the route, the voice and the
+    // driving state exactly like the in-app stop. Navigation state stays
+    // in JS — the native side only forwards the request.
+    stopNavigation: function () {
+      try {
+        if (typeof navActive !== 'undefined' && navActive &&
+            typeof endNav === 'function') endNav();
+        return true;
+      } catch (e) { return false; }
+    },
     getState: function () {
       let theme = null, nav = false;
       try { theme = (typeof wsThemeId === 'function') ? wsThemeId() : null; } catch (e) {}
