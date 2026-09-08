@@ -222,6 +222,13 @@ async function initMap() {
     container: mapEl, style, center: DUBLIN, zoom: 12,
     attributionControl: { compact: true }
   });
+  // TEMP-DIAG: surface map errors visibly (no console access in test env)
+  try {
+    map.on('error', function(e) {
+      var m = (e && e.error && e.error.message) || (e && e.message) || 'map error';
+      try { toast('MAP: ' + m); } catch (_) {}
+    });
+  } catch (_) {}
   map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
   map.on('load', () => {
     try { map.on('move', syncDashCompass); } catch (e) {}
