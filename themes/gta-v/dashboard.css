@@ -120,6 +120,10 @@ body.dashboard-mode.theme-gta-v .dash-tabs button{
 }
 body.dashboard-mode.theme-gta-v .dash-tabs button:first-child{border-left:none}
 body.dashboard-mode.theme-gta-v .dash-tabs button svg{display:none}
+body.dashboard-mode.theme-gta-v .dash-tabs button[data-dtab="vehicle"] svg{
+  display:block;width:32px;height:32px;color:#9aa3a8;
+}
+body.dashboard-mode.theme-gta-v .dash-tabs button[data-dtab="vehicle"].on svg{color:#7CFF6B}
 body.dashboard-mode.theme-gta-v .dash-tabs button::before{
   content:'';width:34px;height:34px;flex:none;
   background:50% 50%/contain no-repeat;
@@ -170,9 +174,10 @@ body.dashboard-mode.theme-gta-v #dash-dest::after{
 body.dashboard-mode.theme-gta-v .dash-zoom{display:none !important}
 /* Right: compass + trip info */
 body.dashboard-mode.theme-gta-v .dash-trip{
-  display:flex;align-items:center;gap:12px;padding:0 20px 0 10px;margin-left:auto;
-  flex:none;max-width:28%;
-  overflow:hidden;
+  display:flex;align-items:center;gap:12px;padding:0 24px 0 10px;margin-left:auto;
+  flex:none;
+  overflow:visible;
+  white-space:nowrap;
 }
 body.dashboard-mode.theme-gta-v #dash-compass{
   font-size:0;width:44px;height:44px;flex:none;
@@ -189,7 +194,7 @@ body.dashboard-mode.theme-gta-v .dash-tag{display:none !important}
 
 /* ============ RIGHT MUSIC PANEL (.gvsp) ============ */
 body.dashboard-mode.theme-gta-v .gvsp{
-  left:auto;right:20px;top:132px;bottom:140px;width:440px;
+  left:auto;right:20px;top:132px;bottom:150px;width:440px;
   transform:none;translate:none;z-index:25;overflow:hidden;
   background:url('dashboard/widget-bg.png') 50% 50%/cover no-repeat, #0a0c0e;
   border:1px solid rgba(255,255,255,.09);border-radius:3px;
