@@ -197,6 +197,25 @@ body.dashboard-mode.theme-san-andreas #map-tools{display:none}
 body.dashboard-mode.theme-san-andreas.nav-driving #drive-bar{bottom:calc(92px + env(safe-area-inset-bottom))}
 body.dashboard-mode.theme-san-andreas #menu-panel{top:90px;bottom:106px}
 
+/* ============ SA drive trip bar: console hardware, never VC neon ============ */
+body.dashboard-mode.theme-san-andreas #drive-bar{
+  background:rgba(14,16,10,.96);
+  border:1px solid rgba(216,169,78,.55);
+  box-shadow:0 8px 22px rgba(0,0,0,.55), inset 0 1px 0 rgba(240,230,200,.08);
+  backdrop-filter:none;-webkit-backdrop-filter:none;
+}
+body.dashboard-mode.theme-san-andreas #trip-meta{
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;
+  color:#f0e6c8;letter-spacing:2px;
+}
+body.dashboard-mode.theme-san-andreas #drive-bar .ctl{
+  background:rgba(10,8,6,.7);color:#d9c9a8;
+  border:1px solid rgba(216,169,78,.45);
+  box-shadow:inset 0 1px 0 rgba(240,230,200,.08);
+}
+body.dashboard-mode.theme-san-andreas #drive-bar .ctl.on{background:rgba(216,169,78,.25)}
+body.dashboard-mode.theme-san-andreas #follow-btn:not(.on){animation:none}
+
 
 /* ---------- WayStation per-theme chrome tints ---------- */
 /* The map itself is fully re-skinned per theme via its own style.json;
