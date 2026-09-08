@@ -92,8 +92,8 @@ body.dashboard-mode.theme-san-andreas .dash-tabs button{
 }
 body.dashboard-mode.theme-san-andreas .dash-tabs button:nth-child(1){left:32px}
 body.dashboard-mode.theme-san-andreas .dash-tabs button:nth-child(2){left:217px}
-body.dashboard-mode.theme-san-andreas .dash-tabs button:nth-child(3){left:407px}
-body.dashboard-mode.theme-san-andreas .dash-tabs button:nth-child(4){left:557px}
+body.dashboard-mode.theme-san-andreas .dash-tabs button:nth-child(3){left:395px}
+body.dashboard-mode.theme-san-andreas .dash-tabs button:nth-child(4){left:555px}
 body.dashboard-mode.theme-san-andreas .dash-tabs button svg{
   width:30px;height:30px;
 }
@@ -107,9 +107,9 @@ body.dashboard-mode.theme-san-andreas .dash-tabs button.on svg{
 }
 /* generic web-map zoom/locate cluster: REMOVED, not recolored */
 body.dashboard-mode.theme-san-andreas .dash-zoom{display:none}
-/* locality: plain cream text in the art's star plate (x775-1146, y62-109) */
+/* locality: plain cream text in the art's star plate (x770-1135, y62-109) */
 body.dashboard-mode.theme-san-andreas .dash-dest{
-  position:absolute;left:775px;top:62px;width:371px;height:47px;
+  position:absolute;left:770px;top:62px;width:365px;height:47px;
   display:flex;align-items:center;justify-content:center;
   min-width:0;margin:0;padding:0;pointer-events:auto;
 }
