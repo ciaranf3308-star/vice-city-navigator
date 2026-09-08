@@ -392,8 +392,10 @@
     }
   }
   function ensureLayers() {
-    if (map.getSource('vcn-pois')) return;
-    map.addSource('vcn-pois', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+    if (!map.getSource('vcn-pois')) {
+      map.addSource('vcn-pois', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+    }
+    if (map.getLayer(POI_LAYER_ID)) return;
     map.addLayer({
       id: POI_LAYER_ID, type: 'symbol', source: 'vcn-pois',
       layout: {
