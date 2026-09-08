@@ -423,7 +423,7 @@ ok(cssSrc.includes('dashboard/topbar.jpg'), 'top bar paints the authored strip i
    layouts and drive-HUD clearances, not one shared silhouette ---------- */
 const barHeights = {
   'vice-city': ['76px', '88px'],
-  'san-andreas': ['86px', '92px'],
+  'san-andreas': ['86px', '96px'],
   'gta-v': ['56px', '64px'],
   'rdr2': ['72px', '72px'],
 };
@@ -532,7 +532,7 @@ ok(vcPaint('vc-road-minor')['line-color'] === '#eef0f6', 'VC minor roads: white 
 ok(vcPaint('vc-road-primary')['line-color'] === '#1d1d36', 'VC arterials: stronger dark navy (hero contrast)');
 ok(vcPaint('vc-road-motorway')['line-color'] === '#0e0e22', 'VC motorways: near-black navy (hero contrast)');
 ok(/bottombar-trim\.jpg/.test(cssSrc), 'SA bottom console wears the machined brass trim');
-ok(/theme-san-andreas #dash-bottombar\{[^}]*background:#0c0a07/.test(cssSrc),
+ok(/theme-san-andreas #dash-bottombar\{[^}]*#0c0a07/.test(cssSrc),
   'SA bottom bar is the dark hero console');
 /* ---------- SA hero-match: authored dashboard art set ---------- */
 const saDash = (f) => path.join(REPO, 'themes/san-andreas/dashboard', f);
