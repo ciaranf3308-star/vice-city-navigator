@@ -544,6 +544,12 @@ ok(appSrc.includes("'sa-grove-panel'") && /DASH_STAGE_NODES = \[[^\]]*'sa-grove-
 ok(cssSrc.includes("themes/san-andreas/dashboard/maneuver.png"), 'SA maneuver card uses the authored empty frame');
 ok(cssSrc.includes("themes/san-andreas/dashboard/grove-panel.png"), 'SA dashboard mounts the Grove Street scene panel art');
 ok(cssSrc.includes("themes/san-andreas/dashboard/script-music.png"), 'SA tagline is the gold script art');
+ok(/theme-san-andreas \.dash-tabs button\{[^}]*border:1px solid/.test(cssSrc),
+  'SA tabs are individual boxed buttons, not floating glyphs');
+ok(/theme-san-andreas \.sasp\{[^}]*width:300px/.test(cssSrc),
+  'SA Spotify widget is shrunken (300px) to stack under the Grove Street panel');
+ok(/theme-san-andreas #sa-grove-panel\{[^}]*width:300px/.test(cssSrc),
+  'SA Grove Street panel matches the shrunken music column width');
 for (const dtab of ['map', 'radio', 'phone', 'vehicle', 'settings']) {
   ok(cssSrc.includes(`.dash-tabs button[data-dtab="${dtab}"]::before`),
     `SA tab icon for ${dtab} is an authored SVG glyph`);

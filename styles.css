@@ -596,16 +596,17 @@ body.dashboard-mode.theme-san-andreas #dash-bottombar .dash-chrome{
 body.dashboard-mode.theme-san-andreas .dash-tabs{
   position:absolute;left:4.6%;top:0;bottom:0;width:32.8%;
   display:flex;align-items:stretch;justify-content:space-evenly;
-  padding:16px 10px;gap:6px;background:#12100a;
+  padding:16px 12px;gap:8px;background:#12100a;
 }
 body.dashboard-mode.theme-san-andreas .dash-tabs button{
   flex:1;min-width:0;font-size:0;line-height:0;color:transparent;
-  background:none;border:0;cursor:pointer;opacity:1;padding:0;
-  text-shadow:none;position:relative;border-radius:12px;
+  background:rgba(242,232,201,.07);border:1px solid rgba(232,220,192,.3);
+  border-radius:10px;cursor:pointer;opacity:1;padding:0;
+  text-shadow:none;position:relative;
 }
 body.dashboard-mode.theme-san-andreas .dash-tabs button::before{
   content:"";position:absolute;inset:0;background-color:#e8dcc0;
-  -webkit-mask:no-repeat center/52px 52px;mask:no-repeat center/52px 52px;
+  -webkit-mask:no-repeat center/54px 54px;mask:no-repeat center/54px 54px;
 }
 body.dashboard-mode.theme-san-andreas .dash-tabs button[data-dtab="map"]::before{
   -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%223.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M7%2013%20L18%208%20L30%2013%20L41%208%20V35%20L30%2040%20L18%2035%20L7%2040%20Z%22%2F%3E%3Cpath%20d%3D%22M18%208%20V35%20M30%2013%20V40%22%2F%3E%3Ccircle%20cx%3D%2224%22%20cy%3D%2221%22%20r%3D%223.2%22%20fill%3D%22%23000%22%20stroke%3D%22none%22%2F%3E%3C%2Fsvg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%223.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M7%2013%20L18%208%20L30%2013%20L41%208%20V35%20L30%2040%20L18%2035%20L7%2040%20Z%22%2F%3E%3Cpath%20d%3D%22M18%208%20V35%20M30%2013%20V40%22%2F%3E%3Ccircle%20cx%3D%2224%22%20cy%3D%2221%22%20r%3D%223.2%22%20fill%3D%22%23000%22%20stroke%3D%22none%22%2F%3E%3C%2Fsvg%3E");
@@ -620,9 +621,9 @@ body.dashboard-mode.theme-san-andreas .dash-tabs button[data-dtab="vehicle"]::be
   -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%223.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M13%2031%20L17%2017%20H31%20L35%2031%22%2F%3E%3Crect%20x%3D%228%22%20y%3D%2229%22%20width%3D%2232%22%20height%3D%229%22%20rx%3D%223%22%2F%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2239%22%20r%3D%222.6%22%20fill%3D%22%23000%22%20stroke%3D%22none%22%2F%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2239%22%20r%3D%222.6%22%20fill%3D%22%23000%22%20stroke%3D%22none%22%2F%3E%3C%2Fsvg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%223.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M13%2031%20L17%2017%20H31%20L35%2031%22%2F%3E%3Crect%20x%3D%228%22%20y%3D%2229%22%20width%3D%2232%22%20height%3D%229%22%20rx%3D%223%22%2F%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2239%22%20r%3D%222.6%22%20fill%3D%22%23000%22%20stroke%3D%22none%22%2F%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2239%22%20r%3D%222.6%22%20fill%3D%22%23000%22%20stroke%3D%22none%22%2F%3E%3C%2Fsvg%3E");
 }
 body.dashboard-mode.theme-san-andreas .dash-tabs button[data-dtab="settings"]::before{
-  -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%223.6%22%20stroke-linecap%3D%22round%22%3E%3Ccircle%20cx%3D%2224%22%20cy%3D%2224%22%20r%3D%227.5%22%2F%3E%3Cpath%20d%3D%22M24%205%20v7%20M24%2036%20v7%20M5%2024%20h7%20M36%2024%20h7%20M10.5%2010.5%20l5%205%20M32.5%2032.5%20l5%205%20M37.5%2010.5%20l-5%205%20M15.5%2032.5%20l-5%205%22%2F%3E%3C%2Fsvg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%223.6%22%20stroke-linecap%3D%22round%22%3E%3Ccircle%20cx%3D%2224%22%20cy%3D%2224%22%20r%3D%227.5%22%2F%3E%3Cpath%20d%3D%22M24%205%20v7%20M24%2036%20v7%20M5%2024%20h7%20M36%2024%20h7%20M10.5%2010.5%20l5%205%20M32.5%2032.5%20l5%205%20M37.5%2010.5%20l-5%205%20M15.5%2032.5%20l-5%205%22%2F%3E%3C%2Fsvg%3E");
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-linecap%3D%22round%22%3E%3Ccircle%20cx%3D%2224%22%20cy%3D%2224%22%20r%3D%2210%22%20stroke-width%3D%223.6%22%2F%3E%3Cpath%20d%3D%22M34%2024h5%20M31.1%2031.1l3.5%203.5%20M24%2034v5%20M16.9%2031.1l-3.5%203.5%20M14%2024h-5%20M16.9%2016.9l-3.5-3.5%20M24%2014v-5%20M31.1%2016.9l3.5-3.5%22%20stroke-width%3D%226%22%2F%3E%3Ccircle%20cx%3D%2224%22%20cy%3D%2224%22%20r%3D%224%22%20stroke-width%3D%223.6%22%2F%3E%3C%2Fsvg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-linecap%3D%22round%22%3E%3Ccircle%20cx%3D%2224%22%20cy%3D%2224%22%20r%3D%2210%22%20stroke-width%3D%223.6%22%2F%3E%3Cpath%20d%3D%22M34%2024h5%20M31.1%2031.1l3.5%203.5%20M24%2034v5%20M16.9%2031.1l-3.5%203.5%20M14%2024h-5%20M16.9%2016.9l-3.5-3.5%20M24%2014v-5%20M31.1%2016.9l3.5-3.5%22%20stroke-width%3D%226%22%2F%3E%3Ccircle%20cx%3D%2224%22%20cy%3D%2224%22%20r%3D%224%22%20stroke-width%3D%223.6%22%2F%3E%3C%2Fsvg%3E");
 }
-body.dashboard-mode.theme-san-andreas .dash-tabs button.on{background:#f2e8c9;
+body.dashboard-mode.theme-san-andreas .dash-tabs button.on{background:#f2e8c9;border-color:#f2e8c9;
   box-shadow:0 3px 0 rgba(0,0,0,.5)}
 body.dashboard-mode.theme-san-andreas .dash-tabs button.on::before{background-color:#1d2a12}
 /* destination rides the art's dest plate */
@@ -631,8 +632,8 @@ body.dashboard-mode.theme-san-andreas .dash-dest{
   display:flex;align-items:center;justify-content:center;padding:0;min-width:0;
 }
 body.dashboard-mode.theme-san-andreas #dash-dest{
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:24px;font-weight:600;
-  letter-spacing:4px;color:#f2e8c9;background:none;border:0;clip-path:none;
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:20px;font-weight:600;
+  letter-spacing:2px;color:#f2e8c9;background:none;border:0;clip-path:none;
   box-shadow:none;text-shadow:0 2px 0 #000;white-space:nowrap;overflow:hidden;
   text-overflow:ellipsis;max-width:100%;padding:0;
 }
@@ -643,20 +644,20 @@ body.dashboard-mode.theme-san-andreas .dash-trip{
 body.dashboard-mode.theme-san-andreas #dash-compass{
   position:absolute;left:62.8%;top:0;bottom:0;width:6.3%;
   display:flex;align-items:center;justify-content:center;
-  font-size:46px;color:#e8dcc0;text-shadow:0 2px 0 #000;
+  font-size:54px;color:#e8dcc0;text-shadow:0 2px 0 #000;
 }
 body.dashboard-mode.theme-san-andreas .dash-north{display:none}
 body.dashboard-mode.theme-san-andreas #dash-eta{
   position:absolute;left:76.7%;top:0;bottom:0;width:18.6%;
   display:flex;align-items:center;justify-content:center;
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:26px;font-weight:600;
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:30px;font-weight:600;
   letter-spacing:2px;color:#7ec850;text-shadow:0 2px 0 #000;
   white-space:nowrap;overflow:hidden;
 }
 body.dashboard-mode.theme-san-andreas .dash-zoom{display:none}
 /* gold script tagline at the bar's right end */
 body.dashboard-mode.theme-san-andreas .dash-tag{
-  position:absolute;right:0.3%;top:0;bottom:0;width:4.4%;
+  position:absolute;right:0.3%;top:0;bottom:0;width:5%;
   font-size:0;line-height:0;color:transparent;text-shadow:none;transform:none;
   display:block;padding:0;white-space:normal;
   background:url('themes/san-andreas/dashboard/script-music.png') 50% 50%/contain no-repeat;
@@ -690,11 +691,11 @@ body.dashboard-mode.theme-san-andreas #next-stats{
 #sa-grove-panel{display:none}
 body.dashboard-mode.theme-san-andreas #sa-grove-panel{
   display:block;position:absolute;z-index:24;pointer-events:none;
-  right:70px;top:192px;width:420px;aspect-ratio:955/285;
+  right:70px;top:192px;width:300px;aspect-ratio:955/285;
   background:url('themes/san-andreas/dashboard/grove-panel.png') 50% 50%/100% 100% no-repeat;
 }
 body.dashboard-mode.theme-san-andreas .sasp{
-  width:420px;right:70px;top:auto;bottom:152px;translate:none;transform:none;
+  width:300px;right:70px;top:289px;bottom:auto;translate:none;transform:none;
 }
 /* ---------- bar-height clearances ---------- */
 body.dashboard-mode.theme-san-andreas #search-bar{top:calc(182px + env(safe-area-inset-top))}
