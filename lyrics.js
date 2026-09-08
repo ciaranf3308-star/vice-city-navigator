@@ -167,29 +167,140 @@
 
   /* ---------------- lyric fetching ---------------- */
 
+  var LRCLIB_SEARCH = 'https://lrclib.net/api/search';
+  var NEG_TTL_MS = 5 * 60 * 1000; // negative results retry after 5 min
+
+  // Normalize a Spotify title for lyric LOOKUP only — never shown to user.
+  // Strips version noise: remasters, radio edits, deluxe markers, year suffixes.
+  function normalizeTitle(t) {
+    if (!t) return '';
+    var s = String(t);
+    // Remove parenthetical/bracketed version noise
+    s = s.replace(/\s*[\(\[][^\)\]]*(remaster|remastered|radio edit|deluxe|anniversary|explicit|clean|single version|album version|extended|acoustic|live|demo)[^\)\]]*[\)\]]/gi, '');
+    // Remove dash-separated version noise: " - Remastered 2011"
+    s = s.replace(/\s*-\s*(remastered|remaster|radio edit|deluxe|anniversary).*/gi, '');
+    // Remove trailing year in parens: " (2011)"
+    s = s.replace(/\s*\(\d{4}\)\s*$/g, '');
+    // Remove " - 2011 Remaster" style suffixes
+    s = s.replace(/\s*\d{4}\s*(remaster|remastered).*$/gi, '');
+    return s.trim().replace(/\s+/g, ' ');
+  }
+
+  function normStr(s) {
+    return String(s || '').toLowerCase().replace(/[’‘]/g, "'").replace(/[^a-z0-9' ]/g, '').replace(/\s+/g, ' ').trim();
+  }
+
+  // Pick the best LRCLIB search candidate by title/artist match + duration.
+  function pickCandidate(results, title, artist, album, durationMs) {
+    if (!results || !results.length) return null;
+    var nTitle = normStr(title), nArtist = normStr(artist), nAlbum = normStr(album);
+    var durSec = durationMs ? Math.round(durationMs / 1000) : 0;
+    var best = null, bestScore = -1;
+    for (var i = 0; i < results.length; i++) {
+      var r = results[i];
+      var score = 0;
+      if (normStr(r.trackName || r.name) === nTitle) score += 10;
+      else if (normStr(r.trackName || r.name).indexOf(nTitle) === 0 || nTitle.indexOf(normStr(r.trackName || r.name)) === 0) score += 5;
+      if (normStr(r.artistName) === nArtist) score += 10;
+      else if (normStr(r.artistName).indexOf(nArtist) === 0 || nArtist.indexOf(normStr(r.artistName)) === 0) score += 4;
+      if (nAlbum && normStr(r.albumName) === nAlbum) score += 3;
+      if (durSec && r.duration) {
+        var d = Math.abs(r.duration - durSec);
+        if (d <= 2) score += 5;
+        else if (d <= 5) score += 2;
+      }
+      // Must have usable lyrics to be a candidate
+      var c = classifyPayload(r);
+      if (c.mode === 'none') continue;
+      if (score > bestScore) { bestScore = score; best = r; }
+    }
+    // Require a minimum match quality — don't accept garbage
+    return (best && bestScore >= 10) ? best : null;
+  }
+
+  async function searchFallback(artists, title, album, durationMs, trackId) {
+    var nTitle = normalizeTitle(title);
+    var q = 'artist_name=' + encodeURIComponent(artists) +
+      '&track_name=' + encodeURIComponent(nTitle || title);
+    if (window.__WS_SPOTIFY_DIAG) console.log('[spotify-diag] lyric search fallback', { trackId, q });
+    var res;
+    try {
+      res = await fetch(LRCLIB_SEARCH + '?' + q);
+    } catch (e) {
+      return { mode: 'none', lines: [], plain: [], _transient: true };
+    }
+    if (!res.ok) {
+      return { mode: 'none', lines: [], plain: [], _transient: res.status >= 500 };
+    }
+    var arr;
+    try { arr = await res.json(); } catch (e) {
+      return { mode: 'none', lines: [], plain: [], _transient: true };
+    }
+    var best = pickCandidate(arr, nTitle || title, artists.split(',')[0], album, durationMs);
+    if (window.__WS_SPOTIFY_DIAG) console.log('[spotify-diag] lyric search result', {
+      trackId, candidates: arr.length, picked: best ? best.trackName + ' / ' + best.artistName : null });
+    if (!best) return { mode: 'none', lines: [], plain: [] };
+    return classifyPayload(best);
+  }
+
   function fetchLyrics(item) {
     var id = item.id;
-    if (cache.has(id)) return cache.get(id);
+    var cached = cache.get(id);
+    // Negative entries expire after NEG_TTL_MS; successes are permanent
+    if (cached) {
+      if (cached.expires && Date.now() > cached.expires) cache.delete(id);
+      else return cached.promise;
+    }
     var p = (async function () {
       var artists = (item.artists || []).map(function (a) { return a.name; })
         .filter(Boolean).join(', ');
       if (!item.name || !artists) return { mode: 'none', lines: [], plain: [] };
+      var album = (item.album && item.album.name) || '';
       var q = 'artist_name=' + encodeURIComponent(artists) +
         '&track_name=' + encodeURIComponent(item.name) +
-        (item.album && item.album.name ? '&album_name=' + encodeURIComponent(item.album.name) : '') +
+        (album ? '&album_name=' + encodeURIComponent(album) : '') +
         (item.duration_ms ? '&duration=' + Math.round(item.duration_ms / 1000) : '');
+      if (window.__WS_SPOTIFY_DIAG) console.log('[spotify-diag] lyric exact query', { trackId: id, q: decodeURIComponent(q) });
       var res;
       try {
         res = await fetch(LRCLIB + '?' + q);
       } catch (e) {
-        return { mode: 'none', lines: [], plain: [] };
+        // Network error: transient — do NOT cache permanently
+        if (window.__WS_SPOTIFY_DIAG) console.log('[spotify-diag] lyric fetch network error', { trackId: id });
+        return { mode: 'none', lines: [], plain: [], _transient: true };
       }
-      if (!res.ok) return { mode: 'none', lines: [], plain: [] };
+      if (res.status === 404) {
+        // Exact miss: try search fallback with normalized title
+        var fb = await searchFallback(artists, item.name, album, item.duration_ms, id);
+        if (window.__WS_SPOTIFY_DIAG) console.log('[spotify-diag] lyric result mode', { trackId: id, mode: fb.mode, via: 'fallback' });
+        return fb;
+      }
+      if (!res.ok) {
+        // 5xx: transient — allow retry
+        var transient = res.status >= 500;
+        if (window.__WS_SPOTIFY_DIAG) console.log('[spotify-diag] lyric fetch HTTP ' + res.status, { trackId: id });
+        return { mode: 'none', lines: [], plain: [], _transient: transient };
+      }
       var j;
-      try { j = await res.json(); } catch (e) { return { mode: 'none', lines: [], plain: [] }; }
-      return classifyPayload(j);
+      try { j = await res.json(); } catch (e) {
+        return { mode: 'none', lines: [], plain: [], _transient: true };
+      }
+      var out = classifyPayload(j);
+      if (window.__WS_SPOTIFY_DIAG) console.log('[spotify-diag] lyric result mode', { trackId: id, mode: out.mode, via: 'exact' });
+      return out;
     })();
-    cache.set(id, p);
+    // Cache policy: successes permanent; transient failures not cached at all;
+    // hard negatives cached with short TTL.
+    var entry = { promise: p, expires: 0 };
+    cache.set(id, entry);
+    p.then(function (data) {
+      if (data && data._transient) {
+        cache.delete(id); // network/5xx/parse: retry next time
+      } else if (data && data.mode === 'none') {
+        entry.expires = Date.now() + NEG_TTL_MS; // negative: short TTL
+      }
+      // karaoke/ambient/instrumental: permanent (expires = 0)
+    }).catch(function () { cache.delete(id); });
     if (cache.size > CACHE_MAX) {
       var oldest = cache.keys().next().value;
       cache.delete(oldest);
@@ -371,7 +482,10 @@
       setStateView(st, 'loading');
       var token = ++st.fetchToken;
       fetchLyrics(item).then(function (data) {
-        if (!stages.get(stageEl) || st.fetchToken !== token || st.trackId !== item.id) return;
+        if (!stages.get(stageEl) || st.fetchToken !== token || st.trackId !== item.id) {
+          if (window.__WS_SPOTIFY_DIAG) console.log('[spotify-diag] lyric DISCARDED (stale)', { trackId: item.id, curTrack: st.trackId });
+          return;
+        }
         st.data = data;
         if (data.mode === 'karaoke') {
           st.dom.root.classList.remove('is-idle');

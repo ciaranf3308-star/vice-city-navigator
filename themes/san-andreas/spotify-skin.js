@@ -47,6 +47,8 @@
     let offs = [];
     let tickTimer = null;
     let currentArtUrl = '';
+    let artGen = 0;          // bumped on every track change
+    let artTrackId = null;   // Spotify item.id the art belongs to
     let statusTimer = null;
     let lyricsRenderer = null;
 
@@ -123,14 +125,14 @@
         title.textContent = 'Radio Los Santos';
         artist.textContent = 'Connect Spotify to play';
         artist.classList.remove('sasp-status');
-        setArt('');
+        setArt('', null);
         renderLyrics(null);
         return;
       }
       if (!s || !s.item) {
         title.textContent = 'Nothing playing';
         artist.textContent = 'Press play in Spotify';
-        setArt('');
+        setArt('', null);
         toggle.innerHTML = SVG.play;
         q('.sasp-duration').textContent = '0:00';
         updateProgress(0, 0);
@@ -146,7 +148,14 @@
       artist.dataset.real = artist.textContent;
       artist.classList.remove('sasp-status');
       const imgs = item.album && item.album.images;
-      setArt(imgs && imgs.length ? (imgs[1] || imgs[0]).url : '');
+      /* Atomic per track: capture item.id — title, artist, art, duration
+         and lyric request all belong to this ID. */
+      const renderTrackId = item.id;
+      if (window.__WS_SPOTIFY_DIAG) console.log('[spotify-diag] render', {
+        trackId: renderTrackId, title: item.name,
+        artist: (item.artists || []).map(a => a.name).join(', '),
+        art: imgs && imgs.length ? (imgs[1] || imgs[0]).url : '' });
+      setArt(imgs && imgs.length ? (imgs[1] || imgs[0]).url : '', renderTrackId);
       toggle.innerHTML = s.is_playing ? SVG.pause : SVG.play;
       q('.sasp-duration').textContent = fmt(item.duration_ms);
       if (s.device && s.device.name) title.title = 'On ' + s.device.name;
@@ -173,10 +182,28 @@
     }
 
     /* ---------- album art crossfade ---------- */
-    function setArt(url) {
-      if (url === currentArtUrl) return;
+    function setArt(url, trackId) {
+      /* Generation-safe: a stale onload can never reveal old artwork.
+         The load only becomes visible if, at completion time, the track,
+         URL and generation all still match the current render. */
+      if (!trackId) {
+        artGen++;
+        artTrackId = null;
+        currentArtUrl = '';
+        const a = q('.sasp-art.a'), b = q('.sasp-art.b');
+        a.classList.remove('on'); b.classList.remove('on');
+        a.onload = null; b.onload = null;
+        a.removeAttribute('src'); b.removeAttribute('src');
+        return;
+      }
+      if (url === currentArtUrl && trackId === artTrackId) return;
+      artGen++;
+      const myGen = artGen;
+      artTrackId = trackId;
       currentArtUrl = url;
       const a = q('.sasp-art.a'), b = q('.sasp-art.b');
+      // Cancel stale handlers so an old load can't toggle visibility.
+      a.onload = null; b.onload = null;
       const show = a.classList.contains('on') ? b : a;
       const hide = show === a ? b : a;
       if (!url) {
@@ -184,7 +211,13 @@
         a.removeAttribute('src'); b.removeAttribute('src');
         return;
       }
+      if (window.__WS_SPOTIFY_DIAG) console.log('[spotify-diag] art request', { trackId, url, gen: myGen });
       show.onload = () => {
+        if (trackId !== artTrackId || url !== currentArtUrl || myGen !== artGen) {
+          if (window.__WS_SPOTIFY_DIAG) console.log('[spotify-diag] art DISCARDED (stale)', { trackId, url, gen: myGen, curTrack: artTrackId, curGen: artGen });
+          return; // stale: never toggle .on
+        }
+        if (window.__WS_SPOTIFY_DIAG) console.log('[spotify-diag] art shown', { trackId, gen: myGen });
         show.classList.add('on');
         hide.classList.remove('on');
       };
