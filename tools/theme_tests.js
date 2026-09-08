@@ -326,7 +326,7 @@ ok(!fs.existsSync(path.join(REPO, 'themes/gta-v/spotify/header.png')), 'GV chopp
 ok(gvSkinJs.includes("register('gta-v'"), 'GV skin registers as gta-v');
 ok(gvSkinJs.includes('data-lyrics-stage'), 'GV lyric stage hook present');
 ok(gvSkinJs.includes('setLyricsRenderer') && gvSkinJs.includes('clearLyrics'), 'GV lyric renderer hooks present');
-ok(/\.gvsp-art\s*\{[^}]*left:\s*6\.49%[^}]*top:\s*35\.61%[^}]*width:\s*26\.84%[^}]*height:\s*22\.76%/.test(gvSkinCss),
+ok(/\.gvsp-art\s*\{[^}]*left:\s*3\.03%[^}]*top:\s*29\.00%[^}]*width:\s*30\.30%[^}]*height:\s*27\.17%/.test(gvSkinCss),
   'GV art rect matches the hud frame opening');
 ok(gvSkinJs.includes('hud.png'), 'GV skin overlays the single hud art');
 const gvSkinJsCode = stripComments(gvSkinJs), gvSkinCssCode = stripComments(gvSkinCss);
@@ -895,7 +895,7 @@ ok(vcRoad !== vcPlace, 'VC: road labels a different tone from place labels');
    (san-andreas pass 4 left the hud.png regime for the Radio Los Santos
    bezel; its assertions live in the pass 4 block) */
 const HUD_EXPECTED = {
-  'gta-v':       { w: 1155, h: 1362, art: ['6.49%', '35.61%', '26.84%', '22.76%'], over: true },
+  'gta-v':       { w: 1155, h: 1362, art: ['3.03%', '29.00%', '30.30%', '27.17%'], over: true },
   'rdr2':        { w: 1254, h: 1254, art: ['15.55%', '27.91%', '29.11%', '28.71%'], over: false },
 };
 for (const [theme, exp] of Object.entries(HUD_EXPECTED)) {
