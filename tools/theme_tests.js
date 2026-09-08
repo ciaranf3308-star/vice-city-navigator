@@ -640,6 +640,8 @@ ok(/theme-san-andreas #dash-dest\{[^}]*max-width:76%/.test(cssSrc), 'SA locality
 const skinSaSrc = fs.readFileSync(path.join(REPO, 'themes/san-andreas/spotify-skin.css'), 'utf8');
 ok(/theme-san-andreas #drive-bar\{[^}]*backdrop-filter:none/.test(cssSrc),
   'SA drive trip bar is solid console hardware, never VC neon glass');
+ok(/theme-san-andreas #drive-bar #follow-btn\{display:none\}/.test(cssSrc),
+  'SA drive bar drops the recenter button — the footer owns it');
 ok(skinSaSrc.includes("font-family: 'Bank Gothic', 'Arial Narrow', sans-serif;"),
   'SA song title uses Bank Gothic, never blackletter');
 ok(/theme-san-andreas \.sasp\{[^}]*transform:none/.test(cssSrc),

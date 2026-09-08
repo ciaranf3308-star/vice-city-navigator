@@ -215,6 +215,9 @@ body.dashboard-mode.theme-san-andreas #drive-bar .ctl{
 }
 body.dashboard-mode.theme-san-andreas #drive-bar .ctl.on{background:rgba(216,169,78,.25)}
 body.dashboard-mode.theme-san-andreas #follow-btn:not(.on){animation:none}
+/* The footer already owns recenter/zoom — the floating bar keeps only
+   what the footer doesn't have: trip readout, search, voice, end-nav. */
+body.dashboard-mode.theme-san-andreas #drive-bar #follow-btn{display:none}
 
 
 /* ---------- WayStation per-theme chrome tints ---------- */
