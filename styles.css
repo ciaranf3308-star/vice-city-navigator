@@ -725,7 +725,13 @@ body.dashboard-mode.theme-rdr2 .dash-tag{display:none}
    at arm's length. In dashboard mode the panel becomes a left-docked
    settings console: big type, big touch targets, docked clear of that
    theme's dash bars. All controls and wiring are unchanged — the existing
-   per-theme menu skins (pink / gold / green / brass) carry over. */
+   per-theme menu skins (pink / gold / green / brass) carry over.
+   Geometry note: #menu-panel stays at BODY level (never reparented into
+   #dash-stage) so it doesn't shrink with the stage zoom. layoutDashMenu()
+   in app.js positions it against the LIVE stage rect in real CSS pixels
+   (the stage is letterboxed/zoomed on anything but a 1920×720 display,
+   so fixed stage-coordinate offsets would land on the dash bars). The
+   top/bottom/left/width below are fallback only — inline styles win. */
 body.dashboard-mode #menu-panel{
   z-index:60;
   top:88px;bottom:100px;left:12px;

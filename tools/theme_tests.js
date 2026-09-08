@@ -146,7 +146,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v46"), 'SW shell cache v44');
+ok(swSrc.includes("ws-shell-v47"), 'SW shell cache v44');
 ok(swSrc.includes("ws-theme-v13"), 'SW theme cache v13');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
@@ -408,6 +408,25 @@ ok(/body\.dashboard-mode \.menu-section input\[type="checkbox"\]\{[^}]*width:36p
   'dashboard settings checkboxes are car-size touch targets');
 ok(/body\.dashboard-mode \.vc-title\{[^}]*font-size:52px/.test(cssSrc),
   'dashboard settings title is car-legible');
+/* The menu panel stays at body level (never shrinks with the stage zoom),
+   so layoutDashMenu() docks it against the LIVE stage rect in real pixels
+   — fixed stage-coordinate offsets would land on the dash bars whenever
+   the stage is letterboxed or zoomed below 1. */
+ok(!/DASH_STAGE_NODES = \[[^\]]*'menu-panel'/.test(appSrc),
+  'menu panel is not reparented into the scaled dash stage');
+for (const [id, top, bottom] of [['vice-city', 76, 88], ['san-andreas', 72, 84], ['gta-v', 56, 64], ['rdr2', 72, 72]]) {
+  ok(new RegExp(`'${id}':\\s*\\{\\s*top:\\s*${top},\\s*bottom:\\s*${bottom}\\s*\\}`).test(appSrc),
+    `DASH_BAR_HEIGHTS: ${id} bars ${top}/${bottom}px (stage coordinates)`);
+}
+ok(/function layoutDashMenu\(\)/.test(appSrc) && appSrc.includes('getBoundingClientRect()'),
+  'layoutDashMenu docks the panel to the live stage rect');
+ok(appSrc.includes('r.width / DASH_W'), 'layoutDashMenu scales bar clearance by the live stage zoom');
+ok(appSrc.includes('layoutDashMenu(); // re-dock the body-level menu panel to the new stage rect'),
+  'stage refit re-docks the menu panel');
+ok(appSrc.includes('layoutDashMenu(); // bar heights changed with the theme'),
+  'theme switch re-docks the menu panel');
+ok(appSrc.includes('layoutDashMenu(); // dock (or undock) the body-level menu panel'),
+  'app-mode switch docks/undocks the menu panel');
 
 /* ---------- bespoke dashboard bar assets (authentic game-UI textures) ---------- */
 const dashAssets = [

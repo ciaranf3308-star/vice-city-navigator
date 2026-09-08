@@ -320,6 +320,7 @@ function applyBodyTheme(id) {
   }
   const cur = VCNThemes.get(id);
   if (cur && cur.ui && cur.ui.bodyClass) document.body.classList.add(cur.ui.bodyClass);
+  layoutDashMenu(); // bar heights changed with the theme — re-dock the menu panel
 }
 async function fetchThemeStyle(theme) {
   const res = await fetch(theme.map.styleUrl, { cache: 'no-cache' });
@@ -1042,6 +1043,47 @@ function dashboardLayoutActive() {
    and toasts stay at body level so they remain usable at any scale. */
 const DASH_W = 1920, DASH_H = 720;
 const DASH_STAGE_NODES = ['map', 'fx', 'explore-ui', 'drive-hud', 'spotify-pane', 'dash-topbar', 'dash-bottombar'];
+/* NOTE: #menu-panel is deliberately NOT reparented into the stage — it
+   stays at body level so it never shrinks with the stage zoom. */
+
+/* Dashboard bar heights in 1920×720 stage coordinates, per theme. The
+   body-level menu panel must dock clear of the bars in REAL pixels, so
+   layoutDashMenu() scales these by the live stage zoom. */
+const DASH_BAR_HEIGHTS = {
+  'vice-city':   { top: 76, bottom: 88 },
+  'san-andreas': { top: 72, bottom: 84 },
+  'gta-v':       { top: 56, bottom: 64 },
+  'rdr2':        { top: 72, bottom: 72 },
+};
+
+/* Dock the body-level menu panel against the LIVE dashboard stage rect.
+   Fixed stage-coordinate CSS can't place this panel: on any window where
+   the stage is letterboxed or zoomed below 1, stage-coordinate offsets
+   land on top of the dash bars / off the visible canvas. This positions
+   the panel inside the visible stage, clear of the current theme's real
+   bar heights, in real CSS pixels. Runs on stage fit, theme commit and
+   mode switch; clears its inline geometry outside dashboard mode. */
+function layoutDashMenu() {
+  const panel = $('menu-panel');
+  if (!panel) return;
+  if (!dashboardLayoutActive()) {
+    panel.style.left = ''; panel.style.top = '';
+    panel.style.bottom = ''; panel.style.width = '';
+    return;
+  }
+  const stage = $('dash-stage');
+  let r = null;
+  try { r = stage && stage.getBoundingClientRect(); } catch (e) {}
+  if (!r || !r.width) return; // stage not built yet; CSS fallback applies
+  const s = r.width / DASH_W; // live stage zoom (zoom or transform scale)
+  const bars = DASH_BAR_HEIGHTS[wsThemeId()] || DASH_BAR_HEIGHTS['vice-city'];
+  const pad = 12;
+  panel.style.left = Math.max(0, r.left + pad) + 'px';
+  panel.style.top = (r.top + (bars.top + pad) * s) + 'px';
+  panel.style.width = Math.max(300, Math.min(540, r.width - pad * 2)) + 'px';
+  const bottomClear = (bars.bottom + pad) * s;
+  panel.style.bottom = Math.max(0, window.innerHeight - (r.bottom - bottomClear)) + 'px';
+}
 
 function buildDashboardStage() {
   let stage = $('dash-stage');
@@ -1087,6 +1129,7 @@ function fitDashboardStage() {
   }
   stage.style.left = ((vw - DASH_W * s) / 2) + 'px';
   stage.style.top = ((vh - DASH_H * s) / 2) + 'px';
+  layoutDashMenu(); // re-dock the body-level menu panel to the new stage rect
 }
 
 /* The Vice City widget floats over the right of the map, so the camera's
@@ -1112,6 +1155,7 @@ function applyAppMode() {
   document.body.classList.toggle('dashboard-mode', on);
   if (on) { buildDashboardStage(); fitDashboardStage(); }
   else teardownDashboardStage();
+  layoutDashMenu(); // dock (or undock) the body-level menu panel
   const pane = $('spotify-pane');
   if (pane) pane.hidden = !on;
   if (on) mountSpotifySkin(wsThemeId());
