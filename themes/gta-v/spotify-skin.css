@@ -7,10 +7,10 @@
    the DOM placement. The map shows through transparent pixels.
 
    Measured openings (fractions of the hud):
-   - album frame   : x 0.0649-0.3333, y 0.3561-0.5837
+   - album frame   : x 0.0303-0.3333, y 0.2900-0.5617
                      (the interior is OPAQUE black: live art
                      layers OVER the hud here)
-   - dark panel    : right of the frame (title / artist /
+   - dark panel    : x 0.346-0.952, y 0.294-0.558 (title / artist /
                      progress / lyrics)
    - transport     : over the sunset panel, bottom center
 
@@ -40,7 +40,7 @@
 /* ---------- album art: OVER the hud's opaque black interior ---------- */
 .gvsp-art {
   position: absolute; z-index: 2;
-  left: 6.49%; top: 35.61%; width: 26.84%; height: 22.76%;
+  left: 3.03%; top: 29.00%; width: 30.30%; height: 27.17%;
   object-fit: cover;
   opacity: 0; transition: opacity .45s ease;
   background: #05070a;
@@ -48,7 +48,7 @@
 .gvsp-art.on { opacity: 1; }
 .gvsp-art-idle {
   position: absolute; z-index: 2;
-  left: 6.49%; top: 35.61%; width: 26.84%; height: 22.76%;
+  left: 3.03%; top: 29.00%; width: 30.30%; height: 27.17%;
   display: flex; align-items: center; justify-content: center;
   background: radial-gradient(70% 70% at 50% 40%, #10161c 0%, #05070a 75%);
 }
@@ -110,10 +110,10 @@
   text-shadow: 0 1px 2px #000;
 }
 
-/* ---------- lyric stage: over the map grid ---------- */
+/* ---------- lyric stage: over the dark panel ---------- */
 .gvsp-lyrics {
   position: absolute; z-index: 3;
-  left: 38%; right: 8%; top: 57%; bottom: 28%;
+  left: 38%; right: 8%; top: 52%; bottom: 30%;
   overflow: hidden;
   display: flex; flex-direction: column; justify-content: center;
   text-align: left; gap: 1cqh;
