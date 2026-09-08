@@ -337,16 +337,38 @@ let themeSwitchGen = 0;
 let dashPaintActive = false;
 function applyDashboardMapPaint() {
   if (!map || !window.VCNThemes) return;
-  const theme = VCNThemes.get('vice-city');
-  const list = theme && theme.map && theme.map.dashboardPaint;
-  if (!list || !list.length) return;
-  const want = document.body.classList.contains('dashboard-mode') &&
-               document.body.classList.contains('theme-vice-city');
+  /* Get the current theme from the body class (e.g. theme-gta-v -> gta-v) */
+  let currentTheme = null;
+  let themeClass = null;
+  for (const tid of VCNThemes.ids()) {
+    const t = VCNThemes.get(tid);
+    if (t && t.ui && t.ui.bodyClass && document.body.classList.contains(t.ui.bodyClass)) {
+      currentTheme = t;
+      themeClass = t.ui.bodyClass;
+      break;
+    }
+  }
+  if (!currentTheme) return;
+  const mapCfg = currentTheme.map;
+  if (!mapCfg) return;
+  const paintList = mapCfg.dashboardPaint || [];
+  const layoutList = mapCfg.dashboardLayout || [];
+  if (!paintList.length && !layoutList.length) {
+    if (dashPaintActive) dashPaintActive = false;
+    return;
+  }
+  const want = document.body.classList.contains('dashboard-mode');
   if (want === dashPaintActive) return;
-  for (const [layer, prop, dashVal, baseVal] of list) {
+  for (const [layer, prop, dashVal, baseVal] of paintList) {
     try {
       if (typeof map.getLayer === 'function' && !map.getLayer(layer)) continue;
       map.setPaintProperty(layer, prop, want ? dashVal : baseVal);
+    } catch (e) { /* one missing layer must not break the pass */ }
+  }
+  for (const [layer, prop, dashVal, baseVal] of layoutList) {
+    try {
+      if (typeof map.getLayer === 'function' && !map.getLayer(layer)) continue;
+      map.setLayoutProperty(layer, prop, want ? dashVal : baseVal);
     } catch (e) { /* one missing layer must not break the pass */ }
   }
   dashPaintActive = want;

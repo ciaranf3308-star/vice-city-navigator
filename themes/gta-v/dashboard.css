@@ -180,24 +180,23 @@ body.dashboard-mode.theme-gta-v .dash-tabs button.on{
 body.dashboard-mode.theme-gta-v .dash-tabs button.on::before{opacity:1;filter:drop-shadow(0 0 7px rgba(44,230,140,.35))}
 body.dashboard-mode.theme-gta-v .dash-tabs button.on::after{background:#2ce68c;box-shadow:0 0 10px rgba(44,230,140,.6)}
 body.dashboard-mode.theme-gta-v .dash-tabs button.on span{color:#f2f5f2}
-/* Center: LOS SANTOS COUNTY — tracked-out Chalet with a mint rule
-   beneath (menu-section treatment), not a bland box. */
+/* Center: locality plate — tracked-out Chalet with a mint rule
+   beneath (menu-section treatment), not a bland box.
+   Shows the real town name from #dash-dest (reverse-geocoded). */
 body.dashboard-mode.theme-gta-v .dash-dest{
   flex:1;display:flex;align-items:center;justify-content:center;
   min-width:0;position:relative;
 }
-body.dashboard-mode.theme-gta-v #dash-dest{visibility:hidden;position:relative}
+body.dashboard-mode.theme-gta-v #dash-dest{
+  position:relative;
+  font-family:'Chalet Comprime','Arial Narrow',sans-serif;font-weight:700;
+  font-size:24px;letter-spacing:5px;text-transform:uppercase;color:#f2f5f2;
+  white-space:nowrap;pointer-events:none;
+}
 body.dashboard-mode.theme-gta-v .dash-dest::before{
   content:'';position:absolute;left:50%;top:calc(50% + 24px);transform:translateX(-50%);
   width:76px;height:2px;background:#2ce68c;
   box-shadow:0 0 10px rgba(44,230,140,.65);
-}
-body.dashboard-mode.theme-gta-v .dash-dest::after{
-  content:'LOS SANTOS COUNTY';
-  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  font-family:'Chalet Comprime','Arial Narrow',sans-serif;font-weight:700;
-  font-size:24px;letter-spacing:5px;text-transform:uppercase;color:#f2f5f2;
-  white-space:nowrap;pointer-events:none;
 }
 body.dashboard-mode.theme-gta-v .dash-zoom{display:none !important}
 body.dashboard-mode.theme-gta-v .dash-tag{display:none}

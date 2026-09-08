@@ -19,6 +19,20 @@
       routeCasingWidth: 9,
       playerMarker: 'assets/themes/gta-v/player.png',
       fontStack: 'gta-v',
+      /* Dashboard mode: map labels are far too small on the car display.
+         Scale text-size up ~1.6x via setLayoutProperty when dashboard is active. */
+      dashboardLayout: [
+        ['v-label-water', 'text-size', 22, 13.5],
+        ['v-label-place', 'text-size',
+          ['match', ['get', 'class'], 'country', 43, 'state', 37, 'city', 62, 'town', 55, 'village', 37, 'suburb', 34, 'hamlet', 30, 30],
+          ['match', ['get', 'class'], 'country', 27, 'state', 23, 'city', 38.5, 'town', 34.5, 'village', 23, 'suburb', 21, 'hamlet', 19, 19]],
+        ['v-label-road-major', 'text-size',
+          ['interpolate', ['linear'], ['zoom'], 11, 33, 14, 34, 17, 34.5],
+          ['interpolate', ['linear'], ['zoom'], 11, 20.5, 14, 21, 17, 21.5]],
+        ['v-label-road-minor', 'text-size',
+          ['interpolate', ['linear'], ['zoom'], 13.5, 29, 16, 33, 18, 34],
+          ['interpolate', ['linear'], ['zoom'], 13.5, 18, 16, 20.5, 18, 21]],
+      ],
     },
 
     pois: {
