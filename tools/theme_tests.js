@@ -379,8 +379,8 @@ ok(appSrc.includes('nav-driving') && /setUiMode/.test(appSrc), 'drive-mode chrom
 ok(cssSrc.includes('body.dashboard-mode.nav-driving #maneuver-card'), 'drive HUD clears the top bar on every theme');
 ok(cssSrc.includes('body.dashboard-mode.nav-driving #drive-bar'), 'drive trip bar clears the bottom bar on every theme');
 ok(!cssSrc.includes('.dash-skyline') && !indexSrc.includes('dash-skyline'), 'old skyline img fully retired in favour of the authored top bar strip');
-ok(/theme-san-andreas #dash-topbar\{[^}]*topbar-sunset\.jpg/.test(cssSrc),
-  'SA top bar is a photographic sunset cropped to the bar (hero 12%)');
+ok(/tbar-night/.test(cssSrc) && /tbar-sunset/.test(cssSrc),
+  'SA top bar is the hero two-pic split (night left, sunset right)');
 ok(!/theme-san-andreas #dash-topbar\{[^}]*radial-gradient\(120px 120px at 62%/.test(cssSrc),
   'SA top bar no longer uses the CSS-painted sun disc');
 ok(/theme-gta-v #dash-topbar\{[^}]*#7CFF6B/.test(cssSrc), 'GTA V chrome uses pause-menu neon green');
@@ -540,12 +540,15 @@ for (const f of ['topbar.png', 'bottombar.png', 'maneuver.png', 'grove-panel.png
 }
 const saLogo = pngSize(saDash('sa-logo.png'));
 ok(saLogo && saLogo.w >= 500 && saLogo.h >= 150, 'SA standalone wordmark extracted with transparency');
-ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/topbar-sunset.jpg')),
-  'SA top bar photographic sunset art exists');
-ok(/topbar-sunset\.jpg/.test(cssSrc),
-  'SA top bar uses the photographic sunset (not a CSS gradient)');
-ok(/theme-san-andreas #dash-topbar\{[^}]*clip-path:polygon/.test(cssSrc),
-  'SA top bar has the hero machined angular edge');
+ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/topbar-night.jpg')),
+  'SA top bar night panel art exists');
+ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/topbar-sunset-panel.jpg')),
+  'SA top bar sunset panel art exists');
+
+ok(/topbar-night\.jpg/.test(cssSrc) && /topbar-sunset-panel\.jpg/.test(cssSrc),
+  'SA top bar panels use photographic art (not CSS gradients)');
+ok(/tbar-night\{[^}]*clip-path:polygon/.test(cssSrc) && /tbar-sunset\{[^}]*clip-path:polygon/.test(cssSrc),
+  'SA top bar panels have the hero machined angular edges');
 ok(/theme-san-andreas #dash-bottombar\{[^}]*clip-path:polygon/.test(cssSrc),
   'SA bottom bar has the hero machined angular edge');
 ok(indexSrc.includes('dash-tomorrow'),
@@ -591,7 +594,8 @@ const saPaint = id => saStyle2.layers.find(l => l.id === id).paint;
 const saLayer = id => saStyle2.layers.find(l => l.id === id);
 ok(saPaint('sa-grass')['fill-color'] === '#8a9448', 'SA grass: deeper olive');
 ok(saPaint('sa-woods')['fill-color'] === '#687637', 'SA woods: deeper green');
-ok(saPaint('sa-urban')['fill-color'] === '#bfa87e', 'SA urban: deeper tan');
+ok(saPaint('sa-urban')['fill-color'] === '#d9c9a8', 'SA urban: hero pale tan blocks');
+ok(saPaint('sa-land')['background-color'] === '#a3a35e', 'SA land: hero olive-green');
 ok(saLayer('sa-label-road-major').minzoom === 10, 'SA major road labels start at zoom 10');
 ok(saLayer('sa-label-road-minor').minzoom === 12.5, 'SA minor road labels start at zoom 12.5');
 ok(/theme-san-andreas #map::after\{[^}]*radial-gradient/.test(cssSrc), 'SA dashboard map wears an illustrated vignette');
@@ -1222,3 +1226,5 @@ ok(fs.existsSync(path.join(AND, 'gradle/wrapper/gradle-wrapper.jar')), 'android:
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
+ok(/function saArrowSvg/.test(appSrc), 'SA has its own block-arrow set (hero font-theme match)');
+ok(/t\.id === 'san-andreas'/.test(appSrc) || /id === "san-andreas"/.test(appSrc), 'SA arrows branch on the san-andreas theme');

@@ -16,7 +16,7 @@
       "id": "sa-land",
       "type": "background",
       "paint": {
-        "background-color": "#d9c9a8"
+        "background-color": "#a3a35e"
       }
     },
     {
@@ -269,7 +269,7 @@
         false
       ],
       "paint": {
-        "fill-color": "#bfa87e"
+        "fill-color": "#d9c9a8"
       }
     },
     {

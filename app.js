@@ -128,7 +128,25 @@ function themeArrowColor() {
   const t = wsTheme();
   return (t && t.ui && t.ui.arrowColor) || '#fffb96';
 }
+function saArrowSvg(kind) {
+  // GTA SA HUD block arrows: chunky white fill, heavy black outline — matches Bank Gothic/blackletter theme
+  const base = '<path d="M26 58 L26 32 L14 32 L32 10 L50 32 L38 32 L38 58 Z" fill="#fff" stroke="#111" stroke-width="4" stroke-linejoin="round"/>';
+  const rot = d => `<g transform="rotate(${d} 32 32)">${base}</g>`;
+  const bodies = {
+    'straight': base,
+    'left': rot(-90), 'right': rot(90),
+    'slight-left': rot(-35), 'slight-right': rot(35),
+    'sharp-left': rot(-125), 'sharp-right': rot(125),
+    'uturn': '<path d="M24 56 L24 30 Q24 12 38 12 Q52 12 52 26 Q52 40 40 40 L32 40" fill="none" stroke="#111" stroke-width="16" stroke-linecap="round"/><path d="M24 56 L24 30 Q24 12 38 12 Q52 12 52 26 Q52 40 40 40 L32 40" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round"/><path d="M39 31 L28 40 L39 49 Z" fill="#fff" stroke="#111" stroke-width="3" stroke-linejoin="round"/>',
+    'roundabout': '<circle cx="32" cy="37" r="13" fill="none" stroke="#111" stroke-width="15"/><circle cx="32" cy="37" r="13" fill="none" stroke="#fff" stroke-width="8"/><path d="M32 6 L32 20 M25 13 L32 20 L39 13" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 6 L32 20 M25 13 L32 20 L39 13" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>',
+    'flag': '<path d="M24 58 L24 8" fill="none" stroke="#111" stroke-width="14" stroke-linecap="round"/><path d="M24 58 L24 8" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/><path d="M24 12 L52 12 L45 20 L52 28 L24 28 Z" fill="#fff" stroke="#111" stroke-width="3" stroke-linejoin="round"/>'
+  };
+  const inner = bodies[kind] || bodies['straight'];
+  return `<svg viewBox="0 0 64 64">${inner}</svg>`;
+}
 function arrowSvg(kind) {
+  const t = wsTheme();
+  if (t && t.id === 'san-andreas') return saArrowSvg(kind);
   const base = '<path d="M32 9 V45 M19 23 L32 9 L45 23"/>';
   const rot = d => `<g transform="rotate(${d} 32 32)">${base}</g>`;
   const bodies = {

@@ -561,17 +561,31 @@ body.dashboard-mode.theme-vice-city #next-stats .ns-sep{opacity:.7}
 .sa-logo{display:none}
 body.dashboard-mode.theme-san-andreas #dash-topbar{
   display:block;position:absolute;left:0;right:0;top:0;height:86px;z-index:25;
-  background:#3a1c0c url('themes/san-andreas/dashboard/topbar-sunset.jpg') center/cover no-repeat;
-  box-shadow:0 5px 10px rgba(0,0,0,.55);
-  pointer-events:none;
-  /* hero's machined edge: straight profile, angled cuts at each end */
-  clip-path:polygon(0 0,100% 0,100% 80%,97.5% 100%,2.5% 100%,0 80%);
+  background:none;box-shadow:none;pointer-events:none;overflow:visible;
 }
-/* gold baseline follows the chamfer */
-body.dashboard-mode.theme-san-andreas #dash-topbar::before{
+/* hero two-pic bar: night city left (taller), sunset right — different heights, angular seam */
+body.dashboard-mode.theme-san-andreas #dash-topbar .tbar-night{
+  position:absolute;left:0;top:0;width:63%;height:96px;
+  background:#0a0e1a url('themes/san-andreas/dashboard/topbar-night.jpg') center/cover no-repeat;
+  clip-path:polygon(0 0,100% 0,97% 100%,2.5% 100%,0 82%);
+  box-shadow:0 5px 10px rgba(0,0,0,.55);
+}
+body.dashboard-mode.theme-san-andreas #dash-topbar .tbar-night::after{
   content:"";position:absolute;left:0;right:0;bottom:0;height:3px;
-  background:linear-gradient(90deg,transparent,#f5c96b 6%,#f5c96b 94%,transparent);
-  clip-path:polygon(0 0,2.5% 100%,97.5% 100%,100% 0);
+  background:linear-gradient(90deg,#8ab4ff,#8ab4ff 90%,transparent);
+  clip-path:polygon(0 0,97% 100%,2.5% 100%,0 0);
+  opacity:.8;
+}
+body.dashboard-mode.theme-san-andreas #dash-topbar .tbar-sunset{
+  position:absolute;right:0;top:0;width:39%;height:86px;
+  background:#3a1c0c url('themes/san-andreas/dashboard/topbar-sunset-panel.jpg') center/cover no-repeat;
+  clip-path:polygon(5% 0,100% 0,100% 80%,97.5% 100%,0 100%);
+  box-shadow:0 5px 10px rgba(0,0,0,.55);
+}
+body.dashboard-mode.theme-san-andreas #dash-topbar .tbar-sunset::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:3px;
+  background:linear-gradient(90deg,transparent,#f5c96b 12%,#f5c96b);
+  clip-path:polygon(5% 0,0 100%,100% 100%,100% 80%,97.5% 100%);
 }
 /* photographic bar: no painted haze needed; keep a whisper at the base for the gold edge */
 body.dashboard-mode.theme-san-andreas #dash-topbar::after{
@@ -636,6 +650,15 @@ body.dashboard-mode.theme-san-andreas #dash-bottombar .dash-chrome{
   padding:0 18px;background:none;overflow:visible;
 }
 /* text tabs: khaki on dark, active takes the cream box */
+body.dashboard-mode.theme-san-andreas .dash-tabs button{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  color:#cbb87f;background:none;border:0;cursor:pointer;
+  font-family:'Bank Gothic',sans-serif;font-size:13px;letter-spacing:.06em;
+  padding:6px 10px;
+}
+body.dashboard-mode.theme-san-andreas .dash-tabs button svg{width:26px;height:26px}
+body.dashboard-mode.theme-san-andreas .dash-tabs button.on{color:#f5e6b8}
+body.dashboard-mode.theme-san-andreas .dash-tabs button.on svg{filter:drop-shadow(0 0 4px rgba(245,214,123,.7))}
 body.dashboard-mode.theme-san-andreas .dash-tabs{
   position:static;display:flex;align-items:center;gap:8px;padding:0;background:none;pointer-events:none;
 }
