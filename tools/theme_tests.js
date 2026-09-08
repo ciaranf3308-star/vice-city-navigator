@@ -173,7 +173,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v130"), 'SW theme cache v130');
+ok(swSrc.includes("ws-theme-v131"), 'SW theme cache v130');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -406,7 +406,7 @@ ok(!/theme-san-andreas #dash-topbar\{[^}]*radial-gradient\(120px 120px at 62%/.t
   'SA top bar no longer uses the CSS-painted sun disc');
 ok(/theme-gta-v #dash-topbar\{[^}]*background:#0b0b0b/.test(cssSrc), 'GTA V top bar is flat pause-menu black (researched)');
 ok(/theme-gta-v #dash-bottombar\{[^}]*background:#0b0b0b/.test(cssSrc), 'GTA V bottom bar is flat pause-menu black (researched)');
-ok(/theme-rdr2 #dash-topbar\{[^}]*border-bottom:1px solid rgba\(216,179,106,.28/.test(cssSrc), 'RDR2 header has a subtle hairline gold rule');
+ok(/theme-rdr2 #dash-topbar\{[^}]*clip-path:polygon/.test(cssSrc), 'RDR2 header has a stepped plate silhouette');
 ok(!/theme-rdr2 #dash-(topbar|bottombar)\{[^}]*#ff71ce/.test(cssSrc), 'RDR2 bar shells carry no neon pink');
 // VC hero: neon 80s chrome per the benchmark image
 ok(true, "VC top bar uses CSS neon (no image)");
@@ -469,8 +469,8 @@ ok(/theme-gta-v \.dash-tabs button\[data-dtab="map"\]::before\{[^}]*tab-map\.png
 ok(/theme-gta-v \.dash-tabs button\[data-dtab="settings"\]::before\{[^}]*tab-settings\.png/.test(cssSrc), 'V tabs use generated icons (settings)');
 ok(/theme-gta-v \.dash-tag\{display:none/.test(cssSrc), 'V drops the 80s script tagline');
 ok(/theme-rdr2 \.dash-tag\{display:none\}/.test(cssSrc), 'RDR2 drops the 80s script tagline');
-ok(/theme-rdr2 \.dash-brand\{[^}]*margin:0 auto/.test(cssSrc), 'RDR2 centers its ornate title plate');
-ok(/theme-rdr2 \.dash-tabs button\.on::after/.test(cssSrc), 'RDR2 active tab gets the gold diamond marker');
+ok(/theme-rdr2 \.dash-brand\{[^}]*left:50%/.test(cssSrc), 'RDR2 centers its frontier badge');
+ok(/theme-rdr2 \.dash-tabs button\.on\{[^}]*selection_box_bg_1a\.png/.test(cssSrc), 'RDR2 active tab uses the authentic selection-box highlight');
 /* ---------- pass 4: narrow hero corrections ---------- */
 // skyline: supplied sunset scenery, left edge feathered, no pixel treatment
 ok(/theme-vice-city #dash-topbar::after\{[^}]*skyline-sunset\.png/.test(cssSrc), 'VC skyline pocket wears the sunset scenery asset');
@@ -764,12 +764,12 @@ ok(/theme-gta-v \.gvsp\{[^}]*background:#0b0b0b/.test(cssSrc), 'V music panel is
 ok(/theme-gta-v \.dash-tabs button\{[^}]*background:transparent/.test(cssSrc), 'V tabs are transparent icon+text buttons');
 ok(/theme-rdr2 #dash-dest\{[^}]*border-image-source:url\('assets\/themes\/rdr2\/dashboard\/menu_header_1a\.png'\)/.test(cssSrc),
    'RDR2 destination plate uses the ornate menu-header frame');
-ok(/theme-rdr2 #dash-topbar\{[^}]*leather-texture\.png/.test(cssSrc), 'RDR2 header has subtle leather texture');
+ok(cssSrc.includes("theme-rdr2 #dash-topbar::after") && cssSrc.includes('header-dusk.png'), 'RDR2 header feathers dusk scenery at the edges');
 ok(/theme-rdr2 \.dash-dest::before/.test(cssSrc) && cssSrc.includes('title_divider.png'), 'RDR2 destination plate is flanked by divider ornaments');
 ok(/theme-gta-v \.dash-logo\{[^}]*'Chalet Comprime'/.test(cssSrc), 'V wordmark uses Chalet (hero typography)');
 ok(/theme-gta-v #dash-dest\{[^}]*'Chalet Comprime'/.test(cssSrc), 'V destination uses Chalet (hero typography)');
 ok(/theme-gta-v \.dash-tabs button span\{[^}]*text-transform:uppercase/.test(cssSrc), 'V tabs carry uppercase text labels under the icons');
-ok(/theme-rdr2 #dash-bottombar\{[^}]*border-top:1px solid rgba\(216,179,106,.28/.test(cssSrc), 'RDR2 footer has a subtle hairline gold rule');
+ok(/theme-rdr2 #dash-bottombar\{[^}]*clip-path:polygon/.test(cssSrc), 'RDR2 footer has a stepped console silhouette');
 // service worker: VC dashboard art is shell-precached (default theme), the
 // other themes' dashboard art rides the on-demand theme-asset cache
 ok(swSrc.includes('themes/vice-city/dashboard/skyline-sunset.png'), 'SW precaches the VC sunset skyline');

@@ -1,58 +1,109 @@
 /* rdr2 logo hidden by default; the rdr2 theme shows it */
 .rdr2-logo{display:none}
-/* rdr2 dashboard theme — full header/footer redesign 2026-09-08
-   Based on RDR2 pause-menu/index-panel study:
-   - near-black warm #171812 bars, torn grunge edges
+/* rdr2 dashboard theme — frontier furniture rebuild 2026-09-09
+   Lessons from the other themes:
+   - VC: authored silhouette via clip-path, double-layer edge technique,
+     hero art as scenery (not decoration)
+   - GTA V: strict palette, scenery feathered into black, grain = material
+   - SA: the bar IS art where the art is good enough
+   RDR2 language:
+   - near-black warm #14150e bars, bone #ede6d6 type, aged gold #d8b36a
+     as detail, blood red #a02723 sparingly
+   - stepped plate silhouette (the pause-menu title plate drops below
+     the bar edge), double gold rules, sharp corners, no border-radius
    - user's WAYSTATION FRONTIER MAPS badge as the header centerpiece
-   - aged gold #D8B36A ornamental rules, bone #EDE6D6 letterpress type
-   - blood red #C00000 used sparingly (active accents only)
-   - sharp corners everywhere, no border-radius */
+   - dusk scenery feathered at the bar edges, grain for material depth */
 body.theme-rdr2 .dest-pin{ background-image:url('assets/themes/rdr2/blips/waypoint.png'); }
 body.dashboard-mode.theme-rdr2 #search-bar{top:calc(116px + env(safe-area-inset-top))}
 
-/* ---------- HEADER: the frontier badge bar ----------
-   User's WAYSTATION logo crowns the bar. Weather left, date/time right,
-   all in Hapna-condensed caps with letterpress shadows. Thin aged-gold
-   rule along the bottom edge — the RDR2 index-panel divider language. */
+/* ============ HEADER: the frontier title plate ============
+   Stepped silhouette — the centre plate drops 14px below the bar,
+   RDR2's pause-menu title-plate language. Double-layer clip-path:
+   the bar is aged gold, an inset dark layer reveals a crisp 2px
+   gold edge following every step. Dusk scenery feathered at the
+   left/right edges behind the content; SVG grain for material. */
 body.dashboard-mode.theme-rdr2 #dash-topbar{
   display:block;position:absolute;left:0;right:0;top:0;height:104px;z-index:25;
+  background:linear-gradient(180deg,#c8a45e 0%,#8a6f3a 100%);
+  clip-path:polygon(
+    0 0, 100% 0,
+    100% calc(100% - 14px),
+    63% calc(100% - 14px), 61.5% 100%, 38.5% 100%, 37% calc(100% - 14px),
+    0 calc(100% - 14px)
+  );
+  filter:drop-shadow(0 4px 18px rgba(0,0,0,.65));
+  pointer-events:none;
+}
+/* dark inset: 2px gold crown revealed at top, 2px gold along the step */
+body.dashboard-mode.theme-rdr2 #dash-topbar::before{
+  content:'';position:absolute;inset:0;z-index:0;display:block;
   background:
-    linear-gradient(180deg,rgba(23,24,18,.06) 0%,rgba(23,24,18,.12) 100%),
-    url('assets/themes/rdr2/dashboard/leather-texture.png') 0 0/512px 512px repeat,
-    linear-gradient(180deg,#1a1b14 0%,#141510 60%,#0e0e0a 100%);
-  border-bottom:1px solid rgba(216,179,106,.28);
-  box-shadow:0 1px 0 rgba(216,179,106,.08), 0 4px 20px rgba(0,0,0,.6), inset 0 1px 0 rgba(237,230,214,.04);
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.85 0 0 0 0 0.78 0 0 0 0 0.62 0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E"),
+    linear-gradient(180deg,rgba(20,21,14,.88) 0%,rgba(16,17,11,.94) 55%,rgba(11,12,8,.97) 100%);
+  background-repeat:repeat,no-repeat;
+  clip-path:polygon(
+    0 2px, 100% 2px,
+    100% calc(100% - 16px),
+    63% calc(100% - 16px), 61.5% calc(100% - 2px), 38.5% calc(100% - 2px), 37% calc(100% - 16px),
+    0 calc(100% - 16px)
+  );
+}
+/* dusk scenery: feathered into the bar at the left and right edges,
+   GTA V mask technique — atmosphere, not decoration */
+body.dashboard-mode.theme-rdr2 #dash-topbar::after{
+  content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:url('assets/themes/rdr2/dashboard/header-dusk.png') 50% 100%/cover no-repeat;
+  opacity:.4;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 18%,#000 82%,transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0%,#000 18%,#000 82%,transparent 100%);
+  clip-path:polygon(
+    0 2px, 100% 2px,
+    100% calc(100% - 16px),
+    63% calc(100% - 16px), 61.5% calc(100% - 2px), 38.5% calc(100% - 2px), 37% calc(100% - 16px),
+    0 calc(100% - 16px)
+  );
 }
 body.dashboard-mode.theme-rdr2 #dash-topbar .dash-chrome{
-  position:absolute;inset:0;
+  position:absolute;inset:0;z-index:2;
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 28px;background:none;
+  padding:0 30px;background:none;pointer-events:none;
 }
-/* the badge: user's supplied frontier logo, centered and dominant */
-body.dashboard-mode.theme-rdr2 .dash-brand{order:2;margin:0 auto;display:flex;align-items:center;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+body.dashboard-mode.theme-rdr2 #dash-topbar .dash-chrome > *{pointer-events:auto}
+/* the badge: user's supplied frontier logo, centered and dominant.
+   Sits in the dropped centre plate. NOTE: .rdr2-logo is a direct child
+   of .dash-chrome (sibling of .dash-brand), so it gets its own
+   absolute centering. */
+body.dashboard-mode.theme-rdr2 .dash-brand{position:absolute;left:50%;top:50%;transform:translate(-50%,-54%);margin:0}
 body.dashboard-mode.theme-rdr2 .dash-brand .dash-logo{display:none}
 body.dashboard-mode.theme-rdr2 .dash-brand .dash-palm{display:none}
 body.dashboard-mode.theme-rdr2 .rdr2-logo{
-  display:block;height:88px;width:auto;max-width:min(560px,54vw);object-fit:contain;
-  filter:drop-shadow(0 4px 8px rgba(0,0,0,.85)) drop-shadow(0 0 24px rgba(216,179,106,.12));
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-52%);z-index:3;
+  display:block;height:92px;width:auto;max-width:min(600px,56vw);object-fit:contain;
+  filter:drop-shadow(0 4px 10px rgba(0,0,0,.9)) drop-shadow(0 0 26px rgba(216,179,106,.14));
 }
-/* corner ink: weather left, clock right */
+/* corner ink: weather left, clock right — engraved plate style */
 body.dashboard-mode.theme-rdr2 .dash-wx{
-  order:1;margin:0;display:flex;align-items:center;gap:10px;
-  font-family:var(--vclabel);font-size:19px;letter-spacing:3px;text-transform:uppercase;
-  color:#ede6d6;text-shadow:0 2px 0 rgba(0,0,0,.65);
+  display:flex;align-items:center;gap:10px;margin:0;
+  font-family:var(--vclabel);font-size:18px;letter-spacing:3px;text-transform:uppercase;
+  color:#d9cba6;text-shadow:0 2px 0 rgba(0,0,0,.7);
+  padding:8px 14px;
+  border-top:1px solid rgba(216,179,106,.22);
+  border-bottom:1px solid rgba(216,179,106,.22);
 }
 body.dashboard-mode.theme-rdr2 .dash-clock{
-  order:3;margin:0;display:flex;align-items:baseline;gap:14px;
+  display:flex;align-items:baseline;gap:14px;margin:0;
   font-family:var(--vclabel);text-transform:uppercase;
+  padding:8px 14px;
+  border-top:1px solid rgba(216,179,106,.22);
+  border-bottom:1px solid rgba(216,179,106,.22);
 }
 body.dashboard-mode.theme-rdr2 #dash-date{
   color:#c8a45e;text-shadow:0 1px 2px rgba(0,0,0,.85);
-  font-size:15px;letter-spacing:.22em;
+  font-size:14px;letter-spacing:.24em;
 }
 body.dashboard-mode.theme-rdr2 #dash-time{
   color:#ece5d3;text-shadow:0 1px 3px rgba(0,0,0,.85);
-  font-size:24px;letter-spacing:.08em;font-variant-numeric:tabular-nums;
+  font-size:23px;letter-spacing:.08em;font-variant-numeric:tabular-nums;
 }
 /* hide the SA-specific images in rdr2 */
 body.dashboard-mode.theme-rdr2 .sa-logo,
@@ -60,27 +111,44 @@ body.dashboard-mode.theme-rdr2 .dash-tomorrow,
 body.dashboard-mode.theme-rdr2 .dash-los-santos{display:none}
 body.dashboard-mode.theme-rdr2.nav-driving #maneuver-card{top:calc(116px + env(safe-area-inset-top))}
 
-/* ---------- FOOTER: frontier menu furniture ----------
-   Near-black bar, gold rule along the top. Tabs are Hapna caps at 55%
-   brightening to full bone-white with the gold diamond beneath the
-   active one — RDR2's restrained selection language. No pills, no boxes. */
+/* ============ FOOTER: frontier menu console ============
+   Mirrored stepped silhouette — the centre rises 12px where the tabs
+   sit, RDR2's menu-panel language. Active tab uses the authentic
+   selection_box_bg_1a highlight, tinted dark with a gold keyline.
+   Destination plate keeps the menu_header_1a Victorian frame. */
 body.dashboard-mode.theme-rdr2 #dash-bottombar{
   display:block;position:absolute;left:0;right:0;bottom:0;height:84px;z-index:25;
+  background:linear-gradient(0deg,#c8a45e 0%,#8a6f3a 100%);
+  clip-path:polygon(
+    0 14px,
+    37% 14px, 38.5% 0, 61.5% 0, 63% 14px,
+    100% 14px, 100% 100%, 0 100%
+  );
+  filter:drop-shadow(0 -4px 18px rgba(0,0,0,.65));
+}
+body.dashboard-mode.theme-rdr2 #dash-bottombar::before{
+  content:'';position:absolute;inset:0;z-index:0;display:block;
   background:
-    linear-gradient(0deg,rgba(23,24,18,.06) 0%,rgba(23,24,18,.12) 100%),
-    url('assets/themes/rdr2/dashboard/leather-texture.png') 0 0/512px 512px repeat,
-    linear-gradient(0deg,#1a1b14 0%,#141510 60%,#0e0e0a 100%);
-  border-top:1px solid rgba(216,179,106,.28);
-  box-shadow:0 -1px 0 rgba(216,179,106,.08), 0 -4px 20px rgba(0,0,0,.6), inset 0 -1px 0 rgba(237,230,214,.04);
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.85 0 0 0 0 0.78 0 0 0 0 0.62 0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E"),
+    linear-gradient(0deg,rgba(20,21,14,.9) 0%,rgba(16,17,11,.95) 55%,rgba(11,12,8,.98) 100%);
+  background-repeat:repeat,no-repeat;
+  clip-path:polygon(
+    0 16px,
+    37% 16px, 38.5% 2px, 61.5% 2px, 63% 16px,
+    100% 16px, 100% 100%, 0 100%
+  );
 }
 body.dashboard-mode.theme-rdr2 #dash-bottombar .dash-chrome{
-  position:absolute;inset:0;
-  display:flex;align-items:stretch;justify-content:space-between;
+  position:absolute;inset:0;z-index:2;
+  display:block;
   padding:0;background:none;
 }
 body.dashboard-mode.theme-rdr2.nav-driving #drive-bar{bottom:calc(96px + env(safe-area-inset-bottom))}
-/* destination plate: the ornate Victorian frame */
-body.dashboard-mode.theme-rdr2 .dash-dest{order:0;flex:none;display:flex;align-items:center;padding:10px 6px 10px 20px}
+/* destination plate: the authentic Victorian frame, pinned left */
+body.dashboard-mode.theme-rdr2 .dash-dest{
+  position:absolute;left:0;top:0;bottom:0;z-index:2;
+  display:flex;align-items:center;padding:12px 6px 10px 22px;
+}
 body.dashboard-mode.theme-rdr2 #dash-dest{
   border:12px solid transparent;
   border-image-source:url('assets/themes/rdr2/dashboard/menu_header_1a.png');
@@ -88,63 +156,73 @@ body.dashboard-mode.theme-rdr2 #dash-dest{
   border-image-width:12px;
   border-image-repeat:round;
   border-radius:0;
-  background:rgba(0,0,0,.32);
-  color:#ede6d6;text-shadow:0 2px 0 rgba(0,0,0,.65);
-  font-family:var(--vcfont);font-size:19px;letter-spacing:5px;text-transform:uppercase;
-  padding:6px 26px;white-space:nowrap;max-width:32vw;overflow:hidden;text-overflow:ellipsis;
+  background:rgba(0,0,0,.38);
+  color:#ede6d6;text-shadow:0 2px 0 rgba(0,0,0,.7);
+  font-family:var(--vcfont);font-size:18px;letter-spacing:5px;text-transform:uppercase;
+  padding:7px 26px;white-space:nowrap;max-width:30vw;overflow:hidden;text-overflow:ellipsis;
 }
 body.dashboard-mode.theme-rdr2 .dash-dest::before,
 body.dashboard-mode.theme-rdr2 .dash-dest::after{
-  content:"";width:14px;height:44px;flex:none;align-self:center;opacity:.85;
+  content:"";width:14px;height:44px;flex:none;align-self:center;opacity:.8;
   background:url('assets/themes/rdr2/dashboard/title_divider.png') 50% 50%/contain no-repeat;
 }
-/* tabs: the heart of the footer */
+/* tabs: the heart of the footer — RDR2 menu selection language.
+   Absolutely centered in the raised plate section. Active tab gets
+   the authentic selection-box highlight. */
 body.dashboard-mode.theme-rdr2 .dash-tabs{
-  order:1;margin:0 auto;display:flex;align-items:center;gap:4px;padding:8px;
+  position:absolute;left:50%;top:0;transform:translateX(-50%);z-index:3;
+  display:flex;align-items:center;gap:2px;height:100%;padding:0;margin:0;
 }
 body.dashboard-mode.theme-rdr2 .dash-tabs button{
-  font-family:var(--vclabel);font-size:17px;letter-spacing:.28em;text-transform:uppercase;
-  color:#d8cdb4;background:none;border:0;cursor:pointer;padding:10px 20px;opacity:.62;
-  text-shadow:0 1px 2px rgba(0,0,0,.8);position:relative;border-radius:0;
-  display:flex;flex-direction:column;align-items:center;gap:7px;
+  font-family:var(--vclabel);font-size:16px;letter-spacing:.26em;text-transform:uppercase;
+  color:#cbbd97;background:none;border:0;cursor:pointer;
+  padding:12px 22px 10px;opacity:.66;
+  text-shadow:0 1px 2px rgba(0,0,0,.85);position:relative;border-radius:0;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
   transition:opacity .18s ease,color .18s ease;
 }
 body.dashboard-mode.theme-rdr2 .dash-tabs button svg{
   width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;
-  filter:drop-shadow(0 1px 2px rgba(0,0,0,.8));
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.85));
 }
-body.dashboard-mode.theme-rdr2 .dash-tabs button:hover{opacity:.88;color:#ece5d3}
-body.dashboard-mode.theme-rdr2 .dash-tabs button.on{opacity:1;color:#f0e9d6}
-body.dashboard-mode.theme-rdr2 .dash-tabs button.on::after{
-  content:"";width:7px;height:7px;
-  transform:rotate(45deg);background:#d8b36a;
-  box-shadow:0 1px 2px rgba(0,0,0,.7),0 0 8px rgba(216,179,106,.4);
+body.dashboard-mode.theme-rdr2 .dash-tabs button:hover{opacity:.9;color:#ece5d3}
+body.dashboard-mode.theme-rdr2 .dash-tabs button.on{
+  opacity:1;color:#f2ead2;
+  background:
+    url('assets/themes/rdr2/dashboard/selection_box_bg_1a.png') 50% 50%/100% 100% no-repeat,
+    linear-gradient(180deg,rgba(46,38,24,.92),rgba(28,23,14,.94));
+  box-shadow:inset 0 0 0 1px rgba(216,179,106,.35), 0 2px 8px rgba(0,0,0,.5);
+  text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 12px rgba(216,179,106,.25);
 }
-/* trip + zoom: right side */
-body.dashboard-mode.theme-rdr2 .dash-zoom{order:2;display:flex;align-items:center;gap:10px;padding:8px}
+/* trip + zoom: pinned right */
+body.dashboard-mode.theme-rdr2 .dash-zoom{
+  position:absolute;right:190px;top:0;bottom:0;z-index:2;
+  display:flex;align-items:center;gap:10px;padding:10px 8px;
+}
 body.dashboard-mode.theme-rdr2 .dash-zoom button{
-  width:48px;height:48px;font-size:22px;color:#d8c9a3;cursor:pointer;border-radius:50%;
-  background:radial-gradient(circle at 35% 30%, #2a241c, #14110c 75%);
-  border:1px solid rgba(216,179,106,.4);
-  box-shadow:0 2px 6px rgba(0,0,0,.5), inset 0 1px 1px rgba(216,179,106,.15);
-  text-shadow:0 1px 2px rgba(0,0,0,.8);
+  width:46px;height:46px;font-size:21px;color:#d8c9a3;cursor:pointer;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #2b251b, #131009 75%);
+  border:1px solid rgba(216,179,106,.42);
+  box-shadow:0 2px 6px rgba(0,0,0,.55), inset 0 1px 1px rgba(216,179,106,.16);
+  text-shadow:0 1px 2px rgba(0,0,0,.85);
   display:flex;align-items:center;justify-content:center;
-  transition:all .15s ease;
+  transition:border-color .15s ease,color .15s ease,transform .1s ease;
   -webkit-tap-highlight-color:transparent;
 }
-body.dashboard-mode.theme-rdr2 .dash-zoom button:hover{border-color:rgba(216,179,106,.7);color:#e8d5a0}
+body.dashboard-mode.theme-rdr2 .dash-zoom button:hover{border-color:rgba(216,179,106,.75);color:#ecd9a4}
 body.dashboard-mode.theme-rdr2 .dash-zoom button:active{transform:scale(.94);border-color:#d8b36a}
 body.dashboard-mode.theme-rdr2 .dash-trip{
-  order:3;display:flex;align-items:center;gap:16px;padding:8px 24px 8px 8px;
+  position:absolute;right:0;top:0;bottom:0;z-index:2;
+  display:flex;align-items:center;gap:14px;padding:10px 24px 6px 8px;
   font-family:var(--vclabel);text-transform:uppercase;
 }
 body.dashboard-mode.theme-rdr2 #dash-compass{
-  color:#d8b36a;text-shadow:0 2px 0 rgba(0,0,0,.65);
-  font-size:22px;letter-spacing:2px;
+  color:#c8a45e;text-shadow:0 2px 0 rgba(0,0,0,.7);
+  font-size:21px;letter-spacing:2px;
 }
 body.dashboard-mode.theme-rdr2 #dash-eta{
-  color:#d8b36a;text-shadow:0 2px 0 rgba(0,0,0,.65);
-  font-size:19px;letter-spacing:3px;
+  color:#d8b36a;text-shadow:0 2px 0 rgba(0,0,0,.7);
+  font-size:18px;letter-spacing:3px;
 }
 body.dashboard-mode.theme-rdr2 .dash-tag{display:none}
 body.dashboard-mode.theme-rdr2 #menu-panel{top:116px;bottom:96px}
