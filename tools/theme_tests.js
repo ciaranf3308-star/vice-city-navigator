@@ -173,7 +173,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v70"), 'SW theme cache v70');
+ok(swSrc.includes("ws-theme-v71"), 'SW theme cache v71');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
@@ -392,8 +392,8 @@ ok(cssSrc.includes('body.dashboard-mode.nav-driving #drive-bar'), 'drive trip ba
 ok(!cssSrc.includes('.dash-skyline') && !indexSrc.includes('dash-skyline'), 'old skyline img fully retired in favour of the authored top bar strip');
 ok(!/topbar-composite\.jpg/.test(cssSrc),
   'SA top bar is CSS chrome now — the photo collage is retired');
-ok(cssSrc.includes("#dash-topbar{") && /topbar-hero\.png/.test(cssSrc),
-  'SA top bar is the generated hero overlay (pass6), not a photo panorama');
+ok(cssSrc.includes("#dash-topbar{") && /topbar-hero7\.png/.test(cssSrc),
+  'SA top bar is the hero7 slice (user art), not a photo panorama');
 ok(!/tbar-night/.test(indexSrc) && !/tbar-sunset/.test(indexSrc),
   'SA top bar has no split-panel divs');
 ok(!/theme-san-andreas #dash-topbar\{[^}]*radial-gradient\(120px 120px at 62%/.test(cssSrc),
@@ -429,7 +429,7 @@ ok(cssSrc.includes('vc-logo-script'), 'VC hero logo script styled');
    layouts and drive-HUD clearances, not one shared silhouette ---------- */
 const barHeights = {
   'vice-city': ['78px', '100px'],
-  'san-andreas': ['140px', '72px'], // pass6: 140px shell lets the baked logo spill onto the map; drive clearance stays 72
+  'san-andreas': ['126px', '126px'], // hero7: bars are the hero art's own height
   'gta-v': ['56px', '64px'],
   'rdr2': ['72px', '72px'],
 };
@@ -456,8 +456,8 @@ ok(/theme-vice-city #dash-bottombar\{[^}]*rgba\(1,205,254/.test(cssSrc), 'VC foo
 ok(/theme-vice-city \.dash-tag::before/.test(cssSrc), 'VC footer separates arrival and slogan with a divider');
 ok(/theme-vice-city #dash-dest\{[^}]*overflow:visible/.test(cssSrc), 'VC locality plate never truncates');
 ok(!/theme-vice-city \.dash-tabs button\{[^}]*linear-gradient/.test(cssSrc), 'VC tabs are flat neon text, not chunky buttons');
-ok(/\.dash-tabs button\.on/.test(cssSrc) && cssSrc.includes("background:#f0e6c8"),
-  'SA active tab is the hero cream pill (icon-only), not a chunky tile');
+ok(/\.dash-tabs button\.on/.test(cssSrc) && /theme-san-andreas \.dash-tabs button\.on\{[^}]*background:rgba\(240,230,200/.test(cssSrc),
+  'SA active tab is the hero cream parallelogram (icon-only), not a chunky tile');
 ok(/theme-gta-v \.dash-tabs button\{[^}]*border-left:1px solid/.test(cssSrc), 'V tab strip uses hairline separators');
 ok(/theme-gta-v \.dash-tag\{display:none\}/.test(cssSrc), 'V drops the 80s script tagline');
 ok(/theme-rdr2 \.dash-tag\{display:none\}/.test(cssSrc), 'RDR2 drops the 80s script tagline');
@@ -517,7 +517,7 @@ ok(/body\.dashboard-mode \.vc-title\{[^}]*font-size:52px/.test(cssSrc),
    the stage is letterboxed or zoomed below 1. */
 ok(!/DASH_STAGE_NODES = \[[^\]]*'menu-panel'/.test(appSrc),
   'menu panel is not reparented into the scaled dash stage');
-for (const [id, top, bottom] of [['vice-city', 76, 100], ['san-andreas', 72, 72], ['gta-v', 56, 64], ['rdr2', 72, 72]]) {
+for (const [id, top, bottom] of [['vice-city', 76, 100], ['san-andreas', 126, 126], ['gta-v', 56, 64], ['rdr2', 72, 72]]) {
   ok(new RegExp(`'${id}':\\s*\\{\\s*top:\\s*${top},\\s*bottom:\\s*${bottom}\\s*\\}`).test(appSrc),
     `DASH_BAR_HEIGHTS: ${id} bars ${top}/${bottom}px (stage coordinates)`);
 }
@@ -588,25 +588,38 @@ ok(vcPaint('vc-buildings')['fill-color'] === '#b7b7c7', 'VC buildings: separated
 ok(vcPaint('vc-road-minor')['line-color'] === '#eef0f6', 'VC minor roads: white streets (hero)');
 ok(vcPaint('vc-road-primary')['line-color'] === '#18182d', 'VC arterials: darker navy core (hero punch)');
 ok(vcPaint('vc-road-motorway')['line-color'] === '#0e0e22', 'VC motorways: near-black navy (hero contrast)');
-/* ---------- PASS 6: HERO OVERLAY BARS (2026-09-08) ----------
-   Pass 5's CSS-composed bars are replaced by full-width generated hero
-   overlays, used directly as the bars (user: "generate a big overlay
-   like this and then just use that for the headers").
-   - topbar-hero.png (1920x140 RGBA): sepia skyline band, cream borders,
-     notched lower edge, big Beckett "San Andreas" logo spilling below.
-   - bottombar-hero.png (1920x72 RGBA): black console, cream border,
-     notched top edge, "A Better Tomorrow" script baked at right. */
+/* ---------- PASS 7: HERO7 DIRECT SLICES (2026-09-08) ----------
+   Pass 6's generated overlays are replaced by slices cut straight
+   out of the user's own hero art (true alpha, transparent map
+   window — no masking needed):
+   - topbar-hero7.png (1920x126 RGBA): sepia skyline, palms,
+     downtown LA, cream borders, dark angular centre plate, big
+     Beckett "San Andreas" crown logo spilling onto the map.
+   - bottombar-hero7.png (1920x126 RGBA): black console, cream
+     angular borders, 4 tab slots, star locality plate, 2 plates
+     + palms + crown right.
+   - radio-hero7.png (701x544 RGBA): framed radio unit with baked
+     crown logo, two dark panels, drawn Spotify/progress/transport,
+     lowrider — right side, overlapping the bars like the hero.
+   Live DOM only: clock in the header plate, tabs/locality/
+   compass in the footer, album/meta/lyrics/progress/transport
+   over the radio art. */
+const skinJsSa = fs.readFileSync(path.join(REPO, 'themes/san-andreas/spotify-skin.js'), 'utf8');
+const skinSaSrc = fs.readFileSync(path.join(REPO, 'themes/san-andreas/spotify-skin.css'), 'utf8');
 const saHero = (f) => path.join(REPO, 'themes/san-andreas/dashboard', f);
-for (const [f, w, h] of [['topbar-hero.png', 1920, 140], ['bottombar-hero.png', 1920, 72]]) {
-  ok(fs.existsSync(saHero(f)), `SA hero overlay art on disk: ${f}`);
+for (const [f, w, h] of [['topbar-hero7.png', 1920, 126], ['bottombar-hero7.png', 1920, 126], ['radio-hero7.png', 701, 544]]) {
+  ok(fs.existsSync(saHero(f)), `SA hero7 slice on disk: ${f}`);
   const sz = pngSize(saHero(f));
   const bytes = fs.readFileSync(saHero(f));
-  ok(sz && sz.w === w && sz.h === h && bytes[25] === 6, `SA hero overlay ${f} is ${w}x${h} RGBA`);
+  ok(sz && sz.w === w && sz.h === h && bytes[25] === 6, `SA hero7 slice ${f} is ${w}x${h} RGBA`);
 }
-ok(/theme-san-andreas #dash-topbar\{[^}]*topbar-hero\.png/.test(cssSrc),
-  'SA header IS the hero overlay art (topbar-hero.png)');
-ok(/theme-san-andreas #dash-topbar\{[^}]*height:140px/.test(cssSrc),
-  'SA header shell is 140px so the baked logo can spill onto the map');
+ok(!fs.existsSync(saHero('topbar-hero.png')), 'pass6 generated header deleted');
+ok(!fs.existsSync(saHero('bottombar-hero.png')), 'pass6 generated footer deleted');
+ok(!fs.existsSync(saHero('radio-frame-pass5.png')), 'pass5 radio frame deleted');
+ok(/theme-san-andreas #dash-topbar\{[^}]*topbar-hero7\.png/.test(cssSrc),
+  'SA header IS the hero7 slice (topbar-hero7.png)');
+ok(/theme-san-andreas #dash-topbar\{[^}]*height:126px/.test(cssSrc),
+  'SA header shell is 126px, the hero art\'s own height');
 ok(!/theme-san-andreas #dash-topbar\{[^}]*clip-path/.test(cssSrc),
   'SA header silhouette comes from the art, not CSS clip-path');
 ok(!/theme-san-andreas #dash-topbar::after\{[^}]*skyline-strip\.jpg/.test(cssSrc),
@@ -615,16 +628,22 @@ ok(/theme-san-andreas \.dash-brand\{display:none/.test(cssSrc),
   'SA header branding lives in the art — no DOM wordmark doubling it');
 ok(cssSrc.includes('#dash-topbar .dash-tomorrow,') && cssSrc.includes('display:none!important'),
   'SA header retires the legacy topbar art imgs (no giant script over the skyline)');
-ok(/theme-san-andreas #dash-bottombar\{[^}]*bottombar-hero\.png/.test(cssSrc),
-  'SA footer IS the hero overlay art (bottombar-hero.png)');
-ok(/theme-san-andreas #dash-bottombar\{[^}]*height:72px/.test(cssSrc),
-  'SA footer is 72px (9-10% of stage)');
+ok(/theme-san-andreas #dash-bottombar\{[^}]*bottombar-hero7\.png/.test(cssSrc),
+  'SA footer IS the hero7 slice (bottombar-hero7.png)');
+ok(/theme-san-andreas #dash-bottombar\{[^}]*height:126px/.test(cssSrc),
+  'SA footer is 126px, the hero art\'s own height');
 ok(!/theme-san-andreas #dash-bottombar\{[^}]*clip-path/.test(cssSrc),
   'SA footer silhouette comes from the art, not CSS clip-path');
-ok(/theme-san-andreas \.dash-tabs button\.on\{[^}]*background:#f0e6c8/.test(cssSrc),
-  'SA active tab is the hero cream pill, icon-only');
+ok(/theme-san-andreas \.dash-tabs button\.on\{[^}]*background:rgba\(240,230,200/.test(cssSrc),
+  'SA active tab is a cream parallelogram over the art\'s slot, icon-only');
 ok(/theme-san-andreas \.dash-tabs button span\{display:none/.test(cssSrc),
   'SA footer tabs are icon-only like the hero');
+ok(/theme-san-andreas \.sasp\{[^}]*left:1219px/.test(skinSaSrc),
+  'SA radio sits at the hero\'s radio x (1219px stage)');
+ok(/theme-san-andreas \.sasp\{[^}]*top:83px/.test(skinSaSrc),
+  'SA radio sits at the hero\'s radio y (83px stage), overlapping the bars');
+ok(/\.sasp-bezel/.test(skinSaSrc) && skinJsSa.includes('dashboard/radio-hero7.png'),
+  'SA Spotify outer skin is the hero7 radio slice');
 /* ---------- SA hero-match: authored dashboard art set ---------- */
 const saDash = (f) => path.join(REPO, 'themes/san-andreas/dashboard', f);
 for (const f of ['topbar.png', 'bottombar.png', 'maneuver.png', 'grove-panel.png', 'script-tomorrow.png', 'script-music.png', 'sa-logo.png']) {
@@ -643,32 +662,26 @@ ok(!fs.existsSync(saDash5('radio-bezel-pass4.png')), 'pass4 vintage-radio bezel 
 ok(!/topbar-pass4\.jpg/.test(cssSrc), 'no CSS references the deleted pass4 topbar');
 ok(!/footer-chrome-pass4\.jpg/.test(cssSrc), 'no CSS references the deleted pass4 footer');
 ok(!/radio-bezel-pass4\.png/.test(cssSrc), 'no CSS references the deleted pass4 bezel');
-/* header/footer: now the pass6 hero overlays (see PASS 6 block above) */
-/* radio: new lowrider frame, ~30% width, art left / meta right / controls bottom */
-const p5Frame = pngSize(saDash5('radio-frame-pass5.png'));
-const p5FrameBytes = fs.readFileSync(saDash5('radio-frame-pass5.png'));
-ok(p5Frame && p5Frame.w >= 1800 && p5Frame.h >= 1500 && p5FrameBytes[25] === 6,
-  'SA pass5 radio frame is >=1800x1500 PNG with true alpha');
-const skinJsSa = fs.readFileSync(path.join(REPO, 'themes/san-andreas/spotify-skin.js'), 'utf8');
-const skinSaSrc = fs.readFileSync(path.join(REPO, 'themes/san-andreas/spotify-skin.css'), 'utf8');
-ok(skinJsSa.includes('dashboard/radio-frame-pass5.png'),
-  'SA Spotify outer skin is the pass5 lowrider frame');
+/* header/footer: now the hero7 slices (see PASS 7 block above) */
+/* radio: hero7 slice, right side overlapping the bars like the hero */
+ok(!skinJsSa.includes('dashboard/radio-frame-pass5.png'),
+  'SA Spotify no longer uses the pass5 lowrider frame');
 ok(!skinJsSa.includes('spotify/hud.png'),
   'SA Spotify no longer uses the ornate hud.png');
 ok(skinJsSa.includes('data-lyrics-stage="1"'), 'SA skin keeps the shared lyric stage mount point');
-ok(/\.sasp-main\s*\{[^}]*grid-template-columns/.test(skinSaSrc),
-  'SA radio console is two columns: art left, metadata/lyrics right');
-ok(/\.sasp-controls\s*\{[^}]*grid-column:1\/-1/.test(skinSaSrc),
-  'SA transport controls are integrated at the bottom, spanning both columns');
-ok(/\.sasp\s*\{[^}]*aspect-ratio:\s*6\s*\/\s*5/.test(skinSaSrc),
-  'SA radio console keeps the frame 6:5 aspect (never stretched)');
-ok(/\.sasp\s*\{[^}]*width:\s*min\(600px,\s*31vw/.test(skinSaSrc),
-  'SA radio unit is ~30% width, never tiny');
+ok(/\.sasp-artwrap\s*\{[^}]*position:absolute/.test(skinSaSrc),
+  'SA album art sits absolutely over the art\'s left panel');
+ok(/\.sasp-side\s*\{[^}]*position:absolute/.test(skinSaSrc),
+  'SA track meta/lyrics sit absolutely over the art\'s right panel');
+ok(/\.sasp-progress\s*\{[^}]*position:absolute/.test(skinSaSrc),
+  'SA live progress sits absolutely over the art\'s drawn bar');
+ok(/\.sasp-tbtn\[data-act="toggle"\]/.test(skinSaSrc),
+  'SA transport buttons overlay the art\'s drawn icons');
 ok(skinSaSrc.includes("font-family:'Bank Gothic','Arial Narrow',sans-serif;"),
   'SA radio uses Bank Gothic, never blackletter for functional text');
-/* maneuver card: angular HUD console below the 72px header */
-ok(/theme-san-andreas\.nav-driving #maneuver-card\{[^}]*top:calc\(72px/.test(cssSrc),
-  'SA maneuver card clears the 72px header');
+/* maneuver card: angular HUD console below the 126px header */
+ok(/theme-san-andreas\.nav-driving #maneuver-card\{[^}]*top:calc\(126px/.test(cssSrc),
+  'SA maneuver card clears the 126px header');
 ok(/theme-san-andreas #maneuver-card::before\{[^}]*clip-path:polygon\(/.test(cssSrc),
   'SA maneuver card is chamfered, not a rounded web pill');
 ok(/theme-san-andreas #maneuver-card::after\{[^}]*#141a0c/.test(cssSrc),
@@ -685,8 +698,8 @@ ok(/theme-san-andreas #map-tools\{display:none\}/.test(cssSrc),
   'SA dashboard hides the floating zoom pills for the clean hero map');
 ok(/theme-san-andreas \.dash-zoom\{display:none/.test(cssSrc),
   'SA footer drops the minus/plus/recenter cluster — the map is the surface');
-ok(appSrc.includes("'san-andreas': { top: 72, bottom: 72 }"),
-  'DASH_BAR_HEIGHTS tracks the pass5 bar heights (72/72)');
+ok(appSrc.includes("'san-andreas': { top: 126, bottom: 126 }"),
+  'DASH_BAR_HEIGHTS tracks the hero7 bar heights (126/126)');
 ok(/theme-san-andreas #dash-dest\{[^}]*cursor:pointer/.test(cssSrc),
   'SA locality plate is the search entry now the pill is gone');
 ok(appSrc.includes("theme-san-andreas')) openPlanning('search')"),

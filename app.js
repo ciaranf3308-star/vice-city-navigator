@@ -1162,7 +1162,7 @@ const DASH_STAGE_NODES = ['map', 'fx', 'explore-ui', 'drive-hud', 'spotify-pane'
    layoutDashMenu() scales these by the live stage zoom. */
 const DASH_BAR_HEIGHTS = {
   'vice-city':   { top: 76, bottom: 100 },
-  'san-andreas': { top: 72, bottom: 72 },
+  'san-andreas': { top: 126, bottom: 126 },
   'gta-v':       { top: 56, bottom: 64 },
   'rdr2':        { top: 72, bottom: 72 },
 };

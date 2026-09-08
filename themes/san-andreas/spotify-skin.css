@@ -1,20 +1,29 @@
 /* ============================================================
-   San Andreas Spotify skin — HARD VISUAL RESET pass 5.
-   Live console inside the authored lowrider radio frame
-   (radio-frame-pass5.png, 1800x1500, true alpha). Right side,
-   ~30% width, vertically centred in the map area.
-   LEFT: album art. RIGHT: title/artist/progress/lyrics.
-   BOTTOM: integrated transport. Bank Gothic throughout;
+   San Andreas Spotify skin — HERO7 (2026-09-08).
+   The skin IS the user's hero art, sliced straight out of it
+   (radio-hero7.png, 701x544, true alpha): framed unit with the
+   baked San Andreas crown logo, two dark panels, drawn Spotify
+   logo / progress bar / transport icons, lowrider at the base.
+   Live HTML sits exactly over the art's panels and controls:
+   album art in the left panel, title/artist + lyrics in the
+   right panel, live progress over the drawn bar, live transport
+   over the drawn prev/play/next icons. Right side, overlapping
+   the dash bars exactly like the hero. Bank Gothic throughout;
    blackletter only on the idle station kicker.
+
+   LYRICS: owned by the shared kinetic karaoke engine (lyrics.js,
+     LRCLIB provider) mounted into [data-lyrics-stage] via
+     window.WSLyrics.render(). skin.setLyricsRenderer(fn) /
+     skin.clearLyrics() remain as an override hook. Never invent
+     lyric text, never scrape, never fake FFT from Spotify audio
+     (the Web API exposes none).
    ============================================================ */
 
-/* widget placement: right side, centred in the map area (bars are
-   equal height so canvas-centre == map-area centre) */
+/* widget placement: the hero's radio position — right side,
+   overlapping the header and footer bars (stage coordinates) */
 body.dashboard-mode.theme-san-andreas .sasp{
-  position:absolute;z-index:20;
-  right:36px;top:50%;transform:translateY(-50%);
-  width:min(600px,31vw,calc((100vh - 220px)*1.2));
-  aspect-ratio:6/5;
+  position:absolute;z-index:30;
+  left:1219px;top:83px;width:701px;height:544px;
   pointer-events:auto;
   filter:drop-shadow(0 18px 34px rgba(0,0,0,.65));
 }
@@ -22,27 +31,17 @@ body.dashboard-mode.theme-san-andreas .sasp-bezel{
   position:absolute;inset:0;width:100%;height:100%;z-index:0;
   pointer-events:none;
 }
-/* live console: sits in the frame's central opening, overlapping the
-   inner gold edge slightly so no map shows through */
+/* live layer fills the widget; children sit over the art */
 body.dashboard-mode.theme-san-andreas .sasp-main{
-  position:absolute;z-index:1;
-  left:24%;right:24%;top:26%;bottom:24.5%;
-  display:grid;
-  grid-template-columns:37% 1fr;
-  grid-template-rows:1fr auto;
-  gap:3% 5%;
-  background:linear-gradient(180deg,#100e0a 0%,#070605 100%);
-  box-shadow:inset 0 0 26px rgba(0,0,0,.9), inset 0 0 0 1px rgba(216,169,78,.28);
-  padding:4.5%;
+  position:absolute;inset:0;z-index:1;pointer-events:none;
   font-family:'Bank Gothic','Arial Narrow',sans-serif;
 }
-/* LEFT: album art */
+/* LEFT panel: album art, inside the art's cream border,
+   chamfered top corners like the panel */
 body.dashboard-mode.theme-san-andreas .sasp-artwrap{
-  grid-column:1;grid-row:1;position:relative;min-height:0;
-  border:2px solid rgba(240,230,200,.75);
-  box-shadow:0 0 0 1px rgba(216,169,78,.5), 0 4px 12px rgba(0,0,0,.6);
-  background:#000;overflow:hidden;
-  aspect-ratio:1/1;align-self:start;width:100%;
+  position:absolute;left:40px;top:107px;width:183px;height:230px;
+  background:#000;overflow:hidden;pointer-events:none;
+  clip-path:polygon(12px 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%,0 12px);
 }
 body.dashboard-mode.theme-san-andreas .sasp-art-idle{
   position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
@@ -53,11 +52,12 @@ body.dashboard-mode.theme-san-andreas .sasp-art{
   position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;
 }
 body.dashboard-mode.theme-san-andreas .sasp-art.on{opacity:1}
-/* RIGHT: metadata / progress / lyrics */
+/* RIGHT panel: track meta up top, lyrics fill the rest */
 body.dashboard-mode.theme-san-andreas .sasp-side{
-  grid-column:2;grid-row:1;display:flex;flex-direction:column;min-height:0;min-width:0;
+  position:absolute;left:274px;top:121px;width:277px;height:216px;
+  display:flex;flex-direction:column;min-height:0;min-width:0;pointer-events:none;
 }
-body.dashboard-mode.theme-san-andreas .sasp-track{margin-bottom:6px;min-width:0}
+body.dashboard-mode.theme-san-andreas .sasp-track{margin-bottom:6px;min-width:0;flex:0 0 auto}
 body.dashboard-mode.theme-san-andreas .sasp-title{
   font-size:15px;font-weight:700;letter-spacing:1.5px;color:#f7f0dc;
   text-shadow:0 2px 0 #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
@@ -67,14 +67,21 @@ body.dashboard-mode.theme-san-andreas .sasp-artist{
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 body.dashboard-mode.theme-san-andreas .sasp-artist.sasp-status{color:#d8a94e}
-body.dashboard-mode.theme-san-andreas .sasp-progress{margin:2px 0 6px}
+body.dashboard-mode.theme-san-andreas .sasp-lyrics{
+  flex:1;min-height:0;overflow:hidden;position:relative;
+  border-top:1px solid rgba(216,169,78,.3);padding-top:6px;
+}
+/* progress: live bar drawn exactly over the art's bar */
+body.dashboard-mode.theme-san-andreas .sasp-progress{
+  position:absolute;left:33px;top:406px;width:267px;pointer-events:auto;
+}
 body.dashboard-mode.theme-san-andreas .sasp-bar{
-  position:relative;height:8px;background:rgba(240,230,200,.14);
+  position:relative;height:8px;background:rgba(240,230,200,.16);
   border:1px solid rgba(216,169,78,.4);cursor:pointer;
 }
 body.dashboard-mode.theme-san-andreas .sasp-bar-fill{
   position:absolute;left:0;top:0;bottom:0;width:0%;
-  background:linear-gradient(90deg,#a8842f,#e8c56a);
+  background:linear-gradient(90deg,#1a9e4b,#2bd96a);
 }
 body.dashboard-mode.theme-san-andreas .sasp-bar-knob{
   position:absolute;top:50%;width:10px;height:10px;border-radius:50%;
@@ -82,37 +89,40 @@ body.dashboard-mode.theme-san-andreas .sasp-bar-knob{
 }
 body.dashboard-mode.theme-san-andreas .sasp-times{
   display:flex;justify-content:space-between;margin-top:3px;
-  font-size:10px;letter-spacing:1px;color:#8f8468;
+  font-size:9px;letter-spacing:1px;color:#8f8468;
 }
-body.dashboard-mode.theme-san-andreas .sasp-lyrics{
-  flex:1;min-height:0;overflow:hidden;position:relative;
-  border-top:1px solid rgba(216,169,78,.3);padding-top:6px;
-}
-/* BOTTOM: integrated transport */
+/* transport: live buttons over the art's drawn prev/play/next icons.
+   Opaque dark backing covers the art's static glyphs; cream icons
+   match the art 1:1. Shuffle/repeat stay as drawn art. */
 body.dashboard-mode.theme-san-andreas .sasp-controls{
-  grid-column:1/-1;grid-row:2;display:flex;align-items:center;justify-content:center;
-  gap:14px;padding-top:2px;
+  position:absolute;inset:0;pointer-events:none;
 }
 body.dashboard-mode.theme-san-andreas .sasp-tbtn{
-  width:44px;height:44px;border-radius:50%;cursor:pointer;
-  background:radial-gradient(circle at 35% 30%,#2a251c,#0d0b08 70%);
-  border:1px solid rgba(216,169,78,.65);color:#e8c56a;
+  position:absolute;width:46px;height:46px;border-radius:50%;cursor:pointer;
+  background:#0e0a05;border:0;color:#f0e6c8;
   display:flex;align-items:center;justify-content:center;
-  box-shadow:0 3px 8px rgba(0,0,0,.6), inset 0 1px 0 rgba(240,230,200,.15);
+  pointer-events:auto;padding:0;
 }
-body.dashboard-mode.theme-san-andreas .sasp-tbtn svg{width:20px;height:20px;fill:currentColor}
-body.dashboard-mode.theme-san-andreas .sasp-tbtn.big{width:56px;height:56px}
-body.dashboard-mode.theme-san-andreas .sasp-tbtn.big svg{width:26px;height:26px}
+body.dashboard-mode.theme-san-andreas .sasp-tbtn svg{width:22px;height:22px;fill:currentColor;
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.8))}
+body.dashboard-mode.theme-san-andreas .sasp-tbtn[data-act="prev"]{left:85px;top:443px}
+body.dashboard-mode.theme-san-andreas .sasp-tbtn[data-act="next"]{left:197px;top:443px}
+body.dashboard-mode.theme-san-andreas .sasp-tbtn[data-act="toggle"]{
+  left:141px;top:438px;width:56px;height:56px;
+  background:#0e0a05;border:2px solid #f0e6c8;
+  box-shadow:0 0 0 1px rgba(0,0,0,.6);
+}
+body.dashboard-mode.theme-san-andreas .sasp-tbtn[data-act="toggle"] svg{width:26px;height:26px}
 body.dashboard-mode.theme-san-andreas .sasp-tbtn:active{transform:scale(.92)}
-/* idle: the station kicker IS the one branding moment */
+/* idle: covers both panels, one branding moment */
 body.dashboard-mode.theme-san-andreas .sasp-idle{
   position:absolute;z-index:2;
-  left:24%;right:24%;top:26%;bottom:24.5%;
+  left:33px;top:100px;width:539px;height:244px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:10px;text-align:center;
-  background:radial-gradient(ellipse at 50% 40%,#14110b 0%,#070605 75%);
+  background:rgba(13,15,10,.94);
   box-shadow:inset 0 0 26px rgba(0,0,0,.9);
-  padding:6%;
+  padding:6%;box-sizing:border-box;pointer-events:auto;
 }
 body.dashboard-mode.theme-san-andreas .sasp-idle[hidden]{display:none}
 body.dashboard-mode.theme-san-andreas .sasp-idle-kicker{

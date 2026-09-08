@@ -1,28 +1,30 @@
-/* san-andreas dashboard theme — HARD VISUAL RESET pass 5 (2026-09-08):
-   The pass-4 rustic/military chrome is deleted. This is flat graphic
-   San Andreas menu/HUD chrome: deep black bars, cream borders, muted
-   olive + gold accents, subtle grunge only. Header 72 / footer 72
-   (10% each of the 720 stage); map area 80%. User-authorized hard reset;
-   see themes/LOCKED.json. */
+/* san-andreas dashboard theme — HERO7 pass (2026-09-08):
+   The pass-5/6 CSS-composed and generated bars are deleted. The bars
+   ARE the user's hero art, sliced straight out of it with true alpha:
+   topbar-hero7.png (1920x126), bottombar-hero7.png (1920x126),
+   radio-hero7.png (701x544, right side overlapping the bars).
+   Only live data/controls stay in DOM, positioned over the art.
+   Header 126 / footer 126; map area 468px. See themes/LOCKED.json. */
 body.theme-san-andreas .dest-pin{ background-image:url('assets/themes/san-andreas/blips/waypoint.png'); }
 body.dashboard-mode.theme-san-andreas #search-bar{display:none} /* hero composition: no search pill */
 body.dashboard-mode.theme-san-andreas #map{background:#ece0bd} /* map ground tone, never pure black */
 
-/* ============ TOP BAR: hero overlay art (140px), pass 6 ============
-   The bar IS the generated hero overlay (topbar-hero.png, 1920x140):
-   sepia skyline band, cream borders, notched lower edge, big Beckett
-   "San Andreas" logo overlapping left and spilling onto the map.
-   Only the live weather/date/time group stays in DOM, centred in the
-   top 72px over the skyline. */
+/* ============ TOP BAR: hero7 slice (126px) ============
+   The bar IS the user's hero art, sliced straight out of it
+   (topbar-hero7.png, 1920x126, true alpha): sepia sunset skyline,
+   palms, downtown LA, cream borders, dark angular centre plate,
+   big Beckett "San Andreas" crown logo spilling below the strip
+   onto the map. Only the live weather/date/time group stays in
+   DOM, centred in the art's dark plate (plate centre ~x741). */
 body.dashboard-mode.theme-san-andreas #dash-topbar{
-  display:block;position:absolute;left:0;right:0;top:0;height:140px;z-index:25;
-  background:url('dashboard/topbar-hero.png') left top/100% 100% no-repeat;
+  display:block;position:absolute;left:0;right:0;top:0;height:126px;z-index:25;
+  background:url('dashboard/topbar-hero7.png') left top/100% 100% no-repeat;
   pointer-events:none;
 }
 body.dashboard-mode.theme-san-andreas #dash-topbar .dash-chrome{
-  position:absolute;left:0;right:0;top:0;height:72px;z-index:1;
+  position:absolute;left:741px;top:52px;transform:translate(-50%,-50%);z-index:1;
   display:flex;align-items:center;justify-content:center;
-  gap:16px;background:none;padding:0 0 0 300px;box-sizing:border-box;
+  gap:16px;background:none;padding:0;box-sizing:border-box;
 }
 /* the baked logo owns the left ~450px — the live clock group centres
    in the remaining space so weather never sits under the wordmark */
@@ -59,85 +61,82 @@ body.dashboard-mode.theme-san-andreas #dash-time{
   font-size:27px;font-weight:700;letter-spacing:2px;color:#f7f0dc;text-shadow:0 2px 0 #000;
 }
 
-/* ============ BOTTOM BAR: hero overlay art (72px), pass 6 ============
-   The bar IS the generated hero overlay (bottombar-hero.png, 1920x72):
-   black console, cream border, notched top edge, "A Better Tomorrow"
-   script baked at the right end. Live DOM overlays: icon-only tabs
-   left (active = cream pill, like the hero), slim locality plate
-   centre, compass + arrival right (kept clear of the baked script). */
+/* ============ BOTTOM BAR: hero7 slice (126px) ============
+   The bar IS the user's hero art, sliced straight out of it
+   (bottombar-hero7.png, 1920x126, true alpha): black console,
+   cream angular borders, 4 parallelogram tab slots left,
+   star-flanked locality plate centre, 2 plates + palms + crown
+   right (partly behind the radio unit, like the hero).
+   Live DOM: 5 icon tabs over the left slots (active = cream
+   parallelogram), locality text in the star plate, compact
+   compass + arrival in the visible sliver of the right plates. */
 body.dashboard-mode.theme-san-andreas #dash-bottombar{
-  display:block;position:absolute;left:0;right:0;bottom:0;height:72px;z-index:25;
-  background:url('dashboard/bottombar-hero.png') left top/100% 100% no-repeat;
+  display:block;position:absolute;left:0;right:0;bottom:0;height:126px;z-index:25;
+  background:url('dashboard/bottombar-hero7.png') left top/100% 100% no-repeat;
   pointer-events:auto;
 }
 body.dashboard-mode.theme-san-andreas #dash-bottombar .dash-chrome{
-  position:absolute;inset:0;display:flex;align-items:center;gap:14px;
-  padding:0 270px 0 22px;background:none;
+  position:absolute;inset:0;background:none;pointer-events:none;
 }
-/* tabs: hero-style icon-only, cream line icons, cream dividers */
+/* tabs: icon-only cream line icons over the art's slots (x9-656, y57-113) */
 body.dashboard-mode.theme-san-andreas .dash-tabs{
-  display:flex;align-items:center;background:none;padding:0;pointer-events:none;
+  position:absolute;left:9px;top:57px;height:56px;
+  display:flex;align-items:stretch;background:none;padding:0;pointer-events:none;
 }
 body.dashboard-mode.theme-san-andreas .dash-tabs button{
-  display:flex;align-items:center;justify-content:center;
-  border:0;background:none;border-radius:12px;cursor:pointer;pointer-events:auto;
+  width:129px;display:flex;align-items:center;justify-content:center;
+  border:0;background:none;cursor:pointer;pointer-events:auto;
   color:#f0e6c8;filter:drop-shadow(0 2px 2px rgba(0,0,0,.7));
-  padding:10px 16px;white-space:nowrap;
+  padding:0;white-space:nowrap;
 }
-body.dashboard-mode.theme-san-andreas .dash-tabs button + button{
-  border-left:1px solid rgba(240,230,200,.35);border-radius:0;
-}
-body.dashboard-mode.theme-san-andreas .dash-tabs button + button.on{border-radius:12px}
 body.dashboard-mode.theme-san-andreas .dash-tabs button svg{
   width:30px;height:30px;
 }
 body.dashboard-mode.theme-san-andreas .dash-tabs button span{display:none}
 body.dashboard-mode.theme-san-andreas .dash-tabs button.on{
-  background:#f0e6c8;color:#14110b;box-shadow:none;filter:none;
+  background:rgba(240,230,200,.92);color:#14110b;filter:none;
+  clip-path:polygon(14px 0,100% 0,calc(100% - 14px) 100%,0 100%);
 }
 body.dashboard-mode.theme-san-andreas .dash-tabs button.on svg{
   filter:none;
 }
 /* generic web-map zoom/locate cluster: REMOVED, not recolored */
 body.dashboard-mode.theme-san-andreas .dash-zoom{display:none}
-/* locality: slim plate, cream Bank Gothic, thin gold outline */
+/* locality: plain cream text in the art's star plate (x684-1059, y62-109) */
 body.dashboard-mode.theme-san-andreas .dash-dest{
-  flex:1;display:flex;align-items:center;justify-content:center;
-  min-width:0;margin:0;padding:0;
+  position:absolute;left:684px;top:62px;width:375px;height:47px;
+  display:flex;align-items:center;justify-content:center;
+  min-width:0;margin:0;padding:0;pointer-events:auto;
 }
 body.dashboard-mode.theme-san-andreas #dash-dest{
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:13px;font-weight:700;
-  letter-spacing:3px;color:#f0e6c8;cursor:pointer;
-  background:rgba(0,0,0,.5);
-  border:1px solid rgba(216,169,78,.5);border-radius:0;
-  box-shadow:inset 0 2px 6px rgba(0,0,0,.7);
-  padding:6px 20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70%;
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:15px;font-weight:700;
+  letter-spacing:3px;color:#f0e6c8;cursor:pointer;background:none;border:0;
+  padding:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
   text-shadow:0 2px 0 #000;
 }
-/* right cluster: compass | arrival — no placeholders when idle */
+/* right cluster: compact compass + arrival in the visible sliver (x1106-1219) */
 body.dashboard-mode.theme-san-andreas .dash-trip{
-  position:relative;display:flex;align-items:center;gap:9px;padding:0 0 0 16px;pointer-events:none;
+  position:absolute;left:1106px;top:57px;width:113px;height:56px;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  padding:0;pointer-events:none;
 }
-body.dashboard-mode.theme-san-andreas .dash-trip::before{
-  content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);
-  width:1px;height:34px;background:rgba(216,169,78,.4);
-}
+body.dashboard-mode.theme-san-andreas .dash-trip::before{display:none}
 body.dashboard-mode.theme-san-andreas #dash-compass{
-  font-size:20px;color:#e8a33d;text-shadow:0 2px 0 #000, 0 0 8px rgba(232,163,61,.4);
+  font-size:24px;color:#e8a33d;text-shadow:0 2px 0 #000, 0 0 8px rgba(232,163,61,.4);
 }
 body.dashboard-mode.theme-san-andreas .dash-north{
-  font-family:'Bank Gothic',sans-serif;font-size:12px;color:#c9b98f;
-  text-shadow:0 2px 0 #000;margin-left:-6px;
+  font-family:'Bank Gothic',sans-serif;font-size:10px;color:#c9b98f;
+  text-shadow:0 2px 0 #000;margin-left:-5px;
 }
 body.dashboard-mode.theme-san-andreas #dash-eta{
   white-space:nowrap;text-transform:uppercase;
   font-family:'Bank Gothic','Arial Narrow',sans-serif;text-shadow:0 2px 0 #000;
 }
 body.dashboard-mode.theme-san-andreas #dash-eta .eta-label{
-  display:block;font-size:9px;letter-spacing:2px;color:#c9b98f;
+  display:block;font-size:8px;letter-spacing:1px;color:#c9b98f;
 }
 body.dashboard-mode.theme-san-andreas #dash-eta .eta-time{
-  display:block;font-size:19px;font-weight:700;letter-spacing:1px;color:#f7f0dc;
+  display:block;font-size:15px;font-weight:700;letter-spacing:1px;color:#f7f0dc;
 }
 /* the scenic tag block is retired */
 body.dashboard-mode.theme-san-andreas .dash-tag{display:none}
@@ -148,7 +147,7 @@ body.dashboard-mode.theme-san-andreas .dash-tag{display:none}
    modern rectangle. Huge cream arrow + distance, gold road name,
    compact stats row + END. */
 body.dashboard-mode.theme-san-andreas.nav-driving #maneuver-card{
-  top:calc(72px + 12px + env(safe-area-inset-top));left:22px;right:auto;
+  top:calc(126px + 12px + env(safe-area-inset-top));left:22px;right:auto;
   width:420px;max-width:420px;
   background:none;border:0;border-radius:0;
   display:flex;align-items:center;gap:20px;padding:20px 24px;
@@ -207,7 +206,7 @@ body.dashboard-mode.theme-san-andreas #sa-grove-panel{display:none}
 body.dashboard-mode.theme-san-andreas #map-tools{display:none}
 
 /* ============ bar-height clearances ============ */
-body.dashboard-mode.theme-san-andreas #menu-panel{top:86px;bottom:86px}
+body.dashboard-mode.theme-san-andreas #menu-panel{top:140px;bottom:140px}
 
 /* ============ SA drive pill: REMOVED in dashboard (pass 5) ============
    The floating trip/search/voice/end bar is gone, not recolored.

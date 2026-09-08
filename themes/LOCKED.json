@@ -10,8 +10,8 @@
   },
   "san-andreas": {
     "locked": true,
-    "sha256": "1761d0eb6b9c94264fcb3fadd4c75d90d1ca6ba2be07b338334cfe14e4592b2a",
-    "note": "HARD VISUAL RESET pass 5 (2026-09-08): flat black HUD chrome 72/72, lowrider radio frame, game-map style. User-authorized."
+    "sha256": "64f2a9b35fe921e6fdcaf07220c8249ac1d670484555b778a553d614cde8dfcb",
+    "note": "HERO7 (2026-09-08): bars are slices of the user's own hero art (topbar/bottombar/radio-hero7.png, true alpha); live DOM only over the art. Header 126 / footer 126. User-authorized."
   },
   "vice-city": {
     "locked": false,

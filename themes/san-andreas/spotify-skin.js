@@ -2,15 +2,14 @@
    WayStation — San Andreas Spotify skin (dashboard mode only),
    HARD VISUAL RESET pass 5.
 
-   The outer skin is the authored lowrider radio-console frame
-   (themes/san-andreas/dashboard/radio-frame-pass5.png, 1800x1500,
-   true alpha outside the frame AND inside the opening). Live HTML
-   sits in the frame's central opening — one branding moment
-   (the idle kicker), no sticker clutter.
-
-   Measured interior opening (fractions of the frame): x 0.24-0.76,
-   y 0.27-0.75. LEFT: album art. RIGHT: title/artist/progress/lyrics.
-   BOTTOM: integrated transport controls.
+   HERO7 (2026-09-08): the outer skin is the user's hero art sliced
+   straight out of it (themes/san-andreas/dashboard/radio-hero7.png,
+   701x544, true alpha). Framed unit with baked San Andreas crown
+   logo, two dark panels, drawn Spotify logo / progress / transport,
+   lowrider at the base — right side, overlapping the dash bars.
+   Live HTML sits over the art: album art in the left panel,
+   title/artist + lyrics in the right panel, live progress over the
+   drawn bar, live transport over the drawn prev/play/next icons.
 
    LYRICS: owned by the shared kinetic karaoke engine (lyrics.js,
      LRCLIB provider) mounted into [data-lyrics-stage] via
@@ -22,7 +21,7 @@
 'use strict';
 
 (function () {
-  const BEZEL = 'themes/san-andreas/dashboard/radio-frame-pass5.png';
+  const BEZEL = 'themes/san-andreas/dashboard/radio-hero7.png';
 
   const SVG = {
     play: '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',
@@ -67,14 +66,14 @@
               '<div class="sasp-title">Radio Los Santos</div>' +
               '<div class="sasp-artist">Connect Spotify to play</div>' +
             '</div>' +
-            '<div class="sasp-progress">' +
-              '<div class="sasp-bar" role="slider" aria-label="Seek" tabindex="0" aria-valuemin="0" aria-valuemax="100">' +
-                '<div class="sasp-bar-fill"></div>' +
-                '<div class="sasp-bar-knob"></div>' +
-              '</div>' +
-              '<div class="sasp-times"><span class="sasp-elapsed">0:00</span><span class="sasp-duration">0:00</span></div>' +
-            '</div>' +
             '<div class="sasp-lyrics" data-lyrics-stage="1"></div>' +
+          '</div>' +
+          '<div class="sasp-progress">' +
+            '<div class="sasp-bar" role="slider" aria-label="Seek" tabindex="0" aria-valuemin="0" aria-valuemax="100">' +
+              '<div class="sasp-bar-fill"></div>' +
+              '<div class="sasp-bar-knob"></div>' +
+            '</div>' +
+            '<div class="sasp-times"><span class="sasp-elapsed">0:00</span><span class="sasp-duration">0:00</span></div>' +
           '</div>' +
           '<div class="sasp-controls">' +
             '<button class="sasp-tbtn" data-act="prev" aria-label="Previous">' + SVG.prev + '</button>' +
