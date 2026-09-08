@@ -218,17 +218,15 @@ async function initMap() {
     toast('Could not load the map style. Check your connection.');
     return;
   }
+  if (window.maplibregl && !maplibregl.supported()) {
+    mapEl.innerHTML = '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#ff71ce;font:16px sans-serif;text-align:center;padding:20px">Map needs WebGL.<br>Try a browser with hardware acceleration enabled.</div>';
+    toast('Map could not start: WebGL unavailable.');
+    return;
+  }
   map = new maplibregl.Map({
     container: mapEl, style, center: DUBLIN, zoom: 12,
     attributionControl: { compact: true }
   });
-  // TEMP-DIAG: surface map errors visibly (no console access in test env)
-  try {
-    map.on('error', function(e) {
-      var m = (e && e.error && e.error.message) || (e && e.message) || 'map error';
-      try { toast('MAP: ' + m); } catch (_) {}
-    });
-  } catch (_) {}
   map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
   map.on('load', () => {
     try { map.on('move', syncDashCompass); } catch (e) {}
