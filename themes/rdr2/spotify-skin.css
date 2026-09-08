@@ -63,19 +63,25 @@
   display: flex; flex-direction: column; justify-content: center;
   text-align: center; gap: 1cqh;
   pointer-events: none;
+  container-type: inline-size;
 }
 .rdsp-lyrics.has-lyrics { pointer-events: auto; }
-.rd-lyric-line {
-  font-size: 4cqw; line-height: 1.35; color: #e8d9b0; opacity: .6;
-  text-shadow: 0 2px 3px #000;
-  transition: opacity .3s ease;
-}
-.rd-lyric-line.ghost { opacity: .32; font-size: 3.6cqw; }
-.rd-lyric-line.next { opacity: .52; }
-.rd-lyric-line.active {
-  opacity: 1; font-size: 4.8cqw; color: #d8b36a;
-  text-shadow: 0 2px 3px #000, 0 0 12px rgba(216,179,106,.4);
-}
+/* WSLyrics builds .wslyr with absolute slots — contain them here */
+.rdsp-lyrics .wslyr { position: absolute; inset: 0; }
+/* Clamp lyric composition extremes: keep variation, lose the
+   tiny / lost-in-corner / washed-out outliers. */
+.rdsp-lyrics .wslyr-hero.s-xl { font-size: 26px; }
+.rdsp-lyrics .wslyr-hero.s-lg { font-size: 21px; }
+.rdsp-lyrics .wslyr-hero.s-md { font-size: 18px; }
+.rdsp-lyrics .wslyr-hero.s-sm { font-size: 17px; } /* never tiny */
+.rdsp-lyrics .wslyr-hero.v-up { top: 20%; max-height: 66%; }
+.rdsp-lyrics .wslyr-hero.v-low { top: 40%; max-height: 52%; }
+.rdsp-lyrics .wslyr-hero { left: 8%; right: 8%; }
+.rdsp-lyrics .wslyr-prev { font-size: 13px; opacity: .55; }
+.rdsp-lyrics .wslyr-next { font-size: 12px; opacity: .55; }
+.rdsp-lyrics .wslyr-hero .wslyr-w {
+  text-shadow: 0 2px 8px rgba(0,0,0,.9), 0 0 2px rgba(0,0,0,.9);
+} /* guarantee contrast on dark wood */
 
 /* ---------- track on the parchment ---------- */
 .rdsp-track {
@@ -88,10 +94,12 @@
   font-size: 5.4cqw; letter-spacing: .04em; line-height: 1.15;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   color: #2a1f16;
+  text-shadow: 0 1px 0 rgba(232,217,176,.3);
 }
 .rdsp-artist {
   margin-top: .5cqh;
-  font-size: 3.8cqw; letter-spacing: .06em;
+  font-family: 'RDR Lino', Georgia, serif;
+  font-size: 3.8cqw; letter-spacing: .08em; text-transform: uppercase;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   color: #7a2a24;
 }
@@ -163,7 +171,7 @@
   text-align: center; gap: 1.2cqh;
   pointer-events: none;
 }
-.rdsp-idle[hidden] { display: none; }
+.rdsp-idle[hidden], .rdsp-idle.is-hidden { display: none !important; }
 /* Disconnected: the idle block owns the parchment — hide progress, the
    lyric stage and the dead transport so nothing overlaps. */
 .rdsp.is-idle .rdsp-progress { display: none; }
