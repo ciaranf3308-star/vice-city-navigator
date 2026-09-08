@@ -25,7 +25,6 @@ body.dashboard-mode.theme-vice-city #dash-topbar::after{
   background-repeat:no-repeat;
   opacity:.9;z-index:1;
 }
-body.dashboard-mode.theme-vice-city #dash-topbar::after{display:none}
 body.dashboard-mode.theme-vice-city #dash-topbar .dash-chrome{
   position:absolute;inset:0;display:flex;align-items:center;gap:28px;
   padding:0 24px;background:none;
