@@ -9,8 +9,8 @@
     "sha256": null
   },
   "san-andreas": {
-    "locked": false,
-    "sha256": null
+    "locked": true,
+    "sha256": "b0c2d38168ea816fca3fac1a57865a23834b21497f07508ef8211af8fe06419d"
   },
   "vice-city": {
     "locked": true,
