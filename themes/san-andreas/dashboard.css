@@ -15,10 +15,10 @@ body.dashboard-mode.theme-san-andreas #dash-topbar::before{
   clip-path:polygon(0 0,100% 0,100% 82%,97.5% 100%,2.5% 100%,0 82%);
 }
 body.dashboard-mode.theme-san-andreas #dash-topbar::after{
-  content:"";position:absolute;left:0;right:0;bottom:0;height:3px;
-  background:linear-gradient(90deg,transparent,#f5c96b 6%,#f5c96b 94%,transparent);
+  content:"";position:absolute;left:0;right:0;bottom:0;height:6px;
+  background:linear-gradient(90deg,#8a6a2a,#f5c96b 15%,#f5c96b 85%,#8a6a2a);
   clip-path:polygon(0 0,2.5% 100%,97.5% 100%,100% 0);
-  z-index:2;
+  z-index:2;box-shadow:0 2px 4px rgba(0,0,0,.6);
 }
 body.dashboard-mode.theme-san-andreas #dash-topbar .dash-chrome{
   position:absolute;inset:0;display:block;background:none;overflow:visible;padding:0;
@@ -32,22 +32,22 @@ body.dashboard-mode.theme-san-andreas .dash-brand .dash-logo,
 body.dashboard-mode.theme-san-andreas .dash-brand .dash-palm{display:none}
 /* hero wordmark: large, overlapping the topbar bottom edge onto the map */
 body.dashboard-mode.theme-san-andreas #dash-topbar .sa-logo{
-  display:block;position:absolute;left:20px;top:6px;
-  height:112px;width:auto;max-width:30vw;object-fit:contain;
+  display:block;position:absolute;left:20px;top:2px;
+  height:140px;width:auto;max-width:32vw;object-fit:contain;
   z-index:30;pointer-events:none;
-  filter:drop-shadow(0 4px 8px rgba(0,0,0,.9)) drop-shadow(0 0 3px rgba(0,0,0,.95));
+  filter:drop-shadow(0 4px 8px rgba(0,0,0,.9));
 }
 /* "A Better Tomorrow" script rides the photo at far right, hero-style */
 body.dashboard-mode.theme-san-andreas #dash-topbar .dash-tomorrow{
-  position:absolute;right:22px;top:50%;transform:translateY(-50%);
-  height:64px;width:auto;max-width:260px;object-fit:contain;
-  filter:drop-shadow(0 2px 4px rgba(0,0,0,.8));pointer-events:none;z-index:5;
+  position:absolute;right:28px;top:50%;transform:translateY(-50%);
+  height:84px;width:auto;max-width:340px;object-fit:contain;
+  filter:drop-shadow(0 2px 6px rgba(0,0,0,.9));pointer-events:none;z-index:5;
 }
 /* "Los Santos" script sits left of the Tomorrow tag, hero-style */
 body.dashboard-mode.theme-san-andreas #dash-topbar .dash-los-santos{
-  display:block;position:absolute;right:270px;top:50%;transform:translateY(-50%);
-  height:48px;width:auto;max-width:280px;object-fit:contain;
-  filter:drop-shadow(0 2px 4px rgba(0,0,0,.8));pointer-events:none;z-index:5;
+  display:block;position:absolute;right:340px;top:50%;transform:translateY(-50%);
+  height:72px;width:auto;max-width:380px;object-fit:contain;
+  filter:drop-shadow(0 2px 6px rgba(0,0,0,.9));pointer-events:none;z-index:5;
 }
 /* live overlays, placed with intent: temp+icon left/centre, date centre,
    time right-centre; cream HUD text with a subtle black shadow */
@@ -55,9 +55,8 @@ body.dashboard-mode.theme-san-andreas .dash-wx{
   position:absolute;left:30%;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:12px;
   font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:34px;font-weight:700;
   letter-spacing:2px;color:#fff;
-  background:rgba(0,0,0,.85);padding:8px 20px;border-radius:12px;
-  border:2px solid rgba(255,255,255,.15);
-  text-shadow:0 2px 4px rgba(0,0,0,.9);
+  -webkit-text-stroke:2px #000;paint-order:stroke fill;
+  text-shadow:0 3px 6px rgba(0,0,0,.9);
 }
 body.dashboard-mode.theme-san-andreas #dash-wxicon{display:inline-flex;width:34px;height:34px}
 body.dashboard-mode.theme-san-andreas #dash-wxicon svg{width:100%;height:100%}
@@ -68,16 +67,14 @@ body.dashboard-mode.theme-san-andreas .dash-clock{
 body.dashboard-mode.theme-san-andreas #dash-date{
   position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
   font-size:28px;font-weight:700;color:#fff;
-  background:rgba(0,0,0,.85);padding:8px 20px;border-radius:12px;
-  border:2px solid rgba(255,255,255,.15);
-  text-shadow:0 2px 4px rgba(0,0,0,.9);
+  -webkit-text-stroke:2px #000;paint-order:stroke fill;
+  text-shadow:0 3px 6px rgba(0,0,0,.9);
 }
 body.dashboard-mode.theme-san-andreas #dash-time{
   position:absolute;left:64%;top:50%;transform:translate(-50%,-50%);
   font-size:38px;font-weight:700;color:#fff;
-  background:rgba(0,0,0,.85);padding:8px 20px;border-radius:12px;
-  border:2px solid rgba(255,255,255,.15);
-  text-shadow:0 2px 4px rgba(0,0,0,.9);
+  -webkit-text-stroke:2px #000;paint-order:stroke fill;
+  text-shadow:0 3px 6px rgba(0,0,0,.9);
 }
 /* ---------- bottom console: designed CSS console, no photo strip ---------- */
 body.dashboard-mode.theme-san-andreas #dash-bottombar{

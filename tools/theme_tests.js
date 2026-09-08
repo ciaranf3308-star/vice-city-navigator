@@ -166,7 +166,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v35"), 'SW theme cache v31');
+ok(swSrc.includes("ws-theme-v36"), 'SW theme cache v31');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
@@ -579,7 +579,7 @@ ok(appSrc.includes("applyBodyTheme(VCNThemes.currentId())") && /Paint the theme 
   'theme chrome paints before tiles arrive (no chrome-less dashboard offline)');
 ok(indexSrc.includes('class="sa-logo"'), 'SA dashboard mounts the standalone wordmark element');
 ok(indexSrc.includes('dashboard/sa-logo.png'), 'SA wordmark uses the extracted logo art');
-ok(/theme-san-andreas #dash-topbar \.sa-logo\{[^}]*height:112px/.test(cssSrc),
+ok(/theme-san-andreas #dash-topbar \.sa-logo\{[^}]*height:140px/.test(cssSrc),
   'SA wordmark is hero-sized and overlaps the map');
 ok(/theme-san-andreas #dash-bottombar \.dash-chrome\{[^}]*display:flex/.test(cssSrc),
   'SA bottom console lays out with flex, not art-slot coordinates');
@@ -1222,7 +1222,7 @@ process.exit(fail ? 1 : 0);
 ok(/function saArrowSvg/.test(appSrc), 'SA has its own block-arrow set (hero font-theme match)');
 ok(/t\.id === 'san-andreas'/.test(appSrc) || /id === "san-andreas"/.test(appSrc), 'SA arrows branch on the san-andreas theme');
 ok(cssSrc.includes('-webkit-text-stroke'), 'SA dash type has the heavy outlined SA treatment');
-ok(/theme-san-andreas \.sa-logo\{[^}]*height:112px/.test(cssSrc),
+ok(/theme-san-andreas \.sa-logo\{[^}]*height:140px/.test(cssSrc),
   'SA logo is hero-big (112px) overlapping the map, not clipped');
 ok(indexSrc.indexOf('class="sa-logo"') > indexSrc.indexOf('</header>'),
   'SA logo sits outside the clipped topbar so it can overlap');
