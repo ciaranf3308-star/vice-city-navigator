@@ -8,54 +8,24 @@ body.theme-san-andreas .dest-pin{ background-image:url('assets/themes/san-andrea
 body.dashboard-mode.theme-san-andreas #search-bar{display:none} /* hero composition: no search pill */
 body.dashboard-mode.theme-san-andreas #map{background:#ece0bd} /* map ground tone, never pure black */
 
-/* ============ TOP BAR: HUD silhouette (72px), pass 5 ============
-   Designed angular bar, not a photo rectangle: deep-black base, black
-   top framing, cream lower border + gold hairline, chamfered lower
-   corners. LEFT = strong SA branding. CENTER = weather/date/time as ONE
-   mathematically centred group. RIGHT = Los Santos skyline art panel
-   (supporting atmosphere, blended into black). */
+/* ============ TOP BAR: hero overlay art (140px), pass 6 ============
+   The bar IS the generated hero overlay (topbar-hero.png, 1920x140):
+   sepia skyline band, cream borders, notched lower edge, big Beckett
+   "San Andreas" logo overlapping left and spilling onto the map.
+   Only the live weather/date/time group stays in DOM, centred in the
+   top 72px over the skyline. */
 body.dashboard-mode.theme-san-andreas #dash-topbar{
-  display:block;position:absolute;left:0;right:0;top:0;height:72px;z-index:25;
-  background:#0a0908;
-  box-shadow:inset 0 4px 0 #000,
-    inset 0 -3px 0 #f0e6c8,
-    inset 0 -4px 0 rgba(216,169,78,.85),
-    0 6px 18px rgba(0,0,0,.6);
-  clip-path:polygon(0 0,100% 0,100% calc(100% - 9px),calc(100% - 16px) 100%,16px 100%,0 calc(100% - 9px));
+  display:block;position:absolute;left:0;right:0;top:0;height:140px;z-index:25;
+  background:url('dashboard/topbar-hero.png') left top/100% 100% no-repeat;
   pointer-events:none;
 }
-/* skyline art: right-side panel only, blended into the black base */
-body.dashboard-mode.theme-san-andreas #dash-topbar::after{
-  content:"";position:absolute;top:0;bottom:5px;right:0;width:37%;z-index:0;
-  background:url('dashboard/skyline-strip.jpg') 70% 38%/cover no-repeat;
-  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 32%);
-  mask-image:linear-gradient(90deg,transparent 0,#000 32%);
-  opacity:.92;
-}
 body.dashboard-mode.theme-san-andreas #dash-topbar .dash-chrome{
-  position:absolute;inset:0;z-index:1;display:flex;align-items:center;justify-content:center;
+  position:absolute;left:0;right:0;top:0;height:72px;z-index:1;
+  display:flex;align-items:center;justify-content:center;
   gap:16px;background:none;padding:0;
 }
-/* LEFT: strong SA branding — WAYSTATION tag over blackletter wordmark */
-body.dashboard-mode.theme-san-andreas .dash-brand{
-  position:absolute;left:26px;top:0;bottom:0;display:flex;flex-direction:column;
-  justify-content:center;margin:0;
-}
-body.dashboard-mode.theme-san-andreas .dash-brand .dash-logo,
-body.dashboard-mode.theme-san-andreas .dash-brand .dash-palm,
-body.dashboard-mode.theme-san-andreas #dash-topbar .sa-logo,
-body.dashboard-mode.theme-san-andreas #dash-topbar .dash-tomorrow,
-body.dashboard-mode.theme-san-andreas #dash-topbar .dash-los-santos{display:none}
-body.dashboard-mode.theme-san-andreas .dash-brand::before{
-  content:"WAYSTATION";
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:10px;font-weight:700;
-  letter-spacing:5px;color:#d8a94e;text-shadow:0 1px 0 #000;margin-bottom:2px;
-}
-body.dashboard-mode.theme-san-andreas .dash-brand::after{
-  content:"San Andreas";
-  font-family:'Beckett','Pricedown Bl',serif;font-size:32px;line-height:1;
-  color:#f5edd8;text-shadow:0 2px 0 #000, 0 0 12px rgba(0,0,0,.7);white-space:nowrap;
-}
+/* branding lives in the art now — no DOM wordmark */
+body.dashboard-mode.theme-san-andreas .dash-brand{display:none}
 /* CENTER: weather + date + time, one centred group (in-flow, justify-center) */
 body.dashboard-mode.theme-san-andreas .dash-wx{
   position:static;transform:none;
@@ -79,48 +49,44 @@ body.dashboard-mode.theme-san-andreas #dash-time{
   font-size:27px;font-weight:700;letter-spacing:2px;color:#f7f0dc;text-shadow:0 2px 0 #000;
 }
 
-/* ============ BOTTOM BAR: flat HUD console (72px), pass 5 ============
-   Deep black base, cream top border + gold hairline, chamfered top
-   corners, subtle grunge only. Flat tabs (active = cream + gold
-   underline, never a filled tile). Slim locality plate centre.
-   Compass + live arrival right. No textures, no wood, no metal. */
+/* ============ BOTTOM BAR: hero overlay art (72px), pass 6 ============
+   The bar IS the generated hero overlay (bottombar-hero.png, 1920x72):
+   black console, cream border, notched top edge, "A Better Tomorrow"
+   script baked at the right end. Live DOM overlays: icon-only tabs
+   left (active = cream pill, like the hero), slim locality plate
+   centre, compass + arrival right (kept clear of the baked script). */
 body.dashboard-mode.theme-san-andreas #dash-bottombar{
   display:block;position:absolute;left:0;right:0;bottom:0;height:72px;z-index:25;
-  background:linear-gradient(180deg,#100e0b 0%,#0b0a08 100%);
-  box-shadow:inset 0 3px 0 #f0e6c8,
-    inset 0 4px 0 rgba(216,169,78,.85),
-    inset 0 -5px 0 #000,
-    0 -8px 22px rgba(0,0,0,.55);
-  clip-path:polygon(16px 0,calc(100% - 16px) 0,100% 9px,100% 100%,0 100%,0 9px);
+  background:url('dashboard/bottombar-hero.png') left top/100% 100% no-repeat;
   pointer-events:auto;
 }
 body.dashboard-mode.theme-san-andreas #dash-bottombar .dash-chrome{
   position:absolute;inset:0;display:flex;align-items:center;gap:14px;
-  padding:0 22px;background:none;
+  padding:0 250px 0 22px;background:none;
 }
-/* tabs: flat functional type, thin cream separators — never tiles */
+/* tabs: hero-style icon-only, cream line icons, cream dividers */
 body.dashboard-mode.theme-san-andreas .dash-tabs{
   display:flex;align-items:center;background:none;padding:0;pointer-events:none;
 }
 body.dashboard-mode.theme-san-andreas .dash-tabs button{
-  display:flex;flex-direction:column;align-items:center;gap:3px;
-  border:0;background:none;border-radius:0;cursor:pointer;pointer-events:auto;
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:11px;font-weight:700;
-  letter-spacing:2px;text-transform:uppercase;color:#a89a78;
-  padding:8px 13px 7px;white-space:nowrap;
-  text-shadow:0 2px 0 #000;
+  display:flex;align-items:center;justify-content:center;
+  border:0;background:none;border-radius:12px;cursor:pointer;pointer-events:auto;
+  color:#f0e6c8;filter:drop-shadow(0 2px 2px rgba(0,0,0,.7));
+  padding:10px 16px;white-space:nowrap;
 }
 body.dashboard-mode.theme-san-andreas .dash-tabs button + button{
-  border-left:1px solid rgba(240,230,200,.14);
+  border-left:1px solid rgba(240,230,200,.35);border-radius:0;
 }
+body.dashboard-mode.theme-san-andreas .dash-tabs button + button.on{border-radius:12px}
 body.dashboard-mode.theme-san-andreas .dash-tabs button svg{
-  width:22px;height:22px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.7));
+  width:30px;height:30px;
 }
+body.dashboard-mode.theme-san-andreas .dash-tabs button span{display:none}
 body.dashboard-mode.theme-san-andreas .dash-tabs button.on{
-  color:#f7f0dc;box-shadow:inset 0 -3px 0 #d8a94e;
+  background:#f0e6c8;color:#14110b;box-shadow:none;filter:none;
 }
 body.dashboard-mode.theme-san-andreas .dash-tabs button.on svg{
-  filter:drop-shadow(0 0 6px rgba(216,169,78,.55));
+  filter:none;
 }
 /* generic web-map zoom/locate cluster: REMOVED, not recolored */
 body.dashboard-mode.theme-san-andreas .dash-zoom{display:none}

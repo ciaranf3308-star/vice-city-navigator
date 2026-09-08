@@ -392,8 +392,8 @@ ok(cssSrc.includes('body.dashboard-mode.nav-driving #drive-bar'), 'drive trip ba
 ok(!cssSrc.includes('.dash-skyline') && !indexSrc.includes('dash-skyline'), 'old skyline img fully retired in favour of the authored top bar strip');
 ok(!/topbar-composite\.jpg/.test(cssSrc),
   'SA top bar is CSS chrome now — the photo collage is retired');
-ok(/theme-san-andreas #dash-topbar\{[^}]*clip-path:polygon/.test(cssSrc),
-  'SA top bar is a designed HUD silhouette (pass5), not a photo panorama');
+ok(cssSrc.includes("#dash-topbar{") && /topbar-hero\.png/.test(cssSrc),
+  'SA top bar is the generated hero overlay (pass6), not a photo panorama');
 ok(!/tbar-night/.test(indexSrc) && !/tbar-sunset/.test(indexSrc),
   'SA top bar has no split-panel divs');
 ok(!/theme-san-andreas #dash-topbar\{[^}]*radial-gradient\(120px 120px at 62%/.test(cssSrc),
@@ -429,7 +429,7 @@ ok(cssSrc.includes('vc-logo-script'), 'VC hero logo script styled');
    layouts and drive-HUD clearances, not one shared silhouette ---------- */
 const barHeights = {
   'vice-city': ['78px', '100px'],
-  'san-andreas': ['72px', '72px'],
+  'san-andreas': ['140px', '72px'], // pass6: 140px shell lets the baked logo spill onto the map; drive clearance stays 72
   'gta-v': ['56px', '64px'],
   'rdr2': ['72px', '72px'],
 };
@@ -456,8 +456,8 @@ ok(/theme-vice-city #dash-bottombar\{[^}]*rgba\(1,205,254/.test(cssSrc), 'VC foo
 ok(/theme-vice-city \.dash-tag::before/.test(cssSrc), 'VC footer separates arrival and slogan with a divider');
 ok(/theme-vice-city #dash-dest\{[^}]*overflow:visible/.test(cssSrc), 'VC locality plate never truncates');
 ok(!/theme-vice-city \.dash-tabs button\{[^}]*linear-gradient/.test(cssSrc), 'VC tabs are flat neon text, not chunky buttons');
-ok(/theme-san-andreas \.dash-tabs button\.on\{[^}]*box-shadow:inset 0 -3px 0 #d8a94e/.test(cssSrc),
-  'SA active tab is a muted gold underline, not a chunky tile');
+ok(/\.dash-tabs button\.on/.test(cssSrc) && cssSrc.includes("background:#f0e6c8"),
+  'SA active tab is the hero cream pill (icon-only), not a chunky tile');
 ok(/theme-gta-v \.dash-tabs button\{[^}]*border-left:1px solid/.test(cssSrc), 'V tab strip uses hairline separators');
 ok(/theme-gta-v \.dash-tag\{display:none\}/.test(cssSrc), 'V drops the 80s script tagline');
 ok(/theme-rdr2 \.dash-tag\{display:none\}/.test(cssSrc), 'RDR2 drops the 80s script tagline');
@@ -588,10 +588,41 @@ ok(vcPaint('vc-buildings')['fill-color'] === '#b7b7c7', 'VC buildings: separated
 ok(vcPaint('vc-road-minor')['line-color'] === '#eef0f6', 'VC minor roads: white streets (hero)');
 ok(vcPaint('vc-road-primary')['line-color'] === '#18182d', 'VC arterials: darker navy core (hero punch)');
 ok(vcPaint('vc-road-motorway')['line-color'] === '#0e0e22', 'VC motorways: near-black navy (hero contrast)');
-ok(/theme-san-andreas #dash-bottombar\s*\{[^}]*inset 0 3px 0 #f0e6c8/.test(cssSrc),
-  'SA bottom bar wears the cream top border (pass5 flat HUD)');
-ok(/theme-san-andreas #dash-bottombar\s*\{[^}]*background:linear-gradient\(180deg,#100e0b/.test(cssSrc),
-  'SA bottom bar is flat deep black, not a texture (pass5)');
+/* ---------- PASS 6: HERO OVERLAY BARS (2026-09-08) ----------
+   Pass 5's CSS-composed bars are replaced by full-width generated hero
+   overlays, used directly as the bars (user: "generate a big overlay
+   like this and then just use that for the headers").
+   - topbar-hero.png (1920x140 RGBA): sepia skyline band, cream borders,
+     notched lower edge, big Beckett "San Andreas" logo spilling below.
+   - bottombar-hero.png (1920x72 RGBA): black console, cream border,
+     notched top edge, "A Better Tomorrow" script baked at right. */
+const saHero = (f) => path.join(REPO, 'themes/san-andreas/dashboard', f);
+for (const [f, w, h] of [['topbar-hero.png', 1920, 140], ['bottombar-hero.png', 1920, 72]]) {
+  ok(fs.existsSync(saHero(f)), `SA hero overlay art on disk: ${f}`);
+  const sz = pngSize(saHero(f));
+  const bytes = fs.readFileSync(saHero(f));
+  ok(sz && sz.w === w && sz.h === h && bytes[25] === 6, `SA hero overlay ${f} is ${w}x${h} RGBA`);
+}
+ok(/theme-san-andreas #dash-topbar\{[^}]*topbar-hero\.png/.test(cssSrc),
+  'SA header IS the hero overlay art (topbar-hero.png)');
+ok(/theme-san-andreas #dash-topbar\{[^}]*height:140px/.test(cssSrc),
+  'SA header shell is 140px so the baked logo can spill onto the map');
+ok(!/theme-san-andreas #dash-topbar\{[^}]*clip-path/.test(cssSrc),
+  'SA header silhouette comes from the art, not CSS clip-path');
+ok(!/theme-san-andreas #dash-topbar::after\{[^}]*skyline-strip\.jpg/.test(cssSrc),
+  'pass5 skyline-strip panel removed from the SA header');
+ok(/theme-san-andreas \.dash-brand\{display:none/.test(cssSrc),
+  'SA header branding lives in the art — no DOM wordmark doubling it');
+ok(/theme-san-andreas #dash-bottombar\{[^}]*bottombar-hero\.png/.test(cssSrc),
+  'SA footer IS the hero overlay art (bottombar-hero.png)');
+ok(/theme-san-andreas #dash-bottombar\{[^}]*height:72px/.test(cssSrc),
+  'SA footer is 72px (9-10% of stage)');
+ok(!/theme-san-andreas #dash-bottombar\{[^}]*clip-path/.test(cssSrc),
+  'SA footer silhouette comes from the art, not CSS clip-path');
+ok(/theme-san-andreas \.dash-tabs button\.on\{[^}]*background:#f0e6c8/.test(cssSrc),
+  'SA active tab is the hero cream pill, icon-only');
+ok(/theme-san-andreas \.dash-tabs button span\{display:none/.test(cssSrc),
+  'SA footer tabs are icon-only like the hero');
 /* ---------- SA hero-match: authored dashboard art set ---------- */
 const saDash = (f) => path.join(REPO, 'themes/san-andreas/dashboard', f);
 for (const f of ['topbar.png', 'bottombar.png', 'maneuver.png', 'grove-panel.png', 'script-tomorrow.png', 'script-music.png', 'sa-logo.png']) {
@@ -610,30 +641,7 @@ ok(!fs.existsSync(saDash5('radio-bezel-pass4.png')), 'pass4 vintage-radio bezel 
 ok(!/topbar-pass4\.jpg/.test(cssSrc), 'no CSS references the deleted pass4 topbar');
 ok(!/footer-chrome-pass4\.jpg/.test(cssSrc), 'no CSS references the deleted pass4 footer');
 ok(!/radio-bezel-pass4\.png/.test(cssSrc), 'no CSS references the deleted pass4 bezel');
-/* header: designed HUD silhouette, 72px */
-ok(/theme-san-andreas #dash-topbar\{[^}]*height:72px/.test(cssSrc),
-  'SA header is 72px (9-10% of stage)');
-ok(/theme-san-andreas #dash-topbar\{[^}]*clip-path:polygon/.test(cssSrc),
-  'SA header has a designed HUD silhouette (chamfered), not a photo rectangle');
-ok(/theme-san-andreas #dash-topbar::after\{[^}]*skyline-strip\.jpg/.test(cssSrc),
-  'SA header skyline art lives in a right-side panel, blended into black');
-ok(/theme-san-andreas #dash-topbar\{[^}]*inset 0 -3px 0 #f0e6c8/.test(cssSrc),
-  'SA header has the cream lower border');
-ok(/theme-san-andreas \.dash-brand::after\{[^}]*content:"San Andreas"/.test(cssSrc),
-  'SA header carries the blackletter branding left');
-ok(/theme-san-andreas #dash-topbar \.dash-chrome\{[^}]*justify-content:center/.test(cssSrc),
-  'SA header centres weather/date/time as one group');
-/* footer: flat black HUD, 72px */
-ok(/theme-san-andreas #dash-bottombar\{[^}]*height:72px/.test(cssSrc),
-  'SA footer is 72px (9-10% of stage)');
-ok(/theme-san-andreas #dash-bottombar\{[^}]*background:linear-gradient\(180deg,#100e0b/.test(cssSrc),
-  'SA footer is flat deep black, no texture image');
-ok(!/theme-san-andreas #dash-bottombar\\{[^}]*\\.jpg/.test(cssSrc),
-  'SA footer has no scenic texture panel');
-ok(/theme-san-andreas \.dash-tabs button\.on\{[^}]*box-shadow:inset 0 -3px 0 #d8a94e/.test(cssSrc),
-  'SA active tab is cream + gold underline, never a filled tile');
-ok(!/theme-san-andreas \\.dash-tabs button\\.on\\{[^}]*background:[^}]*linear-gradient/.test(cssSrc),
-  'no filled gradient active tile in the SA footer');
+/* header/footer: now the pass6 hero overlays (see PASS 6 block above) */
 /* radio: new lowrider frame, ~30% width, art left / meta right / controls bottom */
 const p5Frame = pngSize(saDash5('radio-frame-pass5.png'));
 const p5FrameBytes = fs.readFileSync(saDash5('radio-frame-pass5.png'));
