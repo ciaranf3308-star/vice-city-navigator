@@ -1,21 +1,15 @@
 /* ============================================================
-   WayStation — San Andreas Spotify skin (dashboard mode only).
-   ------------------------------------------------------------
-   The supplied concept art (themes/san-andreas/spotify/hud.png,
-   1254x1254 with transparency) IS the widget: it is overlaid as
-   one unified skin/chrome layer and live HTML is positioned into
-   its defined openings. The art dictates the DOM placement.
+   WayStation — San Andreas Spotify skin (dashboard mode only),
+   hero-convergence pass 4.
 
-   Measured openings (fractions of the hud):
-   - album cut-out : x 0.0518-0.4585, y 0.3070-0.6976
-                     (art lives UNDER the hud, seen through the
-                     frame's transparent opening)
-   - dark panel    : right of the frame, x ~0.54-0.92,
-                     y ~0.34-0.76 (title, artist, progress, lyrics)
-   - transport     : the empty green bay below the album frame
+   The outer skin is the authored Radio Los Santos hardware bezel
+   (themes/san-andreas/dashboard/radio-bezel-pass4.png, 1600x1400,
+   true alpha outside the frame). Live HTML sits ON the bezel's dark
+   recessed interior — one branding moment, no sticker clutter.
 
-   Z-order: art placeholder < album art < hud < lyrics / track /
-   controls / idle. The map shows through transparent pixels.
+   Measured interior (fractions of the bezel): x 0.19-0.81,
+   y 0.21-0.78. LEFT column: album art / title / artist / progress /
+   controls. RIGHT column: lyrics / ambient stage.
 
    LYRICS: owned by the shared kinetic karaoke engine (lyrics.js,
      LRCLIB provider) mounted into [data-lyrics-stage] via
@@ -27,7 +21,7 @@
 'use strict';
 
 (function () {
-  const ART = 'themes/san-andreas/spotify/';
+  const BEZEL = 'themes/san-andreas/dashboard/radio-bezel-pass4.png';
 
   const SVG = {
     play: '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',
@@ -60,29 +54,38 @@
     function build() {
       root = el('div', 'sasp');
       root.innerHTML =
-        '<div class="sasp-art-idle">' + SVG.note + '</div>' +
-        '<img class="sasp-art a" alt="">' +
-        '<img class="sasp-art b" alt="">' +
-        '<img class="sasp-hud" src="' + ART + 'hud.png" alt="" aria-hidden="true">' +
-        '<div class="sasp-track">' +
-          '<div class="sasp-title">Grove Street Radio</div>' +
-          '<div class="sasp-artist">Connect Spotify to play</div>' +
-        '</div>' +
-        '<div class="sasp-progress">' +
-          '<div class="sasp-bar" role="slider" aria-label="Seek" tabindex="0" aria-valuemin="0" aria-valuemax="100">' +
-            '<div class="sasp-bar-fill"></div>' +
-            '<div class="sasp-bar-knob"></div>' +
+        '<img class="sasp-bezel" src="' + BEZEL + '" alt="" aria-hidden="true">' +
+        '<div class="sasp-brand" aria-hidden="true">Radio Los Santos</div>' +
+        '<div class="sasp-main">' +
+          '<div class="sasp-left">' +
+            '<div class="sasp-artwrap">' +
+              '<div class="sasp-art-idle">' + SVG.note + '</div>' +
+              '<img class="sasp-art a" alt="">' +
+              '<img class="sasp-art b" alt="">' +
+            '</div>' +
+            '<div class="sasp-track">' +
+              '<div class="sasp-title">Radio Los Santos</div>' +
+              '<div class="sasp-artist">Connect Spotify to play</div>' +
+            '</div>' +
+            '<div class="sasp-progress">' +
+              '<div class="sasp-bar" role="slider" aria-label="Seek" tabindex="0" aria-valuemin="0" aria-valuemax="100">' +
+                '<div class="sasp-bar-fill"></div>' +
+                '<div class="sasp-bar-knob"></div>' +
+              '</div>' +
+              '<div class="sasp-times"><span class="sasp-elapsed">0:00</span><span class="sasp-duration">0:00</span></div>' +
+            '</div>' +
+            '<div class="sasp-controls">' +
+              '<button class="sasp-tbtn" data-act="prev" aria-label="Previous">' + SVG.prev + '</button>' +
+              '<button class="sasp-tbtn big" data-act="toggle" aria-label="Play or pause">' + SVG.play + '</button>' +
+              '<button class="sasp-tbtn" data-act="next" aria-label="Next">' + SVG.next + '</button>' +
+            '</div>' +
           '</div>' +
-          '<div class="sasp-times"><span class="sasp-elapsed">0:00</span><span class="sasp-duration">0:00</span></div>' +
+          '<div class="sasp-right">' +
+            '<div class="sasp-lyrics" data-lyrics-stage="1"></div>' +
+          '</div>' +
         '</div>' +
-        '<div class="sasp-controls">' +
-          '<button class="sasp-tbtn" data-act="prev" aria-label="Previous">' + SVG.prev + '</button>' +
-          '<button class="sasp-tbtn big" data-act="toggle" aria-label="Play or pause">' + SVG.play + '</button>' +
-          '<button class="sasp-tbtn" data-act="next" aria-label="Next">' + SVG.next + '</button>' +
-        '</div>' +
-        '<div class="sasp-lyrics" data-lyrics-stage="1"></div>' +
         '<div class="sasp-idle">' +
-          '<div class="sasp-idle-kicker">Grove Street Radio</div>' +
+          '<div class="sasp-idle-kicker">Radio Los Santos</div>' +
           '<button class="sasp-connect-btn" type="button">Connect Spotify</button>' +
           '<p class="sasp-idle-hint">Music plays on your phone or car.<br>WayStation controls it.</p>' +
         '</div>';
@@ -118,9 +121,9 @@
       const toggle = q('.sasp-tbtn[data-act="toggle"]');
       if (!connected) {
         // Disconnected state stays inside the one widget: themed idle
-        // text on the frame's band, connect CTA in the stage.
+        // text on the console, connect CTA in the stage.
         stopTick();
-        title.textContent = 'Grove Street Radio';
+        title.textContent = 'Radio Los Santos';
         artist.textContent = 'Connect Spotify to play';
         artist.classList.remove('sasp-status');
         setArt('');
@@ -150,8 +153,6 @@
       startTick();
     }
 
-    /* Lyrics stage: a renderer (future LRCLIB pass) owns this DOM.
-       With no provider, the stage stays ambient — never fake words. */
     /* Lyrics stage: owned by the shared kinetic karaoke engine
        (lyrics.js, LRCLIB). A custom lyricsRenderer set via the mount
        api still overrides the engine. Never fake words. */
@@ -170,7 +171,7 @@
       if (window.WSLyrics) WSLyrics.render(box, core, s && s.item, 'san-andreas');
     }
 
-    /* ---------- album art crossfade (art sits UNDER the frame) ---------- */
+    /* ---------- album art crossfade ---------- */
     function setArt(url) {
       if (url === currentArtUrl) return;
       currentArtUrl = url;

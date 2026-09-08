@@ -1,11 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">
-  <!-- San Andreas player pointer, hero-convergence pass 2:
-       cream core, heavy black outline, soft ground shadow. No neon. -->
-  <path d="M21.5 3.5 L38.5 38 L21.5 30.5 L4.5 38 Z"
-        fill="#000" opacity="0.35"/>
-  <path d="M20 1.5 L37 36.5 L20 29 L3 36.5 Z"
-        fill="#f6efdb" stroke="#0a0806" stroke-width="3.6"
+  <!-- San Andreas player pointer, hero-convergence pass 4:
+       chunky directional arrowhead, cream fill, heavy black outline,
+       subtle offset ground shadow. Crisp vector, no glow, no raster. -->
+  <path d="M22 4.5 L36.5 30.5 L26.5 30.5 L26.5 38.5 L19.5 38.5 L19.5 30.5 L7.5 30.5 Z"
+        fill="#000000" opacity="0.38" transform="translate(1.4 2)"/>
+  <path d="M20 2 L34 28 L24 28 L24 36 L16 36 L16 28 L6 28 Z"
+        fill="#f6efdb" stroke="#0a0806" stroke-width="4"
         stroke-linejoin="round"/>
-  <path d="M20 8.5 L30.5 31.5 L20 27.2 L9.5 31.5 Z"
-        fill="#fffdf4" opacity="0.65"/>
+  <path d="M20 8.5 L26.5 23.5 L22.8 23.5 L22.8 30.5 L17.2 30.5 L17.2 23.5 L13.5 23.5 Z"
+        fill="#fffdf4" opacity="0.5"/>
 </svg>

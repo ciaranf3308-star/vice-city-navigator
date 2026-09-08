@@ -3,27 +3,31 @@
    game map, 540px radio unit. User-authorized; see themes/LOCKED.json. */
 body.theme-san-andreas .dest-pin{ background-image:url('assets/themes/san-andreas/blips/waypoint.png'); }
 body.dashboard-mode.theme-san-andreas #search-bar{display:none} /* hero composition: no search pill */
-body.dashboard-mode.theme-san-andreas #map{background:#d8cfad} /* map ground tone, never pure black */
+body.dashboard-mode.theme-san-andreas #map{background:#ece0bd} /* map ground tone, never pure black */
 
-/* ============ TOP BAR: dark skyline HUD strip (76px) ============ */
+/* ============ TOP BAR: authored SA identity bar (112px), pass 4 ============
+   The old thin strip is gone. Full-bleed authored panorama
+   (dashboard/topbar-pass4.jpg, 2400x320): dark olive left third carries
+   the branding, right two-thirds is Los Santos skyline / palms /
+   powerlines / sunset. LEFT = WayStation + San Andreas blackletter,
+   CENTER = weather/date/time as one centered group, RIGHT = pure art. */
 body.dashboard-mode.theme-san-andreas #dash-topbar{
-  display:block;position:absolute;left:0;right:0;top:0;height:76px;z-index:25;
-  background:
-    linear-gradient(180deg, rgba(8,5,3,.82) 0%, rgba(8,5,3,.45) 45%, rgba(8,5,3,.78) 100%),
-    url('dashboard/topbar-skyline.jpg') center 34%/cover no-repeat;
-  /* black/cream edge framing over the gold rule */
-  box-shadow:inset 0 3px 0 #000,
-    inset 0 -2px 0 rgba(216,169,78,.6),
-    inset 0 -3px 0 rgba(240,230,200,.22),
-    0 6px 18px rgba(0,0,0,.5);
+  display:block;position:absolute;left:0;right:0;top:0;height:112px;z-index:25;
+  background:url('dashboard/topbar-pass4.jpg') center 42%/cover no-repeat #10130c;
+  /* cream/black edge framing */
+  box-shadow:inset 0 4px 0 #000,
+    inset 0 -3px 0 rgba(216,169,78,.65),
+    inset 0 -4px 0 rgba(240,230,200,.20),
+    0 8px 24px rgba(0,0,0,.55);
   pointer-events:none;
 }
 body.dashboard-mode.theme-san-andreas #dash-topbar .dash-chrome{
-  position:absolute;inset:0;display:block;background:none;padding:0;
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  gap:30px;background:none;padding:0;
 }
-/* identity: tiny WAYSTATION tag over a controlled blackletter wordmark */
+/* identity: small WAYSTATION tag over a large blackletter wordmark */
 body.dashboard-mode.theme-san-andreas .dash-brand{
-  position:absolute;left:26px;top:0;bottom:0;display:flex;flex-direction:column;
+  position:absolute;left:30px;top:0;bottom:0;display:flex;flex-direction:column;
   justify-content:center;margin:0;
 }
 body.dashboard-mode.theme-san-andreas .dash-brand .dash-logo,
@@ -33,70 +37,70 @@ body.dashboard-mode.theme-san-andreas #dash-topbar .dash-tomorrow,
 body.dashboard-mode.theme-san-andreas #dash-topbar .dash-los-santos{display:none}
 body.dashboard-mode.theme-san-andreas .dash-brand::before{
   content:"WAYSTATION";
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:10px;font-weight:700;
-  letter-spacing:4px;color:#d8a94e;text-shadow:0 1px 0 #000;margin-bottom:2px;
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:5px;color:#d8a94e;text-shadow:0 1px 0 #000;margin-bottom:4px;
 }
 body.dashboard-mode.theme-san-andreas .dash-brand::after{
   content:"San Andreas";
-  font-family:'Beckett','Pricedown Bl',serif;font-size:30px;line-height:1;
-  color:#f5edd8;text-shadow:0 2px 0 #000, 0 0 12px rgba(0,0,0,.65);white-space:nowrap;
+  font-family:'Beckett','Pricedown Bl',serif;font-size:42px;line-height:1;
+  color:#f5edd8;text-shadow:0 2px 0 #000, 0 0 14px rgba(0,0,0,.7);white-space:nowrap;
 }
-/* clock: one mathematically centred group */
+/* center group: weather + date + time, one deliberate unit, truly centered */
+body.dashboard-mode.theme-san-andreas .dash-wx{
+  position:static;transform:none;
+  display:flex;align-items:center;gap:10px;white-space:nowrap;
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:20px;letter-spacing:2px;
+  color:#e8dcc0;text-shadow:0 2px 0 #000;
+  padding-right:30px;border-right:1px solid rgba(216,169,78,.5);
+}
+body.dashboard-mode.theme-san-andreas .dash-wx::after{display:none}
+body.dashboard-mode.theme-san-andreas #dash-wxicon{display:inline-flex;width:26px;height:26px}
+body.dashboard-mode.theme-san-andreas #dash-wxicon svg{width:100%;height:100%}
 body.dashboard-mode.theme-san-andreas .dash-clock{
-  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  display:flex;align-items:baseline;gap:14px;white-space:nowrap;margin:0;pointer-events:none;
+  position:static;transform:none;
+  display:flex;align-items:baseline;gap:16px;white-space:nowrap;margin:0;pointer-events:none;
   font-family:'Bank Gothic','Arial Narrow',sans-serif;
 }
 body.dashboard-mode.theme-san-andreas #dash-date{
-  font-size:19px;letter-spacing:4px;color:#e8dcc0;text-shadow:0 2px 0 #000;
+  font-size:21px;letter-spacing:5px;color:#e8dcc0;text-shadow:0 2px 0 #000;
 }
 body.dashboard-mode.theme-san-andreas #dash-time{
-  font-size:30px;font-weight:700;letter-spacing:2px;color:#f7f0dc;text-shadow:0 2px 0 #000;
+  font-size:36px;font-weight:700;letter-spacing:2px;color:#f7f0dc;text-shadow:0 2px 0 #000;
 }
-/* weather: small, secondary, tucked left of the clock behind a hairline */
-body.dashboard-mode.theme-san-andreas .dash-wx{
-  position:absolute;left:50%;top:50%;transform:translate(calc(-100% - 180px),-50%);
-  display:flex;align-items:center;gap:8px;white-space:nowrap;
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:18px;letter-spacing:2px;
-  color:#cfc0a0;text-shadow:0 2px 0 #000;
-}
-body.dashboard-mode.theme-san-andreas .dash-wx::after{
-  content:"";position:absolute;right:-26px;top:50%;transform:translateY(-50%);
-  width:1px;height:30px;background:rgba(216,169,78,.5);
-}
-body.dashboard-mode.theme-san-andreas #dash-wxicon{display:inline-flex;width:24px;height:24px}
-body.dashboard-mode.theme-san-andreas #dash-wxicon svg{width:100%;height:100%}
 
-/* ============ BOTTOM BAR: dark textured console strip (92px) ============ */
+/* ============ BOTTOM BAR: purpose-built console strip (116px), pass 4 ============
+   dashboard/footer-chrome-pass4.jpg (2400x260): black/deep-olive brushed
+   worn metal, distressed cream + muted-gold pinstripes, embossed palm
+   texture. Low-profile tab layout — never tiles, never a bright block.
+   Active MAP = cream icon/text + muted-gold underline. Inactive = muted
+   tan. CENTER = slim locality plate. RIGHT = compass + live arrival only. */
 body.dashboard-mode.theme-san-andreas #dash-bottombar{
-  display:block;position:absolute;left:0;right:0;bottom:0;height:92px;z-index:25;
-  background:
-    linear-gradient(180deg, rgba(12,9,6,.80) 0%, rgba(12,9,6,.62) 38%, rgba(12,9,6,.86) 100%),
-    url('dashboard/bottombar-texture.jpg') center/cover no-repeat;
-  border-top:2px solid rgba(216,169,78,.55);
-  box-shadow:0 -8px 22px rgba(0,0,0,.55), inset 0 1px 0 rgba(240,230,200,.08);
+  display:block;position:absolute;left:0;right:0;bottom:0;height:116px;z-index:25;
+  background:url('dashboard/footer-chrome-pass4.jpg') center 45%/cover no-repeat #0b0d07;
+  box-shadow:0 -10px 28px rgba(0,0,0,.6), inset 0 4px 0 rgba(0,0,0,.9);
   pointer-events:auto;
 }
 body.dashboard-mode.theme-san-andreas #dash-bottombar .dash-chrome{
-  position:absolute;inset:0;display:flex;align-items:center;gap:14px;
-  padding:0 20px;background:none;
+  position:absolute;inset:0;display:flex;align-items:center;gap:16px;
+  padding:0 24px;background:none;
 }
-/* tabs: flat cream type, small icons, thin separators — never tiles */
+/* tabs: flat functional type, thin separators — never tiles */
 body.dashboard-mode.theme-san-andreas .dash-tabs{
   display:flex;align-items:center;background:none;padding:0;pointer-events:none;
 }
 body.dashboard-mode.theme-san-andreas .dash-tabs button{
-  display:flex;flex-direction:column;align-items:center;gap:4px;
+  display:flex;flex-direction:column;align-items:center;gap:5px;
   border:0;background:none;border-radius:0;cursor:pointer;pointer-events:auto;
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:12px;font-weight:700;
-  letter-spacing:2px;text-transform:uppercase;color:#c9b98f;
-  padding:10px 14px 8px;white-space:nowrap;
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:13px;font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;color:#b3a582;
+  padding:12px 16px 10px;white-space:nowrap;
+  text-shadow:0 2px 0 #000;
 }
 body.dashboard-mode.theme-san-andreas .dash-tabs button + button{
-  border-left:1px solid rgba(216,169,78,.22);
+  border-left:1px solid rgba(240,230,200,.16);
 }
 body.dashboard-mode.theme-san-andreas .dash-tabs button svg{
-  width:28px;height:28px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.7));
+  width:30px;height:30px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.7));
 }
 body.dashboard-mode.theme-san-andreas .dash-tabs button.on{
   color:#f7f0dc;box-shadow:inset 0 -3px 0 #d8a94e;
@@ -104,6 +108,8 @@ body.dashboard-mode.theme-san-andreas .dash-tabs button.on{
 body.dashboard-mode.theme-san-andreas .dash-tabs button.on svg{
   filter:drop-shadow(0 0 6px rgba(216,169,78,.6));
 }
+/* generic web-map zoom/locate cluster: removed, not recolored */
+body.dashboard-mode.theme-san-andreas .dash-zoom{display:none}
 /* locality: slim dark plaque, cream functional type, thin gold outline */
 body.dashboard-mode.theme-san-andreas .dash-dest{
   flex:1;display:flex;align-items:center;justify-content:center;
@@ -143,81 +149,92 @@ body.dashboard-mode.theme-san-andreas #dash-eta .eta-label{
 body.dashboard-mode.theme-san-andreas #dash-eta .eta-time{
   display:block;font-size:22px;font-weight:700;letter-spacing:1px;color:#f7f0dc;
 }
-body.dashboard-mode.theme-san-andreas .dash-zoom{display:flex;gap:6px}
-body.dashboard-mode.theme-san-andreas .dash-zoom button{
-  width:40px;height:40px;border-radius:4px;cursor:pointer;
-  border:1px solid rgba(216,169,78,.4);
-  background:rgba(10,8,6,.6);
-  box-shadow:inset 0 1px 0 rgba(240,230,200,.08);
-  color:#d9c9a8;font-size:20px;line-height:1;
-}
+/* the minus/plus/recenter cluster is REMOVED in SA dashboard (pass 4):
+   body.dashboard-mode.theme-san-andreas .dash-zoom{display:none} above stands.
+   No restyling here — the cluster is gone, not recolored. */
 /* the scenic tag block is retired */
 body.dashboard-mode.theme-san-andreas .dash-tag{display:none}
 
-/* ============ MANEUVER CARD: hero-style, left, balances the radio ============ */
+/* ============ MANEUVER CARD: chamfered console frame, pass 4 ============
+   Angular cut corners, deep olive/black interior, distressed cream outer
+   edge, muted-gold inner accent. No rounded modern card. Upper-left,
+   compact. Hierarchy: huge cream block arrow, huge cream distance,
+   muted-gold road name, compact stats row beneath (+ small END). */
 body.dashboard-mode.theme-san-andreas.nav-driving #maneuver-card{
-  top:calc(76px + 12px + env(safe-area-inset-top));left:24px;right:auto;
+  top:calc(112px + 14px + env(safe-area-inset-top));left:24px;right:auto;
   width:400px;max-width:400px;
-  background:rgba(18,22,12,.94);border:1px solid rgba(240,230,200,.45);border-radius:8px;
-  box-shadow:0 8px 24px rgba(0,0,0,.55), inset 0 0 24px rgba(0,0,0,.4);
-  display:flex;flex-wrap:wrap;align-items:center;gap:4px 16px;padding:16px 22px;
+  background:none;border:0;border-radius:0;
+  display:flex;align-items:center;gap:18px;padding:22px 26px;
+  filter:drop-shadow(0 12px 26px rgba(0,0,0,.65));
 }
-body.dashboard-mode.theme-san-andreas #maneuver-arrow{flex:0 0 72px;width:72px;height:72px}
+/* distressed cream outer edge, follows the chamfers */
+body.dashboard-mode.theme-san-andreas #maneuver-card::before{
+  content:"";position:absolute;inset:0;z-index:0;
+  background:
+    repeating-linear-gradient(115deg, rgba(60,40,20,.10) 0 2px, transparent 2px 6px),
+    repeating-linear-gradient(28deg, rgba(255,255,255,.05) 0 1px, transparent 1px 5px),
+    linear-gradient(180deg,#f2e8cc 0%,#e0d0a8 55%,#c9b586 100%);
+  clip-path:polygon(24px 0,100% 0,100% calc(100% - 24px),calc(100% - 24px) 100%,0 100%,0 24px);
+}
+/* deep olive/black interior + muted-gold inner accent line */
+body.dashboard-mode.theme-san-andreas #maneuver-card::after{
+  content:"";position:absolute;inset:5px;z-index:0;
+  background:linear-gradient(180deg,#1b2110 0%,#10140b 60%,#0b0e07 100%);
+  clip-path:polygon(19px 0,100% 0,100% calc(100% - 19px),calc(100% - 19px) 100%,0 100%,0 19px);
+  box-shadow:inset 0 0 0 1px rgba(216,169,78,.55), inset 0 0 34px rgba(0,0,0,.65);
+}
+body.dashboard-mode.theme-san-andreas #maneuver-card > *{position:relative;z-index:1}
+body.dashboard-mode.theme-san-andreas #maneuver-arrow{flex:0 0 84px;width:84px;height:84px}
 body.dashboard-mode.theme-san-andreas #maneuver-arrow svg{
-  width:100%;height:100%;filter:drop-shadow(0 2px 2px rgba(0,0,0,.7))}
+  width:100%;height:100%;filter:drop-shadow(0 3px 3px rgba(0,0,0,.8))}
 body.dashboard-mode.theme-san-andreas .banner-text{
-  flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:2px;
+  flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:3px;
 }
 body.dashboard-mode.theme-san-andreas #next-dist{
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:44px;font-weight:700;
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:46px;font-weight:700;
   letter-spacing:2px;color:#f7f0dc;text-shadow:0 2px 0 #000;line-height:1;
 }
 body.dashboard-mode.theme-san-andreas #next-instr{
   font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:22px;font-weight:600;
   letter-spacing:2px;color:#d8a94e;text-shadow:0 2px 0 #000;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:290px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:270px;
 }
 body.dashboard-mode.theme-san-andreas #next-stats{
-  flex:0 0 100%;
   font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:17px;letter-spacing:2px;
-  color:#e8dcc0;text-shadow:0 2px 0 #000;opacity:.9;white-space:nowrap;overflow:hidden;
-  text-overflow:ellipsis;border-top:1px solid rgba(216,169,78,.3);padding-top:8px;
+  color:#e8dcc0;text-shadow:0 2px 0 #000;opacity:.92;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;border-top:1px solid rgba(216,169,78,.35);padding-top:9px;margin-top:5px;
+  display:flex;align-items:center;gap:8px;
 }
+/* maneuver END control: SA dashboard only; hidden everywhere else */
+#maneuver-end{display:none}
+body.dashboard-mode.theme-san-andreas #maneuver-end{
+  display:inline-block;
+  margin-left:auto;flex:0 0 auto;cursor:pointer;
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:13px;font-weight:700;
+  letter-spacing:3px;color:#0e120a;background:linear-gradient(180deg,#e8c56a,#c9982f);
+  border:1px solid rgba(255,240,200,.45);border-radius:2px;padding:6px 12px 5px;
+  box-shadow:0 2px 6px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.35);
+}
+body.dashboard-mode.theme-san-andreas #maneuver-end:active{transform:scale(.94)}
+/* locality plate doubles as the search entry now the pill is gone */
+body.dashboard-mode.theme-san-andreas #dash-dest{cursor:pointer}
 
 /* ============ SPOTIFY: right-side radio unit, part of the dash ============ */
 body.dashboard-mode.theme-san-andreas .sasp{
-  width:540px;right:60px;top:calc(50% - 8px);transform:none;
-  filter:drop-shadow(0 18px 36px rgba(0,0,0,.6));
+  right:60px;top:calc(50% - 8px);
 }
 body.dashboard-mode.theme-san-andreas #sa-grove-panel{display:none}
 /* hero map is clean: no floating zoom pills on this theme */
 body.dashboard-mode.theme-san-andreas #map-tools{display:none}
 
 /* ============ bar-height clearances ============ */
-body.dashboard-mode.theme-san-andreas.nav-driving #drive-bar{bottom:calc(92px + env(safe-area-inset-bottom))}
-body.dashboard-mode.theme-san-andreas #menu-panel{top:90px;bottom:106px}
+body.dashboard-mode.theme-san-andreas #menu-panel{top:126px;bottom:130px}
 
-/* ============ SA drive trip bar: console hardware, never VC neon ============ */
-body.dashboard-mode.theme-san-andreas #drive-bar{
-  background:rgba(14,16,10,.96);
-  border:1px solid rgba(216,169,78,.55);
-  box-shadow:0 8px 22px rgba(0,0,0,.55), inset 0 1px 0 rgba(240,230,200,.08);
-  backdrop-filter:none;-webkit-backdrop-filter:none;
-}
-body.dashboard-mode.theme-san-andreas #trip-meta{
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;
-  color:#f0e6c8;letter-spacing:2px;
-}
-body.dashboard-mode.theme-san-andreas #drive-bar .ctl{
-  background:rgba(10,8,6,.7);color:#d9c9a8;
-  border:1px solid rgba(216,169,78,.45);
-  box-shadow:inset 0 1px 0 rgba(240,230,200,.08);
-}
-body.dashboard-mode.theme-san-andreas #drive-bar .ctl.on{background:rgba(216,169,78,.25)}
-body.dashboard-mode.theme-san-andreas #follow-btn:not(.on){animation:none}
-/* The footer already owns recenter/zoom — the floating bar keeps only
-   what the footer doesn't have: trip readout, search, voice, end-nav. */
-body.dashboard-mode.theme-san-andreas #drive-bar #follow-btn{display:none}
+/* ============ SA drive pill: REMOVED in dashboard (pass 4) ============
+   The floating trip/search/voice/end bar is gone, not recolored.
+   Search lives on the locality plate, END lives in the maneuver card,
+   voice lives in the settings menu. */
+body.dashboard-mode.theme-san-andreas #drive-bar{display:none}
 
 
 /* ---------- WayStation per-theme chrome tints ---------- */

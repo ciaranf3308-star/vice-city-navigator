@@ -130,7 +130,7 @@ function themeArrowColor() {
 }
 function saArrowSvg(kind) {
   // GTA SA HUD block arrows: chunky white fill, heavy black outline — matches Bank Gothic/blackletter theme
-  const base = '<path d="M26 58 L26 32 L14 32 L32 10 L50 32 L38 32 L38 58 Z" fill="#fff" stroke="#111" stroke-width="4" stroke-linejoin="round"/>';
+  const base = '<path d="M26 58 L26 32 L14 32 L32 10 L50 32 L38 32 L38 58 Z" fill="#f6efdb" stroke="#111" stroke-width="4" stroke-linejoin="round"/>';
   const rot = d => `<g transform="rotate(${d} 32 32)">${base}</g>`;
   const bodies = {
     'straight': base,
@@ -1162,7 +1162,7 @@ const DASH_STAGE_NODES = ['map', 'fx', 'explore-ui', 'drive-hud', 'spotify-pane'
    layoutDashMenu() scales these by the live stage zoom. */
 const DASH_BAR_HEIGHTS = {
   'vice-city':   { top: 76, bottom: 100 },
-  'san-andreas': { top: 76, bottom: 92 },
+  'san-andreas': { top: 112, bottom: 116 },
   'gta-v':       { top: 56, bottom: 64 },
   'rdr2':        { top: 72, bottom: 72 },
 };
@@ -1768,6 +1768,15 @@ function wireControls() {
   // drive HUD
   $('drive-menu-btn').addEventListener('click', toggleMenu);
   $('drive-search-btn').addEventListener('click', () => openPlanning('search'));
+  const mEnd = $('maneuver-end');
+  if (mEnd) mEnd.addEventListener('click', () => { if (typeof endNav === 'function') endNav(); });
+  /* SA dashboard: the floating drive pill is gone — the locality plate
+     opens search so the function is not stranded. */
+  const dDest = $('dash-dest');
+  if (dDest) dDest.addEventListener('click', () => {
+    if (document.body.classList.contains('dashboard-mode') &&
+        document.body.classList.contains('theme-san-andreas')) openPlanning('search');
+  });
 
   // menu: theme selector
   buildThemeSelector();

@@ -1,161 +1,150 @@
 /* ============================================================
-   San Andreas Spotify skin — the supplied concept art IS the
-   widget (themes/san-andreas/spotify/hud.png, 1254x1254).
+   San Andreas Spotify skin, hero-convergence pass 4.
 
-   The hud is overlaid as one unified skin/chrome layer; live
-   HTML is positioned into its defined openings. The art dictates
-   the DOM placement. The map shows through transparent pixels.
+   The authored Radio Los Santos hardware bezel
+   (dashboard/radio-bezel-pass4.png, 1600x1400, true alpha) IS the
+   widget chrome. Live HTML sits ON its dark recessed interior —
+   measured content rect: x 0.19-0.81, y 0.21-0.78.
 
-   Measured openings (fractions of the hud):
-   - album cut-out : x 0.0518-0.4585, y 0.3070-0.6976
-   - dark panel    : right of the frame (title / artist /
-                     progress / lyrics)
-   - transport     : the empty green bay below the album frame
-
-   Z-order: art placeholder < album art < hud < lyrics / track /
-   controls / idle. Live data only; no fake lyrics, no fake FFT.
+   LEFT column: album art / title / artist / progress / controls.
+   RIGHT column: lyrics / ambient stage.
+   One branding moment only ("Radio Los Santos", blackletter).
+   All live text/data stays HTML. Deep olive/black, distressed
+   cream edges (in the art), muted gold accents.
    ============================================================ */
 
 .sasp {
-  position: absolute; left: auto; right: 70px; top: 50%; translate: 0 -50%;
-  width: 600px; max-width: calc(100vh - 300px); aspect-ratio: 1 / 1;
-  transform: rotate(-6deg); transform-origin: center;
+  position: absolute; left: auto; right: 60px; top: 50%; translate: 0 -50%;
+  width: min(560px, 29vw, calc((100vh - 300px) * 8 / 7));
+  aspect-ratio: 8 / 7;
   container-type: size;
   pointer-events: auto;
   background: transparent;
   font-family: 'Bank Gothic', 'Arial Narrow', sans-serif; color: #f2e8c8;
   user-select: none; -webkit-user-select: none;
+  filter: drop-shadow(0 18px 36px rgba(0,0,0,.6));
 }
 .sasp img { display: block; }
 
-/* ---------- album art: UNDER the hud, through the frame ---------- */
+/* ---------- the authored bezel: one unified hardware frame ---------- */
+.sasp-bezel {
+  position: absolute; z-index: 1; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+}
+
+/* ---------- the one branding moment, on the top frame ---------- */
+.sasp-brand {
+  position: absolute; z-index: 2;
+  left: 10%; right: 10%; top: 11.5%;
+  text-align: center;
+  font-family: 'Beckett', 'Pricedown Bl', serif;
+  font-size: 4.6cqw; letter-spacing: .14em;
+  color: #efe3c2;
+  text-shadow: 0 2px 0 #000, 0 0 12px rgba(0,0,0,.8);
+  white-space: nowrap;
+}
+
+/* ---------- content on the dark interior ---------- */
+.sasp-main {
+  position: absolute; z-index: 2;
+  left: 19%; right: 19%; top: 20%; bottom: 22%;
+  display: grid; grid-template-columns: 44% 1fr; gap: 4cqw;
+  min-height: 0;
+}
+.sasp-left {
+  display: flex; flex-direction: column; gap: 1.6cqh; min-height: 0;
+}
+/* album art in its own recessed slot */
+.sasp-artwrap {
+  position: relative; width: 100%; aspect-ratio: 1 / 1; flex: 0 0 auto;
+  background: #070905;
+  border: 1px solid rgba(216,169,78,.5);
+  box-shadow: inset 0 0 18px rgba(0,0,0,.85), 0 1px 0 rgba(240,230,200,.08);
+  overflow: hidden;
+}
 .sasp-art {
-  position: absolute; z-index: 1;
-  left: 6.1%; top: 30.70%; width: 42%; height: 39.07%;
+  position: absolute; inset: 0; width: 100%; height: 100%;
   object-fit: cover;
   opacity: 0; transition: opacity .45s ease;
-  background: #0a120c;
 }
 .sasp-art.on { opacity: 1; }
 .sasp-art-idle {
-  position: absolute; z-index: 1;
-  left: 6.1%; top: 30.70%; width: 42%; height: 39.07%;
+  position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(70% 70% at 50% 40%, #16241a 0%, #0a120c 75%);
+  background: radial-gradient(70% 70% at 50% 40%, #16241a 0%, #070905 78%);
 }
 .sasp-art-idle svg {
-  width: 22%; height: auto; fill: #d8b36a; opacity: .5;
+  width: 24%; height: auto; fill: #d8b36a; opacity: .5;
   filter: drop-shadow(0 2px 3px #000);
 }
 
-/* ---------- the concept art: one unified skin ---------- */
-.sasp-hud {
-  position: absolute; z-index: 2; inset: 0;
-  width: 100%; height: 100%;
-  pointer-events: none;
-  /* quiet the baked-in decoration so the one identity moment leads */
-  filter: saturate(.9) brightness(.97);
-}
-
-/* ---------- track on the dark green panel ---------- */
-.sasp-track {
-  position: absolute; z-index: 3;
-  left: 54%; right: 8%; top: 34%;
-  text-align: left;
-}
+/* ---------- track ---------- */
+.sasp-track { flex: 0 0 auto; min-width: 0; }
 .sasp-title {
   font-family: 'Bank Gothic', 'Arial Narrow', sans-serif;
-  font-size: 5.0cqw; font-weight: 700; letter-spacing: .04em; line-height: 1.15;
+  font-size: 3.4cqw; font-weight: 700; letter-spacing: .03em; line-height: 1.2;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   overflow: hidden;
   color: #f7ecd0;
-  text-shadow: 0 2px 4px #000, 0 0 10px rgba(0,0,0,.5);
+  text-shadow: 0 2px 3px #000;
 }
 .sasp-artist {
-  margin-top: .6cqh;
-  font-size: 3.6cqw; letter-spacing: .06em; line-height: 1.3;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  margin-top: .5cqh;
+  font-size: 2.9cqw; letter-spacing: .05em; line-height: 1.3;
+  display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;
   overflow: hidden;
   color: #d8b36a;
-  text-shadow: 0 1px 3px #000;
+  text-shadow: 0 1px 2px #000;
 }
 .sasp-artist.sasp-status { color: #a8c86a; }
 
-/* ---------- progress on the dark green panel ---------- */
-.sasp-progress {
-  position: absolute; z-index: 3;
-  left: 54%; right: 8%; top: 52%;
-}
-.sasp-bar { position: relative; height: 2.6cqh; cursor: pointer; touch-action: none; }
+/* ---------- progress ---------- */
+.sasp-progress { flex: 0 0 auto; }
+.sasp-bar { position: relative; height: 2.2cqh; cursor: pointer; touch-action: none; }
 .sasp-bar::before {
   content: ''; position: absolute; left: 0; right: 0; top: 50%;
-  height: 6px; margin-top: -3px; border-radius: 3px;
+  height: 5px; margin-top: -2.5px; border-radius: 3px;
   background: rgba(242,232,200,.16);
   box-shadow: inset 0 1px 2px rgba(0,0,0,.7);
 }
 .sasp-bar-fill {
-  position: absolute; left: 0; top: 50%; height: 6px; margin-top: -3px;
+  position: absolute; left: 0; top: 50%; height: 5px; margin-top: -2.5px;
   width: 0%; border-radius: 3px;
   background: linear-gradient(90deg, #d8b36a, #e8a33d);
-  box-shadow: 0 0 10px rgba(232,163,61,.7);
+  box-shadow: 0 0 8px rgba(232,163,61,.7);
 }
 .sasp-bar-knob {
   position: absolute; top: 50%;
-  width: 3cqw; height: 3cqw; margin: -1.5cqw 0 0 -1.5cqw;
+  width: 2.4cqw; height: 2.4cqw; margin: -1.2cqw 0 0 -1.2cqw;
   border-radius: 50%;
   background: #f2e8c8; border: 2px solid #d8b36a;
   box-shadow: 0 0 8px rgba(216,179,106,.8);
 }
 .sasp-times {
-  display: flex; justify-content: space-between; margin-top: .4cqh;
-  font-size: 3.1cqw; letter-spacing: .05em; color: #b8a878;
+  display: flex; justify-content: space-between; margin-top: .3cqh;
+  font-size: 2.5cqw; letter-spacing: .05em; color: #b8a878;
   text-shadow: 0 1px 2px #000;
 }
 
-/* ---------- lyric stage: over the faint graffiti ---------- */
-.sasp-lyrics {
-  position: absolute; z-index: 3;
-  left: 54%; right: 8%; top: 59%; bottom: 24%;
-  overflow: hidden;
-  display: flex; flex-direction: column; justify-content: center;
-  text-align: left; gap: 1cqh;
-  pointer-events: none;
-}
-.sasp-lyrics.has-lyrics { pointer-events: auto; }
-.sa-lyric-line {
-  font-size: 4.2cqw; line-height: 1.35; color: #e8dcc0; opacity: .6;
-  text-shadow: 0 2px 4px #000;
-  transition: opacity .3s ease;
-}
-.sa-lyric-line.ghost { opacity: .32; font-size: 3.7cqw; }
-.sa-lyric-line.next { opacity: .52; }
-.sa-lyric-line.active {
-  opacity: 1; font-size: 5.0cqw; color: #f0c96a;
-  text-shadow: 0 2px 4px #000, 0 0 14px rgba(232,163,61,.45);
-}
-
-/* ---------- transport: optically centered in the green bay ----------
-   The bay runs y 68-95% of the hud (measured from the alpha channel);
-   the buttons sit at its optical center (~81.5%), clear of the album
-   frame above and the bottom trim below — never glued to the edge. */
+/* ---------- transport ---------- */
 .sasp-controls {
-  position: absolute; z-index: 3;
-  left: 5%; width: 44%; top: 74%;
-  display: flex; align-items: center; justify-content: center; gap: 4cqw;
+  flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center; gap: 2.6cqw;
+  margin-top: auto; padding-bottom: .4cqh;
 }
 .sasp-tbtn {
-  width: 12cqw; height: 12cqw; min-width: 52px; min-height: 52px;
+  width: 8.2cqw; height: 8.2cqw; min-width: 40px; min-height: 40px;
   border-radius: 50%; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   color: #f2e8c8; background: rgba(10,18,12,.55);
   border: 2px solid rgba(216,179,106,.85);
-  box-shadow: 0 0 14px rgba(216,179,106,.35), inset 0 0 10px rgba(216,179,106,.15);
+  box-shadow: 0 0 12px rgba(216,179,106,.35), inset 0 0 8px rgba(216,179,106,.15);
   -webkit-tap-highlight-color: transparent;
 }
 .sasp-tbtn.big {
-  width: 14.5cqw; height: 14.5cqw; min-width: 62px; min-height: 62px;
+  width: 9.8cqw; height: 9.8cqw; min-width: 48px; min-height: 48px;
   border-color: #d8b36a;
-  box-shadow: 0 0 12px rgba(216,179,106,.4), inset 0 0 10px rgba(216,179,106,.15);
 }
 .sasp-tbtn:active { transform: scale(.93); }
 .sasp-tbtn svg {
@@ -163,37 +152,61 @@
   filter: drop-shadow(0 1px 2px #000);
 }
 
-/* ---------- themed idle / connect: pinned on the dark panel ---------- */
+/* ---------- lyric stage: right column ---------- */
+.sasp-right { min-height: 0; display: flex; }
+.sasp-lyrics {
+  flex: 1; min-height: 0;
+  overflow: hidden;
+  display: flex; flex-direction: column; justify-content: center;
+  text-align: left; gap: .8cqh;
+  padding-left: 3.2cqw;
+  border-left: 1px solid rgba(216,169,78,.3);
+  pointer-events: none;
+}
+.sasp-lyrics.has-lyrics { pointer-events: auto; }
+.sa-lyric-line {
+  font-size: 3.4cqw; line-height: 1.35; color: #e8dcc0; opacity: .6;
+  text-shadow: 0 2px 4px #000;
+  transition: opacity .3s ease;
+}
+.sa-lyric-line.ghost { opacity: .32; font-size: 3cqw; }
+.sa-lyric-line.next { opacity: .52; }
+.sa-lyric-line.active {
+  opacity: 1; font-size: 4cqw; color: #f0c96a;
+  text-shadow: 0 2px 4px #000, 0 0 12px rgba(232,163,61,.45);
+}
+
+/* ---------- themed idle / connect: over the interior ---------- */
 .sasp-idle {
-  position: absolute; z-index: 4;
-  left: 50%; right: 6%; top: 48%; bottom: 20%;
+  position: absolute; z-index: 3;
+  left: 19%; right: 19%; top: 20%; bottom: 22%;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; gap: 1.2cqh;
+  text-align: center; gap: 1.4cqh;
+  background: rgba(7,9,5,.72);
   pointer-events: none;
 }
 .sasp-idle[hidden] { display: none; }
-/* Disconnected: the idle block owns the panel — hide progress, the lyric
-   stage and the dead transport so nothing overlaps. */
-.sasp.is-idle .sasp-progress { display: none; }
-.sasp.is-idle .sasp-lyrics { display: none; }
-.sasp.is-idle .sasp-controls { display: none; }
+/* Disconnected: the idle block owns the console — hide the live rows
+   and the frame branding (the idle kicker IS the one branding moment). */
+.sasp.is-idle .sasp-main { visibility: hidden; }
+.sasp.is-idle .sasp-brand { visibility: hidden; }
 .sasp-idle-kicker {
-  font-family: 'Beckett', 'Bank Gothic', serif;
-  font-size: 5.8cqw; letter-spacing: .04em;
+  font-family: 'Beckett', 'Pricedown Bl', serif;
+  font-size: 5.4cqw; letter-spacing: .1em;
   color: #f2e8c8;
   text-shadow: 0 2px 4px #000, 0 0 16px rgba(232,163,61,.45);
 }
 .sasp-connect-btn {
   pointer-events: auto;
-  padding: 1.2cqh 6.5cqw;
+  padding: 1.1cqh 5.5cqw;
   font-family: 'Bank Gothic', 'Arial Narrow', sans-serif;
-  font-size: 4.6cqw; font-weight: 700; letter-spacing: .12em;
+  font-size: 3.8cqw; font-weight: 700; letter-spacing: .12em;
   color: #0a120c; background: linear-gradient(180deg, #f0c96a, #d8a94e);
   border: 1px solid rgba(255,240,200,.5); border-radius: 999px; cursor: pointer;
   box-shadow: 0 0 18px rgba(232,163,61,.55), inset 0 1px 0 rgba(255,255,255,.35);
 }
 .sasp-connect-btn:active { transform: scale(.96); }
 .sasp-idle-hint {
-  font-size: 3.4cqw; line-height: 1.55; letter-spacing: .04em;
+  font-size: 2.8cqw; line-height: 1.55; letter-spacing: .04em;
   color: #c4b184; opacity: .95; text-shadow: 0 1px 3px #000;
 }
