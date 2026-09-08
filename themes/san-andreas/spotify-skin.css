@@ -134,10 +134,13 @@
   text-shadow: 0 2px 4px #000, 0 0 14px rgba(232,163,61,.45);
 }
 
-/* ---------- transport in the green bay below the album ---------- */
+/* ---------- transport: optically centered in the green bay ----------
+   The bay runs y 68-95% of the hud (measured from the alpha channel);
+   the buttons sit at its optical center (~81.5%), clear of the album
+   frame above and the bottom trim below — never glued to the edge. */
 .sasp-controls {
   position: absolute; z-index: 3;
-  left: 5%; width: 44%; bottom: 3%;
+  left: 5%; width: 44%; top: 74%;
   display: flex; align-items: center; justify-content: center; gap: 4cqw;
 }
 .sasp-tbtn {

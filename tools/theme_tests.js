@@ -173,7 +173,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v64"), 'SW theme cache v62');
+ok(swSrc.includes("ws-theme-v65"), 'SW theme cache v62');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
@@ -644,6 +644,8 @@ ok(/theme-san-andreas #drive-bar #follow-btn\{display:none\}/.test(cssSrc),
   'SA drive bar drops the recenter button — the footer owns it');
 ok(skinSaSrc.includes("font-family: 'Bank Gothic', 'Arial Narrow', sans-serif;"),
   'SA song title uses Bank Gothic, never blackletter');
+ok(/\.sasp-controls\s*\{[^}]*top:\s*74%/.test(skinSaSrc) && !/\.sasp-controls\s*\{[^}]*bottom:/.test(skinSaSrc),
+  'SA transport buttons sit at the optical center of the green bay, never glued to the bottom edge');
 ok(/theme-san-andreas \.sasp\{[^}]*transform:none/.test(cssSrc),
   'SA Spotify widget sits straight inside the map area without touching the bars');
 ok(/theme-san-andreas #map-tools\{display:none\}/.test(cssSrc),
