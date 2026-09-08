@@ -4,7 +4,7 @@
     {
       "id": "vc-land",
       "paint": {
-        "background-color": "#9294a7"
+        "background-color": "#84869c"
       },
       "type": "background"
     },
@@ -118,7 +118,7 @@
       "id": "vc-parks",
       "paint": {
         "fill-antialias": true,
-        "fill-color": "#619972"
+        "fill-color": "#538a63"
       },
       "source": "openmaptiles",
       "source-layer": "landcover",
@@ -200,7 +200,7 @@
       "id": "vc-park-areas",
       "paint": {
         "fill-antialias": true,
-        "fill-color": "#619972"
+        "fill-color": "#538a63"
       },
       "source": "openmaptiles",
       "source-layer": "park",
@@ -462,7 +462,7 @@
       },
       "minzoom": 7,
       "paint": {
-        "line-color": "#b1b1b7",
+        "line-color": "#9e9ea4",
         "line-width": [
           "interpolate",
           [
@@ -587,7 +587,7 @@
       },
       "minzoom": 5,
       "paint": {
-        "line-color": "#a8a8ae",
+        "line-color": "#95959b",
         "line-width": [
           "interpolate",
           [
@@ -993,9 +993,9 @@
         "text-transform": "uppercase"
       },
       "paint": {
-        "text-color": "#d42796",
+        "text-color": "#f01e9c",
         "text-halo-color": "#ffffff",
-        "text-halo-width": 3.2
+        "text-halo-width": 3.6
       },
       "source": "openmaptiles",
       "source-layer": "place",

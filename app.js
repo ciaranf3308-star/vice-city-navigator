@@ -1136,7 +1136,7 @@ const DASH_STAGE_NODES = ['map', 'fx', 'explore-ui', 'drive-hud', 'spotify-pane'
    body-level menu panel must dock clear of the bars in REAL pixels, so
    layoutDashMenu() scales these by the live stage zoom. */
 const DASH_BAR_HEIGHTS = {
-  'vice-city':   { top: 76, bottom: 88 },
+  'vice-city':   { top: 76, bottom: 100 },
   'san-andreas': { top: 86, bottom: 86 },
   'gta-v':       { top: 56, bottom: 64 },
   'rdr2':        { top: 72, bottom: 72 },
@@ -1258,7 +1258,7 @@ function syncDashPadding() {
   // keep the camera target clear of them whether driving or exploring.
   const dash = b.contains('dashboard-mode');
   if (dash && b.contains('theme-vice-city'))
-    map.setPadding({ top: 76, right: 900, bottom: 88, left: 8 });
+    map.setPadding({ top: 76, right: 900, bottom: 100, left: 8 });
   else if (dash)
     map.setPadding({ top: 76, right: 8, bottom: 88, left: 8 });
   else map.setPadding({ top: 0, right: 0, bottom: 0, left: 0 });

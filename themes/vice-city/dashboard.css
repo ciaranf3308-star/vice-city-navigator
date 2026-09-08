@@ -2,53 +2,60 @@
 /* HERO: neon 80s chrome — pink script, cyan accents, black glass */
 /* dashboard hero match: the player arrow reads instantly against the map */
 body.dashboard-mode.theme-vice-city .player-arrow{width:71px;height:71px;
-  filter:drop-shadow(0 0 16px rgba(255,251,150,1)) drop-shadow(0 0 34px rgba(255,251,150,.55)) drop-shadow(0 2px 4px rgba(0,0,0,.6))}
+  filter:drop-shadow(0 0 14px rgba(255,46,136,1)) drop-shadow(0 0 30px rgba(255,46,136,.6)) drop-shadow(0 2px 4px rgba(0,0,0,.6))}
 body.theme-vice-city .dest-pin{ background-image:url('assets/themes/vice-city/blips/blip_waypoint.png'); }
 body.dashboard-mode.theme-vice-city #search-bar{display:none}
 
 /* ============ TOP BAR: authored angular HUD header (hero silhouette) ============
    Double-layer clip-path: the bar itself is hot pink, an inset dark layer
-   reveals a crisp 2-3px neon edge that follows every chamfer. The map tucks
-   underneath the stepped lower edge exactly like the hero. Height unchanged. */
+   reveals a crisp 2-3px neon edge that follows every chamfer. The lower edge
+   steps down at the centre AND drops into a raised skyline pocket on the
+   right (~29%) where the art rises into the black chrome. A restrained cyan
+   segment glows along the centre notch floor. Height unchanged. */
 body.dashboard-mode.theme-vice-city #dash-topbar{
   display:block;position:absolute;left:0;right:0;top:0;height:78px;z-index:25;
-  background:#ff2e88;
-  clip-path:polygon(0 0,100% 0,100% calc(100% - 14px),64% calc(100% - 14px),60% 100%,38% 100%,34% calc(100% - 14px),0 calc(100% - 14px));
+  background:
+    linear-gradient(90deg,transparent 36%,rgba(1,205,254,.9) 40%,rgba(1,205,254,.9) 60%,transparent 64%),
+    #ff2e88;
+  background-size:100% 2px,auto;
+  background-position:0 100%,0 0;
+  background-repeat:no-repeat;
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 14px),97.5% 100%,72% 100%,69% calc(100% - 14px),64% calc(100% - 14px),60% 100%,38% 100%,34% calc(100% - 14px),0 calc(100% - 14px));
   filter:drop-shadow(0 0 14px rgba(255,46,136,.55)) drop-shadow(0 6px 18px rgba(255,46,136,.25));
   pointer-events:none;
 }
-/* inner dark layer: 2px pink crown at top, 3px neon along the stepped lower edge */
+/* inner dark layer: 2px pink crown at top, 3px neon along every stepped edge */
 body.dashboard-mode.theme-vice-city #dash-topbar::before{
   content:'';position:absolute;inset:0;z-index:0;
   display:block;
   background:
     radial-gradient(ellipse 800px 120px at 30% 0%, rgba(255,46,136,.07) 0%, transparent 70%),
     linear-gradient(180deg,#0d0719 0%,#060310 60%,#030208 100%);
-  clip-path:polygon(0 2px,100% 2px,100% calc(100% - 17px),64% calc(100% - 17px),60% calc(100% - 3px),38% calc(100% - 3px),34% calc(100% - 17px),0 calc(100% - 17px));
+  clip-path:polygon(0 2px,100% 2px,100% calc(100% - 17px),97.5% calc(100% - 3px),72% calc(100% - 3px),69% calc(100% - 17px),64% calc(100% - 17px),60% calc(100% - 3px),38% calc(100% - 3px),34% calc(100% - 17px),0 calc(100% - 17px));
 }
-/* Hero skyline: embedded in the chrome, not pasted on it.
-   Right ~28%, left edge feathered deep into the dark, bottom feathered so no
-   rectangular boundary survives. */
+/* Hero skyline: palms, buildings and the striped sun rise from the pocket
+   floor into the black chrome. The art box overflows the bar top (clipped by
+   the bar shape) so silhouettes stay tall; left edge feathered deep into the
+   black, no rectangular boundary, no bottom fade — it meets the pink edge. */
 body.dashboard-mode.theme-vice-city #dash-topbar::after{
-  content:'';position:absolute;right:0;top:2px;bottom:3px;width:28%;pointer-events:none;
-  background-image:url('dashboard/topbar-skyline-right.png');
-  background-position:right bottom;
+  content:'';position:absolute;right:0;bottom:0;width:29.5%;height:170px;pointer-events:none;
+  background-image:url('dashboard/topbar-skyline.png');
+  background-position:50% 100%;
   background-size:cover;
   background-repeat:no-repeat;
-  opacity:.92;z-index:1;
-  filter:saturate(1.08);
-  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 34%),linear-gradient(180deg,#000 58%,transparent 97%);
+  opacity:.95;z-index:1;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 30%),linear-gradient(180deg,transparent 46%,#000 68%);
   -webkit-mask-composite:source-in;
-  mask-image:linear-gradient(90deg,transparent 0%,#000 34%),linear-gradient(180deg,#000 58%,transparent 97%);
+  mask-image:linear-gradient(90deg,transparent 0%,#000 30%),linear-gradient(180deg,transparent 46%,#000 68%);
   mask-composite:intersect;
 }
 body.dashboard-mode.theme-vice-city #dash-topbar .dash-chrome{
-  position:absolute;inset:0;display:flex;align-items:center;gap:36px;
+  position:absolute;inset:0;display:flex;align-items:center;gap:28px;
   padding:0 32px;background:none;z-index:2;
 }
-/* WayStation logo: neon script, ~9% larger */
+/* WayStation logo: neon script, +5% */
 body.dashboard-mode.theme-vice-city .dash-logo{
-  font-family:'Yellowtail',cursive;font-size:44px;color:#ff71ce;
+  font-family:'Yellowtail',cursive;font-size:46px;color:#ff71ce;
   text-shadow:0 0 8px rgba(255,113,206,.9),0 0 24px rgba(255,46,136,.7);
   transform:rotate(-3deg);white-space:nowrap;
   background:none!important;margin-left:8px;
@@ -58,7 +65,7 @@ body.dashboard-mode.theme-vice-city .dash-wx{
   display:flex;align-items:center;gap:10px;
   font-family:var(--vclabel);font-size:28px;font-weight:700;color:var(--cyan);
   text-shadow:0 0 10px rgba(1,205,254,.8);
-  margin-left:12px;
+  margin-left:4px;
 }
 body.dashboard-mode.theme-vice-city .dash-clock{
   display:flex;align-items:baseline;gap:18px;
@@ -74,42 +81,55 @@ body.dashboard-mode.theme-vice-city #dash-time{
 }
 body.dashboard-mode.theme-vice-city .dash-tomorrow{display:none}
 
-/* ============ MANEUVER CARD: dark glass, pink neon frame ============ */
+/* ============ MANEUVER CARD: dark glass, pink neon frame, cyan accent ============
+   Active navigation only (hidden when idle). Double-layer clip-path: the card
+   is hot pink, an inset dark layer leaves a crisp 2px neon border following
+   the chamfer; a cyan hairline sits under the stats row. Sized to balance the
+   enlarged Spotify widget on the opposite side. */
 body.dashboard-mode.theme-vice-city #maneuver-card{display:none}
 body.dashboard-mode.theme-vice-city #vc-maneuver[hidden]{display:none}
 body.dashboard-mode.theme-vice-city #vc-maneuver{
-  display:block;position:absolute;left:18px;top:92px;width:360px;z-index:24;
-  background:linear-gradient(180deg,rgba(10,6,24,.92),rgba(16,8,36,.88));
-  border:2px solid #ff2e88;border-radius:14px;
+  display:block;position:absolute;left:18px;top:92px;width:400px;z-index:24;
+  background:#ff2e88;
   clip-path:polygon(0 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,18px 100%,0 calc(100% - 18px));
-  box-shadow:0 0 18px rgba(255,46,136,.45),inset 0 0 24px rgba(255,46,136,.08);
-  padding:18px 20px 14px 20px;
+  filter:drop-shadow(0 0 16px rgba(255,46,136,.5));
+  padding:20px 22px 18px 22px;
+}
+body.dashboard-mode.theme-vice-city #vc-maneuver::before{
+  content:'';position:absolute;inset:0;z-index:0;
+  background:linear-gradient(180deg,rgba(10,6,24,.94),rgba(16,8,36,.9));
+  clip-path:polygon(2px 2px,calc(100% - 2px) 2px,calc(100% - 2px) calc(100% - 20px),calc(100% - 20px) calc(100% - 2px),20px calc(100% - 2px),2px calc(100% - 20px));
+}
+body.dashboard-mode.theme-vice-city #vc-maneuver::after{
+  content:'';position:absolute;left:22px;right:22px;bottom:10px;height:2px;z-index:1;
+  background:linear-gradient(90deg,transparent,rgba(1,205,254,.8),transparent);
 }
 body.dashboard-mode.theme-vice-city #vc-maneuver .vc-man-arrow{
-  position:absolute;left:16px;top:16px;width:64px;height:64px;
-  filter:drop-shadow(0 0 10px rgba(255,46,136,.9));
+  position:absolute;left:18px;top:18px;width:84px;height:84px;z-index:1;
+  filter:drop-shadow(0 0 12px rgba(255,46,136,.95));
 }
 body.dashboard-mode.theme-vice-city #vc-maneuver .vc-man-text{
-  margin-left:88px;display:flex;flex-direction:column;
+  margin-left:112px;display:flex;flex-direction:column;position:relative;z-index:1;
 }
 body.dashboard-mode.theme-vice-city #vc-maneuver .vc-man-text strong{
-  font-family:var(--vcfont);font-size:44px;color:#ff71ce;letter-spacing:2px;
-  text-shadow:0 0 12px rgba(255,46,136,.9);
+  font-family:var(--vcfont);font-size:56px;color:#ff71ce;letter-spacing:2px;
+  text-shadow:0 0 14px rgba(255,46,136,.95),0 0 44px rgba(255,46,136,.45);
 }
 body.dashboard-mode.theme-vice-city #vc-maneuver .vc-man-text span{
-  font-family:var(--vclabel);font-size:24px;font-weight:700;color:var(--cyan);
+  font-family:var(--vclabel);font-size:28px;font-weight:700;color:var(--cyan);
   text-shadow:0 0 10px rgba(1,205,254,.8);margin-top:2px;
 }
 body.dashboard-mode.theme-vice-city #vc-maneuver .vc-man-meta{
-  display:flex;gap:10px;align-items:center;margin-top:10px;
-  font-family:var(--vclabel);font-size:20px;font-weight:600;
+  display:flex;gap:10px;align-items:center;margin-top:12px;
+  font-family:var(--vclabel);font-size:22px;font-weight:600;
+  position:relative;z-index:1;
 }
 body.dashboard-mode.theme-vice-city #vc-maneuver .vc-man-meta span:first-child{color:#ff71ce;text-shadow:0 0 8px rgba(255,46,136,.8)}
 body.dashboard-mode.theme-vice-city #vc-maneuver .vc-man-meta span{color:var(--cyan);text-shadow:0 0 8px rgba(1,205,254,.7)}
 body.dashboard-mode.theme-vice-city #vc-maneuver .vc-man-meta i{color:#ff71ce;font-style:normal;opacity:.7}
 body.dashboard-mode.theme-vice-city #vc-maneuver .vc-man-script{
-  position:absolute;right:14px;bottom:8px;
-  font-family:'Yellowtail',cursive;font-size:22px;color:#ff71ce;opacity:.85;
+  position:absolute;right:16px;bottom:10px;z-index:1;
+  font-family:'Yellowtail',cursive;font-size:24px;color:#ff71ce;opacity:.85;
   text-shadow:0 0 8px rgba(255,46,136,.7);transform:rotate(-4deg);
 }
 
@@ -142,19 +162,27 @@ body.dashboard-mode.theme-vice-city #spotify-pane{
      viewport — the pane must NOT create a positioning context. */
 }
 /* Widget sits below the top bar, clear of the bottom bar — hero weighting:
-   ~5% smaller again, 20px further right, 15px higher. Rotation untouched. */
+   +8% scale (687px), bottom-anchored 18px above the footer, right edge near
+   the screen edge. Rotation and all internals untouched. */
 body.dashboard-mode.theme-vice-city .vcsp{
-  top:73px;right:115px;translate:none;width:636px;
+  top:auto;bottom:118px;right:110px;translate:none;width:687px;
 }
 
 /* ============ BOTTOM BAR: authored angular HUD footer (hero silhouette) ============
    One continuous chamfered console: pink outline follows the stepped top edge
    (raised centre cradle for the locality plate) and chamfered ends via the
-   same double-layer clip-path technique as the header. The footer locks into
-   the map instead of floating over it. */
+   same double-layer clip-path technique as the header. A restrained cyan
+   segment glows along the cradle's top edge where the footer joins the map.
+   The footer locks into the map instead of floating over it. */
 body.dashboard-mode.theme-vice-city #dash-bottombar{
-  display:block;position:absolute;left:0;right:0;bottom:0;height:88px;z-index:25;
-  background:#ff2e88;pointer-events:auto;
+  display:block;position:absolute;left:0;right:0;bottom:0;height:100px;z-index:25;
+  background:
+    linear-gradient(90deg,transparent 34%,rgba(1,205,254,.9) 37.5%,rgba(1,205,254,.9) 62.5%,transparent 66%),
+    #ff2e88;
+  background-size:100% 5px,auto;
+  background-position:0 0,0 0;
+  background-repeat:no-repeat;
+  pointer-events:auto;
   clip-path:polygon(30px 16px,34% 16px,37.5% 2px,62.5% 2px,66% 16px,calc(100% - 30px) 16px,100% 40px,100% calc(100% - 2px),0 calc(100% - 2px),0 40px);
   filter:drop-shadow(0 0 14px rgba(255,46,136,.55)) drop-shadow(0 -6px 18px rgba(255,46,136,.22));
 }
@@ -169,7 +197,7 @@ body.dashboard-mode.theme-vice-city #dash-bottombar::before{
 }
 body.dashboard-mode.theme-vice-city #dash-bottombar .dash-chrome{
   position:absolute;inset:0;z-index:1;display:flex;align-items:center;
-  gap:8px;padding:6px 28px 4px 28px;background:none;
+  gap:8px;padding:10px 30px 8px 30px;background:none;
 }
 body.dashboard-mode.theme-vice-city #map-tools{display:none}
 body.dashboard-mode.theme-vice-city .dash-zoom{display:none}
@@ -180,25 +208,25 @@ body.dashboard-mode.theme-vice-city .dash-tabs{
 }
 body.dashboard-mode.theme-vice-city .dash-tabs button{
   background:none;border:0;box-shadow:none;
-  font-family:var(--vcfont);font-size:28px;letter-spacing:3px;text-transform:uppercase;
-  color:var(--cyan);text-shadow:0 0 7px rgba(1,205,254,.38);
+  font-family:var(--vcfont);font-size:30px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--cyan);text-shadow:0 0 7px rgba(1,205,254,.28);
   padding:0 20px;opacity:.75;display:flex;align-items:center;gap:8px;
   line-height:1;
 }
 body.dashboard-mode.theme-vice-city .dash-tabs button svg{display:none}
 body.dashboard-mode.theme-vice-city .dash-tabs button.on{
   color:#ff71ce;opacity:1;
-  text-shadow:0 0 10px rgba(255,113,206,1),0 0 30px rgba(255,46,136,.9),0 0 64px rgba(255,46,136,.5);
+  text-shadow:0 0 10px rgba(255,113,206,1),0 0 30px rgba(255,46,136,.95),0 0 64px rgba(255,46,136,.55),0 0 96px rgba(255,46,136,.4);
 }
 /* Destination plate: chamfered cyan outline, hot-pink live text.
    Double-layer so the outline is crisp (border+clip-path clips borders).
    Auto width, never truncates at dashboard widths. */
 body.dashboard-mode.theme-vice-city .dash-dest{
   position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  flex:none;min-width:0;max-width:430px;padding:3px;
-  background:rgba(1,205,254,.8);
+  flex:none;min-width:0;max-width:410px;padding:3px;
+  background:rgba(1,205,254,.95);
   clip-path:polygon(22px 0,calc(100% - 22px) 0,100% 50%,calc(100% - 22px) 100%,22px 100%,0 50%);
-  box-shadow:0 0 16px rgba(1,205,254,.45);
+  box-shadow:0 0 22px rgba(1,205,254,.6);
 }
 body.dashboard-mode.theme-vice-city .dash-dest::before{
   content:'';position:absolute;inset:3px;
@@ -207,11 +235,11 @@ body.dashboard-mode.theme-vice-city .dash-dest::before{
 }
 body.dashboard-mode.theme-vice-city #dash-dest{
   position:relative;z-index:1;
-  display:block;
+  display:block;text-align:center;
   font-family:var(--vcfont);font-size:24px;letter-spacing:4px;color:#ff71ce;
   text-shadow:0 0 12px rgba(255,46,136,.9);text-transform:uppercase;
   background:none;border:0;box-shadow:none;clip-path:none;
-  padding:10px 36px;line-height:1;white-space:nowrap;
+  padding:12px 34px;line-height:1;white-space:nowrap;
   overflow:visible;max-width:none;text-overflow:clip;
 }
 /* Trip cluster: pink compass, hairline divider, ARRIVE IN hierarchy.
@@ -221,7 +249,7 @@ body.dashboard-mode.theme-vice-city .dash-trip{
   font-family:var(--vclabel);padding:0 4px;
 }
 body.dashboard-mode.theme-vice-city #dash-compass{
-  font-size:30px;color:#ff71ce;
+  font-size:32px;color:#ff71ce;
   text-shadow:0 0 12px rgba(255,46,136,.9);
 }
 body.dashboard-mode.theme-vice-city .dash-north{
@@ -244,14 +272,21 @@ body.dashboard-mode.theme-vice-city #dash-eta .eta-label{
   text-shadow:0 0 8px rgba(1,205,254,.7);
 }
 body.dashboard-mode.theme-vice-city #dash-eta .eta-time{
-  color:#ff71ce;font-size:30px;
+  color:#ff71ce;font-size:32px;
   text-shadow:0 0 12px rgba(255,46,136,.95),0 0 34px rgba(255,46,136,.45);
 }
-/* Tagline: hero copy, integrated into the footer, eased in from the edge */
+/* Tagline: hero copy, integrated into the footer, eased well in from the edge.
+   Angled hairline divider separates the arrival zone from the slogan. */
 body.dashboard-mode.theme-vice-city .dash-tag{
+  position:relative;
   flex:0 0 auto;font-size:0;line-height:0;
-  padding:0;margin:0 26px 0 18px;
+  padding:0 0 0 20px;margin:0 46px 0 14px;
   transform:none;white-space:normal;
+}
+body.dashboard-mode.theme-vice-city .dash-tag::before{
+  content:'';position:absolute;left:0;top:18%;bottom:18%;width:2px;
+  background:linear-gradient(180deg,transparent,rgba(1,205,254,.55),transparent);
+  transform:skewX(-12deg);
 }
 body.dashboard-mode.theme-vice-city .dash-tag .tag-line{display:none}
 body.dashboard-mode.theme-vice-city .dash-tag::after{

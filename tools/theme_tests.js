@@ -166,7 +166,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v56"), 'SW theme cache v32');
+ok(swSrc.includes("ws-theme-v57"), 'SW theme cache v32');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
@@ -419,7 +419,7 @@ ok(cssSrc.includes('vc-logo-script'), 'VC hero logo script styled');
 /* ---------- bespoke bar silhouettes: every theme gets its own bar heights,
    layouts and drive-HUD clearances, not one shared silhouette ---------- */
 const barHeights = {
-  'vice-city': ['78px', '88px'],
+  'vice-city': ['78px', '100px'],
   'san-andreas': ['140px', '120px'],
   'gta-v': ['56px', '64px'],
   'rdr2': ['72px', '72px'],
@@ -434,6 +434,14 @@ ok(cssSrc.includes('#dash-topbar::after'), 'VC top bar wears a neon edge');
 ok(/theme-vice-city #dash-topbar\{[^}]*clip-path:polygon/.test(cssSrc), 'VC top bar is a chamfered hero silhouette');
 ok(/theme-vice-city #dash-bottombar\{[^}]*clip-path:polygon/.test(cssSrc), 'VC bottom bar is a shaped angular footer');
 ok(cssSrc.includes('#dash-eta .eta-time'), 'VC arrival time uses the live eta-time hook');
+/* ---------- pass 3: hero convergence refinements ---------- */
+ok(/theme-vice-city \.vcsp\{[^}]*bottom:118px/.test(cssSrc), 'VC widget bottom-anchored 18px above the footer');
+ok(cssSrc.includes("dashboard/topbar-skyline.png"), 'VC skyline uses the full palm/sun art, masked organically');
+ok(/theme-vice-city #dash-topbar\{[^}]*97\.5% 100%/.test(cssSrc), 'VC header has a skyline pocket in its silhouette');
+ok(/theme-vice-city #vc-maneuver::before/.test(cssSrc), 'VC maneuver card uses a double-layer pink neon border');
+ok(/theme-vice-city #vc-maneuver::after/.test(cssSrc), 'VC maneuver card carries a cyan secondary accent');
+ok(/theme-vice-city #dash-bottombar\{[^}]*rgba\(1,205,254/.test(cssSrc), 'VC footer has a cyan cradle accent at the map join');
+ok(/theme-vice-city \.dash-tag::before/.test(cssSrc), 'VC footer separates arrival and slogan with a divider');
 ok(/theme-vice-city #dash-dest\{[^}]*overflow:visible/.test(cssSrc), 'VC locality plate never truncates');
 ok(!/theme-vice-city \.dash-tabs button\{[^}]*linear-gradient/.test(cssSrc), 'VC tabs are flat neon text, not chunky buttons');
 ok(/theme-san-andreas \.dash-tabs button\.on\{[^}]*#9ccb84/.test(cssSrc),
@@ -462,7 +470,7 @@ ok(/body\.dashboard-mode \.vc-title\{[^}]*font-size:52px/.test(cssSrc),
    the stage is letterboxed or zoomed below 1. */
 ok(!/DASH_STAGE_NODES = \[[^\]]*'menu-panel'/.test(appSrc),
   'menu panel is not reparented into the scaled dash stage');
-for (const [id, top, bottom] of [['vice-city', 76, 88], ['san-andreas', 86, 86], ['gta-v', 56, 64], ['rdr2', 72, 72]]) {
+for (const [id, top, bottom] of [['vice-city', 76, 100], ['san-andreas', 86, 86], ['gta-v', 56, 64], ['rdr2', 72, 72]]) {
   ok(new RegExp(`'${id}':\\s*\\{\\s*top:\\s*${top},\\s*bottom:\\s*${bottom}\\s*\\}`).test(appSrc),
     `DASH_BAR_HEIGHTS: ${id} bars ${top}/${bottom}px (stage coordinates)`);
 }
@@ -526,9 +534,9 @@ ok(cssSrc.includes('Yellowtail'), 'VC wordmark uses the neon script font');
 /* ---------- VC map matches the hero target ---------- */
 const vcStyle2 = JSON.parse(fs.readFileSync(path.join(REPO, 'themes/vice-city/style.json'), 'utf8'));
 const vcPaint = id => vcStyle2.layers.find(l => l.id === id).paint;
-ok(vcPaint('vc-land')['background-color'] === '#9294a7', 'VC land: darker urban gray (hero punch)');
+ok(vcPaint('vc-land')['background-color'] === '#84869c', 'VC land: darker urban gray (hero punch)');
 ok(vcPaint('vc-water')['fill-color'] === '#48a8e8', 'VC water: vivid blue (hero)');
-ok(vcPaint('vc-parks')['fill-color'] === '#619972', 'VC parks: deepened green (hero punch)');
+ok(vcPaint('vc-parks')['fill-color'] === '#538a63', 'VC parks: deepened green (hero punch)');
 ok(vcPaint('vc-buildings')['fill-color'] === '#b7b7c7', 'VC buildings: separated from land (hero contrast)');
 ok(vcPaint('vc-road-minor')['line-color'] === '#eef0f6', 'VC minor roads: white streets (hero)');
 ok(vcPaint('vc-road-primary')['line-color'] === '#18182d', 'VC arterials: darker navy core (hero punch)');
@@ -619,7 +627,7 @@ ok(SW.isThemeAsset('/themes/san-andreas/dashboard/sa-logo.png'), 'isThemeAsset: 
 ok(SW.isThemeAsset('/assets/themes/gta-v/dashboard/topbar-skyline.jpg'), 'isThemeAsset: V dashboard art');
 ok(SW.isThemeAsset('/assets/themes/rdr2/dashboard/menu_header_1a.png'), 'isThemeAsset: RDR2 dashboard art');
 const vcSkinSrc = fs.readFileSync(path.join(REPO, 'themes/vice-city/spotify-skin.css'), 'utf8');
-ok(cssSrc.includes('theme-vice-city .vcsp{') && /theme-vice-city \.vcsp\{[^}]*width:636px/.test(cssSrc), 'VC widget scaled to 636px in dashboard (hero weighting)');
+ok(cssSrc.includes('theme-vice-city .vcsp{') && /theme-vice-city \.vcsp\{[^}]*width:687px/.test(cssSrc), 'VC widget scaled to 687px in dashboard (hero weighting)');
 ok(!vcSkinSrc.includes('rotate(6deg)'), 'VC widget is straight (hero has no tilt)');
 // every theme widget: explicit larger size, ~6-7 degree tilt (except VC hero-match), no-overlap idle states
 const skinSpecs = [
