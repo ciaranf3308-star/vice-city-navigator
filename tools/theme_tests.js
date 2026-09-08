@@ -529,7 +529,7 @@ ok(vcPaint('vc-buildings')['fill-color'] === '#b7b7c7', 'VC buildings: separated
 ok(vcPaint('vc-road-minor')['line-color'] === '#eef0f6', 'VC minor roads: white streets (hero)');
 ok(vcPaint('vc-road-primary')['line-color'] === '#1d1d36', 'VC arterials: stronger dark navy (hero contrast)');
 ok(vcPaint('vc-road-motorway')['line-color'] === '#0e0e22', 'VC motorways: near-black navy (hero contrast)');
-ok(cssSrc.includes("inset 0 2px 0 #d8b34a"), 'SA bottom console wears its own gold chamfer');
+ok(cssSrc.includes("#dash-bottombar::before") && cssSrc.includes("#d8b34a"), 'SA bottom console wears its own gold chamfer');
 ok(/theme-san-andreas #dash-bottombar\{[^}]*linear-gradient\(180deg,#4a3a20/.test(cssSrc),
   'SA bottom bar is a designed CSS console, not a fitted photo strip');
 /* ---------- SA hero-match: authored dashboard art set ---------- */
@@ -544,6 +544,12 @@ ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/topbar-sunset.jpg
   'SA top bar photographic sunset art exists');
 ok(/topbar-sunset\.jpg/.test(cssSrc),
   'SA top bar uses the photographic sunset (not a CSS gradient)');
+ok(/theme-san-andreas #dash-topbar\{[^}]*clip-path:polygon/.test(cssSrc),
+  'SA top bar has the hero machined angular edge');
+ok(/theme-san-andreas #dash-bottombar\{[^}]*clip-path:polygon/.test(cssSrc),
+  'SA bottom bar has the hero machined angular edge');
+ok(indexSrc.includes('dash-tomorrow'),
+  'SA top bar places the A Better Tomorrow script (hero detail)');
 const saMan = pngSize(saDash('maneuver.png'));
 ok(saMan && saMan.w >= 900 && saMan.h >= 180, 'SA maneuver frame: clean empty plate for live data');
 const saGrove = pngSize(saDash('grove-panel.png'));

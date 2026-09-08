@@ -562,8 +562,16 @@ body.dashboard-mode.theme-vice-city #next-stats .ns-sep{opacity:.7}
 body.dashboard-mode.theme-san-andreas #dash-topbar{
   display:block;position:absolute;left:0;right:0;top:0;height:86px;z-index:25;
   background:#3a1c0c url('themes/san-andreas/dashboard/topbar-sunset.jpg') center/cover no-repeat;
-  box-shadow:0 2px 0 #c9a227, 0 5px 10px rgba(0,0,0,.55);
+  box-shadow:0 5px 10px rgba(0,0,0,.55);
   pointer-events:none;
+  /* hero's machined edge: straight profile, angled cuts at each end */
+  clip-path:polygon(0 0,100% 0,100% 80%,97.5% 100%,2.5% 100%,0 80%);
+}
+/* gold baseline follows the chamfer */
+body.dashboard-mode.theme-san-andreas #dash-topbar::before{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:3px;
+  background:linear-gradient(90deg,transparent,#f5c96b 6%,#f5c96b 94%,transparent);
+  clip-path:polygon(0 0,2.5% 100%,97.5% 100%,100% 0);
 }
 /* photographic bar: no painted haze needed; keep a whisper at the base for the gold edge */
 body.dashboard-mode.theme-san-andreas #dash-topbar::after{
@@ -581,6 +589,12 @@ body.dashboard-mode.theme-san-andreas .dash-brand{
 body.dashboard-mode.theme-san-andreas .dash-brand .dash-logo,
 body.dashboard-mode.theme-san-andreas .dash-brand .dash-palm{display:none}
 body.dashboard-mode.theme-san-andreas .sa-logo{display:block;height:64px;width:auto;max-width:24vw;flex:none}
+/* "A Better Tomorrow" script rides the photo at far right, hero-style */
+body.dashboard-mode.theme-san-andreas #dash-topbar .dash-tomorrow{
+  position:absolute;right:22px;top:50%;transform:translateY(-54%);
+  height:44px;width:auto;max-width:220px;object-fit:contain;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.8));pointer-events:none;
+}
 /* live overlays, placed with intent: temp+icon left/centre, date centre,
    time right-centre; cream HUD text with a subtle black shadow */
 body.dashboard-mode.theme-san-andreas .dash-wx{
@@ -606,8 +620,16 @@ body.dashboard-mode.theme-san-andreas #dash-time{
 body.dashboard-mode.theme-san-andreas #dash-bottombar{
   display:block;position:absolute;left:0;right:0;bottom:0;height:86px;z-index:25;
   background:linear-gradient(180deg,#4a3a20 0%,#2a2010 16%,#14100a 55%,#0b0906 100%);
-  box-shadow:inset 0 2px 0 #d8b34a, inset 0 4px 8px rgba(255,220,150,.22), inset 0 -12px 20px rgba(0,0,0,.65);
+  box-shadow:inset 0 4px 8px rgba(255,220,150,.22), inset 0 -12px 20px rgba(0,0,0,.65);
   pointer-events:auto;
+  /* hero's machined top edge: chamfered corners, angular console profile */
+  clip-path:polygon(0 100%,0 28%,2.5% 0,97.5% 0,100% 28%,100% 100%);
+}
+/* gold edge follows the chamfer */
+body.dashboard-mode.theme-san-andreas #dash-bottombar::before{
+  content:"";position:absolute;left:0;right:0;top:0;height:3px;
+  background:linear-gradient(90deg,transparent,#d8b34a 8%,#f5d67b 50%,#d8b34a 92%,transparent);
+  clip-path:polygon(0 100%,2.5% 0,97.5% 0,100% 100%);
 }
 body.dashboard-mode.theme-san-andreas #dash-bottombar .dash-chrome{
   position:absolute;inset:0;display:flex;align-items:center;gap:12px;
