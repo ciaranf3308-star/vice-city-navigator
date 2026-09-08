@@ -54,6 +54,7 @@ body.dashboard-mode.theme-gta-v #dash-topbar::after{
 }
 body.dashboard-mode.theme-gta-v #dash-topbar .dash-chrome{
   position:absolute;inset:0;z-index:1;
+  overflow:visible;
 }
 body.dashboard-mode.theme-gta-v #dash-topbar .dash-chrome::after{
   content:'Los Santos';position:absolute;right:64px;bottom:24px;z-index:2;
