@@ -32,8 +32,8 @@ body.dashboard-mode.theme-san-andreas .dash-brand .dash-logo,
 body.dashboard-mode.theme-san-andreas .dash-brand .dash-palm{display:none}
 /* hero wordmark: large, overlapping the topbar bottom edge onto the map */
 body.dashboard-mode.theme-san-andreas #dash-topbar .sa-logo{
-  display:block;position:absolute;left:20px;top:-2px;
-  height:180px;width:auto;max-width:36vw;object-fit:contain;
+  display:block;position:absolute;left:16px;top:-10px;
+  height:160px;width:auto;max-width:30vw;object-fit:contain;
   z-index:50;pointer-events:none;
   filter:drop-shadow(0 4px 8px rgba(0,0,0,.9));
 }
