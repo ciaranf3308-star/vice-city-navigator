@@ -648,7 +648,7 @@ ok(/theme-san-andreas \.sasp\{[^}]*top:83px/.test(skinSaSrc),
   'SA radio sits at the hero\'s radio y (83px stage), overlapping the bars');
 ok(/\.sasp-bezel/.test(skinSaSrc) && skinJsSa.includes('dashboard/radio-hero7-r2.png'),
   'SA Spotify outer skin is the hero7 radio slice');
-ok(/\.sasp-idle::after\{[^}]*left:5px;top:280px;width:220px/.test(skinSaSrc),
+ok(/\.sasp-idle::after\{[^}]*left:5px;top:280px;width:260px/.test(skinSaSrc),
   'SA idle covers the art\'s drawn transport strip (no phantom pause/progress when disconnected)');
 /* ---------- SA hero-match: authored dashboard art set ---------- */
 const saDash = (f) => path.join(REPO, 'themes/san-andreas/dashboard', f);
