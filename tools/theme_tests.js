@@ -91,7 +91,8 @@ for (const id of T.ids()) {
   const style = JSON.parse(fs.readFileSync(stylePath, 'utf8'));
   styles[id] = style;
   ok(style.version === 8, `${id} style version 8`);
-  ok(Array.isArray(style.layers) && style.layers.length >= 29, `${id} has 29+ layers (got ${style.layers.length})`);
+  ok(Array.isArray(style.layers) && style.layers.length >= (id === 'san-andreas' ? 20 : 29),
+    `${id} has enough layers (got ${style.layers.length})`);
   const srcs = new Set(Object.values(style.sources || {}).map(s => s.tiles && s.tiles[0]).filter(Boolean));
   ok([...srcs].every(u => u.includes('openfreemap')), `${id} sources are OpenFreeMap`);
   const stack = T.get(id).map.fontStack;
@@ -172,7 +173,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v59"), 'SW theme cache v59');
+ok(swSrc.includes("ws-theme-v60"), 'SW theme cache v60');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
@@ -389,8 +390,10 @@ ok(appSrc.includes('nav-driving') && /setUiMode/.test(appSrc), 'drive-mode chrom
 ok(cssSrc.includes('body.dashboard-mode.nav-driving #maneuver-card'), 'drive HUD clears the top bar on every theme');
 ok(cssSrc.includes('body.dashboard-mode.nav-driving #drive-bar'), 'drive trip bar clears the bottom bar on every theme');
 ok(!cssSrc.includes('.dash-skyline') && !indexSrc.includes('dash-skyline'), 'old skyline img fully retired in favour of the authored top bar strip');
-ok(/topbar-composite\.jpg/.test(cssSrc),
-  'SA top bar is one seamless night-to-sunset panorama (hero, not two smushed pics)');
+ok(!/topbar-composite\.jpg/.test(cssSrc),
+  'SA top bar is CSS chrome now — the photo collage is retired');
+ok(/theme-san-andreas #dash-topbar\{[^}]*linear-gradient/.test(cssSrc),
+  'SA top bar is a thin CSS gradient bar with an embedded sunset glow');
 ok(!/tbar-night/.test(indexSrc) && !/tbar-sunset/.test(indexSrc),
   'SA top bar has no split-panel divs');
 ok(!/theme-san-andreas #dash-topbar\{[^}]*radial-gradient\(120px 120px at 62%/.test(cssSrc),
@@ -426,7 +429,7 @@ ok(cssSrc.includes('vc-logo-script'), 'VC hero logo script styled');
    layouts and drive-HUD clearances, not one shared silhouette ---------- */
 const barHeights = {
   'vice-city': ['78px', '100px'],
-  'san-andreas': ['140px', '120px'],
+  'san-andreas': ['84px', '104px'],
   'gta-v': ['56px', '64px'],
   'rdr2': ['72px', '72px'],
 };
@@ -451,8 +454,8 @@ ok(/theme-vice-city #dash-bottombar\{[^}]*rgba\(1,205,254/.test(cssSrc), 'VC foo
 ok(/theme-vice-city \.dash-tag::before/.test(cssSrc), 'VC footer separates arrival and slogan with a divider');
 ok(/theme-vice-city #dash-dest\{[^}]*overflow:visible/.test(cssSrc), 'VC locality plate never truncates');
 ok(!/theme-vice-city \.dash-tabs button\{[^}]*linear-gradient/.test(cssSrc), 'VC tabs are flat neon text, not chunky buttons');
-ok(/theme-san-andreas \.dash-tabs button\.on\{[^}]*#9ccb84/.test(cssSrc),
-  'SA active tab is the hero solid green box');
+ok(/theme-san-andreas \.dash-tabs button\.on\{[^}]*#6f7442/.test(cssSrc),
+  'SA active tab is a soft olive flat, not the toy-green tile');
 ok(/theme-gta-v \.dash-tabs button\{[^}]*border-left:1px solid/.test(cssSrc), 'V tab strip uses hairline separators');
 ok(/theme-gta-v \.dash-tag\{display:none\}/.test(cssSrc), 'V drops the 80s script tagline');
 ok(/theme-rdr2 \.dash-tag\{display:none\}/.test(cssSrc), 'RDR2 drops the 80s script tagline');
@@ -512,7 +515,7 @@ ok(/body\.dashboard-mode \.vc-title\{[^}]*font-size:52px/.test(cssSrc),
    the stage is letterboxed or zoomed below 1. */
 ok(!/DASH_STAGE_NODES = \[[^\]]*'menu-panel'/.test(appSrc),
   'menu panel is not reparented into the scaled dash stage');
-for (const [id, top, bottom] of [['vice-city', 76, 100], ['san-andreas', 86, 86], ['gta-v', 56, 64], ['rdr2', 72, 72]]) {
+for (const [id, top, bottom] of [['vice-city', 76, 100], ['san-andreas', 84, 104], ['gta-v', 56, 64], ['rdr2', 72, 72]]) {
   ok(new RegExp(`'${id}':\\s*\\{\\s*top:\\s*${top},\\s*bottom:\\s*${bottom}\\s*\\}`).test(appSrc),
     `DASH_BAR_HEIGHTS: ${id} bars ${top}/${bottom}px (stage coordinates)`);
 }
@@ -583,8 +586,9 @@ ok(vcPaint('vc-buildings')['fill-color'] === '#b7b7c7', 'VC buildings: separated
 ok(vcPaint('vc-road-minor')['line-color'] === '#eef0f6', 'VC minor roads: white streets (hero)');
 ok(vcPaint('vc-road-primary')['line-color'] === '#18182d', 'VC arterials: darker navy core (hero punch)');
 ok(vcPaint('vc-road-motorway')['line-color'] === '#0e0e22', 'VC motorways: near-black navy (hero contrast)');
-ok(/theme-san-andreas #dash-bottombar::before/.test(cssSrc), 'SA bottom console wears the machined brass trim');
-ok(/theme-san-andreas #dash-bottombar\{[^}]*#0e0c08/.test(cssSrc),
+ok(/theme-san-andreas #dash-bottombar\{[^}]*border-top:2px solid/.test(cssSrc),
+  'SA bottom bar wears a thin gold top rule, not a chunky brass trim');
+ok(/theme-san-andreas #dash-bottombar\{[^}]*#0e0b07/.test(cssSrc),
   'SA bottom bar is the dark console');
 /* ---------- SA hero-match: authored dashboard art set ---------- */
 const saDash = (f) => path.join(REPO, 'themes/san-andreas/dashboard', f);
@@ -597,12 +601,10 @@ ok(saLogo && saLogo.w >= 500 && saLogo.h >= 150, 'SA standalone wordmark extract
 ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/topbar-composite.jpg')),
   'SA top bar seamless panorama art exists');
 
-ok(/topbar-composite\.jpg/.test(cssSrc),
-  'SA top bar panorama is photographic art (not a CSS gradient)');
-ok(/theme-san-andreas #dash-topbar::before\{[^}]*clip-path:polygon/.test(cssSrc),
-  'SA top bar has the hero machined angular edge');
-ok(/theme-san-andreas #dash-bottombar\{[^}]*border-top:3px solid/.test(cssSrc),
-  'SA bottom bar has a clean brass top border');
+ok(!/topbar-composite\.jpg/.test(cssSrc),
+  'SA top bar panorama is photographic art no more — CSS chrome, not a collage');
+ok(!/theme-san-andreas #dash-topbar::before\{[^}]*clip-path/.test(cssSrc),
+  'SA top bar has no machined clip-path silhouette (thin integrated bar)');
 ok(indexSrc.includes('dash-tomorrow'),
   'SA top bar places the A Better Tomorrow script (hero detail)');
 const saMan = pngSize(saDash('maneuver.png'));
@@ -612,15 +614,15 @@ ok(saGrove && saGrove.w >= 900 && saGrove.h >= 250, 'SA Grove Street scene panel
 ok(indexSrc.includes('id="sa-grove-panel"'), 'SA dashboard mounts the Grove Street scene panel element');
 ok(appSrc.includes("'sa-grove-panel'") && /DASH_STAGE_NODES = \[[^\]]*'sa-grove-panel'/.test(appSrc),
   'Grove Street panel scales with the dashboard stage');
-ok(cssSrc.includes("dashboard/maneuver.png"), 'SA maneuver card uses the authored empty frame');
+ok(!cssSrc.includes("dashboard/maneuver.png"), 'SA maneuver card is a clean console panel, not photo art');
 ok(/theme-san-andreas #sa-grove-panel\{[^}]*display:none/.test(cssSrc), 'SA Grove Street scene panel removed (unified hud carries the art)');
-ok(cssSrc.includes("dashboard/bottombar-palms.jpg"), 'SA bottom bar has the palm sunset panel');
-ok(/theme-san-andreas \.dash-tabs button\{[^}]*font-size:20px/.test(cssSrc),
-  'SA tabs are text labels riding the art slots, not icon glyphs');
+ok(!cssSrc.includes("dashboard/bottombar-palms.jpg"), 'SA bottom bar drops the scenic palm photo block');
+ok(/theme-san-andreas \.dash-tabs button\{[^}]*font-size:13px/.test(cssSrc),
+  'SA tabs are low-profile icon+label, not giant tiles');
 ok(!/theme-san-andreas \.dash-tabs button::before\{[^}]*mask-image/.test(cssSrc),
   'SA tabs carry no generic icon glyphs');
-ok(/theme-san-andreas \.sasp\{[^}]*width:520px/.test(cssSrc),
-  'SA Spotify widget is the right-side anchor (520px square, clears bottom bar)');
+ok(/theme-san-andreas \.sasp\{[^}]*width:548px/.test(cssSrc),
+  'SA Spotify widget is the right-side anchor (548px, straight, framed)');
 ok(/theme-san-andreas \.sasp\{[^}]*transform:none/.test(cssSrc),
   'SA Spotify widget sits straight inside the map area without touching the bars');
 ok(/theme-san-andreas #map-tools\{display:none\}/.test(cssSrc),
@@ -633,8 +635,10 @@ ok(appSrc.includes("applyBodyTheme(VCNThemes.currentId())") && /Paint the theme 
   'theme chrome paints before tiles arrive (no chrome-less dashboard offline)');
 ok(indexSrc.includes('class="sa-logo"'), 'SA dashboard mounts the standalone wordmark element');
 ok(indexSrc.includes('dashboard/sa-logo.png'), 'SA wordmark uses the extracted logo art');
-ok(/theme-san-andreas #dash-topbar \.sa-logo\{[^}]*height:140px/.test(cssSrc),
-  'SA wordmark is sized to fit without clipping');
+ok(cssSrc.includes('theme-san-andreas #dash-topbar .sa-logo,'),
+  'SA retires the huge stacked wordmark img (modest text branding instead)');
+ok(/theme-san-andreas \.dash-brand::after\{[^}]*content:"SAN ANDREAS"/.test(cssSrc),
+  'SA top bar carries one modest text identity moment');
 ok(/theme-san-andreas #dash-bottombar \.dash-chrome\{[^}]*display:flex/.test(cssSrc),
   'SA bottom console lays out with flex, not art-slot coordinates');
 ok(/theme-san-andreas \.dash-tabs button\{[^}]*border:0/.test(cssSrc),
@@ -644,13 +648,20 @@ ok(indexSrc.includes('Good Music</span><span class="tag-line">Better Times'), 'd
 const saStyle2 = JSON.parse(fs.readFileSync(path.join(REPO, 'themes/san-andreas/style.json'), 'utf8'));
 const saPaint = id => saStyle2.layers.find(l => l.id === id).paint;
 const saLayer = id => saStyle2.layers.find(l => l.id === id);
-ok(saPaint('sa-grass')['fill-color'] === '#8a9448', 'SA grass: deeper olive');
-ok(saPaint('sa-woods')['fill-color'] === '#687637', 'SA woods: deeper green');
-ok(saPaint('sa-urban')['fill-color'] === '#d9c9a8', 'SA urban: hero pale tan blocks');
-ok(saPaint('sa-land')['background-color'] === '#a3a35e', 'SA land: hero olive-green');
+ok(saPaint('sa-grass')['fill-color'] === '#9aa05e', 'SA grass: muted olive');
+ok(saPaint('sa-woods')['fill-color'] === '#7d8449', 'SA woods: muted olive');
+ok(saPaint('sa-urban')['fill-color'] === '#cdb488', 'SA urban: dusty tan blocks');
+ok(saPaint('sa-land')['background-color'] === '#d9c096', 'SA land: warm dusty tan');
+ok(saPaint('sa-water')['fill-color'] === '#8ba0ae', 'SA water: dusty blue-grey');
+ok(saPaint('sa-road-motorway')['line-color'] === '#262626', 'SA motorways: asphalt charcoal');
+ok(saPaint('sa-road-minor')['line-color'] === '#3f3f3f', 'SA minor roads: lighter charcoal');
 ok(saLayer('sa-label-road-major').minzoom === 10, 'SA major road labels start at zoom 10');
-ok(saLayer('sa-label-road-minor').minzoom === 12.5, 'SA minor road labels start at zoom 12.5');
-ok(/theme-san-andreas #map::after\{[^}]*radial-gradient/.test(cssSrc), 'SA dashboard map wears an illustrated vignette');
+const saThemeSrc = fs.readFileSync(path.join(REPO, 'themes/san-andreas/theme.js'), 'utf8');
+ok(/routeColor: '#d9a83f'/.test(saThemeSrc), 'SA route is muted ochre, not neon');
+ok(/playerMarker: 'assets\/themes\/san-andreas\/player.svg'/.test(saThemeSrc), 'SA player marker is the crisp vector arrow');
+ok(fs.existsSync(path.join(REPO, 'assets/themes/san-andreas/player.svg')), 'SA player SVG on disk');
+ok(saLayer('sa-label-road-minor').minzoom === 13, 'SA minor road labels start at zoom 13 (less clutter)');
+ok(!/theme-san-andreas #map::after/.test(cssSrc), 'SA map has no vignette overlay (clean hero map)');
 ok(/theme-gta-v #dash-topbar \.dash-chrome\{[^}]*topbar-skyline\.jpg/.test(cssSrc), 'V top bar uses the v-hud skyline strip');
 ok(/theme-gta-v #dash-bottombar \.dash-chrome\{[^}]*bottombar-skyline\.jpg/.test(cssSrc), 'V bottom bar uses the v-hud skyline strip');
 ok(/theme-gta-v \.dash-tabs button\.on\{[^}]*box-shadow:inset 0 -3px 0 #7CFF6B/.test(cssSrc), 'V active tab uses the pause-menu green underline');

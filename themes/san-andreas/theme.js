@@ -12,11 +12,13 @@
 
     map: {
       styleUrl: 'themes/san-andreas/style.json',
-      routeColor: '#d8443c',
-      routeCasingColor: '#5e1a14',
+      routeColor: '#d9a83f',
+      routeCasingColor: '#3d2f14',
+      routeGlowColor: '#c9962e',
+      routeGlowOpacity: 0.3,
       routeWidth: 4,
       routeCasingWidth: 8,
-      playerMarker: 'assets/themes/san-andreas/player.png',
+      playerMarker: 'assets/themes/san-andreas/player.svg',
       fontStack: 'san-andreas',
     },
 

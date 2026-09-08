@@ -1,5 +1,6 @@
 /* gta-v dashboard theme — LOCKABLE: do not edit without approval */
 body.theme-gta-v .dest-pin{ background-image:url('assets/themes/gta-v/blips/waypoint.png'); }
+body.dashboard-mode.theme-gta-v #search-bar{top:calc(68px + env(safe-area-inset-top))}
 
 /* ---------- GTA V dashboard chrome: Los Santos minimal panel ----------
    V's pause-menu language: near-black panels, hairline neon-green rules,
