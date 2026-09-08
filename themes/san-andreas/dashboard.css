@@ -32,6 +32,10 @@ body.dashboard-mode.theme-san-andreas .dash-clock{
 }
 /* branding lives in the art now — no DOM wordmark */
 body.dashboard-mode.theme-san-andreas .dash-brand{display:none}
+/* legacy topbar art imgs stay retired — the hero overlay is the bar */
+body.dashboard-mode.theme-san-andreas #dash-topbar .sa-logo,
+body.dashboard-mode.theme-san-andreas #dash-topbar .dash-tomorrow,
+body.dashboard-mode.theme-san-andreas #dash-topbar .dash-los-santos{display:none!important}
 /* CENTER: weather + date + time, one centred group (in-flow, justify-center) */
 body.dashboard-mode.theme-san-andreas .dash-wx{
   position:static;transform:none;

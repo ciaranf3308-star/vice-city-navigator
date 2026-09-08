@@ -173,7 +173,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v69"), 'SW theme cache v69');
+ok(swSrc.includes("ws-theme-v70"), 'SW theme cache v70');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
@@ -613,6 +613,8 @@ ok(!/theme-san-andreas #dash-topbar::after\{[^}]*skyline-strip\.jpg/.test(cssSrc
   'pass5 skyline-strip panel removed from the SA header');
 ok(/theme-san-andreas \.dash-brand\{display:none/.test(cssSrc),
   'SA header branding lives in the art — no DOM wordmark doubling it');
+ok(cssSrc.includes('#dash-topbar .dash-tomorrow,') && cssSrc.includes('display:none!important'),
+  'SA header retires the legacy topbar art imgs (no giant script over the skyline)');
 ok(/theme-san-andreas #dash-bottombar\{[^}]*bottombar-hero\.png/.test(cssSrc),
   'SA footer IS the hero overlay art (bottombar-hero.png)');
 ok(/theme-san-andreas #dash-bottombar\{[^}]*height:72px/.test(cssSrc),
