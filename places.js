@@ -392,6 +392,23 @@
     }
   }
   let lastLayerError = null;
+  function nukeAndRebuild() {
+    try {
+      if (map.getLayer(POI_LAYER_ID)) map.removeLayer(POI_LAYER_ID);
+    } catch (e) { /* ignore */ }
+    try {
+      if (map.getSource('vcn-pois')) map.removeSource('vcn-pois');
+    } catch (e) { /* ignore */ }
+    lastLayerError = null;
+    ensureLayers();
+    preloadBlipImages();
+    renderPois();
+    return {
+      sourceExists: !!map.getSource('vcn-pois'),
+      layerExists: !!map.getLayer(POI_LAYER_ID),
+      lastLayerError,
+    };
+  }
   function ensureLayers() {
     if (!map.getSource('vcn-pois')) {
       map.addSource('vcn-pois', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
@@ -519,6 +536,7 @@
     },
     maybeRefresh,
     renderPois,
+    nukeAndRebuild,
     cacheSize: () => memCache.size,
     /* Rebuild map-side state after a style change (setStyle drops all
        custom sources/layers/images). Cache and data are untouched. */

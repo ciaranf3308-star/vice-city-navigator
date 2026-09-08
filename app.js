@@ -297,9 +297,11 @@ function maybeShowPoiDebug() {
       const m = (window.VCN && window.VCN._map) ? window.VCN._map() : null;
       const c = m ? m.getCenter().toArray() : [-6.68, 53.29];
       window.VCNPlaces.maybeRefresh(c);
-      // renderPois self-heals the layer if missing
-      if (window.VCNPlaces.renderPois) window.VCNPlaces.renderPois();
-      pre.textContent = 'manual refresh triggered…\n' + pre.textContent;
+      // Nuclear rebuild: teardown source+layer, recreate fresh
+      let rebuild = null;
+      if (window.VCNPlaces.nukeAndRebuild) rebuild = window.VCNPlaces.nukeAndRebuild();
+      else if (window.VCNPlaces.renderPois) window.VCNPlaces.renderPois();
+      pre.textContent = 'rebuild: ' + JSON.stringify(rebuild) + '\n' + pre.textContent;
     } catch (e) { pre.textContent = 'ERR ' + e.message; }
   };
   el.appendChild(pre);
