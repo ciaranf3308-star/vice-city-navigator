@@ -147,7 +147,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v51"), 'SW shell cache v50');
-ok(swSrc.includes("ws-theme-v13"), 'SW theme cache v13');
+ok(swSrc.includes("ws-theme-v14"), 'SW theme cache v14');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
@@ -484,6 +484,16 @@ for (const [theme, file] of dashAssets) {
 }
 // theme-scoped usage: each asset is only wired into its own theme's chrome
 ok(/theme-vice-city[^{]*\.dash-logo\{[^}]*vc-logo\.png/.test(cssSrc), 'VC wordmark is the authentic in-game logo');
+/* ---------- VC map matches the hero target ---------- */
+const vcStyle2 = JSON.parse(fs.readFileSync(path.join(REPO, 'themes/vice-city/style.json'), 'utf8'));
+const vcPaint = id => vcStyle2.layers.find(l => l.id === id).paint;
+ok(vcPaint('vc-land')['background-color'] === '#b8b8c8', 'VC land: light cool gray (hero)');
+ok(vcPaint('vc-water')['fill-color'] === '#48a8e8', 'VC water: vivid blue (hero)');
+ok(vcPaint('vc-parks')['fill-color'] === '#78b888', 'VC parks: soft desaturated green (hero)');
+ok(vcPaint('vc-buildings')['fill-color'] === '#c4c4d2', 'VC buildings: subtle, blend into land (hero)');
+ok(vcPaint('vc-road-minor')['line-color'] === '#eef0f6', 'VC minor roads: white streets (hero)');
+ok(vcPaint('vc-road-primary')['line-color'] === '#262640', 'VC arterials: dark navy (hero)');
+ok(vcPaint('vc-road-motorway')['line-color'] === '#15152c', 'VC motorways: near-black navy (hero)');
 ok(/theme-san-andreas #dash-topbar \.dash-chrome\{[^}]*menu-bgmap\.jpg/.test(cssSrc), 'SA top bar uses the engraved state-map texture');
 ok(/theme-san-andreas #dash-bottombar \.dash-chrome\{[^}]*menu-bgmap\.jpg/.test(cssSrc), 'SA bottom bar uses the engraved state-map texture');
 ok(/theme-gta-v #dash-topbar \.dash-chrome\{[^}]*topbar-skyline\.jpg/.test(cssSrc), 'V top bar uses the v-hud skyline strip');
