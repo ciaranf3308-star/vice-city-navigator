@@ -1814,6 +1814,40 @@ function wireControls() {
     }
   });
 
+  // menu: force update — pull latest from repo, clear caches, reload
+  const forceBtn = $('force-update');
+  const verEl = $('app-version');
+  function syncAppVersion() {
+    if (!verEl) return;
+    fetch('sw.js', { cache: 'no-store' }).then(r => r.text()).then(t => {
+      const m = t.match(/ws-theme-(v\d+)/);
+      verEl.textContent = m ? 'Version ' + m[1] : '—';
+    }).catch(() => { verEl.textContent = '—'; });
+  }
+  syncAppVersion();
+  if (forceBtn) forceBtn.addEventListener('click', async () => {
+    forceBtn.disabled = true;
+    forceBtn.textContent = 'Updating…';
+    try {
+      // 1. Ask the service worker to check for a new version
+      if ('serviceWorker' in navigator) {
+        const reg = await navigator.serviceWorker.getRegistration();
+        if (reg) await reg.update().catch(() => {});
+      }
+      // 2. Clear all WayStation caches so fresh files are fetched
+      if ('caches' in window) {
+        const names = await caches.keys();
+        await Promise.all(names.filter(n => n.startsWith('ws-')).map(n => caches.delete(n)));
+      }
+      // 3. Reload — bypassing HTTP cache to get the new shell
+      location.reload();
+    } catch (e) {
+      forceBtn.disabled = false;
+      forceBtn.textContent = 'Force update';
+      toast('Update failed — try again.');
+    }
+  });
+
   // menu: voice settings
   if (window.VCNVoice) {
     VCNVoice.init(); // load saved settings before populating controls
