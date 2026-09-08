@@ -554,10 +554,14 @@ ok(/theme-san-andreas \.dash-tabs button\{[^}]*font-size:17px/.test(cssSrc),
   'SA tabs are text labels riding the art slots, not icon glyphs');
 ok(!/theme-san-andreas \.dash-tabs button::before\{[^}]*mask-image/.test(cssSrc),
   'SA tabs carry no generic icon glyphs');
-ok(/theme-san-andreas \.sasp\{[^}]*width:520px/.test(cssSrc),
-  'SA Spotify widget is the major right-side anchor (520px, ~27% width)');
+ok(/theme-san-andreas \.sasp\{[^}]*width:540px/.test(cssSrc),
+  'SA Spotify widget is the major right-side anchor (540px, ~28% width)');
 ok(/theme-san-andreas \.sasp\{[^}]*transform:none/.test(cssSrc),
   'SA Spotify widget sits straight inside the map area without touching the bars');
+ok(/theme-san-andreas #map-tools\{display:none\}/.test(cssSrc),
+  'SA dashboard hides the floating zoom pills for the clean hero map');
+ok(appSrc.includes("applyBodyTheme(VCNThemes.currentId())") && /Paint the theme chrome/.test(appSrc),
+  'theme chrome paints before tiles arrive (no chrome-less dashboard offline)');
 ok(indexSrc.includes('class="sa-logo"'), 'SA dashboard mounts the standalone wordmark element');
 ok(indexSrc.includes('dashboard/sa-logo.png'), 'SA wordmark uses the extracted logo art');
 ok(/theme-san-andreas \.sa-logo\{[^}]*height:64px/.test(cssSrc),

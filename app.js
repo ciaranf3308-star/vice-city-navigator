@@ -181,6 +181,9 @@ function instrText(step) {
 /* ---------------- map init ---------------- */
 async function initMap() {
   if (window.VCNThemes) VCNThemes.restore();
+  // Paint the theme chrome (bars, menu docking, Spotify skin) immediately:
+  // the dashboard must never depend on vector tiles arriving.
+  try { if (window.VCNThemes) applyBodyTheme(VCNThemes.currentId()); } catch (e) {}
   const theme = wsTheme();
   const styleUrl = (theme && theme.map.styleUrl) || 'themes/vice-city/style.json';
   let style;
