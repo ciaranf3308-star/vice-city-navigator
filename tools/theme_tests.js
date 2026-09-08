@@ -161,8 +161,8 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v53"), 'SW shell cache v53');
-ok(swSrc.includes("ws-theme-v16"), 'SW theme cache v16');
+ok(swSrc.includes("ws-shell-v54"), 'SW shell cache v53');
+ok(swSrc.includes("ws-theme-v17"), 'SW theme cache v16');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
@@ -379,10 +379,10 @@ ok(appSrc.includes('nav-driving') && /setUiMode/.test(appSrc), 'drive-mode chrom
 ok(cssSrc.includes('body.dashboard-mode.nav-driving #maneuver-card'), 'drive HUD clears the top bar on every theme');
 ok(cssSrc.includes('body.dashboard-mode.nav-driving #drive-bar'), 'drive trip bar clears the bottom bar on every theme');
 ok(!cssSrc.includes('.dash-skyline') && !indexSrc.includes('dash-skyline'), 'old skyline img fully retired in favour of the authored top bar strip');
-ok(/theme-san-andreas #dash-topbar\{[^}]*radial-gradient\(120px 120px at 62%/.test(cssSrc),
-  'SA top bar is a designed CSS sunset with its own sun disc (hero 12%)');
-ok(!/theme-san-andreas #dash-topbar\{[^}]*\.png/.test(cssSrc),
-  'SA top bar uses no photo strip');
+ok(/theme-san-andreas #dash-topbar\{[^}]*topbar-sunset\.jpg/.test(cssSrc),
+  'SA top bar is a photographic sunset cropped to the bar (hero 12%)');
+ok(!/theme-san-andreas #dash-topbar\{[^}]*radial-gradient\(120px 120px at 62%/.test(cssSrc),
+  'SA top bar no longer uses the CSS-painted sun disc');
 ok(/theme-gta-v #dash-topbar\{[^}]*#7CFF6B/.test(cssSrc), 'GTA V chrome uses pause-menu neon green');
 ok(/theme-rdr2 #dash-topbar\{[^}]*menu_bar\.png/.test(cssSrc), 'RDR2 chrome uses the engraved double-rule seam, not neon');
 ok(!/theme-rdr2 #dash-(topbar|bottombar)\{[^}]*#ff71ce/.test(cssSrc), 'RDR2 bar shells carry no neon pink');
@@ -540,6 +540,10 @@ for (const f of ['topbar.png', 'bottombar.png', 'maneuver.png', 'grove-panel.png
 }
 const saLogo = pngSize(saDash('sa-logo.png'));
 ok(saLogo && saLogo.w >= 500 && saLogo.h >= 150, 'SA standalone wordmark extracted with transparency');
+ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/topbar-sunset.jpg')),
+  'SA top bar photographic sunset art exists');
+ok(/topbar-sunset\.jpg/.test(cssSrc),
+  'SA top bar uses the photographic sunset (not a CSS gradient)');
 const saMan = pngSize(saDash('maneuver.png'));
 ok(saMan && saMan.w >= 900 && saMan.h >= 180, 'SA maneuver frame: clean empty plate for live data');
 const saGrove = pngSize(saDash('grove-panel.png'));
