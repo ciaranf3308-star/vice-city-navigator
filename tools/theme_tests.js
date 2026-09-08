@@ -650,6 +650,8 @@ ok(/\.sasp-bezel/.test(skinSaSrc) && skinJsSa.includes('dashboard/radio-hero7-r2
   'SA Spotify outer skin is the hero7 radio slice');
 ok(/\.sasp-idle::after\{[^}]*left:5px;top:280px;width:260px/.test(skinSaSrc),
   'SA idle covers the art\'s drawn transport strip (no phantom pause/progress when disconnected)');
+ok(/\.sasp\{[^}]*container-type:size/.test(skinSaSrc),
+  'SA widget is a cqw/cqh container (lyrics size against widget, not viewport)');
 /* ---------- SA hero-match: authored dashboard art set ---------- */
 const saDash = (f) => path.join(REPO, 'themes/san-andreas/dashboard', f);
 for (const f of ['topbar.png', 'bottombar.png', 'maneuver.png', 'grove-panel.png', 'script-tomorrow.png', 'script-music.png', 'sa-logo.png']) {
