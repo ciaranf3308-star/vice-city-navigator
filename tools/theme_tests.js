@@ -420,7 +420,7 @@ ok(cssSrc.includes('vc-logo-script'), 'VC hero logo script styled');
    layouts and drive-HUD clearances, not one shared silhouette ---------- */
 const barHeights = {
   'vice-city': ['76px', '88px'],
-  'san-andreas': ['140px', '96px'],
+  'san-andreas': ['140px', '110px'],
   'gta-v': ['56px', '64px'],
   'rdr2': ['72px', '72px'],
 };
