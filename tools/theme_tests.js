@@ -173,7 +173,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v115"), 'SW theme cache v115');
+ok(swSrc.includes("ws-theme-v116"), 'SW theme cache v116');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -1191,10 +1191,10 @@ ok(threw, 'traffic: converter throws on empty payload (caller falls back to OSRM
 vm.runInContext(fs.readFileSync(path.join(REPO, 'lyrics.js'), 'utf8'), sandbox, { filename: 'lyrics.js' });
 const LY = sandbox.window.WSLyrics;
 ok(!!LY && typeof LY.render === 'function' && typeof LY.destroy === 'function', 'lyrics: WSLyrics exposes render/destroy');
-ok(typeof LY.setOffset === 'function' && LY.getOffset() === -400, 'lyrics: default offset -400ms (was 1s early at +600)');
+ok(typeof LY.setOffset === 'function' && LY.getOffset() === -100, 'lyrics: default offset -100ms (tuned from live feedback)');
 ok(LY.setOffset(50) === 50 && LY.getOffset() === 50, 'lyrics: offset tunable');
 ok(LY.setOffset(-5) === -5 && LY.setOffset(99999) === 5000 && LY.setOffset(-99999) === -2000, 'lyrics: offset clamped to [-2000,5000]');
-LY.setOffset(-400);
+LY.setOffset(-100);
 const U = LY.util;
 
 // LRC parsing: timestamps, sort order, metadata + note-lines skipped
