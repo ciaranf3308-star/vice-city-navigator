@@ -13,10 +13,10 @@
 
     map: {
       styleUrl: 'themes/vice-city/style.json',
-      routeColor: '#ffd200',
-      routeCasingColor: '#ffd200',
-      routeWidth: 6,
-      routeCasingWidth: 10,
+      routeColor: '#ffc400',
+      routeCasingColor: '#ffc400',
+      routeWidth: 7,
+      routeCasingWidth: 12,
       routeGlowColor: '#ffd200',
       routeGlowOpacity: 0.5,
       playerMarker: 'assets/themes/vice-city/player.png',
