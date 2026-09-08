@@ -391,29 +391,35 @@
       img.src = assetPath + filePrefix + stem + '.png';
     }
   }
+  let lastLayerError = null;
   function ensureLayers() {
     if (!map.getSource('vcn-pois')) {
       map.addSource('vcn-pois', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
     }
     if (map.getLayer(POI_LAYER_ID)) return;
-    map.addLayer({
-      id: POI_LAYER_ID, type: 'symbol', source: 'vcn-pois',
-      layout: {
-        // icon resolves to the ACTIVE theme's namespaced image id,
-        // computed per feature in renderPois() — shared code never
-        // names a blip file.
-        'icon-image': ['get', 'icon'],
-        'icon-size': iconSizeExpr(),
-        'icon-anchor': 'center',
-        'icon-allow-overlap': false,
-        'icon-ignore-placement': false,
-        'icon-padding': 2,
-        // MapLibre gives LOWER sort-key values placement priority, so
-        // the stored key is inverted: airports/hospitals win collisions
-        // over restaurants/bars. See sortKey in renderPois().
-        'symbol-sort-key': ['get', 'sortKey'],
-      },
-    });
+    try {
+      map.addLayer({
+        id: POI_LAYER_ID, type: 'symbol', source: 'vcn-pois',
+        layout: {
+          // icon resolves to the ACTIVE theme's namespaced image id,
+          // computed per feature in renderPois() — shared code never
+          // names a blip file.
+          'icon-image': ['get', 'icon'],
+          'icon-size': iconSizeExpr(),
+          'icon-anchor': 'center',
+          'icon-allow-overlap': false,
+          'icon-ignore-placement': false,
+          'icon-padding': 2,
+          // MapLibre gives LOWER sort-key values placement priority, so
+          // the stored key is inverted: airports/hospitals win collisions
+          // over restaurants/bars. See sortKey in renderPois().
+          'symbol-sort-key': ['get', 'sortKey'],
+        },
+      });
+      lastLayerError = null;
+    } catch (e) {
+      lastLayerError = 'addLayer: ' + (e && e.message);
+    }
   }
   function renderPois() {
     if (!map || !map.getSource('vcn-pois')) return;
@@ -552,6 +558,7 @@
             return { theme: tid, total: allIconStems().length, missing, lastImageError };
           } catch (e) { return { error: String(e && e.message || e) }; }
         })(),
+        lastLayerError,
         cooldownMsLeft: Math.max(0, failCooldownUntil - Date.now()),
       };
     },
