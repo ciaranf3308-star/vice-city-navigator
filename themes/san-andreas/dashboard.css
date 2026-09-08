@@ -1,113 +1,130 @@
-/* san-andreas dashboard theme — hard-reset pass (2026-09-08):
-   thin HUD top bar, flat olive console bottom bar, tan/olive/charcoal map.
-   LOCKABLE: do not edit without approval */
+/* san-andreas dashboard theme — MEGA FIX pass (2026-09-08):
+   panoramic sunset-skyline top bar, aged-metal console bottom bar,
+   pale-sand game map with charcoal roads, hero radio widget.
+   This pass is user-authorized; see themes/LOCKED.json. */
 body.theme-san-andreas .dest-pin{ background-image:url('assets/themes/san-andreas/blips/waypoint.png'); }
 body.dashboard-mode.theme-san-andreas #search-bar{display:none} /* hero composition: no search pill */
-body.dashboard-mode.theme-san-andreas #map{background:#d9c096} /* never pure black if GL fails */
+body.dashboard-mode.theme-san-andreas #map{background:#e8d8b4} /* map ground tone, never pure black */
 
-/* ============ TOP BAR: thin integrated HUD (84px) ============ */
+/* ============ TOP BAR: sunset-skyline chrome strip (84px) ============ */
 body.dashboard-mode.theme-san-andreas #dash-topbar{
   display:block;position:absolute;left:0;right:0;top:0;height:84px;z-index:25;
-  background:linear-gradient(180deg,#1b1610 0%,#100d08 65%,#0b0906 100%);
-  box-shadow:inset 0 -2px 0 rgba(216,169,78,.55), 0 4px 12px rgba(0,0,0,.45);
-  pointer-events:none;
-}
-/* sunset flavour, embedded in the bar: warm glow + palm silhouettes on the
-   right, fading in from mid-bar — chrome, not a poster */
-body.dashboard-mode.theme-san-andreas #dash-topbar::before{
-  content:"";position:absolute;inset:0;pointer-events:none;
   background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 130'%3E%3Cg fill='none' stroke='%230a0806' stroke-width='5' stroke-linecap='round'%3E%3Cpath d='M60 130 C58 105 58 88 62 70'/%3E%3Cpath d='M62 70 C45 62 30 62 16 68'/%3E%3Cpath d='M62 70 C48 56 34 52 20 54'/%3E%3Cpath d='M62 70 C56 52 48 42 36 36'/%3E%3Cpath d='M62 70 C66 52 74 42 86 36'/%3E%3Cpath d='M62 70 C76 60 90 60 104 66'/%3E%3Cpath d='M160 130 C159 112 159 100 162 88'/%3E%3Cpath d='M162 88 C150 82 140 82 130 86'/%3E%3Cpath d='M162 88 C154 76 146 72 136 74'/%3E%3Cpath d='M162 88 C164 74 170 66 178 62'/%3E%3Cpath d='M162 88 C172 80 182 80 192 84'/%3E%3C/g%3E%3Cg fill='%230a0806'%3E%3Ccircle cx='58' cy='72' r='3.6'/%3E%3Ccircle cx='66' cy='72' r='3.6'/%3E%3Ccircle cx='159' cy='90' r='2.8'/%3E%3Ccircle cx='165' cy='90' r='2.8'/%3E%3C/g%3E%3C/svg%3E") right 48px bottom / auto 62px no-repeat,
-    linear-gradient(90deg, rgba(0,0,0,0) 46%, rgba(206,116,44,.30) 74%, rgba(232,150,70,.44) 100%);
+    linear-gradient(180deg, rgba(12,8,5,.68) 0%, rgba(12,8,5,.26) 42%, rgba(12,8,5,.64) 100%),
+    url('dashboard/topbar-skyline.jpg') center 34%/cover no-repeat;
+  box-shadow:inset 0 -2px 0 rgba(216,169,78,.6), 0 6px 18px rgba(0,0,0,.5);
+  pointer-events:none;
 }
 body.dashboard-mode.theme-san-andreas #dash-topbar .dash-chrome{
   position:absolute;inset:0;display:block;background:none;padding:0;
 }
-/* one modest identity moment — the stacked wordmark and scripts are retired */
+/* identity: blackletter wordmark over a tiny letterspaced tag — one moment, modest */
 body.dashboard-mode.theme-san-andreas .dash-brand{
-  position:absolute;left:28px;top:0;bottom:0;display:flex;align-items:center;margin:0;
+  position:absolute;left:28px;top:0;bottom:0;display:flex;flex-direction:column;
+  justify-content:center;margin:0;
 }
 body.dashboard-mode.theme-san-andreas .dash-brand .dash-logo,
 body.dashboard-mode.theme-san-andreas .dash-brand .dash-palm,
 body.dashboard-mode.theme-san-andreas #dash-topbar .sa-logo,
 body.dashboard-mode.theme-san-andreas #dash-topbar .dash-tomorrow,
 body.dashboard-mode.theme-san-andreas #dash-topbar .dash-los-santos{display:none}
-body.dashboard-mode.theme-san-andreas .dash-brand::after{
-  content:"SAN ANDREAS";
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:27px;font-weight:700;
-  letter-spacing:6px;color:#f0e6c8;text-shadow:0 2px 0 #000;white-space:nowrap;
-  border-left:3px solid #d8a94e;padding-left:16px;
+body.dashboard-mode.theme-san-andreas .dash-brand::before{
+  content:"WAYSTATION";
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:5px;color:#d8a94e;text-shadow:0 1px 0 #000;margin-bottom:3px;
 }
-/* clock: one visually centred group */
+body.dashboard-mode.theme-san-andreas .dash-brand::after{
+  content:"San Andreas";
+  font-family:'Beckett','Pricedown Bl',serif;font-size:36px;line-height:1;
+  color:#f5edd8;text-shadow:0 2px 0 #000, 0 0 14px rgba(0,0,0,.65);white-space:nowrap;
+}
+/* clock: one visually centred group, date + time */
 body.dashboard-mode.theme-san-andreas .dash-clock{
   position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  display:flex;align-items:baseline;gap:18px;white-space:nowrap;margin:0;pointer-events:none;
+  display:flex;align-items:baseline;gap:16px;white-space:nowrap;margin:0;pointer-events:none;
   font-family:'Bank Gothic','Arial Narrow',sans-serif;
 }
 body.dashboard-mode.theme-san-andreas #dash-date{
-  font-size:21px;letter-spacing:4px;color:#e8dcc0;text-shadow:0 2px 0 #000;
+  font-size:20px;letter-spacing:4px;color:#e8dcc0;text-shadow:0 2px 0 #000;
 }
 body.dashboard-mode.theme-san-andreas #dash-time{
-  font-size:33px;font-weight:700;letter-spacing:2px;color:#f5edd8;text-shadow:0 2px 0 #000;
+  font-size:32px;font-weight:700;letter-spacing:2px;color:#f7f0dc;text-shadow:0 2px 0 #000;
 }
-/* weather: small, tucked just left of the clock cluster */
+/* weather: tucked left of the clock cluster, divided by a gold hairline */
 body.dashboard-mode.theme-san-andreas .dash-wx{
-  position:absolute;left:50%;top:50%;transform:translate(calc(-100% - 210px),-50%);
+  position:absolute;left:50%;top:50%;transform:translate(calc(-100% - 196px),-50%);
   display:flex;align-items:center;gap:10px;white-space:nowrap;
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:21px;letter-spacing:2px;
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:20px;letter-spacing:2px;
   color:#f0e6c8;text-shadow:0 2px 0 #000;
+}
+body.dashboard-mode.theme-san-andreas .dash-wx::after{
+  content:"";position:absolute;right:-30px;top:50%;transform:translateY(-50%);
+  width:1px;height:34px;background:rgba(216,169,78,.55);
 }
 body.dashboard-mode.theme-san-andreas #dash-wxicon{display:inline-flex;width:26px;height:26px}
 body.dashboard-mode.theme-san-andreas #dash-wxicon svg{width:100%;height:100%}
 
-/* ============ BOTTOM BAR: flat console strip (104px) ============ */
+/* ============ BOTTOM BAR: aged-metal console strip (104px) ============ */
 body.dashboard-mode.theme-san-andreas #dash-bottombar{
   display:block;position:absolute;left:0;right:0;bottom:0;height:104px;z-index:25;
-  background:linear-gradient(180deg,#191510 0%,#0e0b07 100%);
-  border-top:2px solid rgba(216,169,78,.5);
-  box-shadow:0 -6px 18px rgba(0,0,0,.5), inset 0 1px 0 rgba(240,230,200,.07);
+  background:
+    linear-gradient(180deg, rgba(12,9,6,.80) 0%, rgba(12,9,6,.60) 38%, rgba(12,9,6,.86) 100%),
+    url('dashboard/bottombar-texture.jpg') center/cover no-repeat;
+  border-top:2px solid rgba(216,169,78,.55);
+  box-shadow:0 -8px 22px rgba(0,0,0,.55), inset 0 1px 0 rgba(240,230,200,.08);
   pointer-events:auto;
 }
 body.dashboard-mode.theme-san-andreas #dash-bottombar .dash-chrome{
   position:absolute;inset:0;display:flex;align-items:center;gap:18px;
   padding:0 22px;background:none;
 }
-/* tabs: low-profile icon + label, never giant tiles */
+/* tabs: low-profile icon + label; active is "lit", not a chunky tile */
 body.dashboard-mode.theme-san-andreas .dash-tabs{
-  display:flex;align-items:center;gap:4px;background:none;padding:0;pointer-events:none;
+  display:flex;align-items:center;gap:2px;background:none;padding:0;pointer-events:none;
 }
 body.dashboard-mode.theme-san-andreas .dash-tabs button{
   display:flex;flex-direction:column;align-items:center;gap:5px;
-  border:0;background:none;border-radius:10px;cursor:pointer;pointer-events:auto;
+  border:0;background:none;border-radius:0;cursor:pointer;pointer-events:auto;
   font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:13px;font-weight:700;
-  letter-spacing:2px;text-transform:uppercase;color:#c9b98a;
-  padding:9px 15px;white-space:nowrap;
+  letter-spacing:2px;text-transform:uppercase;color:#b7a67e;
+  padding:12px 15px 10px;white-space:nowrap;
 }
-body.dashboard-mode.theme-san-andreas .dash-tabs button svg{width:30px;height:30px}
+body.dashboard-mode.theme-san-andreas .dash-tabs button svg{
+  width:30px;height:30px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.7));
+}
 body.dashboard-mode.theme-san-andreas .dash-tabs button.on{
-  background:#6f7442;color:#f5edd8;
+  color:#f7f0dc;box-shadow:inset 0 -3px 0 #e8a33d;
 }
-/* locality: slim embedded plate, clean type */
+body.dashboard-mode.theme-san-andreas .dash-tabs button.on svg{
+  filter:drop-shadow(0 0 7px rgba(232,163,61,.65));
+}
+/* locality: inset dashboard plaque with gold hairline */
 body.dashboard-mode.theme-san-andreas .dash-dest{
   flex:1;display:flex;align-items:center;justify-content:center;
   min-width:0;margin:0;padding:0;
 }
 body.dashboard-mode.theme-san-andreas #dash-dest{
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:19px;font-weight:700;
-  letter-spacing:4px;color:#f0e6c8;background:rgba(0,0,0,.5);
-  border:1px solid rgba(216,169,78,.55);border-radius:3px;
-  padding:9px 30px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:18px;font-weight:700;
+  letter-spacing:4px;color:#f0e6c8;
+  background:linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.72));
+  border:1px solid rgba(216,169,78,.6);border-radius:3px;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.7), 0 1px 0 rgba(240,230,200,.08);
+  padding:10px 34px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
   text-shadow:0 2px 0 #000;
 }
-/* compass cluster: restrained */
+/* trip cluster: compass + zoom + eta, divided off like real chrome */
 body.dashboard-mode.theme-san-andreas .dash-trip{
-  display:flex;align-items:center;gap:12px;padding:0;pointer-events:none;
+  position:relative;display:flex;align-items:center;gap:12px;padding:0 0 0 20px;pointer-events:none;
+}
+body.dashboard-mode.theme-san-andreas .dash-trip::before{
+  content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);
+  width:1px;height:44px;background:rgba(216,169,78,.4);
 }
 body.dashboard-mode.theme-san-andreas #dash-compass{
-  font-size:26px;color:#f0e6c8;text-shadow:0 2px 0 #000;
+  font-size:26px;color:#e8a33d;text-shadow:0 2px 0 #000, 0 0 8px rgba(232,163,61,.4);
 }
 body.dashboard-mode.theme-san-andreas .dash-north{
-  font-family:'Bank Gothic',sans-serif;font-size:15px;color:#c9b98a;
+  font-family:'Bank Gothic',sans-serif;font-size:15px;color:#b7a67e;
   text-shadow:0 2px 0 #000;margin-left:-8px;
 }
 body.dashboard-mode.theme-san-andreas #dash-eta{
@@ -115,18 +132,20 @@ body.dashboard-mode.theme-san-andreas #dash-eta{
   font-family:'Bank Gothic','Arial Narrow',sans-serif;text-shadow:0 2px 0 #000;
 }
 body.dashboard-mode.theme-san-andreas #dash-eta .eta-label{
-  display:block;font-size:11px;letter-spacing:2px;color:#c9b98a;
+  display:block;font-size:11px;letter-spacing:2px;color:#b7a67e;
 }
 body.dashboard-mode.theme-san-andreas #dash-eta .eta-time{
-  display:block;font-size:24px;font-weight:700;letter-spacing:1px;color:#f5edd8;
+  display:block;font-size:24px;font-weight:700;letter-spacing:1px;color:#f7f0dc;
 }
 body.dashboard-mode.theme-san-andreas .dash-zoom{display:flex;gap:8px}
 body.dashboard-mode.theme-san-andreas .dash-zoom button{
-  width:44px;height:44px;border-radius:8px;cursor:pointer;
-  border:1px solid rgba(216,169,78,.4);background:rgba(0,0,0,.45);
+  width:44px;height:44px;border-radius:6px;cursor:pointer;
+  border:1px solid rgba(216,169,78,.45);
+  background:linear-gradient(180deg, rgba(40,32,22,.85), rgba(14,11,8,.9));
+  box-shadow:inset 0 1px 0 rgba(240,230,200,.1), 0 2px 4px rgba(0,0,0,.5);
   color:#d9c9a8;font-size:22px;line-height:1;
 }
-/* the scenic tag block is retired with the collage pass */
+/* the scenic tag block is retired */
 body.dashboard-mode.theme-san-andreas .dash-tag{display:none}
 
 /* ============ MANEUVER CARD: clean console panel ============ */
@@ -159,9 +178,10 @@ body.dashboard-mode.theme-san-andreas #next-stats{
   text-overflow:ellipsis;border-top:1px solid rgba(216,169,78,.35);padding-top:8px;
 }
 
-/* ============ SPOTIFY: right-side overlay, straight and framed ============ */
+/* ============ SPOTIFY: right-side hero object, straight and grounded ============ */
 body.dashboard-mode.theme-san-andreas .sasp{
-  width:548px;right:52px;transform:none;
+  width:600px;right:48px;transform:none;
+  filter:drop-shadow(0 24px 48px rgba(0,0,0,.62));
 }
 body.dashboard-mode.theme-san-andreas #sa-grove-panel{display:none}
 /* hero map is clean: no floating zoom pills on this theme */

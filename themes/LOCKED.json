@@ -10,8 +10,8 @@
   },
   "san-andreas": {
     "locked": true,
-    "sha256": "3fd41816a877a4c555a10f4651e518d94aa6c2b434b35e8a0ce7fc4a87fc9d22",
-    "note": "hard-reset pass 2026-09-08 (thin HUD bars, flat console, tan/olive map) \u2014 user-authorized rebuild"
+    "sha256": "8fd4d160872b4941e4f208fd47f361e3b0ffc522ce46c996870098456e36e3ff",
+    "note": "mega-fix pass 2026-09-08 (sunset-skyline top bar, aged-metal console, pale-sand map, 600px hero radio widget) \u2014 user-authorized full correction pass"
   },
   "vice-city": {
     "locked": false,
