@@ -74,8 +74,9 @@ body.dashboard-mode.theme-vice-city .dash-wx{
   margin-left:4px;
 }
 body.dashboard-mode.theme-vice-city .dash-clock{
-  display:flex;align-items:baseline;gap:18px;
-  font-family:var(--vcfont);margin:0 auto;
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  display:flex;align-items:baseline;gap:18px;white-space:nowrap;
+  font-family:var(--vcfont);margin:0;
 }
 body.dashboard-mode.theme-vice-city #dash-date{
   font-size:26px;letter-spacing:2px;color:#ff71ce;

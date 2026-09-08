@@ -19,7 +19,7 @@
       routeCasingWidth: 14,
       routeGlowColor: '#ffd200',
       routeGlowOpacity: 0.5,
-      playerMarker: 'assets/themes/vice-city/player.png',
+      playerMarker: 'assets/themes/vice-city/player.svg',
       fontStack: 'PricedownBl',
       /* Dashboard-only contrast pass (hero convergence). Applied at runtime
          via setPaintProperty — never written into style.json, so phone mode

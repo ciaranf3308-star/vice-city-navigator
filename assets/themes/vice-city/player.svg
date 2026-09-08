@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 32 32">
+  <title>Vice City player marker</title>
+  <!-- Faithful vector recreation of assets/themes/vice-city/player.png
+       (32x32): the marker is two overlapping outlined shapes — a horizontal
+       wing blade underneath, and a vertical needle-with-pommel on top whose
+       black outline crosses the wings (the dark junction in the original).
+       White cores, near-black outlines. Crisp at any size. -->
+  <g fill="#ffffff" stroke="#0d0d0d" stroke-width="1.5" stroke-linejoin="round">
+    <path d="M 0.8,20.2 L 11,17.2 L 19,17.2 L 29.2,20.2 L 19,23.2 L 11,23.2 Z"/>
+    <path d="M 15,0.5
+             L 13.7,4.5 L 12.5,8.5 L 11.6,12.5 L 11.2,16 L 11.2,20
+             L 12,22.8 L 11.5,25.8 L 15,30.6
+             L 18.5,25.8 L 18,22.8 L 18.8,20 L 18.8,16
+             L 18.4,12.5 L 17.5,8.5 L 16.3,4.5 Z"/>
+  </g>
+</svg>

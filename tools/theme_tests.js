@@ -59,7 +59,7 @@ for (const id of ['vice-city', 'san-andreas', 'gta-v', 'rdr2']) {
   ok(t.map && typeof t.map.styleUrl === 'string' && t.map.styleUrl.endsWith('style.json'), `${id} map.styleUrl`);
   ok(t.map && typeof t.map.fontStack === 'string', `${id} map.fontStack`);
   ok(t.map && typeof t.map.routeColor === 'string', `${id} map.routeColor`);
-  ok(t.map && typeof t.map.playerMarker === 'string' && t.map.playerMarker.endsWith('player.png'), `${id} map.playerMarker`);
+  ok(t.map && typeof t.map.playerMarker === 'string' && /player\.(png|svg)$/.test(t.map.playerMarker), `${id} map.playerMarker`);
   ok(t.pois && typeof t.pois.assetPath === 'string', `${id} pois.assetPath`);
   ok(t.pois && typeof t.pois.fallbackIcon === 'string', `${id} pois.fallbackIcon`);
   ok(t.ui && typeof t.ui.bodyClass === 'string', `${id} ui.bodyClass`);
@@ -132,8 +132,14 @@ for (const id of T.ids()) {
     const { w, h } = pngSize(path.join(REPO, url));
     ok(w === nominal && h === nominal, `${id} blip ${nominal}x${nominal}: ${sem}`);
   }
-  const ps = pngSize(path.join(REPO, T.get(id).map.playerMarker));
-  ok(ps.w === 32 && ps.h === 32, `${id} player marker 32x32`);
+  const pmUrl = T.get(id).map.playerMarker;
+  if (pmUrl.endsWith('.svg')) {
+    const s = fs.readFileSync(path.join(REPO, pmUrl), 'utf8');
+    ok(/<svg[\s>]/.test(s) && /viewBox="0 0 32 32"/.test(s), `${id} player marker is a square 32-unit SVG`);
+  } else {
+    const ps = pngSize(path.join(REPO, pmUrl));
+    ok(ps.w === 32 && ps.h === 32, `${id} player marker 32x32`);
+  }
 }
 ok(T.get('gta-v').pois.blipScale === 0.5, 'gta-v declares blipScale 0.5');
 
@@ -166,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v58"), 'SW theme cache v32');
+ok(swSrc.includes("ws-theme-v59"), 'SW theme cache v59');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',

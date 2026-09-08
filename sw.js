@@ -10,7 +10,7 @@
      default Vice City set.
    Map tiles, routing and search always go to the network. */
 const CACHE = 'ws-shell-v59';
-const THEME_CACHE = 'ws-theme-v58';
+const THEME_CACHE = 'ws-theme-v59';
 const VC_BLIPS = ['airYard','barbers','burgerShot','cash','chicken','dateDisco','dateDrink',
   'dateFood','diner','fuel','girlfriend','gym','hostpital','modGarage','north','parking',
   'pizza','police','propertyG','qmark','race','runway','saveGame','school','spray','tattoo','waypoint'];
@@ -38,7 +38,7 @@ const SHELL = [
   'themes/vice-city/style.json',
   'manifest.webmanifest', 'icon.svg', 'icon-512.png', 'icon-maskable-512.png',
   'fonts/pricedown-bl.woff',
-  'assets/themes/vice-city/player.png',
+  'assets/themes/vice-city/player.svg',
   'assets/themes/vice-city/dashboard/vc-logo.png',
   'assets/themes/vice-city/dashboard/bar-texture.jpg',
   ...VC_BLIPS.map(b => `assets/themes/vice-city/blips/blip_${b}.png`)
