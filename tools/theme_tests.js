@@ -146,7 +146,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v43"), 'SW shell cache v43');
+ok(swSrc.includes("ws-shell-v44"), 'SW shell cache v44');
 ok(swSrc.includes("ws-theme-v13"), 'SW theme cache v13');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
@@ -364,10 +364,35 @@ ok(!/theme-rdr2 #dash-(topbar|bottombar)\{[^}]*#ff71ce/.test(cssSrc), 'RDR2 bar 
 ok(!/theme-(san-andreas|gta-v|rdr2) #dash-(topbar|bottombar)\{[^}]*clip-path:polygon\(0 0,100% 0,100% 50%/.test(cssSrc),
    'non-VC themes do not reuse the VC angular silhouette on the bar shells');
 ok(!/function syncDashLocality\(\)[\s\S]{0,400}theme-vice-city/.test(appSrc), 'bottom-bar locality plate is theme-agnostic');
-ok(cssSrc.includes('clip-path:polygon(0 0,100% 0,100% 50%'), 'bars use the angular game-HUD silhouette');
+ok(cssSrc.includes('clip-path:polygon(0 0,100% 0,100% 42%'), 'VC bars use the angular neon-tube silhouette');
 ok(indexSrc.includes('dash-tag'), 'bottom bar carries the script tagline');
 ok(appSrc.includes('queueDashLocality'), 'locality plate reverse-geocodes the map centre');
 ok(indexSrc.includes('dash-scene'), 'top bar uses a crisp vector sunset scene (no stretched raster)');
+/* ---------- bespoke bar silhouettes: every theme gets its own bar heights,
+   layouts and drive-HUD clearances, not one shared silhouette ---------- */
+const barHeights = {
+  'vice-city': ['76px', '88px'],
+  'san-andreas': ['72px', '84px'],
+  'gta-v': ['56px', '64px'],
+  'rdr2': ['72px', '72px'],
+};
+for (const [id, [top, bottom]] of Object.entries(barHeights)) {
+  ok(new RegExp(`theme-${id} #dash-topbar\\{[^}]*height:${top}`).test(cssSrc), `${id} top bar is ${top} tall`);
+  ok(new RegExp(`theme-${id} #dash-bottombar\\{[^}]*height:${bottom}`).test(cssSrc), `${id} bottom bar is ${bottom} tall`);
+  ok(cssSrc.includes(`body.dashboard-mode.theme-${id}.nav-driving #maneuver-card`),
+    `${id} maneuver card clears its own top bar height`);
+  ok(cssSrc.includes(`body.dashboard-mode.theme-${id}.nav-driving #drive-bar`),
+    `${id} drive trip bar clears its own bottom bar height`);
+}
+ok(/theme-vice-city #dash-topbar \.dash-chrome::after/.test(cssSrc), 'VC top bar wears a chrome divider strip');
+ok(/theme-vice-city \.dash-tabs button\.on\{[^}]*#ff2e88/.test(cssSrc), 'VC active tab is a lit pink preset button');
+ok(/theme-san-andreas \.dash-tabs button\.on\{[^}]*linear-gradient\(180deg,#f2c14e/.test(cssSrc),
+  'SA active tab wears the full orange menu selection bar');
+ok(/theme-gta-v \.dash-tabs button\{[^}]*border-left:1px solid/.test(cssSrc), 'V tab strip uses hairline separators');
+ok(/theme-gta-v \.dash-tag\{display:none\}/.test(cssSrc), 'V drops the 80s script tagline');
+ok(/theme-rdr2 \.dash-tag\{display:none\}/.test(cssSrc), 'RDR2 drops the 80s script tagline');
+ok(/theme-rdr2 \.dash-brand\{[^}]*margin:0 auto/.test(cssSrc), 'RDR2 centers its ornate title plate');
+ok(/theme-rdr2 \.dash-tabs button\.on::after/.test(cssSrc), 'RDR2 active tab gets the gold diamond marker');
 
 /* ---------- bespoke dashboard bar assets (authentic game-UI textures) ---------- */
 const dashAssets = [
