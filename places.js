@@ -400,6 +400,7 @@
       if (map.getSource('vcn-pois')) map.removeSource('vcn-pois');
     } catch (e) { /* ignore */ }
     lastLayerError = null;
+    const styleLoaded = map.isStyleLoaded ? map.isStyleLoaded() : 'unknown';
     ensureLayers();
     preloadBlipImages();
     renderPois();
@@ -407,6 +408,7 @@
       sourceExists: !!map.getSource('vcn-pois'),
       layerExists: !!map.getLayer(POI_LAYER_ID),
       lastLayerError,
+      styleLoaded,
     };
   }
   function ensureLayers() {
