@@ -937,6 +937,10 @@ function updateBanner(dMan) {
   const remainDist = steps.slice(nextIdx).reduce((a, s) => a + s.dist, 0) + dMan;
   const remainDur = totalDur * (totalDist ? remainDist / totalDist : 0);
   $('trip-meta').textContent = `${fmtDist(remainDist)} to go • arrive ${etaString(remainDur)}`;
+  const ns = $('next-stats');
+  if (ns) ns.innerHTML = `<span class="ns-min">${Math.max(1, Math.round(remainDur / 60))} min</span>` +
+    `<span class="ns-sep"> • </span><span>${fmtDist(remainDist)}</span>` +
+    `<span class="ns-sep"> • </span><span>${etaString(remainDur)}</span>`;
   syncDashTrip(remainDur);
 }
 

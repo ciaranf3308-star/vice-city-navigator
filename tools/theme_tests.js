@@ -146,7 +146,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v48"), 'SW shell cache v48');
+ok(swSrc.includes("ws-shell-v49"), 'SW shell cache v49');
 ok(swSrc.includes("ws-theme-v13"), 'SW theme cache v13');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
@@ -363,6 +363,16 @@ ok(/theme-san-andreas #dash-topbar\{[^}]*#e8a33d/.test(cssSrc), 'SA chrome uses 
 ok(/theme-gta-v #dash-topbar\{[^}]*#7CFF6B/.test(cssSrc), 'GTA V chrome uses pause-menu neon green');
 ok(/theme-rdr2 #dash-topbar\{[^}]*menu_bar\.png/.test(cssSrc), 'RDR2 chrome uses the engraved double-rule seam, not neon');
 ok(!/theme-rdr2 #dash-(topbar|bottombar)\{[^}]*#ff71ce/.test(cssSrc), 'RDR2 bar shells carry no neon pink');
+// VC visual quality pass: neon console bars per the benchmark
+ok(indexSrc.includes('class="dash-palm"'), 'top bar has a neon palm beside the wordmark');
+ok(indexSrc.includes('id="dsc-sky"'), 'VC skyline scene has a sunset gradient sky band');
+ok(indexSrc.includes('class="dash-north"'), 'bottom bar compass shows the N marker');
+ok(indexSrc.includes('id="next-stats"'), 'maneuver card has a trip stats row slot');
+ok(cssSrc.includes('body.dashboard-mode.theme-vice-city #next-stats'), 'VC dashboard styles the maneuver stats row');
+ok(cssSrc.includes('body.dashboard-mode.theme-vice-city #maneuver-arrow svg'), 'VC dashboard recolors the maneuver arrow pink');
+ok(cssSrc.includes('ns-min'), 'maneuver stats row highlights minutes in pink');
+ok(appSrc.includes("next-stats"), 'updateBanner feeds the maneuver stats row');
+ok(/theme-vice-city \.dash-tabs button\.on\{[^}]*#ff71ce/.test(cssSrc), 'VC active tab is flat hot-pink neon text');
 ok(!/theme-(san-andreas|gta-v|rdr2) #dash-(topbar|bottombar)\{[^}]*clip-path:polygon\(0 0,100% 0,100% 50%/.test(cssSrc),
    'non-VC themes do not reuse the VC angular silhouette on the bar shells');
 ok(!/function syncDashLocality\(\)[\s\S]{0,400}theme-vice-city/.test(appSrc), 'bottom-bar locality plate is theme-agnostic');
@@ -387,7 +397,7 @@ for (const [id, [top, bottom]] of Object.entries(barHeights)) {
     `${id} drive trip bar clears its own bottom bar height`);
 }
 ok(/theme-vice-city #dash-topbar \.dash-chrome::after/.test(cssSrc), 'VC top bar wears a chrome divider strip');
-ok(/theme-vice-city \.dash-tabs button\.on\{[^}]*#ff2e88/.test(cssSrc), 'VC active tab is a lit pink preset button');
+ok(!/theme-vice-city \.dash-tabs button\{[^}]*linear-gradient/.test(cssSrc), 'VC tabs are flat neon text, not chunky buttons');
 ok(/theme-san-andreas \.dash-tabs button\.on\{[^}]*linear-gradient\(180deg,#f2c14e/.test(cssSrc),
   'SA active tab wears the full orange menu selection bar');
 ok(/theme-gta-v \.dash-tabs button\{[^}]*border-left:1px solid/.test(cssSrc), 'V tab strip uses hairline separators');

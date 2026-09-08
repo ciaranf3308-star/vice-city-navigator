@@ -376,7 +376,17 @@ body.dashboard-mode.theme-vice-city #dash-topbar .dash-chrome{
 body.dashboard-mode.theme-vice-city #dash-topbar .dash-chrome::after{
   content:"";position:absolute;left:5.5%;right:5.5%;bottom:0;height:4px;
   background:linear-gradient(180deg,#fdfdfd 0%,#9fb4c8 30%,#3c4a5c 50%,#dfe9f2 70%,#7d8ea0 100%);
-  box-shadow:0 1px 8px rgba(1,205,254,.65);
+  box-shadow:0 1px 12px rgba(255,46,136,.85),0 2px 22px rgba(255,46,136,.4);
+}
+/* neon palm beside the wordmark + compass "N": VC dashboard only */
+.dash-palm,.dash-north{display:none}
+body.dashboard-mode.theme-vice-city .dash-palm{
+  display:block;width:44px;height:60px;flex:none;margin-left:-14px;
+  filter:drop-shadow(0 0 6px rgba(255,113,206,.9));transform:rotate(-4deg);
+}
+body.dashboard-mode.theme-vice-city .dash-north{
+  display:inline-block;font-family:var(--vclabel);font-size:22px;font-weight:700;
+  color:var(--cyan);text-shadow:0 0 10px rgba(1,205,254,.85);margin-left:-8px;
 }
 /* vector sunset scene: crisp at any size, never stretches */
 .dash-scene{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
@@ -457,26 +467,53 @@ body.dashboard-mode.theme-vice-city .dash-logo{
   font-family:var(--vclabel);font-size:24px;font-weight:600;letter-spacing:2px;
   color:var(--cyan);text-shadow:0 0 10px rgba(1,205,254,.8);white-space:nowrap;
 }
-/* VC console hardware: chunky backlit radio-preset tabs, LED marquee plate. */
-body.dashboard-mode.theme-vice-city .dash-tabs{padding:16px 6px 16px 44px;gap:10px}
+/* VC console tabs: flat neon text like the benchmark — cyan glow resting,
+   hot pink glow on the active tab. No chunky buttons. */
+body.dashboard-mode.theme-vice-city .dash-tabs{padding:14px 6px 14px 44px;gap:6px}
 body.dashboard-mode.theme-vice-city .dash-tabs button{
-  background:linear-gradient(180deg,rgba(24,10,44,.92),rgba(8,3,18,.92));
-  border:2px solid rgba(1,205,254,.55);border-radius:6px;padding:6px 24px;
-  box-shadow:inset 0 2px 0 rgba(255,255,255,.09),0 0 12px rgba(1,205,254,.25);
-  clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);
-  opacity:1;
+  background:none;border:0;box-shadow:none;clip-path:none;border-radius:0;
+  font-family:var(--vcfont);font-size:34px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--cyan);text-shadow:0 0 10px rgba(1,205,254,.75);padding:0 22px;opacity:.88;
 }
 body.dashboard-mode.theme-vice-city .dash-tabs button.on{
-  color:#fff;background:linear-gradient(180deg,#ff2e88,#b967ff);
-  border-color:#ff71ce;text-shadow:0 0 12px rgba(255,255,255,.9);
-  box-shadow:0 0 20px rgba(255,46,136,.85),inset 0 2px 0 rgba(255,255,255,.35);
+  color:#ff71ce;background:none;border:0;box-shadow:none;opacity:1;
+  text-shadow:0 0 12px rgba(255,46,136,.95),0 0 38px rgba(255,46,136,.55);
 }
 body.dashboard-mode.theme-vice-city #dash-dest{
-  color:#ffd319;text-shadow:0 0 14px rgba(255,211,25,.95);
-  background:rgba(5,2,12,.88);border-color:rgba(255,46,136,.75);
-  box-shadow:0 0 18px rgba(255,46,136,.45),inset 0 0 24px rgba(255,46,136,.14);
+  color:#ff71ce;text-shadow:0 0 14px rgba(255,46,136,.95);
+  background:rgba(5,2,12,.88);border-color:rgba(1,205,254,.7);
+  box-shadow:0 0 18px rgba(1,205,254,.4),inset 0 0 24px rgba(1,205,254,.12);
   clip-path:polygon(14px 0,100% 0,calc(100% - 14px) 100%,0 100%);
 }
+/* VC dashboard maneuver card: neon console card like the benchmark —
+   pink tube border, chamfered corners, hot-pink distance, cyan road,
+   and a trip stats row. Phone / other themes are untouched. */
+#next-stats{display:none}
+body.dashboard-mode.theme-vice-city #maneuver-card{
+  background:linear-gradient(180deg,rgba(10,3,24,.96),rgba(22,7,44,.96));
+  border:2px solid #ff2e88;border-radius:0;
+  clip-path:polygon(20px 0,100% 0,100% calc(100% - 20px),calc(100% - 20px) 100%,0 100%,0 20px);
+  box-shadow:0 0 28px rgba(255,46,136,.5),inset 0 0 34px rgba(255,46,136,.09);
+  padding:16px 24px;gap:20px;max-width:580px;backdrop-filter:none;-webkit-backdrop-filter:none;
+}
+body.dashboard-mode.theme-vice-city #maneuver-arrow{flex:0 0 76px;width:76px;height:76px}
+body.dashboard-mode.theme-vice-city #maneuver-arrow svg{
+  stroke:#ff2e88;filter:drop-shadow(0 0 9px rgba(255,46,136,.95));
+}
+body.dashboard-mode.theme-vice-city #next-dist{
+  color:#ff71ce;font-size:42px;text-shadow:0 0 14px rgba(255,46,136,.9);
+}
+body.dashboard-mode.theme-vice-city #next-instr{
+  color:var(--cyan);font-size:22px;font-weight:700;letter-spacing:1px;
+  text-shadow:0 0 10px rgba(1,205,254,.8);margin-top:4px;
+}
+body.dashboard-mode.theme-vice-city #next-stats{
+  display:block;margin-top:6px;font-family:var(--vclabel);font-size:20px;font-weight:600;
+  letter-spacing:2px;color:var(--cyan);text-shadow:0 0 8px rgba(1,205,254,.7);
+  white-space:nowrap;
+}
+body.dashboard-mode.theme-vice-city #next-stats .ns-min{color:#ff71ce;text-shadow:0 0 10px rgba(255,46,136,.9)}
+body.dashboard-mode.theme-vice-city #next-stats .ns-sep{opacity:.7}
 
 /* The Vice City sunset scene is VC artwork: never on other themes. */
 body.dashboard-mode:not(.theme-vice-city) .dash-scene{display:none}

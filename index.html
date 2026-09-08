@@ -144,6 +144,7 @@
     <div class="banner-text">
       <div id="next-dist">—</div>
       <div id="next-instr">—</div>
+      <div id="next-stats" aria-hidden="true"></div>
     </div>
   </div>
   <div id="drive-bar">
@@ -168,7 +169,7 @@
 <!-- ============ DASHBOARD chrome: car head-unit top + bottom bars ============ -->
 <header id="dash-topbar" aria-label="Status">
   <div class="dash-chrome">
-    <div class="dash-brand"><span class="dash-logo">WayStation</span></div>
+    <div class="dash-brand"><span class="dash-logo">WayStation</span><svg class="dash-palm" viewBox="0 0 48 64" aria-hidden="true"><g stroke="#ff71ce" stroke-width="3.5" stroke-linecap="round" fill="none"><path d="M24 62 C23 48 23 36 25 26"/><path d="M25 26 C15 22 8 24 3 30"/><path d="M25 26 C17 16 10 14 4 16"/><path d="M25 26 C25 14 29 8 34 5"/><path d="M25 26 C33 18 40 18 45 22"/><path d="M25 26 C35 24 42 28 46 34"/></g></svg></div>
     <div class="dash-wx"><span id="dash-temp">--°C</span><span id="dash-wxicon" aria-hidden="true"></span></div>
     <div class="dash-clock"><span id="dash-date">—</span><span id="dash-time">--:--</span></div>
     <svg class="dash-scene" viewBox="0 0 1920 68" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
@@ -183,7 +184,11 @@
           <rect x="1610" y="49" width="170" height="6" fill="#000"/>
           <rect x="1610" y="60" width="170" height="7" fill="#000"/>
         </mask>
+        <linearGradient id="dsc-sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#ff2e88" stop-opacity=".8"/><stop offset=".6" stop-color="#b967ff" stop-opacity=".38"/><stop offset="1" stop-color="#b967ff" stop-opacity="0"/>
+        </linearGradient>
       </defs>
+      <rect x="1370" y="0" width="550" height="68" fill="url(#dsc-sky)"/>
       <circle cx="1695" cy="32" r="36" fill="url(#dsc-sun)" mask="url(#dsc-stripes)"/>
       <path fill="#05030c" d="M1370 68 V46 h22 V38 h14 v8 h18 V34 h20 v12 h12 V42 h16 V30 h12 v12 h18 V38 h14 v8 h22 V32 h16 v14 h12 V44 h20 V28 h14 v16 h18 V40 h12 v6 h24 V34 h18 v12 h12 V46 h16 V36 h14 v10 h22 V44 h18 V68 Z"/>
       <g transform="translate(1462,68)" stroke="#05030c" stroke-width="5" stroke-linecap="round" fill="none">
@@ -221,7 +226,7 @@
       <button type="button" id="dash-zoom-in" aria-label="Zoom in">+</button>
       <button type="button" id="dash-locate" aria-label="My location">◎</button>
     </div>
-    <div class="dash-trip"><span id="dash-compass" aria-hidden="true">▲</span><span id="dash-eta">—</span></div>
+    <div class="dash-trip"><span id="dash-compass" aria-hidden="true">▲</span><span class="dash-north" aria-hidden="true">N</span><span id="dash-eta">—</span></div>
     <div class="dash-tag">Good Roads<br>Better Times</div>
   </div>
 </nav>
