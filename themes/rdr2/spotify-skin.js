@@ -141,7 +141,11 @@
       }
       const item = s.item;
       title.textContent = item.name || '—';
+      /* Clear any pending status timer and sync dataset.real so a stale
+         timer can't restore the previous track's artist. */
+      if (statusTimer) { clearTimeout(statusTimer); statusTimer = null; }
       artist.textContent = (item.artists || []).map(a => a.name).join(', ') || '—';
+      artist.dataset.real = artist.textContent;
       artist.classList.remove('rdsp-status');
       const imgs = item.album && item.album.images;
       setArt(imgs && imgs.length ? (imgs[1] || imgs[0]).url : '');

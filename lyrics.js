@@ -174,9 +174,9 @@
       var artists = (item.artists || []).map(function (a) { return a.name; })
         .filter(Boolean).join(', ');
       if (!item.name || !artists) return { mode: 'none', lines: [], plain: [] };
-      var q = 'artist=' + encodeURIComponent(artists) +
-        '&track=' + encodeURIComponent(item.name) +
-        (item.album && item.album.name ? '&album=' + encodeURIComponent(item.album.name) : '') +
+      var q = 'artist_name=' + encodeURIComponent(artists) +
+        '&track_name=' + encodeURIComponent(item.name) +
+        (item.album && item.album.name ? '&album_name=' + encodeURIComponent(item.album.name) : '') +
         (item.duration_ms ? '&duration=' + Math.round(item.duration_ms / 1000) : '');
       var res;
       try {
