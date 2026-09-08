@@ -1,3 +1,57 @@
+/* ============ GTA V DASHBOARD: supplied overlay (2048x768) ============
+   The user-supplied overlay.png IS the dashboard chrome (top bar,
+   bottom bar, widget). Transparent middle lets the map show through.
+   Live Spotify elements are positioned into the widget area.
+   Widget measurements (fractions of 2048x768):
+   - album: x 0.7959-0.9180, y 0.1758-0.4688
+   - track box: x 0.7861-0.9717, y 0.5208-0.6576
+   - progress: y 0.6901
+   - transport: x 0.8301/0.8838/0.9375, y 0.7943 */
+body.dashboard-mode.theme-gta-v #dash-topbar,
+body.dashboard-mode.theme-gta-v #dash-bottombar{
+  background:transparent;border:none;box-shadow:none;
+}
+body.dashboard-mode.theme-gta-v #dash-topbar .dash-chrome,
+body.dashboard-mode.theme-gta-v #dash-bottombar .dash-chrome{
+  background:transparent;
+}
+body.dashboard-mode.theme-gta-v::before{
+  content:'';position:absolute;inset:0;z-index:24;pointer-events:none;
+  background:url('dashboard/overlay.png') 50% 50%/100% 100% no-repeat;
+}
+/* In dashboard mode, the widget chrome comes from the overlay.
+   Hide the old floating hud, reposition live elements into the overlay. */
+body.dashboard-mode.theme-gta-v .gvsp{
+  left:0;right:0;top:0;bottom:0;width:auto;transform:none;translate:none;
+}
+body.dashboard-mode.theme-gta-v .gvsp-hud{display:none}
+/* Album art into the overlay's album box */
+body.dashboard-mode.theme-gta-v .gvsp-art,
+body.dashboard-mode.theme-gta-v .gvsp-art-idle{
+  left:79.59%;top:17.58%;width:12.21%;height:29.30%;
+}
+/* Track into the overlay's track box */
+body.dashboard-mode.theme-gta-v .gvsp-track{
+  left:78.61%;right:2.83%;top:52.08%;
+}
+/* Progress at the overlay's progress line */
+body.dashboard-mode.theme-gta-v .gvsp-progress{
+  left:78.61%;right:2.83%;top:69.01%;
+}
+/* Transport buttons at the overlay's button positions */
+body.dashboard-mode.theme-gta-v .gvsp-controls{
+  left:78.61%;right:2.83%;top:79.43%;bottom:auto;
+  justify-content:space-between;padding:0 4%;
+}
+/* Lyrics into the track box area */
+body.dashboard-mode.theme-gta-v .gvsp-lyrics{
+  left:78.61%;right:2.83%;top:56%;bottom:26%;
+}
+/* Idle/connect in the widget area */
+body.dashboard-mode.theme-gta-v .gvsp-idle{
+  left:78.61%;right:2.83%;top:52%;bottom:20%;
+}
+
 /* gta-v dashboard theme — LOCKABLE: do not edit without approval */
 body.theme-gta-v .dest-pin{ background-image:url('assets/themes/gta-v/blips/waypoint.png'); }
 body.dashboard-mode.theme-gta-v #search-bar{top:calc(68px + env(safe-area-inset-top))}
