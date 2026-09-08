@@ -17,7 +17,7 @@ body.dashboard-mode.theme-vice-city #dash-topbar{
 }
 body.dashboard-mode.theme-vice-city #dash-topbar::before{
   content:"";position:absolute;top:0;right:0;bottom:0;width:34%;
-  background:url('themes/vice-city/dashboard/topbar-skyline-right.png') 100% 50%/cover no-repeat;
+  background:url('dashboard/topbar-skyline-right.png') 100% 50%/cover no-repeat;
   opacity:.9;pointer-events:none;
 }
 body.dashboard-mode.theme-vice-city #dash-topbar::after{display:none}
@@ -27,7 +27,7 @@ body.dashboard-mode.theme-vice-city #dash-topbar .dash-chrome{
 }
 /* WayStation logo: baked neon art */
 body.dashboard-mode.theme-vice-city .dash-logo{
-  background:url('themes/vice-city/dashboard/waystation-logo.png') 0 50%/contain no-repeat!important;
+  background:url('dashboard/waystation-logo.png') 0 50%/contain no-repeat!important;
   width:300px!important;height:56px!important;
   font-size:0!important;color:transparent!important;
   text-shadow:none!important;transform:none!important;
@@ -109,7 +109,7 @@ body.dashboard-mode.theme-vice-city #vc-right-panel .vc-tagline{
 }
 body.dashboard-mode.theme-vice-city #vc-right-panel .vc-sunset{
   position:relative;height:420px;border-radius:16px;overflow:hidden;
-  background:url('themes/vice-city/dashboard/sunset-panel.png') 50% 30%/cover no-repeat;
+  background:url('dashboard/sunset-panel.png') 50% 30%/cover no-repeat;
   border:2px solid rgba(1,205,254,.5);
   box-shadow:0 0 20px rgba(1,205,254,.3),0 0 40px rgba(255,46,136,.2);
   clip-path:polygon(0 0,100% 0,100% calc(100% - 24px),calc(100% - 24px) 100%,24px 100%,0 calc(100% - 24px));

@@ -205,6 +205,8 @@ async function initMap() {
   // Sync the Spotify skin on init too — applyBodyTheme doesn't cover it,
   // and a stale skin (e.g. SA) with a VC body is the classic mismatch.
   try { if (window.VCNThemes) mountSpotifySkin(VCNThemes.currentId()); } catch (e) {}
+  // The theme selector may have built before restore(); re-sync it now.
+  try { syncThemeSelector(); } catch (e) {}
   const theme = wsTheme();
   const styleUrl = (theme && theme.map.styleUrl) || 'themes/vice-city/style.json';
   let style;

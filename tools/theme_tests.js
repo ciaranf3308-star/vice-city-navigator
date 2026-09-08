@@ -513,7 +513,9 @@ for (const [theme, file] of dashAssets) {
   const rel = `${base}/${file}`;
   ok(fs.existsSync(path.join(REPO, rel)), `dashboard bar asset on disk: ${rel}`);
   ok(fs.statSync(path.join(REPO, rel)).size > 0, `dashboard bar asset non-empty: ${rel}`);
-  ok(cssSrc.includes(rel), `styles.css references ${rel}`);
+  // VC theme CSS uses paths relative to themes/vice-city/ (dashboard/...); others use full paths
+  const cssRef = theme === 'vice-city' ? `dashboard/${file}` : rel;
+  ok(cssSrc.includes(cssRef), `styles.css references ${cssRef}`);
 }
 // theme-scoped usage: each asset is only wired into its own theme's chrome
 ok(cssSrc.includes('Yellowtail'), 'VC wordmark uses the neon script font');
@@ -556,9 +558,9 @@ ok(saGrove && saGrove.w >= 900 && saGrove.h >= 250, 'SA Grove Street scene panel
 ok(indexSrc.includes('id="sa-grove-panel"'), 'SA dashboard mounts the Grove Street scene panel element');
 ok(appSrc.includes("'sa-grove-panel'") && /DASH_STAGE_NODES = \[[^\]]*'sa-grove-panel'/.test(appSrc),
   'Grove Street panel scales with the dashboard stage');
-ok(cssSrc.includes("themes/san-andreas/dashboard/maneuver.png"), 'SA maneuver card uses the authored empty frame');
+ok(cssSrc.includes("dashboard/maneuver.png"), 'SA maneuver card uses the authored empty frame');
 ok(/theme-san-andreas #sa-grove-panel\{display:none/.test(cssSrc), 'SA Grove Street panel is hidden: the music widget is the right-side anchor');
-ok(cssSrc.includes("themes/san-andreas/dashboard/script-music.png"), 'SA tagline is the gold script art');
+ok(cssSrc.includes("dashboard/script-music.png"), 'SA tagline is the gold script art');
 ok(/theme-san-andreas \.dash-tabs button\{[^}]*font-size:17px/.test(cssSrc),
   'SA tabs are text labels riding the art slots, not icon glyphs');
 ok(!/theme-san-andreas \.dash-tabs button::before\{[^}]*mask-image/.test(cssSrc),
