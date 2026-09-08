@@ -432,7 +432,7 @@ for (const [id, [top, bottom]] of Object.entries(barHeights)) {
 }
 ok(cssSrc.includes('#dash-topbar::after'), 'VC top bar wears a neon edge');
 ok(!/theme-vice-city \.dash-tabs button\{[^}]*linear-gradient/.test(cssSrc), 'VC tabs are flat neon text, not chunky buttons');
-ok(/theme-san-andreas \.dash-tabs button\.on\{[^}]*#8fbf7a/.test(cssSrc),
+ok(/theme-san-andreas \.dash-tabs button\.on\{[^}]*#9ccb84/.test(cssSrc),
   'SA active tab is the hero solid green box');
 ok(/theme-gta-v \.dash-tabs button\{[^}]*border-left:1px solid/.test(cssSrc), 'V tab strip uses hairline separators');
 ok(/theme-gta-v \.dash-tag\{display:none\}/.test(cssSrc), 'V drops the 80s script tagline');
@@ -530,7 +530,7 @@ ok(vcPaint('vc-road-minor')['line-color'] === '#eef0f6', 'VC minor roads: white 
 ok(vcPaint('vc-road-primary')['line-color'] === '#1d1d36', 'VC arterials: stronger dark navy (hero contrast)');
 ok(vcPaint('vc-road-motorway')['line-color'] === '#0e0e22', 'VC motorways: near-black navy (hero contrast)');
 ok(/bottombar-trim\.jpg/.test(cssSrc), 'SA bottom console wears the machined brass trim');
-ok(/theme-san-andreas #dash-bottombar\{[^}]*#0c0a07/.test(cssSrc),
+ok(/theme-san-andreas #dash-bottombar\{[^}]*#0a0806/.test(cssSrc),
   'SA bottom bar is the dark hero console');
 /* ---------- SA hero-match: authored dashboard art set ---------- */
 const saDash = (f) => path.join(REPO, 'themes/san-andreas/dashboard', f);
