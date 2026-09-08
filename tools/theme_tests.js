@@ -173,7 +173,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v91"), 'SW theme cache v76');
+ok(swSrc.includes("ws-theme-v92"), 'SW theme cache v76');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -402,7 +402,8 @@ ok(!/tbar-night/.test(indexSrc) && !/tbar-sunset/.test(indexSrc),
   'SA top bar has no split-panel divs');
 ok(!/theme-san-andreas #dash-topbar\{[^}]*radial-gradient\(120px 120px at 62%/.test(cssSrc),
   'SA top bar no longer uses the CSS-painted sun disc');
-ok(cssSrc.includes('dashboard/overlay.png'), 'GTA V dashboard uses the supplied overlay art');
+ok(cssSrc.includes('dashboard/topbar-bg.png'), 'GTA V top bar uses the generated bar art');
+ok(cssSrc.includes('dashboard/bottombar-bg.png'), 'GTA V bottom bar uses the generated bar art');
 ok(/theme-rdr2 #dash-topbar\{[^}]*menu_bar\.png/.test(cssSrc), 'RDR2 chrome uses the engraved double-rule seam, not neon');
 ok(!/theme-rdr2 #dash-(topbar|bottombar)\{[^}]*#ff71ce/.test(cssSrc), 'RDR2 bar shells carry no neon pink');
 // VC hero: neon 80s chrome per the benchmark image
@@ -434,7 +435,7 @@ ok(cssSrc.includes('vc-logo-script'), 'VC hero logo script styled');
 const barHeights = {
   'vice-city': ['78px', '100px'],
   'san-andreas': ['126px', '126px'], // hero7: bars are the hero art's own height
-  // gta-v: overlay.png IS the chrome (full-dashboard), no fixed bar heights
+  'gta-v': ['120px', '120px'], // generated bar art: fixed 120px chrome
   'rdr2': ['72px', '72px'],
 };
 for (const [id, [top, bottom]] of Object.entries(barHeights)) {
@@ -462,7 +463,8 @@ ok(/theme-vice-city #dash-dest\{[^}]*overflow:visible/.test(cssSrc), 'VC localit
 ok(!/theme-vice-city \.dash-tabs button\{[^}]*linear-gradient/.test(cssSrc), 'VC tabs are flat neon text, not chunky buttons');
 ok(/\.dash-tabs button\.on/.test(cssSrc) && /theme-san-andreas \.dash-tabs button\.on\{[^}]*background:rgba\(240,230,200/.test(cssSrc),
   'SA active tab is the hero cream parallelogram (icon-only), not a chunky tile');
-ok(/theme-gta-v #dash-bottombar \.dash-tabs button\[data-dtab/.test(cssSrc), 'V tabs are positioned hit-areas over the overlay icons');
+ok(/theme-gta-v \.dash-tabs button\[data-dtab="map"\]::before\{[^}]*icon-map\.png/.test(cssSrc), 'V tabs use generated icons (map)');
+ok(/theme-gta-v \.dash-tabs button\[data-dtab="settings"\]::before\{[^}]*icon-settings\.png/.test(cssSrc), 'V tabs use generated icons (settings)');
 ok(/theme-gta-v \.dash-tag\{display:none/.test(cssSrc), 'V drops the 80s script tagline');
 ok(/theme-rdr2 \.dash-tag\{display:none\}/.test(cssSrc), 'RDR2 drops the 80s script tagline');
 ok(/theme-rdr2 \.dash-brand\{[^}]*margin:0 auto/.test(cssSrc), 'RDR2 centers its ornate title plate');
@@ -541,7 +543,7 @@ ok(appSrc.includes('layoutDashMenu(); // dock (or undock) the body-level menu pa
    so dashboard users had no visible way to set a route. It now drops
    below the per-theme bar heights, and the planning drawer docks to the
    live stage rect in real pixels like the menu panel. */
-for (const [id, top] of [['gta-v', 68], ['rdr2', 84]]) {
+for (const [id, top] of [['gta-v', 132], ['rdr2', 84]]) {
   ok(new RegExp(`body\\.dashboard-mode\\.theme-${id} #search-bar\\{top:calc\\(${top}px`).test(cssSrc),
     `dashboard search bar clears the ${id} top bar (${top}px)`);
 }
@@ -563,7 +565,7 @@ ok(appSrc.includes('layoutDashDrawer(); // dock the drawer to the live stage rec
   'opening planning re-docks the drawer');
 
 /* ---------- bespoke dashboard bar assets (authentic game-UI textures) ---------- */
-// Note: gta-v overlay lives in themes/ (not assets/) — handled separately below
+// Note: gta-v dashboard art lives in themes/gta-v/dashboard/ — asserted separately below
 const dashAssets = [
   ['rdr2', 'menu_header_1a.png'],
   ['rdr2', 'menu_bar.png'],
@@ -580,8 +582,16 @@ for (const [theme, file] of dashAssets) {
   ok(cssSrc.includes(cssRef), `styles.css references ${cssRef}`);
 }
 // theme-scoped usage: each asset is only wired into its own theme's chrome
-ok(fs.existsSync(path.join(REPO, 'themes/gta-v/dashboard/overlay.png')), 'GTA V overlay.png on disk');
-ok(cssSrc.includes('dashboard/overlay.png'), 'styles.css references the GTA V overlay');
+const gvDashAssets = ['topbar-bg.png','bottombar-bg.png','widget-bg.png','v-mark.png',
+  'icon-map.png','icon-radio.png','icon-phone.png','icon-car.png','icon-settings.png',
+  'palms.png','skyline.png','noise.png','lyrics-bg.png','dest-plate.png','compass.png',
+  'divider.png','diamond.png','chevron.png','btn-ring.png'];
+for (const f of gvDashAssets) {
+  ok(fs.existsSync(path.join(REPO, 'themes/gta-v/dashboard/' + f)), `GTA V dashboard asset on disk: ${f}`);
+  ok(fs.statSync(path.join(REPO, 'themes/gta-v/dashboard/' + f)).size > 0, `GTA V dashboard asset non-empty: ${f}`);
+}
+ok(!fs.existsSync(path.join(REPO, 'themes/gta-v/dashboard/overlay.png')), 'GTA V overlay.png retired (rebuilt from generated assets)');
+ok(!cssSrc.includes('dashboard/overlay.png'), 'styles.css no longer references the GTA V overlay');
 ok(cssSrc.includes('Yellowtail'), 'VC wordmark uses the neon script font');
 /* ---------- VC map matches the hero target ---------- */
 const vcStyle2 = JSON.parse(fs.readFileSync(path.join(REPO, 'themes/vice-city/style.json'), 'utf8'));
@@ -746,22 +756,23 @@ ok(saLayer('sa-label-road-minor').minzoom >= 16, 'SA minor road labels start at 
 ok(saLayer('sa-buildings').minzoom === 15, 'SA buildings appear at zoom 15 (less tiny clutter)');
 ok(saLayer('sa-label-road-major').minzoom === 10, 'SA major road labels start at zoom 10');
 ok(!/theme-san-andreas #map::after/.test(cssSrc), 'SA map has no vignette overlay (clean hero map)');
-ok(cssSrc.includes('dashboard/overlay.png'), 'V dashboard chrome comes from the supplied overlay');
-ok(cssSrc.includes('dashboard/overlay.png'), 'V dashboard chrome comes from the supplied overlay (bottom)');
-ok(/theme-gta-v #dash-bottombar \.dash-tabs button\{[^}]*background:transparent/.test(cssSrc), 'V tabs are transparent hit-areas');
+ok(cssSrc.includes('dashboard/topbar-bg.png'), 'V top bar chrome comes from generated bar art');
+ok(cssSrc.includes('dashboard/bottombar-bg.png'), 'V bottom bar chrome comes from generated bar art');
+ok(cssSrc.includes('dashboard/widget-bg.png'), 'V music panel uses the generated widget art');
+ok(/theme-gta-v \.dash-tabs button\{[^}]*background:transparent/.test(cssSrc), 'V tabs are transparent icon+text buttons');
 ok(/theme-rdr2 #dash-dest\{[^}]*border-image-source:url\('assets\/themes\/rdr2\/dashboard\/menu_header_1a\.png'\)/.test(cssSrc),
    'RDR2 destination plate uses the ornate menu-header frame');
 ok(/theme-rdr2 #dash-topbar\{[^}]*menu_bar\.png/.test(cssSrc), 'RDR2 top bar seam uses the authentic double-rule');
 ok(/theme-rdr2 \.dash-dest::before/.test(cssSrc) && cssSrc.includes('title_divider.png'), 'RDR2 destination plate is flanked by divider ornaments');
 ok(/theme-gta-v \.dash-logo\{[^}]*'Chalet Comprime'/.test(cssSrc), 'V wordmark uses Chalet (hero typography)');
 ok(/theme-gta-v #dash-dest\{[^}]*'Chalet Comprime'/.test(cssSrc), 'V destination uses Chalet (hero typography)');
-ok(true, 'V tabs are overlay-icon hit-areas (no text styling needed)');
+ok(/theme-gta-v \.dash-tabs button span\{[^}]*text-transform:uppercase/.test(cssSrc), 'V tabs carry uppercase text labels under the icons');
 ok(/theme-rdr2 #dash-topbar \.dash-chrome\{[^}]*selection_box_bg_1a\.png/.test(cssSrc), 'RDR2 bars wear the grunge panel texture');
 // service worker: VC dashboard art is shell-precached (default theme), the
 // other themes' dashboard art rides the on-demand theme-asset cache
 ok(swSrc.includes('themes/vice-city/dashboard/skyline-sunset.png'), 'SW precaches the VC sunset skyline');
 ok(SW.isThemeAsset('/themes/san-andreas/dashboard/sa-logo.png'), 'isThemeAsset: SA wordmark');
-ok(SW.isThemeAsset('/themes/gta-v/dashboard/overlay.png'), 'isThemeAsset: V dashboard overlay');
+ok(SW.isThemeAsset('/themes/gta-v/dashboard/topbar-bg.png'), 'isThemeAsset: V dashboard bar art');
 ok(SW.isThemeAsset('/assets/themes/rdr2/dashboard/menu_header_1a.png'), 'isThemeAsset: RDR2 dashboard art');
 const vcSkinSrc = fs.readFileSync(path.join(REPO, 'themes/vice-city/spotify-skin.css'), 'utf8');
 ok(cssSrc.includes('theme-vice-city .vcsp{') && /theme-vice-city \.vcsp\{[^}]*width:687px/.test(cssSrc), 'VC widget scaled to 687px in dashboard (hero weighting)');

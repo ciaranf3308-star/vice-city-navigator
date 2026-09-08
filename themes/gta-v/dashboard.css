@@ -1,349 +1,309 @@
-/* ============ GTA V DASHBOARD: supplied overlay (2048x768) ============
-   The user-supplied overlay.png IS the dashboard chrome (top bar,
-   bottom bar, widget). Transparent middle lets the map show through.
-   Live HTML/CSS UI populates the shell compartments.
-   
-   Overlay layout (2048x768):
-   - Top bar: y 0-120. V logo x50-150, skyline x150-600, empty x600-1400,
-     hill x1400-1900, palms x1900-2048
-   - Bottom bar: y 648-768. Palms x0-150, icons x200-700 (map250/radio350/
-     phone450/car550/settings650), hexagon x700-1400, skyline x1400-1900,
-     shield x1950-2000
-   - Widget: x1550-2048, y100-660. Album x1630-1880 y135-360,
-     track x1610-1990 y400-505, progress y530, transport y610 */
+/* ============================================================
+   GTA V DASHBOARD — built from generated assets (8:3 geometry)
+   No overlay.png. Bars, widget and details are authored PNGs in
+   themes/gta-v/dashboard/ + live HTML/CSS in the compartments.
 
-/* --- 1. REMOVE GENERIC WEB UI --- */
+   Palette: #0d1117 / #0a0c0e near-black, #7CFF6B green accent
+   (restrained), #f2f5f2 / #aebbae / #8a9a8c greys.
+   Type: Chalet Comprime (titles), Chalet London (body),
+   SignPainter (Los Santos script accent only).
+   ============================================================ */
+
+/* --- 1. REMOVE GENERIC WEB UI in dashboard mode --- */
 body.dashboard-mode.theme-gta-v #search-bar,
 body.dashboard-mode.theme-gta-v #map-tools,
 body.dashboard-mode.theme-gta-v .maplibregl-ctrl-attrib{
   display:none !important;
 }
+body.dashboard-mode.theme-gta-v #search-bar{top:calc(132px + env(safe-area-inset-top))}
 
-/* --- Dashboard bars: transparent, overlay provides chrome --- */
-body.dashboard-mode.theme-gta-v #dash-topbar,
-body.dashboard-mode.theme-gta-v #dash-bottombar{
-  background:transparent;border:none;box-shadow:none;
-  position:absolute;left:0;right:0;z-index:25;
+/* ============ TOP BAR ============ */
+body.dashboard-mode.theme-gta-v #dash-topbar{
+  display:block;position:absolute;left:0;right:0;top:0;height:120px;z-index:25;
+  background:
+    url('dashboard/noise.png') 0 0/256px 256px repeat,
+    url('dashboard/palms.png') 24px 50%/auto 72% no-repeat,
+    url('dashboard/skyline.png') 17% 100%/auto 82% no-repeat,
+    url('dashboard/topbar-bg.png') 50% 50%/cover no-repeat,
+    #0d1117;
+  border-bottom:1px solid rgba(124,255,107,.35);
+  box-shadow:0 2px 18px rgba(0,0,0,.55);
 }
-body.dashboard-mode.theme-gta-v #dash-topbar{top:0;height:15.6%}
-body.dashboard-mode.theme-gta-v #dash-bottombar{bottom:0;height:15.6%}
-body.dashboard-mode.theme-gta-v #dash-topbar .dash-chrome,
-body.dashboard-mode.theme-gta-v #dash-bottombar .dash-chrome{
-  background:transparent;
-  position:absolute;inset:0;
-  display:block;
-  visibility:visible;
+body.dashboard-mode.theme-gta-v #dash-topbar .dash-chrome{
+  position:absolute;inset:0;display:flex;align-items:center;
+  padding:0 34px;background:transparent;
 }
-body.dashboard-mode.theme-gta-v #dash-topbar .dash-chrome > *,
-body.dashboard-mode.theme-gta-v #dash-bottombar .dash-chrome > *{
-  visibility:visible;
-}
-
-/* --- 3. TOP BAR: populated like the hero --- */
+/* Brand: V mark + WayStation + tagline */
 body.dashboard-mode.theme-gta-v .dash-brand{
-  position:absolute;left:7.3%;top:50%;transform:translateY(-50%);
-  display:flex;flex-direction:column;align-items:flex-start;gap:2px;
+  display:flex;align-items:center;gap:16px;margin-right:auto;
 }
+body.dashboard-mode.theme-gta-v .dash-brand::before{
+  content:'';flex:none;width:64px;height:64px;
+  background:url('dashboard/v-mark.png') 50% 50%/contain no-repeat;
+  filter:drop-shadow(0 2px 6px rgba(0,0,0,.6));
+}
+body.dashboard-mode.theme-gta-v .dash-palm{display:none}
 body.dashboard-mode.theme-gta-v .dash-logo{
-  font-family:'Chalet Comprime','Arial Narrow',sans-serif;
-  font-weight:700;font-size:clamp(18px,2.2vw,32px);
-  letter-spacing:3px;text-transform:uppercase;
-  color:#f2f5f2;text-shadow:0 1px 3px rgba(0,0,0,.8);
-  white-space:nowrap;line-height:1;
+  font-family:'Chalet Comprime','Arial Narrow',sans-serif;font-weight:700;
+  font-size:30px;letter-spacing:4px;text-transform:uppercase;color:#f2f5f2;
+  text-shadow:0 2px 4px rgba(0,0,0,.8);white-space:nowrap;line-height:1;
 }
 body.dashboard-mode.theme-gta-v .dash-brand::after{
   content:'DRIVE FURTHER / SAME ROADS';
-  font-family:'Chalet London',system-ui,sans-serif;
-  font-size:clamp(8px,0.9vw,12px);letter-spacing:2px;
-  color:#8a9a8c;text-transform:uppercase;
+  display:block;font-family:'Chalet London',system-ui,sans-serif;
+  font-size:11px;letter-spacing:2.5px;color:#8a9a8c;text-transform:uppercase;
+  margin-top:5px;
 }
-body.dashboard-mode.theme-gta-v .dash-palm{display:none}
+body.dashboard-mode.theme-gta-v .dash-brand{
+  flex-wrap:wrap;align-content:center;max-width:340px;
+}
 body.dashboard-mode.theme-gta-v .sa-logo,
 body.dashboard-mode.theme-gta-v .dash-tomorrow,
-body.dashboard-mode.theme-gta-v .dash-los-santos{display:none}
+body.dashboard-mode.theme-gta-v .dash-los-santos{display:none !important}
 
-/* Top center: weather + date/time, vertically aligned */
+/* Center: weather + date/time, vertically aligned, deliberately spaced */
 body.dashboard-mode.theme-gta-v .dash-wx{
-  position:absolute;left:38%;top:50%;transform:translateY(-50%);
-  display:flex;align-items:center;gap:12px;
-  margin:0;
+  display:flex;align-items:center;gap:10px;margin:0 0 0 auto;
+  padding-right:26px;
+  background:url('dashboard/divider.png') 100% 50%/2px 44px no-repeat;
 }
 body.dashboard-mode.theme-gta-v #dash-temp{
-  font-family:'Chalet Comprime',sans-serif;font-weight:600;
-  font-size:clamp(16px,2vw,28px);color:#f2f5f2;
-  text-shadow:0 1px 3px rgba(0,0,0,.8);
+  font-family:'Chalet Comprime',sans-serif;font-weight:600;font-size:26px;
+  color:#f2f5f2;text-shadow:0 1px 3px rgba(0,0,0,.8);
+  font-variant-numeric:tabular-nums;
 }
-body.dashboard-mode.theme-gta-v #dash-wxicon{
-  font-size:clamp(16px,2vw,24px);color:#7CFF6B;
-}
+body.dashboard-mode.theme-gta-v #dash-wxicon{font-size:22px;color:#7CFF6B}
 body.dashboard-mode.theme-gta-v .dash-clock{
-  position:absolute;left:52%;top:50%;transform:translateY(-50%);
-  display:flex;align-items:baseline;gap:14px;margin:0;
+  display:flex;align-items:baseline;gap:14px;margin:0 auto 0 26px;
 }
 body.dashboard-mode.theme-gta-v #dash-date{
-  font-family:'Chalet London',sans-serif;
-  font-size:clamp(11px,1.4vw,18px);letter-spacing:1px;
+  font-family:'Chalet London',sans-serif;font-size:15px;letter-spacing:2px;
   color:#8a9a8c;text-transform:uppercase;
 }
 body.dashboard-mode.theme-gta-v #dash-time{
-  font-family:'Chalet Comprime',sans-serif;font-weight:600;
-  font-size:clamp(16px,2vw,28px);color:#f2f5f2;
-  text-shadow:0 1px 3px rgba(0,0,0,.8);
+  font-family:'Chalet Comprime',sans-serif;font-weight:600;font-size:30px;
+  color:#f2f5f2;text-shadow:0 1px 3px rgba(0,0,0,.8);
   font-variant-numeric:tabular-nums;
 }
-/* Top right: Los Santos script identity */
+/* Right: Los Santos script identity */
 body.dashboard-mode.theme-gta-v #dash-topbar .dash-chrome::after{
   content:'Los Santos';
-  position:absolute;right:8%;top:50%;transform:translateY(-50%) rotate(-2deg);
+  margin-left:auto;transform:rotate(-2deg);
   font-family:'SignPainter','Pricedown Bl',cursive;
-  font-size:clamp(20px,2.8vw,38px);color:#f2f5f2;
-  text-shadow:0 0 12px rgba(124,255,107,.3), 0 2px 4px rgba(0,0,0,.8);
-  white-space:nowrap;pointer-events:none;
+  font-size:40px;color:#eef4ee;white-space:nowrap;pointer-events:none;
+  text-shadow:0 2px 6px rgba(0,0,0,.85), 0 0 14px rgba(124,255,107,.25);
 }
 
-/* --- 7. BOTTOM BAR: populated compartments --- */
-/* Tabs with icons + text over overlay icons */
-body.dashboard-mode.theme-gta-v #dash-bottombar .dash-tabs{
-  position:absolute;left:0;top:0;bottom:0;width:38%;
-  display:flex;align-items:stretch;justify-content:flex-start;
-  padding:0;margin:0;gap:0;
-  visibility:visible;
+/* ============ BOTTOM BAR ============ */
+body.dashboard-mode.theme-gta-v #dash-bottombar{
+  display:block;position:absolute;left:0;right:0;bottom:0;height:120px;z-index:25;
+  background:
+    url('dashboard/noise.png') 0 0/256px 256px repeat,
+    url('dashboard/skyline.png') 82% 100%/auto 78% no-repeat,
+    url('dashboard/bottombar-bg.png') 50% 50%/cover no-repeat,
+    #0d1117;
+  border-top:1px solid rgba(124,255,107,.35);
+  box-shadow:0 -2px 18px rgba(0,0,0,.55);
 }
-body.dashboard-mode.theme-gta-v #dash-bottombar .dash-tabs button{
-  position:relative;flex:1;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:4px;background:transparent;border:none;cursor:pointer;
-  padding:6px 0;color:#aebbae;
-  visibility:visible;
+body.dashboard-mode.theme-gta-v #dash-bottombar .dash-chrome{
+  position:absolute;inset:0;display:flex;align-items:stretch;background:transparent;
 }
-body.dashboard-mode.theme-gta-v #dash-bottombar .dash-tabs button svg{
-  display:block;width:clamp(20px,2.5vw,32px);height:clamp(20px,2.5vw,32px);
+/* Tabs: generated icons + text labels */
+body.dashboard-mode.theme-gta-v .dash-tabs{
+  display:flex;align-items:stretch;margin:0;padding:0 0 0 18px;
 }
-body.dashboard-mode.theme-gta-v #dash-bottombar .dash-tabs button span{
-  display:block;
+body.dashboard-mode.theme-gta-v .dash-tabs button{
+  position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:7px;min-width:104px;padding:0 10px;
+  background:transparent;border:none;border-left:1px solid rgba(255,255,255,.10);
+  cursor:pointer;color:#aebbae;
+}
+body.dashboard-mode.theme-gta-v .dash-tabs button:first-child{border-left:none}
+body.dashboard-mode.theme-gta-v .dash-tabs button svg{display:none}
+body.dashboard-mode.theme-gta-v .dash-tabs button::before{
+  content:'';width:34px;height:34px;flex:none;
+  background:50% 50%/contain no-repeat;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.7));
+}
+body.dashboard-mode.theme-gta-v .dash-tabs button[data-dtab="map"]::before{background-image:url('dashboard/icon-map.png')}
+body.dashboard-mode.theme-gta-v .dash-tabs button[data-dtab="radio"]::before{background-image:url('dashboard/icon-radio.png')}
+body.dashboard-mode.theme-gta-v .dash-tabs button[data-dtab="phone"]::before{background-image:url('dashboard/icon-phone.png')}
+body.dashboard-mode.theme-gta-v .dash-tabs button[data-dtab="settings"]::before{background-image:url('dashboard/icon-settings.png')}
+body.dashboard-mode.theme-gta-v .dash-tabs button span{
   font-family:'Chalet Comprime',sans-serif;font-weight:600;
-  font-size:clamp(8px,1vw,13px);letter-spacing:1.5px;text-transform:uppercase;
+  font-size:12px;letter-spacing:2px;text-transform:uppercase;
 }
-body.dashboard-mode.theme-gta-v #dash-bottombar .dash-tabs button.on{
-  color:#7CFF6B;
+body.dashboard-mode.theme-gta-v .dash-tabs button.on{color:#7CFF6B}
+body.dashboard-mode.theme-gta-v .dash-tabs button.on::before{
+  filter:drop-shadow(0 0 7px rgba(124,255,107,.55));
 }
-body.dashboard-mode.theme-gta-v #dash-bottombar .dash-tabs button.on::after{
-  content:'';position:absolute;bottom:8%;left:25%;right:25%;height:2px;
+body.dashboard-mode.theme-gta-v .dash-tabs button.on::after{
+  content:'';position:absolute;left:22%;right:22%;bottom:14px;height:2px;
   background:#7CFF6B;box-shadow:0 0 8px rgba(124,255,107,.6);
 }
-/* Hide the old icon-only hit-area positioning */
-body.dashboard-mode.theme-gta-v #dash-bottombar .dash-tabs button[data-dtab]{
-  left:auto !important;
-}
-
-/* Center: LOS SANTOS COUNTY in hexagon */
+/* Center: destination plate */
 body.dashboard-mode.theme-gta-v .dash-dest{
-  position:absolute;left:38%;right:38%;top:50%;transform:translateY(-50%);
-  display:flex;align-items:center;justify-content:center;
-  padding:0;text-align:center;
-  visibility:visible;
+  flex:1;display:flex;align-items:center;justify-content:center;
+  background:url('dashboard/dest-plate.png') 50% 50%/min(560px,90%) auto no-repeat;
+  padding:0 40px;min-width:0;
 }
 body.dashboard-mode.theme-gta-v #dash-dest{
+  display:flex;align-items:center;gap:14px;
   font-family:'Chalet Comprime',sans-serif;font-weight:700;
-  font-size:clamp(14px,1.8vw,24px);letter-spacing:2px;text-transform:uppercase;
-  color:#f2f5f2;text-shadow:0 1px 3px rgba(0,0,0,.8);
+  font-size:21px;letter-spacing:2.5px;text-transform:uppercase;color:#f2f5f2;
+  text-shadow:0 1px 3px rgba(0,0,0,.85);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
 }
-/* Hide zoom controls in bottom bar */
+body.dashboard-mode.theme-gta-v #dash-dest::before,
+body.dashboard-mode.theme-gta-v #dash-dest::after{
+  content:'';flex:none;width:11px;height:11px;
+  background:url('dashboard/diamond.png') 50% 50%/contain no-repeat;
+  opacity:.85;
+}
 body.dashboard-mode.theme-gta-v .dash-zoom{display:none !important}
 /* Right: compass + trip info */
 body.dashboard-mode.theme-gta-v .dash-trip{
-  position:absolute;right:6%;top:50%;transform:translateY(-50%);
-  display:flex;align-items:center;gap:clamp(8px,1.2vw,16px);
-  padding:0;visibility:visible;
+  display:flex;align-items:center;gap:14px;padding:0 30px 0 10px;margin-left:auto;
 }
 body.dashboard-mode.theme-gta-v #dash-compass{
-  font-size:clamp(16px,2vw,24px);color:#7CFF6B;
-  text-shadow:0 0 8px rgba(124,255,107,.4);
+  font-size:0;width:44px;height:44px;flex:none;
+  background:url('dashboard/compass.png') 50% 50%/contain no-repeat;
+  filter:drop-shadow(0 1px 3px rgba(0,0,0,.7));
 }
 body.dashboard-mode.theme-gta-v .dash-north{display:none}
 body.dashboard-mode.theme-gta-v #dash-eta{
-  font-family:'Chalet Comprime',sans-serif;font-weight:600;
-  font-size:clamp(12px,1.6vw,20px);color:#f2f5f2;
-  text-shadow:0 1px 3px rgba(0,0,0,.8);
+  font-family:'Chalet Comprime',sans-serif;font-weight:600;font-size:19px;
+  color:#f2f5f2;text-shadow:0 1px 3px rgba(0,0,0,.8);
   font-variant-numeric:tabular-nums;white-space:nowrap;
 }
 body.dashboard-mode.theme-gta-v .dash-tag{display:none !important}
 
-body.dashboard-mode.theme-gta-v::before{
-  content:'';position:absolute;inset:0;z-index:24;pointer-events:none;
-  background:url('dashboard/overlay.png') 50% 50%/contain no-repeat;
-  /* Maintain 8:3 aspect — do not stretch. On 8:3 screens (car) this fills
-     perfectly. On other aspects it letterboxes rather than distorting. */
-}
-/* In dashboard mode, the widget chrome comes from the overlay.
-   Hide the old floating hud, reposition live elements into the overlay.
-   Widget area in overlay (2048x768): x 1550-2048, y 100-660.
-   
-   GTA V radio panel hierarchy:
-   - TOP: album art in art opening, track/artist below
-   - MIDDLE: progress bar with times, transport controls
-   - LOWER: lyrics stage / ambient radio visual */
+/* ============ RIGHT MUSIC PANEL (.gvsp) ============ */
 body.dashboard-mode.theme-gta-v .gvsp{
-  left:75.68%;top:13.02%;width:24.32%;height:72.92%;
-  right:auto;bottom:auto;transform:none;translate:none;
-  z-index:25;overflow:hidden;
-  background:transparent;
-  border:none;border-radius:0;box-shadow:none;
+  left:auto;right:20px;top:132px;bottom:132px;width:440px;
+  transform:none;translate:none;z-index:25;overflow:hidden;
+  background:url('dashboard/widget-bg.png') 50% 50%/cover no-repeat, #0a0c0e;
+  border:1px solid rgba(255,255,255,.09);border-radius:3px;
+  box-shadow:0 6px 24px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.05);
 }
 body.dashboard-mode.theme-gta-v .gvsp-hud{display:none}
-/* Album art: overlay x1630-1880 y135-360 → widget-relative */
+/* Album art, top section */
 body.dashboard-mode.theme-gta-v .gvsp-art,
 body.dashboard-mode.theme-gta-v .gvsp-art-idle{
-  left:16.06%;top:6.25%;width:50.20%;height:40.18%;
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:2px;overflow:hidden;
-  box-shadow:0 2px 8px rgba(0,0,0,.4);
+  left:50%;top:20px;width:188px;height:188px;translate:-50% 0;
+  border:1px solid rgba(255,255,255,.14);border-radius:2px;
+  box-shadow:0 3px 10px rgba(0,0,0,.5);
 }
-body.dashboard-mode.theme-gta-v .gvsp-art img{
-  width:100%;height:100%;object-fit:cover;display:block;
-}
-/* Track: title + artist */
+body.dashboard-mode.theme-gta-v .gvsp-art{object-fit:cover}
+body.dashboard-mode.theme-gta-v .gvsp-art-idle{background:rgba(255,255,255,.03)}
+/* Track: centered title + artist */
 body.dashboard-mode.theme-gta-v .gvsp-track{
-  left:12.05%;right:11.64%;top:48%;
-  text-align:left;
+  left:24px;right:24px;top:222px;text-align:center;
 }
 body.dashboard-mode.theme-gta-v .gvsp-title{
   font-family:'Chalet Comprime',sans-serif;font-weight:700;
-  font-size:clamp(13px,1.8vw,22px);letter-spacing:.5px;
-  color:#f2f5f2;text-shadow:0 1px 2px rgba(0,0,0,.8);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  margin:0 0 2px 0;line-height:1.2;
+  font-size:24px;letter-spacing:.5px;color:#f2f5f2;
+  text-shadow:0 1px 3px rgba(0,0,0,.85);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25;
 }
 body.dashboard-mode.theme-gta-v .gvsp-artist{
-  font-family:'Chalet London',sans-serif;
-  font-size:clamp(10px,1.3vw,15px);color:#8a9a8c;
+  margin-top:3px;font-family:'Chalet London',sans-serif;
+  font-size:15px;letter-spacing:.06em;color:#9fb3a8;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  margin:0;line-height:1.2;
 }
-/* Progress: thin bar with times */
+/* Progress */
 body.dashboard-mode.theme-gta-v .gvsp-progress{
-  left:12.05%;right:11.64%;top:62%;
-  display:flex;align-items:center;gap:8px;
+  left:24px;right:24px;top:296px;
 }
-body.dashboard-mode.theme-gta-v .gvsp-progress .bar{
-  flex:1;height:3px;background:rgba(255,255,255,.15);
-  border-radius:2px;overflow:hidden;position:relative;
-}
-body.dashboard-mode.theme-gta-v .gvsp-progress .fill{
-  position:absolute;left:0;top:0;bottom:0;
-  background:#7CFF6B;box-shadow:0 0 6px rgba(124,255,107,.5);
-}
-body.dashboard-mode.theme-gta-v .gvsp-times{
-  display:flex;gap:8px;
-  font-family:'Chalet London',sans-serif;
-  font-size:clamp(9px,1.1vw,13px);color:#8a9a8c;
-  font-variant-numeric:tabular-nums;white-space:nowrap;
-}
-/* Transport: clean minimal buttons */
+body.dashboard-mode.theme-gta-v .gvsp-bar{height:14px}
+body.dashboard-mode.theme-gta-v .gvsp-bar::before{height:4px;margin-top:-2px}
+body.dashboard-mode.theme-gta-v .gvsp-bar-fill{height:4px;margin-top:-2px}
+body.dashboard-mode.theme-gta-v .gvsp-bar-knob{width:12px;height:12px;margin:-6px 0 0 -6px;border-width:2px}
+body.dashboard-mode.theme-gta-v .gvsp-times{font-size:13px;margin-top:5px}
+/* Transport: restrained, no neon overload */
 body.dashboard-mode.theme-gta-v .gvsp-controls{
-  left:12.05%;right:11.64%;top:68%;bottom:auto;
-  display:flex;align-items:center;justify-content:center;gap:12px;
-  padding:0;
+  left:0;right:0;top:342px;bottom:auto;gap:26px;
 }
-body.dashboard-mode.theme-gta-v .gvsp-controls button{
-  width:clamp(32px,4vw,44px);height:clamp(32px,4vw,44px);
-  border-radius:50%;border:1px solid rgba(255,255,255,.2);
-  background:rgba(255,255,255,.05);color:#f2f5f2;
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;font-size:clamp(14px,1.8vw,20px);
-  transition:all .15s ease;
+body.dashboard-mode.theme-gta-v .gvsp-tbtn{
+  width:54px;height:54px;min-width:54px;min-height:54px;
+  border:1.5px solid rgba(255,255,255,.28);color:#e8f0e8;
+  background:rgba(255,255,255,.045);
+  box-shadow:0 2px 8px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.07);
 }
-body.dashboard-mode.theme-gta-v .gvsp-controls button:hover{
-  background:rgba(124,255,107,.15);border-color:#7CFF6B;
+body.dashboard-mode.theme-gta-v .gvsp-tbtn.big{
+  width:68px;height:68px;min-width:68px;min-height:68px;
+  border-color:rgba(124,255,107,.65);color:#7CFF6B;
+  box-shadow:0 2px 10px rgba(0,0,0,.5), 0 0 12px rgba(124,255,107,.25);
 }
-body.dashboard-mode.theme-gta-v .gvsp-controls .play-pause{
-  width:clamp(40px,5vw,56px);height:clamp(40px,5vw,56px);
-  border-color:rgba(124,255,107,.5);
-}
-/* Lyrics: fills lower panel */
+body.dashboard-mode.theme-gta-v .gvsp-tbtn svg{filter:none}
+/* Lyrics: lower panel over lyrics-bg */
 body.dashboard-mode.theme-gta-v .gvsp-lyrics{
-  left:8%;right:8%;top:76%;bottom:4%;
-  background:rgba(0,0,0,.35);
-  border-top:1px solid rgba(255,255,255,.08);
-  padding:8px 12px;overflow:hidden;
-  font-family:'Chalet London',sans-serif;
-  font-size:clamp(11px,1.4vw,16px);line-height:1.5;
-  color:#c9d4c9;text-align:center;
+  left:14px;right:14px;top:424px;bottom:14px;
+  background:url('dashboard/lyrics-bg.png') 50% 100%/cover no-repeat,
+             rgba(0,0,0,.42);
+  border:1px solid rgba(255,255,255,.08);border-radius:2px;
+  padding:14px 16px;text-align:center;gap:8px;
 }
-body.dashboard-mode.theme-gta-v .gvsp-lyrics .line{
-  opacity:.5;transition:opacity .3s;
+body.dashboard-mode.theme-gta-v .gv-lyric-line{
+  font-size:17px;color:#cfe8d4;
+  text-shadow:0 1px 3px #000;
 }
-body.dashboard-mode.theme-gta-v .gvsp-lyrics .line.active{
-  opacity:1;color:#f2f5f2;
-  text-shadow:0 0 8px rgba(124,255,107,.3);
+body.dashboard-mode.theme-gta-v .gv-lyric-line.ghost{font-size:15px}
+body.dashboard-mode.theme-gta-v .gv-lyric-line.active{
+  font-size:19px;color:#f2f5f2;
+  text-shadow:0 0 10px rgba(124,255,107,.35), 0 1px 3px #000;
 }
-/* Idle/connect state */
+/* Idle / connect */
 body.dashboard-mode.theme-gta-v .gvsp-idle{
-  left:12.05%;right:11.64%;top:48%;bottom:20%;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:12px;text-align:center;
+  left:24px;right:24px;top:222px;bottom:120px;
 }
-body.dashboard-mode.theme-gta-v .gvsp-idle .connect-btn{
-  padding:10px 24px;border:1px solid #7CFF6B;border-radius:2px;
-  background:rgba(124,255,107,.1);color:#7CFF6B;
-  font-family:'Chalet Comprime',sans-serif;font-weight:600;
-  font-size:clamp(12px,1.5vw,16px);letter-spacing:1px;text-transform:uppercase;
-  cursor:pointer;
-}
-
-/* gta-v dashboard theme — LOCKABLE: do not edit without approval */
-body.theme-gta-v .dest-pin{ background-image:url('assets/themes/gta-v/blips/waypoint.png'); }
-body.dashboard-mode.theme-gta-v #search-bar{top:calc(68px + env(safe-area-inset-top))}
-
-/* ---------- GTA V dashboard chrome: supplied overlay.png ----------
-   The old CSS-generated bars are retired; the overlay IS the chrome.
-   (New populated styles are at the top of this file.) */
-body.dashboard-mode.theme-gta-v.nav-driving #maneuver-card{top:calc(68px + env(safe-area-inset-top))}
-body.dashboard-mode.theme-gta-v.nav-driving #drive-bar{bottom:calc(74px + env(safe-area-inset-bottom))}
-body.dashboard-mode.theme-gta-v #menu-panel{top:68px;bottom:76px}
-
-/* --- 4. MANEUVER CARD: hero style --- */
-body.dashboard-mode.theme-gta-v #maneuver-card{
-  position:absolute;left:2%;top:18%;z-index:26;
-  min-width:280px;max-width:340px;
-  background:rgba(12,14,16,.88);
-  border:1px solid rgba(255,255,255,.15);
-  border-left:3px solid #7CFF6B;
-  border-radius:2px;
-  box-shadow:0 4px 20px rgba(0,0,0,.6),
-             inset 0 1px 0 rgba(255,255,255,.06);
-  padding:14px 18px;
-  display:none; /* shown when nav-driving */
-}
-body.dashboard-mode.theme-gta-v.nav-driving #maneuver-card{
-  display:block;
-}
-body.dashboard-mode.theme-gta-v #maneuver-card::before{
-  content:'NEXT TURN';
-  display:block;
+body.dashboard-mode.theme-gta-v .gvsp-idle-kicker{
   font-family:'Chalet Comprime',sans-serif;font-weight:700;
-  font-size:11px;letter-spacing:2px;color:#8a9a8c;
-  margin-bottom:8px;text-transform:uppercase;
+  font-size:26px;letter-spacing:1px;color:#f2f5f2;text-shadow:0 1px 3px #000;
+}
+body.dashboard-mode.theme-gta-v .gvsp-connect-btn{
+  font-family:'Chalet Comprime',sans-serif;font-size:19px;letter-spacing:1px;
+  padding:10px 34px;border-radius:2px;
+  color:#06110a;background:#7CFF6B;
+  box-shadow:0 2px 10px rgba(0,0,0,.5);
+}
+body.dashboard-mode.theme-gta-v .gvsp-idle-hint{font-size:14px}
+
+/* ============ MANEUVER CARD (navigation active) ============ */
+body.dashboard-mode.theme-gta-v #maneuver-card{
+  position:absolute;left:24px;top:144px;z-index:26;
+  min-width:300px;max-width:360px;
+  background:
+    url('dashboard/noise.png') 0 0/256px 256px repeat,
+    rgba(12,14,16,.9);
+  border:1px solid rgba(255,255,255,.14);
+  border-left:3px solid #7CFF6B;border-radius:2px;
+  box-shadow:0 6px 22px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.06);
+  padding:14px 18px;display:none;
+}
+body.dashboard-mode.theme-gta-v.nav-driving #maneuver-card{display:block}
+body.dashboard-mode.theme-gta-v #maneuver-card::before{
+  content:'NEXT TURN';display:block;
+  font-family:'Chalet Comprime',sans-serif;font-weight:700;
+  font-size:11px;letter-spacing:2.5px;color:#8a9a8c;text-transform:uppercase;
+  margin-bottom:8px;
 }
 body.dashboard-mode.theme-gta-v #maneuver-arrow{
-  font-size:48px;line-height:1;color:#f2f5f2;
-  margin:4px 0;text-shadow:0 2px 4px rgba(0,0,0,.6);
+  font-size:46px;line-height:1;color:#f2f5f2;margin:4px 0;
+  text-shadow:0 2px 4px rgba(0,0,0,.6);
 }
 body.dashboard-mode.theme-gta-v #next-dist{
   font-family:'Chalet Comprime',sans-serif;font-weight:700;
-  font-size:28px;color:#f2f5f2;line-height:1.1;
-  font-variant-numeric:tabular-nums;
+  font-size:30px;color:#f2f5f2;line-height:1.1;font-variant-numeric:tabular-nums;
 }
 body.dashboard-mode.theme-gta-v #next-instr{
-  font-family:'Chalet London',sans-serif;
-  font-size:16px;color:#c9d4c9;margin-top:4px;
+  font-family:'Chalet London',sans-serif;font-size:16px;color:#c9d4c9;margin-top:4px;
 }
 body.dashboard-mode.theme-gta-v #next-stats{
-  margin-top:12px;padding-top:10px;
-  border-top:1px solid rgba(255,255,255,.1);
+  margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.1);
   display:flex;gap:16px;
-  font-family:'Chalet London',sans-serif;font-size:12px;color:#8a9a8c;
+  font-family:'Chalet London',sans-serif;font-size:12.5px;color:#8a9a8c;
+  font-variant-numeric:tabular-nums;
 }
 body.dashboard-mode.theme-gta-v #maneuver-end{
   position:absolute;top:8px;right:8px;
@@ -351,6 +311,14 @@ body.dashboard-mode.theme-gta-v #maneuver-end{
   color:#8a9a8c;font-size:10px;letter-spacing:1px;
   padding:4px 8px;border-radius:2px;cursor:pointer;
 }
+body.dashboard-mode.theme-gta-v #maneuver-end:hover{border-color:#7CFF6B;color:#7CFF6B}
+
+/* Drive HUD clearances track the real bar heights */
+body.dashboard-mode.theme-gta-v.nav-driving #drive-bar{bottom:calc(130px + env(safe-area-inset-bottom))}
+body.dashboard-mode.theme-gta-v #menu-panel{top:132px;bottom:132px}
+
+/* gta-v dashboard theme */
+body.theme-gta-v .dest-pin{ background-image:url('assets/themes/gta-v/blips/waypoint.png'); }
 body.theme-san-andreas .vc-title,
 body.theme-gta-v .vc-title,
 body.theme-rdr2 .vc-title{ text-shadow:0 2px 0 rgba(0,0,0,.55); }
