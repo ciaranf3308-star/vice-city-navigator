@@ -71,8 +71,9 @@
 }
 .sasp-artist {
   margin-top: .5cqh;
-  font-size: 3.4cqw; letter-spacing: .08em;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-size: 3.2cqw; letter-spacing: .06em; line-height: 1.3;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
   color: #d8b36a;
   text-shadow: 0 1px 3px #000;
 }

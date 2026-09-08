@@ -1,6 +1,7 @@
 /* san-andreas dashboard theme — LOCKABLE: do not edit without approval */
 body.theme-san-andreas .dest-pin{ background-image:url('assets/themes/san-andreas/blips/waypoint.png'); }
 body.dashboard-mode.theme-san-andreas #search-bar{display:none} /* hero composition: no search pill */
+body.dashboard-mode.theme-san-andreas #map{background:#a3a35e} /* never pure black if GL fails */
 body.dashboard-mode.theme-gta-v #search-bar{top:calc(68px + env(safe-area-inset-top))}
 body.dashboard-mode.theme-san-andreas #dash-topbar{
   display:block;position:absolute;left:0;right:0;top:0;height:110px;z-index:25;
@@ -38,7 +39,7 @@ body.dashboard-mode.theme-san-andreas .sa-logo{
 /* "A Better Tomorrow" script rides the photo at far right, hero-style */
 body.dashboard-mode.theme-san-andreas #dash-topbar .dash-tomorrow{
   position:absolute;right:22px;top:50%;transform:translateY(-54%);
-  height:44px;width:auto;max-width:220px;object-fit:contain;
+  height:68px;width:auto;max-width:280px;object-fit:contain;
   filter:drop-shadow(0 2px 4px rgba(0,0,0,.8));pointer-events:none;
 }
 /* "Los Santos" script sits left of the Tomorrow tag, hero-style */
@@ -190,14 +191,12 @@ body.dashboard-mode.theme-san-andreas .sasp{
   width:520px;right:70px;top:calc(80px + env(safe-area-inset-top));bottom:auto;
   translate:none;transform:none;
 }
-/* bottom-bar right slot: palm sunset panel with the gold tagline script, hero-style */
+/* bottom-bar right slot: palm sunset panel (hud carries the tagline script) */
 body.dashboard-mode.theme-san-andreas #dash-bottombar .dash-tag{
   position:static;width:300px;height:76px;flex:0 0 auto;
   font-size:0;line-height:0;color:transparent;text-shadow:none;transform:none;
   display:block;padding:0;white-space:normal;
-  background:
-    url('dashboard/script-music.png') 50% 50%/220px auto no-repeat,
-    url('dashboard/bottombar-palms.jpg') 50% 50%/cover no-repeat;
+  background:url('dashboard/bottombar-palms.jpg') 50% 50%/cover no-repeat;
   border:1px solid rgba(201,162,39,.5);
   clip-path:polygon(12px 0,100% 0,100% 100%,0 100%,0 12px);
   filter:drop-shadow(0 2px 4px rgba(0,0,0,.6));

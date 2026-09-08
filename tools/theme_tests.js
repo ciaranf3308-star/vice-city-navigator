@@ -166,7 +166,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v27"), 'SW theme cache v27');
+ok(swSrc.includes("ws-theme-v28"), 'SW theme cache v28');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
@@ -560,7 +560,7 @@ ok(appSrc.includes("'sa-grove-panel'") && /DASH_STAGE_NODES = \[[^\]]*'sa-grove-
   'Grove Street panel scales with the dashboard stage');
 ok(cssSrc.includes("dashboard/maneuver.png"), 'SA maneuver card uses the authored empty frame');
 ok(/theme-san-andreas #sa-grove-panel\{[^}]*display:none/.test(cssSrc), 'SA Grove Street scene panel removed (unified hud carries the art)');
-ok(cssSrc.includes("dashboard/script-music.png"), 'SA tagline is the gold script art');
+ok(cssSrc.includes("dashboard/bottombar-palms.jpg"), 'SA bottom bar has the palm sunset panel');
 ok(/theme-san-andreas \.dash-tabs button\{[^}]*font-size:17px/.test(cssSrc),
   'SA tabs are text labels riding the art slots, not icon glyphs');
 ok(!/theme-san-andreas \.dash-tabs button::before\{[^}]*mask-image/.test(cssSrc),
