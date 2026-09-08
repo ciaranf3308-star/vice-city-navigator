@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<link href="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.css" rel="stylesheet">
+<script src="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.js"></script>
+<style>#map{position:absolute;inset:0}#err{position:absolute;top:10px;left:10px;background:#fff;color:#000;padding:10px;z-index:99;font:14px monospace;max-width:80%}</style>
+</head><body>
+<div id="map"></div><div id="err">loading...</div>
+<script>
+var errEl = document.getElementById('err');
+function log(m){ errEl.textContent += '\n' + m; }
+window.onerror = function(m){ log('JS: ' + m); };
+try {
+  fetch('themes/vice-city/style.json').then(function(r){ log('style fetch: ' + r.status); return r.json(); }).then(function(style){
+    log('style parsed, layers: ' + style.layers.length);
+    var map = new maplibregl.Map({ container: 'map', style: style, center: [-6.26, 53.35], zoom: 12 });
+    map.on('error', function(e){ log('MAP ERROR: ' + ((e.error&&e.error.message)||e.message||'unknown')); });
+    map.on('load', function(){ log('MAP LOADED OK'); });
+    map.on('sourcedata', function(e){ if(e.isSourceLoaded) log('source loaded'); });
+    setTimeout(function(){ log('idle check done'); }, 8000);
+  }).catch(function(e){ log('FETCH FAIL: ' + e.message); });
+} catch(e){ log('INIT FAIL: ' + e.message); }
+</script>
+</body></html>
