@@ -113,8 +113,9 @@
       const s = core.getState();
       const idle = q('.vcsp-idle');
       const connected = core.isConnected();
-      idle.hidden = connected;
-      root.classList.toggle('is-idle', !connected);
+      const hasTrack = !!(s && s.item && s.item.id);
+      idle.hidden = connected || hasTrack;
+      root.classList.toggle('is-idle', !connected && !hasTrack);
       const title = q('.vcsp-title'), artist = q('.vcsp-artist');
       const toggle = q('.vcsp-tbtn[data-act="toggle"]');
       if (!connected) {

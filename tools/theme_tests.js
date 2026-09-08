@@ -790,6 +790,10 @@ for (const [theme, cls, tilt, size] of skinSpecs) {
   ok(css.includes(size), `${theme}: widget sized up (${size})`);
   ok(css.includes(`.${cls}.is-idle`), `${theme}: disconnected idle owns its stage (no overlaps)`);
   ok(js.includes("root.classList.toggle('is-idle'"), `${theme}: render toggles the is-idle class`);
+  /* Regression: is-idle must NOT hide the lyric stage when a track is in
+     state but auth is stale (the black lyric void). Idle requires both
+     disconnected AND no track. */
+  ok(js.includes('!connected && !hasTrack'), `${theme}: is-idle requires disconnected AND no track (lyric void fix)`);
 }
 ok(appSrc.includes('syncDashPadding'), 'camera viewport offsets left of the VC widget');
 ok(cssSrc.includes('#dash-bottombar::before'), 'VC bottom bar has a neon top edge');

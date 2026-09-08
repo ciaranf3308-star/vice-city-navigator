@@ -116,9 +116,10 @@
       const s = core.getState();
       const idle = q('.rdsp-idle');
       const connected = core.isConnected();
-      idle.hidden = connected;
-      idle.classList.toggle('is-hidden', connected);
-      root.classList.toggle('is-idle', !connected);
+      const hasTrack = !!(s && s.item && s.item.id);
+      idle.hidden = connected || hasTrack;
+      idle.classList.toggle('is-hidden', connected || hasTrack);
+      root.classList.toggle('is-idle', !connected && !hasTrack);
       const title = q('.rdsp-title'), artist = q('.rdsp-artist');
       const toggle = q('.rdsp-tbtn[data-act="toggle"]');
       if (!connected) {

@@ -122,13 +122,17 @@
       const s = core.getState();
       const idle = q('.gvsp-idle');
       const connected = core.isConnected();
+      const hasTrack = !!(s && s.item && s.item.id);
       /* State bug fix: idle and playback UI are mutually exclusive.
-         When connected, idle is hidden and playback UI shows.
-         When disconnected, playback UI is hidden and idle shows.
-         Belt and braces: hidden attribute + is-hidden class. */
-      idle.hidden = connected;
-      idle.classList.toggle('is-hidden', connected);
-      root.classList.toggle('is-idle', !connected);
+         Root cause of the black lyric void: when auth state went stale
+         (isConnected false) while a track was still in state, the
+         is-idle class hid BOTH the lyric stage and the ambient fallback
+         via CSS, leaving a black hole. Idle now requires BOTH
+         disconnected AND no track — if there's a track, show it. */
+      const showIdle = !connected && !hasTrack;
+      idle.hidden = !showIdle;
+      idle.classList.toggle('is-hidden', !showIdle);
+      root.classList.toggle('is-idle', showIdle);
       root.classList.toggle('is-connected', connected);
       const title = q('.gvsp-title'), artist = q('.gvsp-artist');
       const deviceEl = q('[data-device]');
