@@ -146,7 +146,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v45"), 'SW shell cache v44');
+ok(swSrc.includes("ws-shell-v46"), 'SW shell cache v44');
 ok(swSrc.includes("ws-theme-v13"), 'SW theme cache v13');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
