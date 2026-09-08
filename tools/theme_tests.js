@@ -559,14 +559,14 @@ ok(indexSrc.includes('id="sa-grove-panel"'), 'SA dashboard mounts the Grove Stre
 ok(appSrc.includes("'sa-grove-panel'") && /DASH_STAGE_NODES = \[[^\]]*'sa-grove-panel'/.test(appSrc),
   'Grove Street panel scales with the dashboard stage');
 ok(cssSrc.includes("dashboard/maneuver.png"), 'SA maneuver card uses the authored empty frame');
-ok(/theme-san-andreas #sa-grove-panel\{[^}]*display:block/.test(cssSrc), 'SA Grove Street scene panel is visible above the music widget (hero)');
+ok(/theme-san-andreas #sa-grove-panel\{[^}]*display:none/.test(cssSrc), 'SA Grove Street scene panel removed (unified hud carries the art)');
 ok(cssSrc.includes("dashboard/script-music.png"), 'SA tagline is the gold script art');
 ok(/theme-san-andreas \.dash-tabs button\{[^}]*font-size:17px/.test(cssSrc),
   'SA tabs are text labels riding the art slots, not icon glyphs');
 ok(!/theme-san-andreas \.dash-tabs button::before\{[^}]*mask-image/.test(cssSrc),
   'SA tabs carry no generic icon glyphs');
-ok(/theme-san-andreas \.sasp\{[^}]*width:420px/.test(cssSrc),
-  'SA Spotify widget is the right-side anchor (420px square, clears bottom bar)');
+ok(/theme-san-andreas \.sasp\{[^}]*width:520px/.test(cssSrc),
+  'SA Spotify widget is the right-side anchor (520px square, clears bottom bar)');
 ok(/theme-san-andreas \.sasp\{[^}]*transform:none/.test(cssSrc),
   'SA Spotify widget sits straight inside the map area without touching the bars');
 ok(/theme-san-andreas #map-tools\{display:none\}/.test(cssSrc),

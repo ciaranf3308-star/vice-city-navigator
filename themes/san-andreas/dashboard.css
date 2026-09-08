@@ -182,17 +182,12 @@ body.dashboard-mode.theme-san-andreas #next-stats{
   color:#e8dcc0;text-shadow:0 2px 0 #000;opacity:.9;white-space:nowrap;overflow:hidden;
   text-overflow:ellipsis;border-top:1px solid rgba(201,162,39,.35);padding-top:8px;
 }
-/* hero right column: Grove Street scene panel above the music widget.
-   The square unified hud.png carries its own "GOOD MUSIC BETTER DAYS" tag,
-   so no separate script is needed below it. */
-body.dashboard-mode.theme-san-andreas #sa-grove-panel{
-  display:block;position:absolute;z-index:24;
-  right:70px;top:calc(100px + env(safe-area-inset-top));width:420px;height:126px;
-  background:url('dashboard/grove-panel.png') 50% 50%/100% 100% no-repeat;
-  filter:drop-shadow(0 4px 10px rgba(0,0,0,.6));pointer-events:none;
-}
+/* hero right column: the unified music widget is the anchor.
+   The square unified hud.png carries its own grove/palm/lowrider art and
+   "GOOD MUSIC BETTER DAYS" tag, so no separate scene panel or script. */
+body.dashboard-mode.theme-san-andreas #sa-grove-panel{display:none;}
 body.dashboard-mode.theme-san-andreas .sasp{
-  width:420px;right:70px;top:calc(236px + env(safe-area-inset-top));bottom:auto;
+  width:520px;right:70px;top:calc(120px + env(safe-area-inset-top));bottom:auto;
   translate:none;transform:none;
 }
 /* bottom-bar right slot: palm sunset panel with the gold tagline script, hero-style */
