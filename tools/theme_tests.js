@@ -529,7 +529,7 @@ ok(vcPaint('vc-buildings')['fill-color'] === '#b7b7c7', 'VC buildings: separated
 ok(vcPaint('vc-road-minor')['line-color'] === '#eef0f6', 'VC minor roads: white streets (hero)');
 ok(vcPaint('vc-road-primary')['line-color'] === '#1d1d36', 'VC arterials: stronger dark navy (hero contrast)');
 ok(vcPaint('vc-road-motorway')['line-color'] === '#0e0e22', 'VC motorways: near-black navy (hero contrast)');
-ok(/bottombar-trim/.test(cssSrc), 'SA bottom console wears the machined brass trim');
+ok(/theme-san-andreas #dash-bottombar::before/.test(cssSrc), 'SA bottom console wears the machined brass trim');
 ok(/theme-san-andreas #dash-bottombar\{[^}]*#0a0806/.test(cssSrc),
   'SA bottom bar is the dark hero console');
 /* ---------- SA hero-match: authored dashboard art set ---------- */
