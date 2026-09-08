@@ -1,40 +1,44 @@
 /* vice-city dashboard theme — LOCKABLE: do not edit without approval */
 /* HERO: neon 80s chrome — pink script, cyan accents, black glass */
 /* dashboard hero match: the player arrow reads instantly against the map */
-body.dashboard-mode.theme-vice-city .player-arrow{width:64px;height:64px;
-  filter:drop-shadow(0 0 12px rgba(255,251,150,.95)) drop-shadow(0 2px 4px rgba(0,0,0,.6))}
+body.dashboard-mode.theme-vice-city .player-arrow{width:67px;height:67px;
+  filter:drop-shadow(0 0 14px rgba(255,251,150,1)) drop-shadow(0 0 28px rgba(255,251,150,.5)) drop-shadow(0 2px 4px rgba(0,0,0,.6))}
 body.theme-vice-city .dest-pin{ background-image:url('assets/themes/vice-city/blips/blip_waypoint.png'); }
 body.dashboard-mode.theme-vice-city #search-bar{display:none}
 
 /* ============ TOP BAR: black glass, pink neon edge ============ */
 body.dashboard-mode.theme-vice-city #dash-topbar{
-  display:block;position:absolute;left:0;right:0;top:0;height:76px;z-index:25;
-  background:#05030c;
+  display:block;position:absolute;left:0;right:0;top:0;height:78px;z-index:25;
+  background:
+    radial-gradient(ellipse 800px 120px at 30% 0%, rgba(255,46,136,.06) 0%, transparent 70%),
+    linear-gradient(180deg,#0a0618 0%,#05030c 60%,#030208 100%);
   border-top:2px solid #ff2e88;
   border-bottom:2px solid #ff2e88;
-  box-shadow:0 0 16px rgba(255,46,136,.6),inset 0 0 16px rgba(255,46,136,.15);
+  box-shadow:0 0 24px rgba(255,46,136,.75),0 4px 12px rgba(255,46,136,.3),inset 0 0 20px rgba(255,46,136,.12),inset 0 -8px 16px rgba(0,0,0,.5);
   pointer-events:none;
 }
 body.dashboard-mode.theme-vice-city #dash-topbar::before{display:none}
-/* Hero skyline silhouette on the right of the top bar */
+/* Hero skyline silhouette: strong across the right ~30% of the bar, kept low */
 body.dashboard-mode.theme-vice-city #dash-topbar::after{
-  content:'';position:absolute;right:0;top:0;bottom:0;width:600px;pointer-events:none;
+  content:'';position:absolute;right:0;top:8px;bottom:0;width:32%;pointer-events:none;
   background-image:url('dashboard/topbar-skyline-right.png');
-  background-position:right center;
-  background-size:contain;
+  background-position:right bottom;
+  background-size:cover;
   background-repeat:no-repeat;
-  opacity:.9;z-index:1;
+  opacity:.95;z-index:1;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 25%);
+  mask-image:linear-gradient(90deg,transparent 0%,#000 25%);
 }
 body.dashboard-mode.theme-vice-city #dash-topbar .dash-chrome{
-  position:absolute;inset:0;display:flex;align-items:center;gap:28px;
-  padding:0 24px;background:none;
+  position:absolute;inset:0;display:flex;align-items:center;gap:36px;
+  padding:0 32px;background:none;z-index:2;
 }
-/* WayStation logo: neon script */
+/* WayStation logo: neon script, ~9% larger */
 body.dashboard-mode.theme-vice-city .dash-logo{
-  font-family:'Yellowtail',cursive;font-size:40px;color:#ff71ce;
+  font-family:'Yellowtail',cursive;font-size:44px;color:#ff71ce;
   text-shadow:0 0 8px rgba(255,113,206,.9),0 0 24px rgba(255,46,136,.7);
   transform:rotate(-3deg);white-space:nowrap;
-  background:none!important;
+  background:none!important;margin-left:8px;
 }
 body.dashboard-mode.theme-vice-city .dash-palm{display:inline-block;width:28px;height:38px;vertical-align:-6px;margin-left:6px}
 body.dashboard-mode.theme-vice-city .dash-wx{
@@ -124,9 +128,9 @@ body.dashboard-mode.theme-vice-city #spotify-pane{
   /* The .vcsp skin positions itself (right:70px;top:48%) relative to the
      viewport — the pane must NOT create a positioning context. */
 }
-/* Widget sits below the top bar, clear of the bottom bar */
+/* Widget sits below the top bar, clear of the bottom bar — scaled ~7% down, nudged right+up */
 body.dashboard-mode.theme-vice-city .vcsp{
-  top:100px;translate:none;
+  top:88px;translate:none;
 }
 
 /* ============ BOTTOM BAR: exact hero match ============ */
@@ -146,24 +150,24 @@ body.dashboard-mode.theme-vice-city .dash-zoom{display:none}
 body.dashboard-mode.theme-vice-city #drive-bar{display:none}
 /* VC tabs: neon text — cyan resting, hot pink active */
 body.dashboard-mode.theme-vice-city .dash-tabs{
-  display:flex;gap:4px;padding:0;align-items:center;
+  display:flex;gap:0;padding:0;align-items:center;
 }
 body.dashboard-mode.theme-vice-city .dash-tabs button{
   background:none;border:0;box-shadow:none;
   font-family:var(--vcfont);font-size:28px;letter-spacing:3px;text-transform:uppercase;
-  color:var(--cyan);text-shadow:0 0 8px rgba(1,205,254,.55);
-  padding:0 14px;opacity:.85;display:flex;align-items:center;gap:8px;
+  color:var(--cyan);text-shadow:0 0 7px rgba(1,205,254,.45);
+  padding:0 18px;opacity:.8;display:flex;align-items:center;gap:8px;
 }
 body.dashboard-mode.theme-vice-city .dash-tabs button svg{display:none}
 body.dashboard-mode.theme-vice-city .dash-tabs button.on{
   color:#ff71ce;opacity:1;
-  text-shadow:0 0 12px rgba(255,46,136,1),0 0 38px rgba(255,46,136,.6);
+  text-shadow:0 0 14px rgba(255,46,136,1),0 0 45px rgba(255,46,136,.75),0 0 80px rgba(255,46,136,.4);
 }
 /* Destination plate: hexagonal cyan neon, centered */
 body.dashboard-mode.theme-vice-city .dash-dest{
   position:absolute;left:50%;transform:translateX(-50%);
   display:flex;align-items:center;justify-content:center;
-  min-width:260px;padding:10px 32px;
+  min-width:235px;max-width:300px;padding:10px 28px;
   background:rgba(5,3,12,.85);
   border:2px solid rgba(1,205,254,.7);
   clip-path:polygon(24px 0,calc(100% - 24px) 0,100% 50%,calc(100% - 24px) 100%,24px 100%,0 50%);
@@ -173,10 +177,11 @@ body.dashboard-mode.theme-vice-city #dash-dest{
   font-family:var(--vcfont);font-size:26px;letter-spacing:5px;color:#ff71ce;
   text-shadow:0 0 12px rgba(255,46,136,.9);text-transform:uppercase;
   background:none;border:0;box-shadow:none;
+  line-height:1;
 }
-/* Trip cluster: compass + ETA */
+/* Trip cluster: compass + ETA — tight spacing */
 body.dashboard-mode.theme-vice-city .dash-trip{
-  margin-left:auto;display:flex;align-items:center;gap:12px;
+  margin-left:auto;display:flex;align-items:center;gap:8px;
   font-family:var(--vclabel);
 }
 body.dashboard-mode.theme-vice-city .dash-north{
@@ -189,11 +194,12 @@ body.dashboard-mode.theme-vice-city #dash-eta{
 }
 body.dashboard-mode.theme-vice-city #dash-eta .eta-label{color:var(--cyan);text-shadow:0 0 8px rgba(1,205,254,.7)}
 body.dashboard-mode.theme-vice-city #dash-eta .eta-min{color:#ff71ce;text-shadow:0 0 10px rgba(255,46,136,.9);font-size:28px}
-/* Tagline script — VC hero says "Good Roads Better Times" */
+/* Tagline script — moved inward from the edge */
 body.dashboard-mode.theme-vice-city .dash-tag{
   font-family:'Yellowtail',cursive;font-size:20px;color:#ff71ce;
   text-shadow:0 0 8px rgba(255,46,136,.7);transform:rotate(-3deg);
   text-align:right;line-height:1.2;white-space:nowrap;
+  margin-right:16px;
 }
 body.dashboard-mode.theme-vice-city .dash-tag .tag-line{display:block}
 /* Hide SA-specific elements */

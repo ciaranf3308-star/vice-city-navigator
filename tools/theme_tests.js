@@ -166,7 +166,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v54"), 'SW theme cache v31');
+ok(swSrc.includes("ws-theme-v55"), 'SW theme cache v31');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
@@ -419,7 +419,7 @@ ok(cssSrc.includes('vc-logo-script'), 'VC hero logo script styled');
 /* ---------- bespoke bar silhouettes: every theme gets its own bar heights,
    layouts and drive-HUD clearances, not one shared silhouette ---------- */
 const barHeights = {
-  'vice-city': ['76px', '88px'],
+  'vice-city': ['78px', '88px'],
   'san-andreas': ['140px', '120px'],
   'gta-v': ['56px', '64px'],
   'rdr2': ['72px', '72px'],
@@ -522,7 +522,7 @@ ok(cssSrc.includes('Yellowtail'), 'VC wordmark uses the neon script font');
 /* ---------- VC map matches the hero target ---------- */
 const vcStyle2 = JSON.parse(fs.readFileSync(path.join(REPO, 'themes/vice-city/style.json'), 'utf8'));
 const vcPaint = id => vcStyle2.layers.find(l => l.id === id).paint;
-ok(vcPaint('vc-land')['background-color'] === '#a9aabe', 'VC land: deeper cool gray (hero contrast)');
+ok(vcPaint('vc-land')['background-color'] === '#9ea0b4', 'VC land: deeper cool gray (polish)');
 ok(vcPaint('vc-water')['fill-color'] === '#48a8e8', 'VC water: vivid blue (hero)');
 ok(vcPaint('vc-parks')['fill-color'] === '#6cab7f', 'VC parks: deeper green (hero contrast)');
 ok(vcPaint('vc-buildings')['fill-color'] === '#b7b7c7', 'VC buildings: separated from land (hero contrast)');
@@ -615,7 +615,7 @@ ok(SW.isThemeAsset('/themes/san-andreas/dashboard/sa-logo.png'), 'isThemeAsset: 
 ok(SW.isThemeAsset('/assets/themes/gta-v/dashboard/topbar-skyline.jpg'), 'isThemeAsset: V dashboard art');
 ok(SW.isThemeAsset('/assets/themes/rdr2/dashboard/menu_header_1a.png'), 'isThemeAsset: RDR2 dashboard art');
 const vcSkinSrc = fs.readFileSync(path.join(REPO, 'themes/vice-city/spotify-skin.css'), 'utf8');
-ok(vcSkinSrc.includes('width: 720px'), 'VC widget scaled down for hero integration');
+ok(vcSkinSrc.includes('width: 670px'), 'VC widget scaled down for map dominance');
 ok(!vcSkinSrc.includes('rotate(6deg)'), 'VC widget is straight (hero has no tilt)');
 // every theme widget: explicit larger size, ~6-7 degree tilt (except VC hero-match), no-overlap idle states
 const skinSpecs = [

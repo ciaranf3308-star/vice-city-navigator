@@ -1452,11 +1452,15 @@ function syncDashTrip(remainSec) {
   if (!eta || !dst) return;
   if (navActive && typeof remainSec === 'number') {
     const mins = Math.max(1, Math.round(remainSec / 60));
+    eta.style.display = '';
     eta.innerHTML = '<span class="eta-label">Arrive in</span><span class="eta-time">' + mins + ' min</span>';
     const label = (typeof dest !== 'undefined' && dest && dest.label) ? dest.label : '';
     dst.textContent = (label || 'EN ROUTE').toUpperCase().slice(0, 28);
   } else {
-    eta.innerHTML = '<span class="eta-label">Arrive in</span><span class="eta-time">—</span>';
+    /* VC idle: compass only, no arrival placeholder. Other themes keep theirs. */
+    const isVC = document.body.classList.contains('theme-vice-city');
+    eta.innerHTML = isVC ? '' : '<span class="eta-label">Arrive in</span><span class="eta-time">—</span>';
+    eta.style.display = isVC ? 'none' : '';
     /* dst (locality plate) is owned by syncDashLocality when not navigating —
        don't wipe it here. */
   }
