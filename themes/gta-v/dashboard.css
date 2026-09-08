@@ -64,13 +64,14 @@ body.dashboard-mode.theme-gta-v #dash-topbar .dash-chrome::after{
 /* Brand: the user's WayStation V lockup, prominent (~80px tall).
    The lockup already carries the wordmark, so the text span hides. */
 body.dashboard-mode.theme-gta-v .dash-brand{
-  position:absolute;left:34px;top:50%;transform:translateY(-50%);
-  display:flex;align-items:center;
+  position:absolute;left:24px;top:-18px;
+  display:flex;align-items:center;z-index:40;
+  pointer-events:none;
 }
 body.dashboard-mode.theme-gta-v .dash-brand::before{
-  content:'';display:block;width:280px;height:84px;flex:none;
+  content:'';display:block;width:460px;height:170px;flex:none;
   background:url('dashboard/logo-v.png') 50% 50%/contain no-repeat;
-  filter:drop-shadow(0 0 16px rgba(44,230,140,.22));
+  filter:drop-shadow(0 0 22px rgba(44,230,140,.28)) drop-shadow(0 4px 12px rgba(0,0,0,.6));
 }
 body.dashboard-mode.theme-gta-v .dash-logo{
   font-family:'Chalet Comprime','Arial Narrow',sans-serif;display:none;
@@ -88,7 +89,7 @@ body.dashboard-mode.theme-gta-v .rdr2-logo{display:none !important}
 /* Weather clusters with the brand (fills the dead zone left of the clock) */
 body.dashboard-mode.theme-gta-v .dash-wx{
   position:absolute;top:50%;transform:translateY(-50%);
-  left:348px;
+  left:510px;
   display:flex;align-items:center;gap:10px;
   color:#2ce68c;
 }
