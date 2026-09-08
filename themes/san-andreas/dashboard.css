@@ -31,8 +31,9 @@ body.dashboard-mode.theme-san-andreas .dash-brand{
 }
 body.dashboard-mode.theme-san-andreas .dash-brand .dash-logo,
 body.dashboard-mode.theme-san-andreas .dash-brand .dash-palm{display:none}
-body.dashboard-mode.theme-san-andreas .sa-logo{
-  display:block;position:absolute;left:28px;top:10px;height:112px;width:auto;max-width:34vw;
+body.dashboard-mode.theme-san-andreas #dash-topbar .sa-logo{
+  display:block;position:absolute;left:28px;top:50%;transform:translateY(-50%);
+  height:96px;width:auto;max-width:32vw;object-fit:contain;
   z-index:30;pointer-events:none;
   filter:drop-shadow(0 3px 6px rgba(0,0,0,.85)) drop-shadow(0 0 2px rgba(0,0,0,.9));
 }
@@ -89,9 +90,9 @@ body.dashboard-mode.theme-san-andreas #dash-bottombar{
 /* machined brass trim along the top edge */
 body.dashboard-mode.theme-san-andreas #dash-bottombar::before{
   content:"";position:absolute;left:0;right:0;top:0;height:28px;
-  background:url('dashboard/bottombar-trim.jpg') 50% 0/1920px 28px no-repeat;
+  background:url('dashboard/bottombar-trim.jpg') 50% 0/1920px 56px no-repeat;
   clip-path:polygon(0 100%,0 30%,1.8% 8%,3.2% 8%,4.5% 0,95.5% 0,96.8% 8%,98.2% 8%,100% 30%,100% 100%);
-  filter:brightness(1.35) contrast(1.15);
+  filter:brightness(1.1) contrast(1.05);
 }
 body.dashboard-mode.theme-san-andreas #dash-bottombar .dash-chrome{
   position:absolute;inset:0;display:flex;align-items:center;gap:12px;
