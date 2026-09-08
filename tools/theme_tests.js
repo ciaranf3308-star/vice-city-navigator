@@ -565,8 +565,8 @@ ok(/theme-san-andreas \.dash-tabs button\{[^}]*font-size:17px/.test(cssSrc),
   'SA tabs are text labels riding the art slots, not icon glyphs');
 ok(!/theme-san-andreas \.dash-tabs button::before\{[^}]*mask-image/.test(cssSrc),
   'SA tabs carry no generic icon glyphs');
-ok(/theme-san-andreas \.sasp\{[^}]*width:540px/.test(cssSrc),
-  'SA Spotify widget is the major right-side anchor (540px, ~28% width)');
+ok(/theme-san-andreas \.sasp\{[^}]*width:420px/.test(cssSrc),
+  'SA Spotify widget is the right-side anchor (420px square, clears bottom bar)');
 ok(/theme-san-andreas \.sasp\{[^}]*transform:none/.test(cssSrc),
   'SA Spotify widget sits straight inside the map area without touching the bars');
 ok(/theme-san-andreas #map-tools\{display:none\}/.test(cssSrc),

@@ -182,29 +182,27 @@ body.dashboard-mode.theme-san-andreas #next-stats{
   color:#e8dcc0;text-shadow:0 2px 0 #000;opacity:.9;white-space:nowrap;overflow:hidden;
   text-overflow:ellipsis;border-top:1px solid rgba(201,162,39,.35);padding-top:8px;
 }
-/* hero right column: Grove Street scene panel above the music widget */
+/* hero right column: Grove Street scene panel above the music widget.
+   The square unified hud.png carries its own "GOOD MUSIC BETTER DAYS" tag,
+   so no separate script is needed below it. */
 body.dashboard-mode.theme-san-andreas #sa-grove-panel{
   display:block;position:absolute;z-index:24;
-  right:70px;top:calc(100px + env(safe-area-inset-top));width:540px;height:172px;
+  right:70px;top:calc(100px + env(safe-area-inset-top));width:420px;height:126px;
   background:url('dashboard/grove-panel.png') 50% 50%/100% 100% no-repeat;
   filter:drop-shadow(0 4px 10px rgba(0,0,0,.6));pointer-events:none;
 }
 body.dashboard-mode.theme-san-andreas .sasp{
-  width:540px;right:70px;top:calc(282px + env(safe-area-inset-top));bottom:auto;
+  width:420px;right:70px;top:calc(236px + env(safe-area-inset-top));bottom:auto;
   translate:none;transform:none;
 }
-/* "Good Music Better Times" script rides below the music widget, hero-style */
-body.dashboard-mode.theme-san-andreas .sasp::after{
-  content:"";display:block;width:300px;height:92px;margin:14px 20px 0 auto;
-  background:url('dashboard/script-music.png') 50% 50%/contain no-repeat;
-  filter:drop-shadow(0 3px 5px rgba(0,0,0,.85));pointer-events:none;
-}
-/* bottom-bar right slot: palm sunset panel only (script lives in right column) */
+/* bottom-bar right slot: palm sunset panel with the gold tagline script, hero-style */
 body.dashboard-mode.theme-san-andreas #dash-bottombar .dash-tag{
-  position:static;width:280px;height:76px;flex:0 0 auto;
-  font-size:0;line-height:0;color:transparent;
-  display:block;padding:0;
-  background:url('dashboard/bottombar-palms.jpg') 50% 50%/cover no-repeat;
+  position:static;width:300px;height:76px;flex:0 0 auto;
+  font-size:0;line-height:0;color:transparent;text-shadow:none;transform:none;
+  display:block;padding:0;white-space:normal;
+  background:
+    url('dashboard/script-music.png') 50% 50%/220px auto no-repeat,
+    url('dashboard/bottombar-palms.jpg') 50% 50%/cover no-repeat;
   border:1px solid rgba(201,162,39,.5);
   clip-path:polygon(12px 0,100% 0,100% 100%,0 100%,0 12px);
   filter:drop-shadow(0 2px 4px rgba(0,0,0,.6));
