@@ -3,7 +3,7 @@
    HARD VISUAL RESET pass 5.
 
    HERO7 (2026-09-08): the outer skin is the user's hero art sliced
-   straight out of it (themes/san-andreas/dashboard/radio-hero7.png,
+   straight out of it (themes/san-andreas/dashboard/radio-hero7-r2.png,
    701x544, true alpha). Framed unit with baked San Andreas crown
    logo, two dark panels, drawn Spotify logo / progress / transport,
    lowrider at the base — right side, overlapping the dash bars.
@@ -21,7 +21,7 @@
 'use strict';
 
 (function () {
-  const BEZEL = 'themes/san-andreas/dashboard/radio-hero7.png';
+  const BEZEL = 'themes/san-andreas/dashboard/radio-hero7-r2.png';
 
   const SVG = {
     play: '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',

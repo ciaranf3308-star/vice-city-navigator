@@ -173,7 +173,9 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v73"), 'SW theme cache v73');
+ok(swSrc.includes("ws-theme-v74"), 'SW theme cache v74');
+ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
+  'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
@@ -598,7 +600,7 @@ ok(vcPaint('vc-road-motorway')['line-color'] === '#0e0e22', 'VC motorways: near-
    - bottombar-hero7.png (1920x126 RGBA): black console, cream
      angular borders, 4 tab slots, star locality plate, 2 plates
      + palms + crown right.
-   - radio-hero7.png (701x544 RGBA): framed radio unit with baked
+   - radio-hero7-r2.png (701x544 RGBA): framed radio unit with baked
      crown logo, two dark panels, drawn Spotify/progress/transport,
      lowrider — right side, overlapping the bars like the hero.
    Live DOM only: clock in the header plate, tabs/locality/
@@ -607,7 +609,7 @@ ok(vcPaint('vc-road-motorway')['line-color'] === '#0e0e22', 'VC motorways: near-
 const skinJsSa = fs.readFileSync(path.join(REPO, 'themes/san-andreas/spotify-skin.js'), 'utf8');
 const skinSaSrc = fs.readFileSync(path.join(REPO, 'themes/san-andreas/spotify-skin.css'), 'utf8');
 const saHero = (f) => path.join(REPO, 'themes/san-andreas/dashboard', f);
-for (const [f, w, h] of [['topbar-hero7.png', 1920, 126], ['bottombar-hero7.png', 1920, 126], ['radio-hero7.png', 701, 544]]) {
+for (const [f, w, h] of [['topbar-hero7.png', 1920, 126], ['bottombar-hero7.png', 1920, 126], ['radio-hero7-r2.png', 701, 544]]) {
   ok(fs.existsSync(saHero(f)), `SA hero7 slice on disk: ${f}`);
   const sz = pngSize(saHero(f));
   const bytes = fs.readFileSync(saHero(f));
@@ -642,7 +644,7 @@ ok(/theme-san-andreas \.sasp\{[^}]*left:1219px/.test(skinSaSrc),
   'SA radio sits at the hero\'s radio x (1219px stage)');
 ok(/theme-san-andreas \.sasp\{[^}]*top:83px/.test(skinSaSrc),
   'SA radio sits at the hero\'s radio y (83px stage), overlapping the bars');
-ok(/\.sasp-bezel/.test(skinSaSrc) && skinJsSa.includes('dashboard/radio-hero7.png'),
+ok(/\.sasp-bezel/.test(skinSaSrc) && skinJsSa.includes('dashboard/radio-hero7-r2.png'),
   'SA Spotify outer skin is the hero7 radio slice');
 /* ---------- SA hero-match: authored dashboard art set ---------- */
 const saDash = (f) => path.join(REPO, 'themes/san-andreas/dashboard', f);

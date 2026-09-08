@@ -10,7 +10,7 @@
      default Vice City set.
    Map tiles, routing and search always go to the network. */
 const CACHE = 'ws-shell-v59';
-const THEME_CACHE = 'ws-theme-v73';
+const THEME_CACHE = 'ws-theme-v74';
 const VC_BLIPS = ['airYard','barbers','burgerShot','cash','chicken','dateDisco','dateDrink',
   'dateFood','diner','fuel','girlfriend','gym','hostpital','modGarage','north','parking',
   'pizza','police','propertyG','qmark','race','runway','saveGame','school','spray','tattoo','waypoint'];
@@ -87,10 +87,15 @@ self.addEventListener('fetch', e => {
     // Stale-while-revalidate (not cache-first-forever): theme art is
     // replaced over time (authentic blips etc.) and the new bytes must
     // reach users. The cached copy renders instantly; the network copy
-    // refreshes it in the background for the next load.
+    // refreshes it in the background for the next load. The revalidation
+    // fetch bypasses the browser HTTP cache ({cache:'reload'}) — without
+    // this, a stale HTTP-cached PNG can be re-stored as "fresh" and the
+    // new art never reaches return visitors (seen 2026-09-08: refined
+    // radio PNG stuck behind the old bytes while the CSS moved on,
+    // misaligning every overlay).
     e.respondWith(
       caches.open(THEME_CACHE).then(c => c.match(e.request).then(cached => {
-        const network = fetch(e.request).then(res => {
+        const network = fetch(new Request(e.request, { cache: 'reload' })).then(res => {
           if (res && res.ok) {
             const copy = res.clone();
             c.put(e.request, copy).catch(()=>{});
