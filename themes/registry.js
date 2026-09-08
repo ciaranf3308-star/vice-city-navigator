@@ -80,10 +80,13 @@
     },
     get: id => THEMES[id || currentId || ORDER[0]],
     current() { return this.get(this.currentId()); },
-    /* First boot: honour the persisted choice, else vice-city. */
+    /* First boot: honour ?theme=<id>, else the persisted choice, else vice-city.
+       The query param is a session override and is never persisted. */
     restore() {
       const p = persisted();
-      currentId = (p && THEMES[p]) ? p : 'vice-city';
+      let q = null;
+      try { q = new URLSearchParams(location.search).get('theme'); } catch (e) {}
+      currentId = (q && THEMES[q]) ? q : (p && THEMES[p]) ? p : 'vice-city';
       if (!THEMES[currentId]) currentId = ORDER[0];
       return currentId;
     },
