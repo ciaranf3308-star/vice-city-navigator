@@ -391,7 +391,7 @@ body.dashboard-mode.theme-vice-city .dash-north{
 /* vector sunset scene: crisp at any size, never stretches */
 /* illustrated sunset skyline: oversized, anchored so the sun + towers sit
    in the bar's sightline; soft left fade melts it into the console */
-.dash-skyline{position:absolute;right:0;bottom:-45%;height:170%;width:auto;pointer-events:none;
+.dash-skyline{position:absolute;right:0;bottom:-50%;height:215%;width:auto;pointer-events:none;
   -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 22%);
   mask-image:linear-gradient(90deg,transparent 0,#000 22%)}
 body.dashboard-mode.theme-vice-city #dash-bottombar .dash-chrome{
