@@ -1,212 +1,134 @@
 /* ============================================================
-   San Andreas Spotify skin, hero-convergence pass 4.
-
-   The authored Radio Los Santos hardware bezel
-   (dashboard/radio-bezel-pass4.png, 1600x1400, true alpha) IS the
-   widget chrome. Live HTML sits ON its dark recessed interior —
-   measured content rect: x 0.19-0.81, y 0.21-0.78.
-
-   LEFT column: album art / title / artist / progress / controls.
-   RIGHT column: lyrics / ambient stage.
-   One branding moment only ("Radio Los Santos", blackletter).
-   All live text/data stays HTML. Deep olive/black, distressed
-   cream edges (in the art), muted gold accents.
+   San Andreas Spotify skin — HARD VISUAL RESET pass 5.
+   Live console inside the authored lowrider radio frame
+   (radio-frame-pass5.png, 1800x1500, true alpha). Right side,
+   ~30% width, vertically centred in the map area.
+   LEFT: album art. RIGHT: title/artist/progress/lyrics.
+   BOTTOM: integrated transport. Bank Gothic throughout;
+   blackletter only on the idle station kicker.
    ============================================================ */
 
-.sasp {
-  position: absolute; left: auto; right: 60px; top: 50%; translate: 0 -50%;
-  width: min(560px, 29vw, calc((100vh - 300px) * 8 / 7));
-  aspect-ratio: 8 / 7;
-  container-type: size;
-  pointer-events: auto;
-  background: transparent;
-  font-family: 'Bank Gothic', 'Arial Narrow', sans-serif; color: #f2e8c8;
-  user-select: none; -webkit-user-select: none;
-  filter: drop-shadow(0 18px 36px rgba(0,0,0,.6));
+/* widget placement: right side, centred in the map area (bars are
+   equal height so canvas-centre == map-area centre) */
+body.dashboard-mode.theme-san-andreas .sasp{
+  position:absolute;z-index:20;
+  right:36px;top:50%;transform:translateY(-50%);
+  width:min(600px,31vw,calc((100vh - 220px)*1.2));
+  aspect-ratio:6/5;
+  pointer-events:auto;
+  filter:drop-shadow(0 18px 34px rgba(0,0,0,.65));
 }
-.sasp img { display: block; }
-
-/* ---------- the authored bezel: one unified hardware frame ---------- */
-.sasp-bezel {
-  position: absolute; z-index: 1; inset: 0;
-  width: 100%; height: 100%;
-  pointer-events: none;
+body.dashboard-mode.theme-san-andreas .sasp-bezel{
+  position:absolute;inset:0;width:100%;height:100%;z-index:0;
+  pointer-events:none;
 }
-
-/* ---------- the one branding moment, on the top frame ---------- */
-.sasp-brand {
-  position: absolute; z-index: 2;
-  left: 10%; right: 10%; top: 11.5%;
-  text-align: center;
-  font-family: 'Beckett', 'Pricedown Bl', serif;
-  font-size: 4.6cqw; letter-spacing: .14em;
-  color: #efe3c2;
-  text-shadow: 0 2px 0 #000, 0 0 12px rgba(0,0,0,.8);
-  white-space: nowrap;
+/* live console: sits in the frame's central opening, overlapping the
+   inner gold edge slightly so no map shows through */
+body.dashboard-mode.theme-san-andreas .sasp-main{
+  position:absolute;z-index:1;
+  left:24%;right:24%;top:26%;bottom:24.5%;
+  display:grid;
+  grid-template-columns:37% 1fr;
+  grid-template-rows:1fr auto;
+  gap:3% 5%;
+  background:linear-gradient(180deg,#100e0a 0%,#070605 100%);
+  box-shadow:inset 0 0 26px rgba(0,0,0,.9), inset 0 0 0 1px rgba(216,169,78,.28);
+  padding:4.5%;
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;
 }
-
-/* ---------- content on the dark interior ---------- */
-.sasp-main {
-  position: absolute; z-index: 2;
-  left: 19%; right: 19%; top: 20%; bottom: 22%;
-  display: grid; grid-template-columns: 44% 1fr; gap: 4cqw;
-  min-height: 0;
+/* LEFT: album art */
+body.dashboard-mode.theme-san-andreas .sasp-artwrap{
+  grid-column:1;grid-row:1;position:relative;min-height:0;
+  border:2px solid rgba(240,230,200,.75);
+  box-shadow:0 0 0 1px rgba(216,169,78,.5), 0 4px 12px rgba(0,0,0,.6);
+  background:#000;overflow:hidden;
+  aspect-ratio:1/1;align-self:start;width:100%;
 }
-.sasp-left {
-  display: flex; flex-direction: column; gap: 1.6cqh; min-height: 0;
+body.dashboard-mode.theme-san-andreas .sasp-art-idle{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  color:#5a5344;
 }
-/* album art in its own recessed slot */
-.sasp-artwrap {
-  position: relative; width: 100%; aspect-ratio: 1 / 1; flex: 0 0 auto;
-  background: #070905;
-  border: 1px solid rgba(216,169,78,.5);
-  box-shadow: inset 0 0 18px rgba(0,0,0,.85), 0 1px 0 rgba(240,230,200,.08);
-  overflow: hidden;
+body.dashboard-mode.theme-san-andreas .sasp-art-idle svg{width:38%;height:38%;fill:currentColor}
+body.dashboard-mode.theme-san-andreas .sasp-art{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;
 }
-.sasp-art {
-  position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: cover;
-  opacity: 0; transition: opacity .45s ease;
+body.dashboard-mode.theme-san-andreas .sasp-art.on{opacity:1}
+/* RIGHT: metadata / progress / lyrics */
+body.dashboard-mode.theme-san-andreas .sasp-side{
+  grid-column:2;grid-row:1;display:flex;flex-direction:column;min-height:0;min-width:0;
 }
-.sasp-art.on { opacity: 1; }
-.sasp-art-idle {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(70% 70% at 50% 40%, #16241a 0%, #070905 78%);
+body.dashboard-mode.theme-san-andreas .sasp-track{margin-bottom:6px;min-width:0}
+body.dashboard-mode.theme-san-andreas .sasp-title{
+  font-size:15px;font-weight:700;letter-spacing:1.5px;color:#f7f0dc;
+  text-shadow:0 2px 0 #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.sasp-art-idle svg {
-  width: 24%; height: auto; fill: #d8b36a; opacity: .5;
-  filter: drop-shadow(0 2px 3px #000);
+body.dashboard-mode.theme-san-andreas .sasp-artist{
+  font-size:11px;letter-spacing:1.5px;color:#b3a582;margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-
-/* ---------- track ---------- */
-.sasp-track { flex: 0 0 auto; min-width: 0; }
-.sasp-title {
-  font-family: 'Bank Gothic', 'Arial Narrow', sans-serif;
-  font-size: 3.4cqw; font-weight: 700; letter-spacing: .03em; line-height: 1.2;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-  overflow: hidden;
-  color: #f7ecd0;
-  text-shadow: 0 2px 3px #000;
+body.dashboard-mode.theme-san-andreas .sasp-artist.sasp-status{color:#d8a94e}
+body.dashboard-mode.theme-san-andreas .sasp-progress{margin:2px 0 6px}
+body.dashboard-mode.theme-san-andreas .sasp-bar{
+  position:relative;height:8px;background:rgba(240,230,200,.14);
+  border:1px solid rgba(216,169,78,.4);cursor:pointer;
 }
-.sasp-artist {
-  margin-top: .5cqh;
-  font-size: 2.9cqw; letter-spacing: .05em; line-height: 1.3;
-  display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;
-  overflow: hidden;
-  color: #d8b36a;
-  text-shadow: 0 1px 2px #000;
+body.dashboard-mode.theme-san-andreas .sasp-bar-fill{
+  position:absolute;left:0;top:0;bottom:0;width:0%;
+  background:linear-gradient(90deg,#a8842f,#e8c56a);
 }
-.sasp-artist.sasp-status { color: #a8c86a; }
-
-/* ---------- progress ---------- */
-.sasp-progress { flex: 0 0 auto; }
-.sasp-bar { position: relative; height: 2.2cqh; cursor: pointer; touch-action: none; }
-.sasp-bar::before {
-  content: ''; position: absolute; left: 0; right: 0; top: 50%;
-  height: 5px; margin-top: -2.5px; border-radius: 3px;
-  background: rgba(242,232,200,.16);
-  box-shadow: inset 0 1px 2px rgba(0,0,0,.7);
+body.dashboard-mode.theme-san-andreas .sasp-bar-knob{
+  position:absolute;top:50%;width:10px;height:10px;border-radius:50%;
+  background:#f0e6c8;border:1px solid #8a6d2a;transform:translate(-50%,-50%);
 }
-.sasp-bar-fill {
-  position: absolute; left: 0; top: 50%; height: 5px; margin-top: -2.5px;
-  width: 0%; border-radius: 3px;
-  background: linear-gradient(90deg, #d8b36a, #e8a33d);
-  box-shadow: 0 0 8px rgba(232,163,61,.7);
+body.dashboard-mode.theme-san-andreas .sasp-times{
+  display:flex;justify-content:space-between;margin-top:3px;
+  font-size:10px;letter-spacing:1px;color:#8f8468;
 }
-.sasp-bar-knob {
-  position: absolute; top: 50%;
-  width: 2.4cqw; height: 2.4cqw; margin: -1.2cqw 0 0 -1.2cqw;
-  border-radius: 50%;
-  background: #f2e8c8; border: 2px solid #d8b36a;
-  box-shadow: 0 0 8px rgba(216,179,106,.8);
+body.dashboard-mode.theme-san-andreas .sasp-lyrics{
+  flex:1;min-height:0;overflow:hidden;position:relative;
+  border-top:1px solid rgba(216,169,78,.3);padding-top:6px;
 }
-.sasp-times {
-  display: flex; justify-content: space-between; margin-top: .3cqh;
-  font-size: 2.5cqw; letter-spacing: .05em; color: #b8a878;
-  text-shadow: 0 1px 2px #000;
+/* BOTTOM: integrated transport */
+body.dashboard-mode.theme-san-andreas .sasp-controls{
+  grid-column:1/-1;grid-row:2;display:flex;align-items:center;justify-content:center;
+  gap:14px;padding-top:2px;
 }
-
-/* ---------- transport ---------- */
-.sasp-controls {
-  flex: 0 0 auto;
-  display: flex; align-items: center; justify-content: center; gap: 2.6cqw;
-  margin-top: auto; padding-bottom: .4cqh;
+body.dashboard-mode.theme-san-andreas .sasp-tbtn{
+  width:44px;height:44px;border-radius:50%;cursor:pointer;
+  background:radial-gradient(circle at 35% 30%,#2a251c,#0d0b08 70%);
+  border:1px solid rgba(216,169,78,.65);color:#e8c56a;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 3px 8px rgba(0,0,0,.6), inset 0 1px 0 rgba(240,230,200,.15);
 }
-.sasp-tbtn {
-  width: 8.2cqw; height: 8.2cqw; min-width: 40px; min-height: 40px;
-  border-radius: 50%; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  color: #f2e8c8; background: rgba(10,18,12,.55);
-  border: 2px solid rgba(216,179,106,.85);
-  box-shadow: 0 0 12px rgba(216,179,106,.35), inset 0 0 8px rgba(216,179,106,.15);
-  -webkit-tap-highlight-color: transparent;
+body.dashboard-mode.theme-san-andreas .sasp-tbtn svg{width:20px;height:20px;fill:currentColor}
+body.dashboard-mode.theme-san-andreas .sasp-tbtn.big{width:56px;height:56px}
+body.dashboard-mode.theme-san-andreas .sasp-tbtn.big svg{width:26px;height:26px}
+body.dashboard-mode.theme-san-andreas .sasp-tbtn:active{transform:scale(.92)}
+/* idle: the station kicker IS the one branding moment */
+body.dashboard-mode.theme-san-andreas .sasp-idle{
+  position:absolute;z-index:2;
+  left:24%;right:24%;top:26%;bottom:24.5%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;text-align:center;
+  background:radial-gradient(ellipse at 50% 40%,#14110b 0%,#070605 75%);
+  box-shadow:inset 0 0 26px rgba(0,0,0,.9);
+  padding:6%;
 }
-.sasp-tbtn.big {
-  width: 9.8cqw; height: 9.8cqw; min-width: 48px; min-height: 48px;
-  border-color: #d8b36a;
+body.dashboard-mode.theme-san-andreas .sasp-idle[hidden]{display:none}
+body.dashboard-mode.theme-san-andreas .sasp-idle-kicker{
+  font-family:'Beckett','Pricedown Bl',serif;font-size:24px;color:#f5edd8;
+  text-shadow:0 2px 0 #000;
 }
-.sasp-tbtn:active { transform: scale(.93); }
-.sasp-tbtn svg {
-  width: 52%; height: 52%; fill: currentColor;
-  filter: drop-shadow(0 1px 2px #000);
+body.dashboard-mode.theme-san-andreas .sasp-connect-btn{
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:13px;font-weight:700;
+  letter-spacing:3px;text-transform:uppercase;cursor:pointer;
+  color:#0e120a;background:linear-gradient(180deg,#e8c56a,#c9982f);
+  border:1px solid rgba(255,240,200,.5);border-radius:0;padding:9px 20px 8px;
+  box-shadow:0 3px 10px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.35);
 }
-
-/* ---------- lyric stage: right column ---------- */
-.sasp-right { min-height: 0; display: flex; }
-.sasp-lyrics {
-  flex: 1; min-height: 0;
-  overflow: hidden;
-  display: flex; flex-direction: column; justify-content: center;
-  text-align: left; gap: .8cqh;
-  padding-left: 3.2cqw;
-  border-left: 1px solid rgba(216,169,78,.3);
-  pointer-events: none;
+body.dashboard-mode.theme-san-andreas .sasp-connect-btn:active{transform:scale(.95)}
+body.dashboard-mode.theme-san-andreas .sasp-idle-hint{
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:10px;letter-spacing:2px;
+  line-height:1.7;color:#8f8468;text-transform:uppercase;margin:0;
 }
-.sasp-lyrics.has-lyrics { pointer-events: auto; }
-.sa-lyric-line {
-  font-size: 3.4cqw; line-height: 1.35; color: #e8dcc0; opacity: .6;
-  text-shadow: 0 2px 4px #000;
-  transition: opacity .3s ease;
-}
-.sa-lyric-line.ghost { opacity: .32; font-size: 3cqw; }
-.sa-lyric-line.next { opacity: .52; }
-.sa-lyric-line.active {
-  opacity: 1; font-size: 4cqw; color: #f0c96a;
-  text-shadow: 0 2px 4px #000, 0 0 12px rgba(232,163,61,.45);
-}
-
-/* ---------- themed idle / connect: over the interior ---------- */
-.sasp-idle {
-  position: absolute; z-index: 3;
-  left: 19%; right: 19%; top: 20%; bottom: 22%;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; gap: 1.4cqh;
-  background: rgba(7,9,5,.72);
-  pointer-events: none;
-}
-.sasp-idle[hidden] { display: none; }
-/* Disconnected: the idle block owns the console — hide the live rows
-   and the frame branding (the idle kicker IS the one branding moment). */
-.sasp.is-idle .sasp-main { visibility: hidden; }
-.sasp.is-idle .sasp-brand { visibility: hidden; }
-.sasp-idle-kicker {
-  font-family: 'Beckett', 'Pricedown Bl', serif;
-  font-size: 5.4cqw; letter-spacing: .1em;
-  color: #f2e8c8;
-  text-shadow: 0 2px 4px #000, 0 0 16px rgba(232,163,61,.45);
-}
-.sasp-connect-btn {
-  pointer-events: auto;
-  padding: 1.1cqh 5.5cqw;
-  font-family: 'Bank Gothic', 'Arial Narrow', sans-serif;
-  font-size: 3.8cqw; font-weight: 700; letter-spacing: .12em;
-  color: #0a120c; background: linear-gradient(180deg, #f0c96a, #d8a94e);
-  border: 1px solid rgba(255,240,200,.5); border-radius: 999px; cursor: pointer;
-  box-shadow: 0 0 18px rgba(232,163,61,.55), inset 0 1px 0 rgba(255,255,255,.35);
-}
-.sasp-connect-btn:active { transform: scale(.96); }
-.sasp-idle-hint {
-  font-size: 2.8cqw; line-height: 1.55; letter-spacing: .04em;
-  color: #c4b184; opacity: .95; text-shadow: 0 1px 3px #000;
-}
+body.dashboard-mode.theme-san-andreas .sasp.is-idle .sasp-main{visibility:hidden}

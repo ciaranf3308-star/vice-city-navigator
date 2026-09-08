@@ -10,8 +10,8 @@
   },
   "san-andreas": {
     "locked": true,
-    "sha256": "c62b62b54285b88400551d845842186737fad0167f253a67702c126ab1e06fb0",
-    "note": "Locked 2026-09-08: hero-convergence pass 4 \u2014 authored 2400x320 topbar / 2400x260 footer chrome / 1600x1400 Radio Los Santos bezel; floating drive pill + zoom cluster removed (search on locality plate, END in maneuver card); chamfered olive maneuver console; Bank Gothic functional type; map re-homed to parchment/blue/green pause-map palette. SW theme cache v66."
+    "sha256": "9a913dbf9243545a3f995d36607bbdaca7eb6c0dc66849f0325ce4c3df7779be",
+    "note": "HARD VISUAL RESET pass 5 (2026-09-08): flat black HUD chrome 72/72, lowrider radio frame, game-map style. User-authorized."
   },
   "vice-city": {
     "locked": false,

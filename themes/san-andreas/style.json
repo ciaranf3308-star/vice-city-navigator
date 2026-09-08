@@ -1,981 +1,979 @@
 {
- "glyphs": "fonts/{fontstack}/{range}.pbf",
- "layers": [
-  {
-   "id": "sa-land",
-   "paint": {
-    "background-color": "#ece0bd"
-   },
-   "type": "background"
+  "glyphs": "fonts/{fontstack}/{range}.pbf",
+  "layers": [
+    {
+      "id": "sa-land",
+      "paint": {
+        "background-color": "#eee3bd"
+      },
+      "type": "background"
+    },
+    {
+      "id": "sa-water",
+      "paint": {
+        "fill-color": "#3f96b4"
+      },
+      "source": "openmaptiles",
+      "source-layer": "water",
+      "type": "fill"
+    },
+    {
+      "id": "sa-waterway",
+      "paint": {
+        "line-color": "#3f96b4",
+        "line-width": [
+          "interpolate",
+          [
+            "exponential",
+            1.5
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.6,
+          14,
+          2.5,
+          18,
+          8
+        ]
+      },
+      "source": "openmaptiles",
+      "source-layer": "waterway",
+      "type": "line"
+    },
+    {
+      "filter": [
+        "==",
+        [
+          "get",
+          "class"
+        ],
+        "sand"
+      ],
+      "id": "sa-beach",
+      "paint": {
+        "fill-color": "#eadfc0"
+      },
+      "source": "openmaptiles",
+      "source-layer": "landcover",
+      "type": "fill"
+    },
+    {
+      "filter": [
+        "==",
+        [
+          "get",
+          "class"
+        ],
+        "grass"
+      ],
+      "id": "sa-grass",
+      "paint": {
+        "fill-color": "#6fa03f"
+      },
+      "source": "openmaptiles",
+      "source-layer": "landcover",
+      "type": "fill"
+    },
+    {
+      "filter": [
+        "match",
+        [
+          "get",
+          "subclass"
+        ],
+        [
+          "park",
+          "village_green",
+          "garden",
+          "recreation_ground",
+          "golf_course"
+        ],
+        true,
+        false
+      ],
+      "id": "sa-parks",
+      "paint": {
+        "fill-color": "#5f9338"
+      },
+      "source": "openmaptiles",
+      "source-layer": "landcover",
+      "type": "fill"
+    },
+    {
+      "filter": [
+        "==",
+        [
+          "get",
+          "class"
+        ],
+        "wood"
+      ],
+      "id": "sa-woods",
+      "paint": {
+        "fill-color": "#558031"
+      },
+      "source": "openmaptiles",
+      "source-layer": "landcover",
+      "type": "fill"
+    },
+    {
+      "id": "sa-park-areas",
+      "paint": {
+        "fill-color": "#5f9338"
+      },
+      "source": "openmaptiles",
+      "source-layer": "park",
+      "type": "fill"
+    },
+    {
+      "filter": [
+        "match",
+        [
+          "get",
+          "class"
+        ],
+        [
+          "pitch",
+          "playground",
+          "stadium"
+        ],
+        true,
+        false
+      ],
+      "id": "sa-playing-fields",
+      "paint": {
+        "fill-color": "#6fa03f"
+      },
+      "source": "openmaptiles",
+      "source-layer": "landuse",
+      "type": "fill"
+    },
+    {
+      "filter": [
+        "match",
+        [
+          "get",
+          "class"
+        ],
+        [
+          "residential",
+          "commercial",
+          "industrial",
+          "retail"
+        ],
+        true,
+        false
+      ],
+      "id": "sa-urban",
+      "paint": {
+        "fill-color": "#ded1ae"
+      },
+      "source": "openmaptiles",
+      "source-layer": "landuse",
+      "type": "fill"
+    },
+    {
+      "id": "sa-aeroway",
+      "paint": {
+        "fill-color": "#d8cba6"
+      },
+      "source": "openmaptiles",
+      "source-layer": "aeroway",
+      "type": "fill"
+    },
+    {
+      "id": "sa-buildings",
+      "minzoom": 15,
+      "paint": {
+        "fill-color": "#bfa87f"
+      },
+      "source": "openmaptiles",
+      "source-layer": "building",
+      "type": "fill"
+    },
+    {
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "get",
+            "class"
+          ],
+          [
+            "minor",
+            "service",
+            "track"
+          ],
+          true,
+          false
+        ],
+        [
+          "!=",
+          [
+            "get",
+            "brunnel"
+          ],
+          "bridge"
+        ],
+        [
+          "!=",
+          [
+            "get",
+            "brunnel"
+          ],
+          "tunnel"
+        ]
+      ],
+      "id": "sa-road-minor-casing",
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "minzoom": 10,
+      "paint": {
+        "line-color": "#1a1712",
+        "line-width": [
+          "interpolate",
+          [
+            "exponential",
+            1.5
+          ],
+          [
+            "zoom"
+          ],
+          10,
+          2.2,
+          14,
+          4.6,
+          18,
+          11
+        ]
+      },
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "type": "line"
+    },
+    {
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "get",
+            "class"
+          ],
+          [
+            "minor",
+            "service",
+            "track"
+          ],
+          true,
+          false
+        ],
+        [
+          "!=",
+          [
+            "get",
+            "brunnel"
+          ],
+          "bridge"
+        ],
+        [
+          "!=",
+          [
+            "get",
+            "brunnel"
+          ],
+          "tunnel"
+        ]
+      ],
+      "id": "sa-road-minor",
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "minzoom": 10,
+      "paint": {
+        "line-color": "#2e2a22",
+        "line-width": [
+          "interpolate",
+          [
+            "exponential",
+            1.5
+          ],
+          [
+            "zoom"
+          ],
+          10,
+          0.8,
+          14,
+          3,
+          18,
+          9.5
+        ]
+      },
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "type": "line"
+    },
+    {
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "get",
+            "class"
+          ],
+          [
+            "primary",
+            "secondary",
+            "tertiary"
+          ],
+          true,
+          false
+        ],
+        [
+          "!=",
+          [
+            "get",
+            "brunnel"
+          ],
+          "bridge"
+        ],
+        [
+          "!=",
+          [
+            "get",
+            "brunnel"
+          ],
+          "tunnel"
+        ]
+      ],
+      "id": "sa-road-primary-casing",
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "minzoom": 6,
+      "paint": {
+        "line-color": "#080808",
+        "line-width": [
+          "interpolate",
+          [
+            "exponential",
+            1.5
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          5,
+          12,
+          12,
+          16,
+          25
+        ]
+      },
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "type": "line"
+    },
+    {
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "get",
+            "class"
+          ],
+          [
+            "primary",
+            "secondary",
+            "tertiary"
+          ],
+          true,
+          false
+        ],
+        [
+          "!=",
+          [
+            "get",
+            "brunnel"
+          ],
+          "bridge"
+        ],
+        [
+          "!=",
+          [
+            "get",
+            "brunnel"
+          ],
+          "tunnel"
+        ]
+      ],
+      "id": "sa-road-primary",
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "minzoom": 6,
+      "paint": {
+        "line-color": "#111111",
+        "line-width": [
+          "interpolate",
+          [
+            "exponential",
+            1.5
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          3,
+          12,
+          9.5,
+          16,
+          22
+        ]
+      },
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "type": "line"
+    },
+    {
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "get",
+            "class"
+          ],
+          [
+            "motorway",
+            "trunk"
+          ],
+          true,
+          false
+        ],
+        [
+          "!=",
+          [
+            "get",
+            "brunnel"
+          ],
+          "bridge"
+        ],
+        [
+          "!=",
+          [
+            "get",
+            "brunnel"
+          ],
+          "tunnel"
+        ]
+      ],
+      "id": "sa-road-motorway-casing",
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "minzoom": 5,
+      "paint": {
+        "line-color": "#060606",
+        "line-width": [
+          "interpolate",
+          [
+            "exponential",
+            1.5
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          7,
+          10,
+          15.5,
+          14,
+          31
+        ]
+      },
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "type": "line"
+    },
+    {
+      "filter": [
+        "all",
+        [
+          "match",
+          [
+            "get",
+            "class"
+          ],
+          [
+            "motorway",
+            "trunk"
+          ],
+          true,
+          false
+        ],
+        [
+          "!=",
+          [
+            "get",
+            "brunnel"
+          ],
+          "bridge"
+        ],
+        [
+          "!=",
+          [
+            "get",
+            "brunnel"
+          ],
+          "tunnel"
+        ]
+      ],
+      "id": "sa-road-motorway",
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "minzoom": 5,
+      "paint": {
+        "line-color": "#0d0d0d",
+        "line-width": [
+          "interpolate",
+          [
+            "exponential",
+            1.5
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          5,
+          10,
+          13,
+          14,
+          28
+        ]
+      },
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "type": "line"
+    },
+    {
+      "filter": [
+        "all",
+        [
+          "==",
+          [
+            "get",
+            "brunnel"
+          ],
+          "bridge"
+        ],
+        [
+          "match",
+          [
+            "get",
+            "class"
+          ],
+          [
+            "motorway",
+            "trunk",
+            "primary",
+            "secondary",
+            "tertiary"
+          ],
+          true,
+          false
+        ]
+      ],
+      "id": "sa-bridges",
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "#111111",
+        "line-width": [
+          "interpolate",
+          [
+            "exponential",
+            1.5
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          2.6,
+          12,
+          8.5,
+          16,
+          21
+        ]
+      },
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "type": "line"
+    },
+    {
+      "filter": [
+        "all",
+        [
+          "==",
+          [
+            "get",
+            "brunnel"
+          ],
+          "tunnel"
+        ],
+        [
+          "match",
+          [
+            "get",
+            "class"
+          ],
+          [
+            "motorway",
+            "trunk",
+            "primary",
+            "secondary",
+            "tertiary",
+            "minor",
+            "service"
+          ],
+          true,
+          false
+        ]
+      ],
+      "id": "sa-tunnels",
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "#080808",
+        "line-dasharray": [
+          2,
+          2
+        ],
+        "line-opacity": 0.7,
+        "line-width": [
+          "interpolate",
+          [
+            "exponential",
+            1.5
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          1.6,
+          12,
+          6,
+          16,
+          16
+        ]
+      },
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "type": "line"
+    },
+    {
+      "filter": [
+        "==",
+        [
+          "get",
+          "class"
+        ],
+        "rail"
+      ],
+      "id": "sa-railway",
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "#454545",
+        "line-width": [
+          "interpolate",
+          [
+            "exponential",
+            1.5
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          1,
+          12,
+          2.5,
+          16,
+          6
+        ]
+      },
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "type": "line"
+    },
+    {
+      "id": "sa-label-water",
+      "layout": {
+        "text-field": [
+          "coalesce",
+          [
+            "get",
+            "name:en"
+          ],
+          [
+            "get",
+            "name:latin"
+          ],
+          [
+            "get",
+            "name"
+          ]
+        ],
+        "text-font": [
+          "san-andreas"
+        ],
+        "text-max-width": 8,
+        "text-size": 13
+      },
+      "paint": {
+        "text-color": "#17424e",
+        "text-halo-color": "#bcd9e2",
+        "text-halo-width": 1.75
+      },
+      "source": "openmaptiles",
+      "source-layer": "water_name",
+      "type": "symbol"
+    },
+    {
+      "filter": [
+        "match",
+        [
+          "get",
+          "class"
+        ],
+        [
+          "country",
+          "state",
+          "city",
+          "town",
+          "village",
+          "suburb",
+          "hamlet"
+        ],
+        true,
+        false
+      ],
+      "id": "sa-label-place",
+      "layout": {
+        "text-field": [
+          "coalesce",
+          [
+            "get",
+            "name:en"
+          ],
+          [
+            "get",
+            "name:latin"
+          ],
+          [
+            "get",
+            "name"
+          ]
+        ],
+        "text-font": [
+          "san-andreas"
+        ],
+        "text-max-width": 8,
+        "text-size": [
+          "match",
+          [
+            "get",
+            "class"
+          ],
+          "country",
+          19,
+          "state",
+          16,
+          "city",
+          28,
+          "town",
+          24,
+          "village",
+          16,
+          "suburb",
+          15.5,
+          "hamlet",
+          13,
+          13
+        ],
+        "text-transform": "uppercase"
+      },
+      "paint": {
+        "text-color": "#191207",
+        "text-halo-color": "#f4ecd2",
+        "text-halo-width": 2.6
+      },
+      "source": "openmaptiles",
+      "source-layer": "place",
+      "type": "symbol"
+    },
+    {
+      "filter": [
+        "in",
+        [
+          "get",
+          "class"
+        ],
+        [
+          "literal",
+          [
+            "motorway",
+            "trunk",
+            "primary",
+            "secondary",
+            "tertiary"
+          ]
+        ]
+      ],
+      "id": "sa-label-road-major",
+      "layout": {
+        "symbol-placement": "line",
+        "text-field": [
+          "coalesce",
+          [
+            "get",
+            "name:en"
+          ],
+          [
+            "get",
+            "name:latin"
+          ],
+          [
+            "get",
+            "name"
+          ]
+        ],
+        "text-font": [
+          "san-andreas"
+        ],
+        "text-max-width": 8,
+        "text-size": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          11,
+          14.5,
+          14,
+          15,
+          17,
+          15.5
+        ]
+      },
+      "minzoom": 10,
+      "paint": {
+        "text-color": "#191207",
+        "text-halo-color": "#f4ecd2",
+        "text-halo-width": 1.75
+      },
+      "source": "openmaptiles",
+      "source-layer": "transportation_name",
+      "type": "symbol"
+    },
+    {
+      "filter": [
+        "!",
+        [
+          "in",
+          [
+            "get",
+            "class"
+          ],
+          [
+            "literal",
+            [
+              "motorway",
+              "trunk",
+              "primary",
+              "secondary",
+              "tertiary"
+            ]
+          ]
+        ]
+      ],
+      "id": "sa-label-road-minor",
+      "layout": {
+        "symbol-placement": "line",
+        "text-field": [
+          "coalesce",
+          [
+            "get",
+            "name:en"
+          ],
+          [
+            "get",
+            "name:latin"
+          ],
+          [
+            "get",
+            "name"
+          ]
+        ],
+        "text-font": [
+          "san-andreas"
+        ],
+        "text-max-width": 8,
+        "text-size": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          16,
+          12,
+          18,
+          13.5
+        ]
+      },
+      "minzoom": 16,
+      "paint": {
+        "text-color": "#241c10",
+        "text-halo-color": "#f4ecd2",
+        "text-halo-width": 1.25
+      },
+      "source": "openmaptiles",
+      "source-layer": "transportation_name",
+      "type": "symbol"
+    }
+  ],
+  "metadata": {
+    "description": "San Andreas pause-map style, hero-convergence pass 4: pale cream land, warm taupe urban, distinctly green parks, clear muted-blue water, near-black bold majors, quiet charcoal minors, dark labels, minor road names from z15. Flat graphic game-map language. Built from OpenMapTiles."
   },
-  {
-   "id": "sa-water",
-   "paint": {
-    "fill-color": "#4f9ab0"
-   },
-   "source": "openmaptiles",
-   "source-layer": "water",
-   "type": "fill"
+  "name": "San Andreas",
+  "sources": {
+    "openmaptiles": {
+      "type": "vector",
+      "url": "https://tiles.openfreemap.org/planet"
+    }
   },
-  {
-   "id": "sa-waterway",
-   "paint": {
-    "line-color": "#4f9ab0",
-    "line-width": [
-     "interpolate",
-     [
-      "exponential",
-      1.5
-     ],
-     [
-      "zoom"
-     ],
-     8,
-     0.6,
-     14,
-     2.5,
-     18,
-     8
-    ]
-   },
-   "source": "openmaptiles",
-   "source-layer": "waterway",
-   "type": "line"
-  },
-  {
-   "filter": [
-    "==",
-    [
-     "get",
-     "class"
-    ],
-    "sand"
-   ],
-   "id": "sa-beach",
-   "paint": {
-    "fill-color": "#eadfc0"
-   },
-   "source": "openmaptiles",
-   "source-layer": "landcover",
-   "type": "fill"
-  },
-  {
-   "filter": [
-    "==",
-    [
-     "get",
-     "class"
-    ],
-    "grass"
-   ],
-   "id": "sa-grass",
-   "paint": {
-    "fill-color": "#8aa050"
-   },
-   "source": "openmaptiles",
-   "source-layer": "landcover",
-   "type": "fill"
-  },
-  {
-   "filter": [
-    "match",
-    [
-     "get",
-     "subclass"
-    ],
-    [
-     "park",
-     "village_green",
-     "garden",
-     "recreation_ground",
-     "golf_course"
-    ],
-    true,
-    false
-   ],
-   "id": "sa-parks",
-   "paint": {
-    "fill-color": "#7c984a"
-   },
-   "source": "openmaptiles",
-   "source-layer": "landcover",
-   "type": "fill"
-  },
-  {
-   "filter": [
-    "==",
-    [
-     "get",
-     "class"
-    ],
-    "wood"
-   ],
-   "id": "sa-woods",
-   "paint": {
-    "fill-color": "#6d8a42"
-   },
-   "source": "openmaptiles",
-   "source-layer": "landcover",
-   "type": "fill"
-  },
-  {
-   "id": "sa-park-areas",
-   "paint": {
-    "fill-color": "#7c984a"
-   },
-   "source": "openmaptiles",
-   "source-layer": "park",
-   "type": "fill"
-  },
-  {
-   "filter": [
-    "match",
-    [
-     "get",
-     "class"
-    ],
-    [
-     "pitch",
-     "playground",
-     "stadium"
-    ],
-    true,
-    false
-   ],
-   "id": "sa-playing-fields",
-   "paint": {
-    "fill-color": "#8aa050"
-   },
-   "source": "openmaptiles",
-   "source-layer": "landuse",
-   "type": "fill"
-  },
-  {
-   "filter": [
-    "match",
-    [
-     "get",
-     "class"
-    ],
-    [
-     "residential",
-     "commercial",
-     "industrial",
-     "retail"
-    ],
-    true,
-    false
-   ],
-   "id": "sa-urban",
-   "paint": {
-    "fill-color": "#d8cdb2"
-   },
-   "source": "openmaptiles",
-   "source-layer": "landuse",
-   "type": "fill"
-  },
-  {
-   "id": "sa-aeroway",
-   "paint": {
-    "fill-color": "#d3c6a8"
-   },
-   "source": "openmaptiles",
-   "source-layer": "aeroway",
-   "type": "fill"
-  },
-  {
-   "id": "sa-buildings",
-   "minzoom": 15,
-   "paint": {
-    "fill-color": "#c4b28c"
-   },
-   "source": "openmaptiles",
-   "source-layer": "building",
-   "type": "fill"
-  },
-  {
-   "filter": [
-    "all",
-    [
-     "match",
-     [
-      "get",
-      "class"
-     ],
-     [
-      "minor",
-      "service",
-      "track"
-     ],
-     true,
-     false
-    ],
-    [
-     "!=",
-     [
-      "get",
-      "brunnel"
-     ],
-     "bridge"
-    ],
-    [
-     "!=",
-     [
-      "get",
-      "brunnel"
-     ],
-     "tunnel"
-    ]
-   ],
-   "id": "sa-road-minor-casing",
-   "layout": {
-    "line-cap": "round",
-    "line-join": "round"
-   },
-   "minzoom": 10,
-   "paint": {
-    "line-color": "#161616",
-    "line-width": [
-     "interpolate",
-     [
-      "exponential",
-      1.5
-     ],
-     [
-      "zoom"
-     ],
-     10,
-     2.2,
-     14,
-     4.6,
-     18,
-     11
-    ]
-   },
-   "source": "openmaptiles",
-   "source-layer": "transportation",
-   "type": "line"
-  },
-  {
-   "filter": [
-    "all",
-    [
-     "match",
-     [
-      "get",
-      "class"
-     ],
-     [
-      "minor",
-      "service",
-      "track"
-     ],
-     true,
-     false
-    ],
-    [
-     "!=",
-     [
-      "get",
-      "brunnel"
-     ],
-     "bridge"
-    ],
-    [
-     "!=",
-     [
-      "get",
-      "brunnel"
-     ],
-     "tunnel"
-    ]
-   ],
-   "id": "sa-road-minor",
-   "layout": {
-    "line-cap": "round",
-    "line-join": "round"
-   },
-   "minzoom": 10,
-   "paint": {
-    "line-color": "#3a352b",
-    "line-width": [
-     "interpolate",
-     [
-      "exponential",
-      1.5
-     ],
-     [
-      "zoom"
-     ],
-     10,
-     0.8,
-     14,
-     3,
-     18,
-     9.5
-    ]
-   },
-   "source": "openmaptiles",
-   "source-layer": "transportation",
-   "type": "line"
-  },
-  {
-   "filter": [
-    "all",
-    [
-     "match",
-     [
-      "get",
-      "class"
-     ],
-     [
-      "primary",
-      "secondary",
-      "tertiary"
-     ],
-     true,
-     false
-    ],
-    [
-     "!=",
-     [
-      "get",
-      "brunnel"
-     ],
-     "bridge"
-    ],
-    [
-     "!=",
-     [
-      "get",
-      "brunnel"
-     ],
-     "tunnel"
-    ]
-   ],
-   "id": "sa-road-primary-casing",
-   "layout": {
-    "line-cap": "round",
-    "line-join": "round"
-   },
-   "minzoom": 6,
-   "paint": {
-    "line-color": "#101010",
-    "line-width": [
-     "interpolate",
-     [
-      "exponential",
-      1.5
-     ],
-     [
-      "zoom"
-     ],
-     8,
-     3.6,
-     12,
-     8.6,
-     16,
-     19
-    ]
-   },
-   "source": "openmaptiles",
-   "source-layer": "transportation",
-   "type": "line"
-  },
-  {
-   "filter": [
-    "all",
-    [
-     "match",
-     [
-      "get",
-      "class"
-     ],
-     [
-      "primary",
-      "secondary",
-      "tertiary"
-     ],
-     true,
-     false
-    ],
-    [
-     "!=",
-     [
-      "get",
-      "brunnel"
-     ],
-     "bridge"
-    ],
-    [
-     "!=",
-     [
-      "get",
-      "brunnel"
-     ],
-     "tunnel"
-    ]
-   ],
-   "id": "sa-road-primary",
-   "layout": {
-    "line-cap": "round",
-    "line-join": "round"
-   },
-   "minzoom": 6,
-   "paint": {
-    "line-color": "#1b1b1b",
-    "line-width": [
-     "interpolate",
-     [
-      "exponential",
-      1.5
-     ],
-     [
-      "zoom"
-     ],
-     8,
-     1.8,
-     12,
-     6.8,
-     16,
-     17
-    ]
-   },
-   "source": "openmaptiles",
-   "source-layer": "transportation",
-   "type": "line"
-  },
-  {
-   "filter": [
-    "all",
-    [
-     "match",
-     [
-      "get",
-      "class"
-     ],
-     [
-      "motorway",
-      "trunk"
-     ],
-     true,
-     false
-    ],
-    [
-     "!=",
-     [
-      "get",
-      "brunnel"
-     ],
-     "bridge"
-    ],
-    [
-     "!=",
-     [
-      "get",
-      "brunnel"
-     ],
-     "tunnel"
-    ]
-   ],
-   "id": "sa-road-motorway-casing",
-   "layout": {
-    "line-cap": "round",
-    "line-join": "round"
-   },
-   "minzoom": 5,
-   "paint": {
-    "line-color": "#0a0a0a",
-    "line-width": [
-     "interpolate",
-     [
-      "exponential",
-      1.5
-     ],
-     [
-      "zoom"
-     ],
-     6,
-     5.2,
-     10,
-     12,
-     14,
-     25
-    ]
-   },
-   "source": "openmaptiles",
-   "source-layer": "transportation",
-   "type": "line"
-  },
-  {
-   "filter": [
-    "all",
-    [
-     "match",
-     [
-      "get",
-      "class"
-     ],
-     [
-      "motorway",
-      "trunk"
-     ],
-     true,
-     false
-    ],
-    [
-     "!=",
-     [
-      "get",
-      "brunnel"
-     ],
-     "bridge"
-    ],
-    [
-     "!=",
-     [
-      "get",
-      "brunnel"
-     ],
-     "tunnel"
-    ]
-   ],
-   "id": "sa-road-motorway",
-   "layout": {
-    "line-cap": "round",
-    "line-join": "round"
-   },
-   "minzoom": 5,
-   "paint": {
-    "line-color": "#141414",
-    "line-width": [
-     "interpolate",
-     [
-      "exponential",
-      1.5
-     ],
-     [
-      "zoom"
-     ],
-     6,
-     3.4,
-     10,
-     10,
-     14,
-     23
-    ]
-   },
-   "source": "openmaptiles",
-   "source-layer": "transportation",
-   "type": "line"
-  },
-  {
-   "filter": [
-    "all",
-    [
-     "==",
-     [
-      "get",
-      "brunnel"
-     ],
-     "bridge"
-    ],
-    [
-     "match",
-     [
-      "get",
-      "class"
-     ],
-     [
-      "motorway",
-      "trunk",
-      "primary",
-      "secondary",
-      "tertiary"
-     ],
-     true,
-     false
-    ]
-   ],
-   "id": "sa-bridges",
-   "layout": {
-    "line-cap": "round",
-    "line-join": "round"
-   },
-   "paint": {
-    "line-color": "#1b1b1b",
-    "line-width": [
-     "interpolate",
-     [
-      "exponential",
-      1.5
-     ],
-     [
-      "zoom"
-     ],
-     8,
-     1.6,
-     12,
-     6,
-     16,
-     16
-    ]
-   },
-   "source": "openmaptiles",
-   "source-layer": "transportation",
-   "type": "line"
-  },
-  {
-   "filter": [
-    "all",
-    [
-     "==",
-     [
-      "get",
-      "brunnel"
-     ],
-     "tunnel"
-    ],
-    [
-     "match",
-     [
-      "get",
-      "class"
-     ],
-     [
-      "motorway",
-      "trunk",
-      "primary",
-      "secondary",
-      "tertiary",
-      "minor",
-      "service"
-     ],
-     true,
-     false
-    ]
-   ],
-   "id": "sa-tunnels",
-   "layout": {
-    "line-cap": "round",
-    "line-join": "round"
-   },
-   "paint": {
-    "line-color": "#101010",
-    "line-dasharray": [
-     2,
-     2
-    ],
-    "line-opacity": 0.7,
-    "line-width": [
-     "interpolate",
-     [
-      "exponential",
-      1.5
-     ],
-     [
-      "zoom"
-     ],
-     8,
-     1,
-     12,
-     4,
-     16,
-     12
-    ]
-   },
-   "source": "openmaptiles",
-   "source-layer": "transportation",
-   "type": "line"
-  },
-  {
-   "filter": [
-    "==",
-    [
-     "get",
-     "class"
-    ],
-    "rail"
-   ],
-   "id": "sa-railway",
-   "layout": {
-    "line-cap": "round",
-    "line-join": "round"
-   },
-   "paint": {
-    "line-color": "#5a5a5a",
-    "line-width": [
-     "interpolate",
-     [
-      "exponential",
-      1.5
-     ],
-     [
-      "zoom"
-     ],
-     8,
-     1,
-     12,
-     2.5,
-     16,
-     6
-    ]
-   },
-   "source": "openmaptiles",
-   "source-layer": "transportation",
-   "type": "line"
-  },
-  {
-   "id": "sa-label-water",
-   "layout": {
-    "text-field": [
-     "coalesce",
-     [
-      "get",
-      "name:en"
-     ],
-     [
-      "get",
-      "name:latin"
-     ],
-     [
-      "get",
-      "name"
-     ]
-    ],
-    "text-font": [
-     "san-andreas"
-    ],
-    "text-max-width": 8,
-    "text-size": 13
-   },
-   "paint": {
-    "text-color": "#1f4a56",
-    "text-halo-color": "#ece0bd",
-    "text-halo-width": 1.5
-   },
-   "source": "openmaptiles",
-   "source-layer": "water_name",
-   "type": "symbol"
-  },
-  {
-   "filter": [
-    "match",
-    [
-     "get",
-     "class"
-    ],
-    [
-     "country",
-     "state",
-     "city",
-     "town",
-     "village",
-     "suburb",
-     "hamlet"
-    ],
-    true,
-    false
-   ],
-   "id": "sa-label-place",
-   "layout": {
-    "text-field": [
-     "coalesce",
-     [
-      "get",
-      "name:en"
-     ],
-     [
-      "get",
-      "name:latin"
-     ],
-     [
-      "get",
-      "name"
-     ]
-    ],
-    "text-font": [
-     "san-andreas"
-    ],
-    "text-max-width": 8,
-    "text-size": [
-     "match",
-     [
-      "get",
-      "class"
-     ],
-     "country",
-     17,
-     "state",
-     14.5,
-     "city",
-     24,
-     "town",
-     21.5,
-     "village",
-     14.5,
-     "suburb",
-     13,
-     "hamlet",
-     12,
-     12
-    ],
-    "text-transform": "uppercase"
-   },
-   "paint": {
-    "text-color": "#1d150c",
-    "text-halo-color": "#f2ead0",
-    "text-halo-width": 2.2
-   },
-   "source": "openmaptiles",
-   "source-layer": "place",
-   "type": "symbol"
-  },
-  {
-   "filter": [
-    "in",
-    [
-     "get",
-     "class"
-    ],
-    [
-     "literal",
-     [
-      "motorway",
-      "trunk",
-      "primary",
-      "secondary",
-      "tertiary"
-     ]
-    ]
-   ],
-   "id": "sa-label-road-major",
-   "layout": {
-    "symbol-placement": "line",
-    "text-field": [
-     "coalesce",
-     [
-      "get",
-      "name:en"
-     ],
-     [
-      "get",
-      "name:latin"
-     ],
-     [
-      "get",
-      "name"
-     ]
-    ],
-    "text-font": [
-     "san-andreas"
-    ],
-    "text-max-width": 8,
-    "text-size": [
-     "interpolate",
-     [
-      "linear"
-     ],
-     [
-      "zoom"
-     ],
-     11,
-     14.5,
-     14,
-     15,
-     17,
-     15.5
-    ]
-   },
-   "minzoom": 10,
-   "paint": {
-    "text-color": "#1e1810",
-    "text-halo-color": "#f2ead0",
-    "text-halo-width": 1.5
-   },
-   "source": "openmaptiles",
-   "source-layer": "transportation_name",
-   "type": "symbol"
-  },
-  {
-   "filter": [
-    "!",
-    [
-     "in",
-     [
-      "get",
-      "class"
-     ],
-     [
-      "literal",
-      [
-       "motorway",
-       "trunk",
-       "primary",
-       "secondary",
-       "tertiary"
-      ]
-     ]
-    ]
-   ],
-   "id": "sa-label-road-minor",
-   "layout": {
-    "symbol-placement": "line",
-    "text-field": [
-     "coalesce",
-     [
-      "get",
-      "name:en"
-     ],
-     [
-      "get",
-      "name:latin"
-     ],
-     [
-      "get",
-      "name"
-     ]
-    ],
-    "text-font": [
-     "san-andreas"
-    ],
-    "text-max-width": 8,
-    "text-size": [
-     "interpolate",
-     [
-      "linear"
-     ],
-     [
-      "zoom"
-     ],
-     14,
-     13,
-     16,
-     14.5,
-     18,
-     15
-    ]
-   },
-   "minzoom": 15,
-   "paint": {
-    "text-color": "#1e1810",
-    "text-halo-color": "#f2ead0",
-    "text-halo-width": 1.25
-   },
-   "source": "openmaptiles",
-   "source-layer": "transportation_name",
-   "type": "symbol"
-  }
- ],
- "metadata": {
-  "description": "San Andreas pause-map style, hero-convergence pass 4: pale cream land, warm taupe urban, distinctly green parks, clear muted-blue water, near-black bold majors, quiet charcoal minors, dark labels, minor road names from z15. Flat graphic game-map language. Built from OpenMapTiles."
- },
- "name": "San Andreas",
- "sources": {
-  "openmaptiles": {
-   "type": "vector",
-   "url": "https://tiles.openfreemap.org/planet"
-  }
- },
- "version": 8
+  "version": 8
 }

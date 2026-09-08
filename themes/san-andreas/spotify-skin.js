@@ -1,15 +1,16 @@
 /* ============================================================
    WayStation — San Andreas Spotify skin (dashboard mode only),
-   hero-convergence pass 4.
+   HARD VISUAL RESET pass 5.
 
-   The outer skin is the authored Radio Los Santos hardware bezel
-   (themes/san-andreas/dashboard/radio-bezel-pass4.png, 1600x1400,
-   true alpha outside the frame). Live HTML sits ON the bezel's dark
-   recessed interior — one branding moment, no sticker clutter.
+   The outer skin is the authored lowrider radio-console frame
+   (themes/san-andreas/dashboard/radio-frame-pass5.png, 1800x1500,
+   true alpha outside the frame AND inside the opening). Live HTML
+   sits in the frame's central opening — one branding moment
+   (the idle kicker), no sticker clutter.
 
-   Measured interior (fractions of the bezel): x 0.19-0.81,
-   y 0.21-0.78. LEFT column: album art / title / artist / progress /
-   controls. RIGHT column: lyrics / ambient stage.
+   Measured interior opening (fractions of the frame): x 0.24-0.76,
+   y 0.27-0.75. LEFT: album art. RIGHT: title/artist/progress/lyrics.
+   BOTTOM: integrated transport controls.
 
    LYRICS: owned by the shared kinetic karaoke engine (lyrics.js,
      LRCLIB provider) mounted into [data-lyrics-stage] via
@@ -21,7 +22,7 @@
 'use strict';
 
 (function () {
-  const BEZEL = 'themes/san-andreas/dashboard/radio-bezel-pass4.png';
+  const BEZEL = 'themes/san-andreas/dashboard/radio-frame-pass5.png';
 
   const SVG = {
     play: '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',
@@ -55,14 +56,13 @@
       root = el('div', 'sasp');
       root.innerHTML =
         '<img class="sasp-bezel" src="' + BEZEL + '" alt="" aria-hidden="true">' +
-        '<div class="sasp-brand" aria-hidden="true">Radio Los Santos</div>' +
         '<div class="sasp-main">' +
-          '<div class="sasp-left">' +
-            '<div class="sasp-artwrap">' +
-              '<div class="sasp-art-idle">' + SVG.note + '</div>' +
-              '<img class="sasp-art a" alt="">' +
-              '<img class="sasp-art b" alt="">' +
-            '</div>' +
+          '<div class="sasp-artwrap">' +
+            '<div class="sasp-art-idle">' + SVG.note + '</div>' +
+            '<img class="sasp-art a" alt="">' +
+            '<img class="sasp-art b" alt="">' +
+          '</div>' +
+          '<div class="sasp-side">' +
             '<div class="sasp-track">' +
               '<div class="sasp-title">Radio Los Santos</div>' +
               '<div class="sasp-artist">Connect Spotify to play</div>' +
@@ -74,14 +74,12 @@
               '</div>' +
               '<div class="sasp-times"><span class="sasp-elapsed">0:00</span><span class="sasp-duration">0:00</span></div>' +
             '</div>' +
-            '<div class="sasp-controls">' +
-              '<button class="sasp-tbtn" data-act="prev" aria-label="Previous">' + SVG.prev + '</button>' +
-              '<button class="sasp-tbtn big" data-act="toggle" aria-label="Play or pause">' + SVG.play + '</button>' +
-              '<button class="sasp-tbtn" data-act="next" aria-label="Next">' + SVG.next + '</button>' +
-            '</div>' +
-          '</div>' +
-          '<div class="sasp-right">' +
             '<div class="sasp-lyrics" data-lyrics-stage="1"></div>' +
+          '</div>' +
+          '<div class="sasp-controls">' +
+            '<button class="sasp-tbtn" data-act="prev" aria-label="Previous">' + SVG.prev + '</button>' +
+            '<button class="sasp-tbtn big" data-act="toggle" aria-label="Play or pause">' + SVG.play + '</button>' +
+            '<button class="sasp-tbtn" data-act="next" aria-label="Next">' + SVG.next + '</button>' +
           '</div>' +
         '</div>' +
         '<div class="sasp-idle">' +
