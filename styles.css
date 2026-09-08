@@ -547,81 +547,163 @@ body.dashboard-mode.theme-vice-city #next-stats .ns-sep{opacity:.7}
 /* VC bottom bar: the authored strip carries the tab slots, dest plate and
    sunset — the live plate drops its own box and lets the art frame it. */
 
-/* ---------- San Andreas dashboard chrome: Grove Street menu console ----------
-   The SA pause-menu language: deep olive-black panels, a gold chamfered
-   edge, the engraved state map ghosted underneath, a Beckett blackletter
-   wordmark, and the menu's signature full-width orange selection bar on
-   the active tab. */
+/* ---------- San Andreas dashboard chrome: authored Grove Street console ----------
+   User-supplied art (themes/san-andreas/dashboard/): full-bleed sunset
+   topbar with baked-in wordmark, chamfered bottom console, empty maneuver
+   frame, Grove Street scene panel, gold script taglines. Live HTML rides
+   inside the art's slots; the map stays dominant. Phone mode untouched. */
 body.dashboard-mode.theme-san-andreas #dash-topbar{
-  display:block;position:absolute;left:0;right:0;top:0;height:72px;z-index:25;
-  background:linear-gradient(180deg,#e8a33d,#c07a1e 60%,#9a5f14);
-  clip-path:polygon(22px 0,100% 0,100% 100%,0 100%,0 22px);
-  filter:drop-shadow(0 2px 10px rgba(0,0,0,.6));
+  display:block;position:absolute;left:0;right:0;top:0;height:170px;z-index:25;
+  background:url('themes/san-andreas/dashboard/topbar.png') 50% 58%/cover no-repeat #140e04;
   pointer-events:none;
 }
+body.dashboard-mode.theme-san-andreas #dash-topbar .dash-chrome{
+  position:absolute;inset:0;display:block;background:none;overflow:visible;padding:0;
+}
+body.dashboard-mode.theme-san-andreas .dash-brand{display:none}
+/* temp + date/time ride the open sky, hero-style: white Bank Gothic, black cut */
+body.dashboard-mode.theme-san-andreas .dash-wx{
+  position:absolute;left:44%;top:30px;display:flex;align-items:center;gap:10px;
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:34px;font-weight:600;
+  letter-spacing:2px;color:#fff;
+  text-shadow:0 2px 0 #000,0 0 14px rgba(0,0,0,.9);
+}
+body.dashboard-mode.theme-san-andreas .dash-wx svg{display:none}
+body.dashboard-mode.theme-san-andreas #dash-wxicon{display:none}
+body.dashboard-mode.theme-san-andreas .dash-clock{
+  position:absolute;left:44%;top:74px;display:flex;align-items:baseline;gap:16px;margin:0;
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;letter-spacing:2px;
+}
+body.dashboard-mode.theme-san-andreas #dash-date{
+  font-size:26px;font-weight:600;color:#ffd34d;
+  text-shadow:0 2px 0 #000,0 0 12px rgba(0,0,0,.9);
+}
+body.dashboard-mode.theme-san-andreas #dash-time{
+  font-size:42px;font-weight:600;color:#fff;
+  text-shadow:0 2px 0 #000,0 0 14px rgba(0,0,0,.9);
+}
+/* ---------- bottom console: authored strip, live slots ---------- */
 body.dashboard-mode.theme-san-andreas #dash-bottombar{
-  display:block;position:absolute;left:0;right:0;bottom:0;height:84px;z-index:25;
-  background:linear-gradient(0deg,#e8a33d,#c07a1e 60%,#9a5f14);
-  clip-path:polygon(0 0,100% 0,100% calc(100% - 22px),calc(100% - 22px) 100%,0 100%);
-  filter:drop-shadow(0 -2px 10px rgba(0,0,0,.6));
+  display:block;position:absolute;left:0;right:0;bottom:0;height:130px;z-index:25;
+  background:url('themes/san-andreas/dashboard/bottombar.png') 50% 50%/100% 100% no-repeat #100d05;
   pointer-events:auto;
 }
-body.dashboard-mode.theme-san-andreas #dash-topbar .dash-chrome{
-  inset:0 0 4px 0;
-  clip-path:polygon(22px 0,100% 0,100% 100%,0 100%,0 22px);
-  background:
-    linear-gradient(180deg,rgba(24,40,26,.88) 0%,rgba(12,20,14,.93) 100%),
-    url('assets/themes/san-andreas/dashboard/menu-bgmap.jpg') 50% 30%/cover no-repeat,
-    #16281b;
-  gap:28px;padding:0 42px;
-}
 body.dashboard-mode.theme-san-andreas #dash-bottombar .dash-chrome{
-  inset:4px 0 0 0;
-  clip-path:polygon(0 0,100% 0,100% calc(100% - 22px),calc(100% - 22px) 100%,0 100%);
-  background:
-    linear-gradient(0deg,rgba(24,40,26,.9) 0%,rgba(12,20,14,.94) 100%),
-    url('assets/themes/san-andreas/dashboard/menu-bgmap.jpg') 50% 66%/cover no-repeat,
-    #101d14;
-  align-items:stretch;
+  position:absolute;inset:0;display:block;background:none;overflow:visible;padding:0;
 }
-body.dashboard-mode.theme-san-andreas.nav-driving #maneuver-card{top:calc(84px + env(safe-area-inset-top))}
-body.dashboard-mode.theme-san-andreas.nav-driving #drive-bar{bottom:calc(94px + env(safe-area-inset-bottom))}
-body.dashboard-mode.theme-san-andreas .dash-logo{
-  font-family:var(--vcfont);font-size:46px;letter-spacing:3px;color:#e8a33d;transform:none;
-  text-shadow:0 3px 0 rgba(0,0,0,.65),0 0 26px rgba(232,163,61,.3);white-space:nowrap;
+/* icon tabs: opaque console block over the art's left group; 5 khaki glyphs,
+   active tab wears the cream box like the concept mock */
+body.dashboard-mode.theme-san-andreas .dash-tabs{
+  position:absolute;left:4.6%;top:0;bottom:0;width:32.8%;
+  display:flex;align-items:stretch;justify-content:space-evenly;
+  padding:16px 10px;gap:6px;background:#12100a;
 }
-body.dashboard-mode.theme-san-andreas .dash-wx{color:#f0e6c8;text-shadow:0 2px 0 rgba(0,0,0,.6)}
-body.dashboard-mode.theme-san-andreas .dash-clock{margin:0 0 0 auto}
-body.dashboard-mode.theme-san-andreas #dash-date{color:#e8a33d;text-shadow:0 2px 0 rgba(0,0,0,.6)}
-body.dashboard-mode.theme-san-andreas #dash-time{color:#f0e6c8;text-shadow:0 2px 0 rgba(0,0,0,.6)}
-/* tabs wear the SA menu's full orange selection bar when active */
-body.dashboard-mode.theme-san-andreas .dash-tabs{padding:12px 6px 12px 30px;gap:8px}
 body.dashboard-mode.theme-san-andreas .dash-tabs button{
-  font-family:var(--vclabel);font-weight:700;font-size:26px;letter-spacing:3px;text-transform:uppercase;
-  color:#f0e6c8;background:none;border:0;cursor:pointer;padding:10px 22px;opacity:1;
-  text-shadow:0 2px 0 rgba(0,0,0,.65);
+  flex:1;min-width:0;font-size:0;line-height:0;color:transparent;
+  background:none;border:0;cursor:pointer;opacity:1;padding:0;
+  text-shadow:none;position:relative;border-radius:12px;
 }
-body.dashboard-mode.theme-san-andreas .dash-tabs button.on{
-  color:#1d2a12;background:linear-gradient(180deg,#f2c14e,#d98f2b);
-  text-shadow:none;box-shadow:0 3px 0 rgba(0,0,0,.45);
-  clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%);
+body.dashboard-mode.theme-san-andreas .dash-tabs button::before{
+  content:"";position:absolute;inset:0;background-color:#e8dcc0;
+  -webkit-mask:no-repeat center/52px 52px;mask:no-repeat center/52px 52px;
+}
+body.dashboard-mode.theme-san-andreas .dash-tabs button[data-dtab="map"]::before{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%223.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M7%2013%20L18%208%20L30%2013%20L41%208%20V35%20L30%2040%20L18%2035%20L7%2040%20Z%22%2F%3E%3Cpath%20d%3D%22M18%208%20V35%20M30%2013%20V40%22%2F%3E%3Ccircle%20cx%3D%2224%22%20cy%3D%2221%22%20r%3D%223.2%22%20fill%3D%22%23000%22%20stroke%3D%22none%22%2F%3E%3C%2Fsvg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%223.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M7%2013%20L18%208%20L30%2013%20L41%208%20V35%20L30%2040%20L18%2035%20L7%2040%20Z%22%2F%3E%3Cpath%20d%3D%22M18%208%20V35%20M30%2013%20V40%22%2F%3E%3Ccircle%20cx%3D%2224%22%20cy%3D%2221%22%20r%3D%223.2%22%20fill%3D%22%23000%22%20stroke%3D%22none%22%2F%3E%3C%2Fsvg%3E");
+}
+body.dashboard-mode.theme-san-andreas .dash-tabs button[data-dtab="radio"]::before{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%223.6%22%20stroke-linecap%3D%22round%22%3E%3Crect%20x%3D%227%22%20y%3D%2213%22%20width%3D%2234%22%20height%3D%2222%22%20rx%3D%224%22%2F%3E%3Ccircle%20cx%3D%2218%22%20cy%3D%2224%22%20r%3D%224.4%22%2F%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2224%22%20r%3D%224.4%22%2F%3E%3Cpath%20d%3D%22M14%2031%20L10%2037%20H38%20L34%2031%22%2F%3E%3C%2Fsvg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%223.6%22%20stroke-linecap%3D%22round%22%3E%3Crect%20x%3D%227%22%20y%3D%2213%22%20width%3D%2234%22%20height%3D%2222%22%20rx%3D%224%22%2F%3E%3Ccircle%20cx%3D%2218%22%20cy%3D%2224%22%20r%3D%224.4%22%2F%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2224%22%20r%3D%224.4%22%2F%3E%3Cpath%20d%3D%22M14%2031%20L10%2037%20H38%20L34%2031%22%2F%3E%3C%2Fsvg%3E");
+}
+body.dashboard-mode.theme-san-andreas .dash-tabs button[data-dtab="phone"]::before{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%223.6%22%20stroke-linecap%3D%22round%22%3E%3Crect%20x%3D%2216%22%20y%3D%225%22%20width%3D%2216%22%20height%3D%2238%22%20rx%3D%224%22%2F%3E%3Crect%20x%3D%2221%22%20y%3D%2210%22%20width%3D%226%22%20height%3D%224%22%20fill%3D%22%23000%22%20stroke%3D%22none%22%2F%3E%3Cpath%20d%3D%22M21%2022%20h6%20M21%2027%20h6%20M21%2032%20h6%22%2F%3E%3C%2Fsvg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%223.6%22%20stroke-linecap%3D%22round%22%3E%3Crect%20x%3D%2216%22%20y%3D%225%22%20width%3D%2216%22%20height%3D%2238%22%20rx%3D%224%22%2F%3E%3Crect%20x%3D%2221%22%20y%3D%2210%22%20width%3D%226%22%20height%3D%224%22%20fill%3D%22%23000%22%20stroke%3D%22none%22%2F%3E%3Cpath%20d%3D%22M21%2022%20h6%20M21%2027%20h6%20M21%2032%20h6%22%2F%3E%3C%2Fsvg%3E");
+}
+body.dashboard-mode.theme-san-andreas .dash-tabs button[data-dtab="vehicle"]::before{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%223.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M13%2031%20L17%2017%20H31%20L35%2031%22%2F%3E%3Crect%20x%3D%228%22%20y%3D%2229%22%20width%3D%2232%22%20height%3D%229%22%20rx%3D%223%22%2F%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2239%22%20r%3D%222.6%22%20fill%3D%22%23000%22%20stroke%3D%22none%22%2F%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2239%22%20r%3D%222.6%22%20fill%3D%22%23000%22%20stroke%3D%22none%22%2F%3E%3C%2Fsvg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%223.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M13%2031%20L17%2017%20H31%20L35%2031%22%2F%3E%3Crect%20x%3D%228%22%20y%3D%2229%22%20width%3D%2232%22%20height%3D%229%22%20rx%3D%223%22%2F%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2239%22%20r%3D%222.6%22%20fill%3D%22%23000%22%20stroke%3D%22none%22%2F%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2239%22%20r%3D%222.6%22%20fill%3D%22%23000%22%20stroke%3D%22none%22%2F%3E%3C%2Fsvg%3E");
+}
+body.dashboard-mode.theme-san-andreas .dash-tabs button[data-dtab="settings"]::before{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%223.6%22%20stroke-linecap%3D%22round%22%3E%3Ccircle%20cx%3D%2224%22%20cy%3D%2224%22%20r%3D%227.5%22%2F%3E%3Cpath%20d%3D%22M24%205%20v7%20M24%2036%20v7%20M5%2024%20h7%20M36%2024%20h7%20M10.5%2010.5%20l5%205%20M32.5%2032.5%20l5%205%20M37.5%2010.5%20l-5%205%20M15.5%2032.5%20l-5%205%22%2F%3E%3C%2Fsvg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%223.6%22%20stroke-linecap%3D%22round%22%3E%3Ccircle%20cx%3D%2224%22%20cy%3D%2224%22%20r%3D%227.5%22%2F%3E%3Cpath%20d%3D%22M24%205%20v7%20M24%2036%20v7%20M5%2024%20h7%20M36%2024%20h7%20M10.5%2010.5%20l5%205%20M32.5%2032.5%20l5%205%20M37.5%2010.5%20l-5%205%20M15.5%2032.5%20l-5%205%22%2F%3E%3C%2Fsvg%3E");
+}
+body.dashboard-mode.theme-san-andreas .dash-tabs button.on{background:#f2e8c9;
+  box-shadow:0 3px 0 rgba(0,0,0,.5)}
+body.dashboard-mode.theme-san-andreas .dash-tabs button.on::before{background-color:#1d2a12}
+/* destination rides the art's dest plate */
+body.dashboard-mode.theme-san-andreas .dash-dest{
+  position:absolute;left:42.7%;top:0;bottom:0;width:14.6%;
+  display:flex;align-items:center;justify-content:center;padding:0;min-width:0;
 }
 body.dashboard-mode.theme-san-andreas #dash-dest{
-  color:#f0e6c8;background:rgba(8,14,9,.82);text-shadow:0 2px 0 rgba(0,0,0,.6);
-  border:3px double rgba(232,163,61,.9);border-radius:0;clip-path:none;
-  box-shadow:inset 0 0 20px rgba(0,0,0,.5);font-size:24px;letter-spacing:5px;padding:8px 30px;
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:24px;font-weight:600;
+  letter-spacing:4px;color:#f2e8c9;background:none;border:0;clip-path:none;
+  box-shadow:none;text-shadow:0 2px 0 #000;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;max-width:100%;padding:0;
 }
-body.dashboard-mode.theme-san-andreas .dash-zoom button{
-  color:#1d2a12;background:linear-gradient(180deg,#f2c14e,#c07a1e);border:0;
-  box-shadow:0 3px 0 #6b4210;text-shadow:none;
-  clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);
+/* compass + ETA ride their slots; zoom lives in the menu on this theme */
+body.dashboard-mode.theme-san-andreas .dash-trip{
+  position:absolute;inset:0;pointer-events:none;display:block;padding:0;
 }
-body.dashboard-mode.theme-san-andreas .dash-zoom button:active{transform:translateY(2px);box-shadow:none}
-body.dashboard-mode.theme-san-andreas #dash-compass{color:#7ec850;text-shadow:0 2px 0 rgba(0,0,0,.6)}
-body.dashboard-mode.theme-san-andreas #dash-eta{color:#7ec850;text-shadow:0 2px 0 rgba(0,0,0,.6)}
+body.dashboard-mode.theme-san-andreas #dash-compass{
+  position:absolute;left:62.8%;top:0;bottom:0;width:6.3%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:46px;color:#e8dcc0;text-shadow:0 2px 0 #000;
+}
+body.dashboard-mode.theme-san-andreas .dash-north{display:none}
+body.dashboard-mode.theme-san-andreas #dash-eta{
+  position:absolute;left:76.7%;top:0;bottom:0;width:18.6%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:26px;font-weight:600;
+  letter-spacing:2px;color:#7ec850;text-shadow:0 2px 0 #000;
+  white-space:nowrap;overflow:hidden;
+}
+body.dashboard-mode.theme-san-andreas .dash-zoom{display:none}
+/* gold script tagline at the bar's right end */
 body.dashboard-mode.theme-san-andreas .dash-tag{
-  font-family:var(--vcfont);font-size:32px;color:#e8a33d;transform:none;
-  text-shadow:0 2px 0 rgba(0,0,0,.65);
+  position:absolute;right:0.3%;top:0;bottom:0;width:4.4%;
+  font-size:0;line-height:0;color:transparent;text-shadow:none;transform:none;
+  display:block;padding:0;white-space:normal;
+  background:url('themes/san-andreas/dashboard/script-music.png') 50% 50%/contain no-repeat;
+}
+/* ---------- maneuver card: authored empty frame, live data inside ---------- */
+body.dashboard-mode.theme-san-andreas.nav-driving #maneuver-card{
+  top:calc(182px + env(safe-area-inset-top));left:76px;right:auto;
+  width:560px;max-width:560px;height:124px;
+  background:url('themes/san-andreas/dashboard/maneuver.png') 50% 50%/100% 100% no-repeat;
+  border:0;border-radius:0;box-shadow:none;
+  backdrop-filter:none;-webkit-backdrop-filter:none;
+  display:flex;align-items:center;gap:20px;padding:10px 34px 26px 38px;
+}
+body.dashboard-mode.theme-san-andreas #maneuver-arrow{flex:0 0 74px;width:74px;height:74px}
+body.dashboard-mode.theme-san-andreas #maneuver-arrow svg{
+  width:100%;height:100%;filter:drop-shadow(0 3px 3px rgba(0,0,0,.75))}
+body.dashboard-mode.theme-san-andreas #next-dist{
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:44px;font-weight:600;
+  letter-spacing:3px;color:#fff;text-shadow:0 3px 0 #000;
+}
+body.dashboard-mode.theme-san-andreas #next-instr{
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:24px;font-weight:600;
+  letter-spacing:2px;color:#ffd34d;text-shadow:0 2px 0 #000;margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+body.dashboard-mode.theme-san-andreas #next-stats{
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:18px;letter-spacing:2px;
+  color:#e8dcc0;text-shadow:0 2px 0 #000;opacity:.9;margin-top:2px;
+}
+/* ---------- right column: Grove Street scene over the shrunken music widget ---------- */
+#sa-grove-panel{display:none}
+body.dashboard-mode.theme-san-andreas #sa-grove-panel{
+  display:block;position:absolute;z-index:24;pointer-events:none;
+  right:70px;top:192px;width:420px;aspect-ratio:955/285;
+  background:url('themes/san-andreas/dashboard/grove-panel.png') 50% 50%/100% 100% no-repeat;
+}
+body.dashboard-mode.theme-san-andreas .sasp{
+  width:420px;right:70px;top:auto;bottom:152px;translate:none;transform:none;
+}
+/* ---------- bar-height clearances ---------- */
+body.dashboard-mode.theme-san-andreas #search-bar{top:calc(182px + env(safe-area-inset-top))}
+body.dashboard-mode.theme-san-andreas.nav-driving #drive-bar{bottom:calc(142px + env(safe-area-inset-bottom))}
+body.dashboard-mode.theme-san-andreas #menu-panel{top:182px;bottom:142px}
+/* ---------- illustrated-map vignette, dashboard only ---------- */
+body.dashboard-mode.theme-san-andreas #map::after{
+  content:"";position:absolute;inset:0;z-index:5;pointer-events:none;
+  background:radial-gradient(115% 100% at 50% 42%,transparent 58%,rgba(24,18,6,.45) 100%);
 }
 
 /* ---------- GTA V dashboard chrome: Los Santos minimal panel ----------
@@ -822,7 +904,7 @@ body.dashboard-mode #menu-panel{
   overflow-y:auto;
 }
 /* dock clear of each theme's real bar heights */
-body.dashboard-mode.theme-san-andreas #menu-panel{top:84px;bottom:96px}
+body.dashboard-mode.theme-san-andreas #menu-panel{top:182px;bottom:142px}
 body.dashboard-mode.theme-gta-v #menu-panel{top:68px;bottom:76px}
 body.dashboard-mode.theme-rdr2 #menu-panel{top:84px;bottom:84px}
 /* car-scale type + touch targets */

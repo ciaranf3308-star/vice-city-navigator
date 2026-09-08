@@ -106,7 +106,7 @@
         ]
       ],
       "paint": {
-        "fill-color": "#9aa45e"
+        "fill-color": "#8a9448"
       }
     },
     {
@@ -128,7 +128,7 @@
         false
       ],
       "paint": {
-        "fill-color": "#8a9a4e"
+        "fill-color": "#7a8a40"
       }
     },
     {
@@ -145,7 +145,7 @@
         "golf_course"
       ],
       "paint": {
-        "fill-color": "#93a355"
+        "fill-color": "#849549"
       }
     },
     {
@@ -162,7 +162,7 @@
         "garden"
       ],
       "paint": {
-        "fill-color": "#8a9a4e"
+        "fill-color": "#7a8a40"
       }
     },
     {
@@ -179,7 +179,7 @@
         "recreation_ground"
       ],
       "paint": {
-        "fill-color": "#9aa45e"
+        "fill-color": "#8a9448"
       }
     },
     {
@@ -196,7 +196,7 @@
         "wood"
       ],
       "paint": {
-        "fill-color": "#75853f"
+        "fill-color": "#687637"
       }
     },
     {
@@ -205,7 +205,7 @@
       "source": "openmaptiles",
       "source-layer": "park",
       "paint": {
-        "fill-color": "#8a9a4e"
+        "fill-color": "#7a8a40"
       }
     },
     {
@@ -228,7 +228,7 @@
         false
       ],
       "paint": {
-        "fill-color": "#9aa45e"
+        "fill-color": "#8a9448"
       }
     },
     {
@@ -245,7 +245,7 @@
         "cemetery"
       ],
       "paint": {
-        "fill-color": "#a8a878"
+        "fill-color": "#9c9c68"
       }
     },
     {
@@ -269,7 +269,7 @@
         false
       ],
       "paint": {
-        "fill-color": "#c9b58c"
+        "fill-color": "#bfa87e"
       }
     },
     {
@@ -278,7 +278,7 @@
       "source": "openmaptiles",
       "source-layer": "aeroway",
       "paint": {
-        "fill-color": "#bfae8c"
+        "fill-color": "#b3a37e"
       }
     },
     {
@@ -287,7 +287,7 @@
       "source": "openmaptiles",
       "source-layer": "building",
       "paint": {
-        "fill-color": "#c2ad84"
+        "fill-color": "#b3a077"
       }
     },
     {
@@ -933,7 +933,7 @@
       "type": "symbol",
       "source": "openmaptiles",
       "source-layer": "transportation_name",
-      "minzoom": 11,
+      "minzoom": 10,
       "filter": [
         "in",
         [
@@ -999,7 +999,7 @@
       "type": "symbol",
       "source": "openmaptiles",
       "source-layer": "transportation_name",
-      "minzoom": 13.5,
+      "minzoom": 12.5,
       "filter": [
         "!",
         [

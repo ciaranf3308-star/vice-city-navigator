@@ -10,7 +10,7 @@
      default Vice City set.
    Map tiles, routing and search always go to the network. */
 const CACHE = 'ws-shell-v53';
-const THEME_CACHE = 'ws-theme-v14';
+const THEME_CACHE = 'ws-theme-v15';
 const VC_BLIPS = ['airYard','barbers','burgerShot','cash','chicken','dateDisco','dateDrink',
   'dateFood','diner','fuel','girlfriend','gym','hostpital','modGarage','north','parking',
   'pizza','police','propertyG','qmark','race','runway','saveGame','school','spray','tattoo','waypoint'];
@@ -53,7 +53,7 @@ function isShell(path) {
 /* Theme assets cached on demand (never precached): the non-default
    themes' style JSON, blip/player PNGs and self-hosted glyph PBFs. */
 function isThemeAsset(path) {
-  return /themes\/(san-andreas|gta-v|rdr2)\/style\.json$/.test(path) ||
+  return /themes\/(san-andreas|gta-v|rdr2)\//.test(path) ||
          /assets\/themes\/(san-andreas|gta-v|rdr2)\//.test(path) ||
          /fonts\/(san-andreas|gta-v|frontier|SignPainter)\//.test(path) ||
          /fonts\/(bank-gothic\.woff|beckett\.woff2|chalet-(london|comprime)\.woff2|signpainter\.woff2|pricedown-gta\.woff2|rdr-lino\.woff2|kirsty\.woff2)$/.test(path);

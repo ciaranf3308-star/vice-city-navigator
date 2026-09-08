@@ -1070,7 +1070,7 @@ function dashboardLayoutActive() {
    coordinates; the stage is zoomed to fit the window. Menus, drawers
    and toasts stay at body level so they remain usable at any scale. */
 const DASH_W = 1920, DASH_H = 720;
-const DASH_STAGE_NODES = ['map', 'fx', 'explore-ui', 'drive-hud', 'spotify-pane', 'dash-topbar', 'dash-bottombar'];
+const DASH_STAGE_NODES = ['map', 'fx', 'explore-ui', 'drive-hud', 'spotify-pane', 'dash-topbar', 'dash-bottombar', 'sa-grove-panel'];
 /* NOTE: #menu-panel is deliberately NOT reparented into the stage — it
    stays at body level so it never shrinks with the stage zoom. */
 
@@ -1079,7 +1079,7 @@ const DASH_STAGE_NODES = ['map', 'fx', 'explore-ui', 'drive-hud', 'spotify-pane'
    layoutDashMenu() scales these by the live stage zoom. */
 const DASH_BAR_HEIGHTS = {
   'vice-city':   { top: 76, bottom: 88 },
-  'san-andreas': { top: 72, bottom: 84 },
+  'san-andreas': { top: 170, bottom: 130 },
   'gta-v':       { top: 56, bottom: 64 },
   'rdr2':        { top: 72, bottom: 72 },
 };
