@@ -228,7 +228,7 @@
   padding: 40px 20px;
   min-height: 320px;
 }
-.gvsp-idle[hidden] { display: none; }
+.gvsp-idle[hidden], .gvsp-idle.is-hidden { display: none !important; }
 /* Disconnected: hide ALL playback UI — no overlap */
 .gvsp.is-idle .gvsp-header,
 .gvsp.is-idle .gvsp-main,

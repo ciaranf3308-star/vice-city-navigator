@@ -124,8 +124,10 @@
       const connected = core.isConnected();
       /* State bug fix: idle and playback UI are mutually exclusive.
          When connected, idle is hidden and playback UI shows.
-         When disconnected, playback UI is hidden and idle shows. */
+         When disconnected, playback UI is hidden and idle shows.
+         Belt and braces: hidden attribute + is-hidden class. */
       idle.hidden = connected;
+      idle.classList.toggle('is-hidden', connected);
       root.classList.toggle('is-idle', !connected);
       root.classList.toggle('is-connected', connected);
       const title = q('.gvsp-title'), artist = q('.gvsp-artist');
