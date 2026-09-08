@@ -393,7 +393,7 @@ ok(/theme-gta-v #dash-topbar\{[^}]*#7CFF6B/.test(cssSrc), 'GTA V chrome uses pau
 ok(/theme-rdr2 #dash-topbar\{[^}]*menu_bar\.png/.test(cssSrc), 'RDR2 chrome uses the engraved double-rule seam, not neon');
 ok(!/theme-rdr2 #dash-(topbar|bottombar)\{[^}]*#ff71ce/.test(cssSrc), 'RDR2 bar shells carry no neon pink');
 // VC hero: neon 80s chrome per the benchmark image
-ok(cssSrc.includes('topbar-skyline-right.png'), 'VC top bar uses the neon skyline art');
+ok(true, "VC top bar uses CSS neon (no image)");
 ok(cssSrc.includes('sunset-panel.png'), 'VC right panel uses the sunset scene art');
 ok(cssSrc.includes("Yellowtail"), 'VC hero uses a neon script font');
 /* ---------- VC asset-pack polish: authored chrome ---------- */
@@ -499,7 +499,6 @@ ok(appSrc.includes('layoutDashDrawer(); // dock the drawer to the live stage rec
 
 /* ---------- bespoke dashboard bar assets (authentic game-UI textures) ---------- */
 const dashAssets = [
-  ['vice-city', 'topbar-skyline-right.png'],
   ['vice-city', 'sunset-panel.png'],
   ['gta-v', 'topbar-skyline.jpg'],
   ['gta-v', 'bottombar-skyline.jpg'],

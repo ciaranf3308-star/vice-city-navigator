@@ -6,7 +6,7 @@ body.dashboard-mode.theme-vice-city .player-arrow{width:64px;height:64px;
 body.theme-vice-city .dest-pin{ background-image:url('assets/themes/vice-city/blips/blip_waypoint.png'); }
 body.dashboard-mode.theme-vice-city #search-bar{top:calc(88px + env(safe-area-inset-top))}
 
-/* ============ TOP BAR: exact hero match ============ */
+/* ============ TOP BAR: black glass, pink neon edge ============ */
 body.dashboard-mode.theme-vice-city #dash-topbar{
   display:block;position:absolute;left:0;right:0;top:0;height:76px;z-index:25;
   background:#05030c;
@@ -15,22 +15,18 @@ body.dashboard-mode.theme-vice-city #dash-topbar{
   box-shadow:0 0 16px rgba(255,46,136,.6),inset 0 0 16px rgba(255,46,136,.15);
   pointer-events:none;
 }
-body.dashboard-mode.theme-vice-city #dash-topbar::before{
-  content:"";position:absolute;top:0;right:0;bottom:0;width:34%;
-  background:url('dashboard/topbar-skyline-right.png') 100% 50%/cover no-repeat;
-  opacity:.9;pointer-events:none;
-}
+body.dashboard-mode.theme-vice-city #dash-topbar::before{display:none}
 body.dashboard-mode.theme-vice-city #dash-topbar::after{display:none}
 body.dashboard-mode.theme-vice-city #dash-topbar .dash-chrome{
   position:absolute;inset:0;display:flex;align-items:center;gap:28px;
   padding:0 24px;background:none;
 }
-/* WayStation logo: baked neon art */
+/* WayStation logo: neon script */
 body.dashboard-mode.theme-vice-city .dash-logo{
-  background:url('dashboard/waystation-logo.png') 0 50%/contain no-repeat!important;
-  width:300px!important;height:56px!important;
-  font-size:0!important;color:transparent!important;
-  text-shadow:none!important;transform:none!important;
+  font-family:'Yellowtail',cursive;font-size:40px;color:#ff71ce;
+  text-shadow:0 0 8px rgba(255,113,206,.9),0 0 24px rgba(255,46,136,.7);
+  transform:rotate(-3deg);white-space:nowrap;
+  background:none!important;
 }
 body.dashboard-mode.theme-vice-city .dash-palm{display:none}
 body.dashboard-mode.theme-vice-city .dash-wx{
@@ -114,19 +110,6 @@ body.dashboard-mode.theme-vice-city #vc-right-panel .vc-sunset{
   box-shadow:0 0 20px rgba(1,205,254,.3),0 0 40px rgba(255,46,136,.2);
   clip-path:polygon(0 0,100% 0,100% calc(100% - 24px),calc(100% - 24px) 100%,24px 100%,0 calc(100% - 24px));
 }
-/* Lyrics spawn here: neon script over the sunset */
-body.dashboard-mode.theme-vice-city #vc-right-panel .vcsp-lyrics{
-  position:absolute;inset:0;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;text-align:center;
-  padding:24px;pointer-events:none;
-}
-body.dashboard-mode.theme-vice-city #vc-right-panel .vcsp-lyrics .wslyr-hero{
-  font-family:'Yellowtail',cursive;font-size:32px;line-height:1.4;color:#ff9de2;
-  text-shadow:0 0 12px rgba(255,46,136,.9),0 2px 8px rgba(0,0,0,.6);
-  transform:rotate(-3deg);
-}
-/* Hide the skin's internal lyrics div in dashboard mode (lyrics are in the sunset panel) */
-body.dashboard-mode.theme-vice-city .vcsp .vcsp-lyrics{display:none}
 /* Spotify sits between the logo and the sunset panel */
 body.dashboard-mode.theme-vice-city #spotify-pane{
   position:absolute;right:18px;top:300px;width:340px;z-index:25;
