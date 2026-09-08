@@ -10,7 +10,10 @@
 body.dashboard-mode.theme-gta-v #dash-topbar,
 body.dashboard-mode.theme-gta-v #dash-bottombar{
   background:transparent;border:none;box-shadow:none;
+  position:absolute;left:0;right:0;z-index:25;
 }
+body.dashboard-mode.theme-gta-v #dash-topbar{top:0;height:13%}
+body.dashboard-mode.theme-gta-v #dash-bottombar{bottom:0;height:14%}
 body.dashboard-mode.theme-gta-v #dash-topbar .dash-chrome,
 body.dashboard-mode.theme-gta-v #dash-bottombar .dash-chrome{
   background:transparent;
@@ -44,74 +47,47 @@ body.dashboard-mode.theme-gta-v::before{
   background:url('dashboard/overlay.png') 50% 50%/100% 100% no-repeat;
 }
 /* In dashboard mode, the widget chrome comes from the overlay.
-   Hide the old floating hud, reposition live elements into the overlay. */
+   Hide the old floating hud, reposition live elements into the overlay.
+   Widget area in overlay (2048x768): x 1550-2048, y 100-660. */
 body.dashboard-mode.theme-gta-v .gvsp{
-  left:0;right:0;top:0;bottom:0;width:auto;transform:none;translate:none;
+  left:75.68%;top:13.02%;width:24.32%;height:72.92%;
+  right:auto;bottom:auto;transform:none;translate:none;
+  z-index:25;
 }
 body.dashboard-mode.theme-gta-v .gvsp-hud{display:none}
-/* Album art into the overlay's album box */
+/* Album art: overlay x1630-1880 y135-360 → widget-relative */
 body.dashboard-mode.theme-gta-v .gvsp-art,
 body.dashboard-mode.theme-gta-v .gvsp-art-idle{
-  left:79.59%;top:17.58%;width:12.21%;height:29.30%;
+  left:16.06%;top:6.25%;width:50.20%;height:40.18%;
 }
-/* Track into the overlay's track box */
+/* Track: overlay x1610-1990 y400-505 → widget-relative */
 body.dashboard-mode.theme-gta-v .gvsp-track{
-  left:78.61%;right:2.83%;top:52.08%;
+  left:12.05%;right:11.64%;top:53.57%;
 }
-/* Progress at the overlay's progress line */
+/* Progress: overlay y530 → widget-relative 76.79% */
 body.dashboard-mode.theme-gta-v .gvsp-progress{
-  left:78.61%;right:2.83%;top:69.01%;
+  left:12.05%;right:11.64%;top:76.79%;
 }
-/* Transport buttons at the overlay's button positions */
+/* Transport: overlay y610, x1700/1810/1920 → widget-relative */
 body.dashboard-mode.theme-gta-v .gvsp-controls{
-  left:78.61%;right:2.83%;top:79.43%;bottom:auto;
-  justify-content:space-between;padding:0 4%;
+  left:12.05%;right:11.64%;top:85%;bottom:auto;
+  justify-content:space-between;padding:0 8%;
 }
 /* Lyrics into the track box area */
 body.dashboard-mode.theme-gta-v .gvsp-lyrics{
-  left:78.61%;right:2.83%;top:56%;bottom:26%;
+  left:12.05%;right:11.64%;top:58%;bottom:18%;
 }
 /* Idle/connect in the widget area */
 body.dashboard-mode.theme-gta-v .gvsp-idle{
-  left:78.61%;right:2.83%;top:52%;bottom:20%;
+  left:12.05%;right:11.64%;top:53%;bottom:15%;
 }
 
 /* gta-v dashboard theme — LOCKABLE: do not edit without approval */
 body.theme-gta-v .dest-pin{ background-image:url('assets/themes/gta-v/blips/waypoint.png'); }
 body.dashboard-mode.theme-gta-v #search-bar{top:calc(68px + env(safe-area-inset-top))}
 
-/* ---------- GTA V dashboard chrome: Los Santos minimal panel ----------
-   V's pause-menu language: near-black panels, hairline neon-green rules,
-   sharp rectangles, small-caps Chalet with wide tracking, and the green
-   underline on the active tab. Slim bars — more map, less chrome. */
-body.dashboard-mode.theme-gta-v #dash-topbar{
-  display:block;position:absolute;left:0;right:0;top:0;height:56px;z-index:25;
-  background:#0d1117;border-bottom:1px solid #7CFF6B;
-  box-shadow:0 1px 14px rgba(124,255,107,.2);
-  pointer-events:none;
-}
-body.dashboard-mode.theme-gta-v #dash-bottombar{
-  display:block;position:absolute;left:0;right:0;bottom:0;height:64px;z-index:25;
-  background:#0d1117;border-top:1px solid #7CFF6B;
-  box-shadow:0 -1px 14px rgba(124,255,107,.2);
-  pointer-events:auto;
-}
-body.dashboard-mode.theme-gta-v #dash-topbar .dash-chrome{
-  clip-path:none;inset:0;
-  background:
-    linear-gradient(180deg,rgba(13,17,23,.8) 0%,rgba(13,17,23,.94) 100%),
-    url('assets/themes/gta-v/dashboard/topbar-skyline.jpg') 50% 38%/cover no-repeat,
-    #0d1117;
-  gap:22px;padding:0 30px;
-}
-body.dashboard-mode.theme-gta-v #dash-bottombar .dash-chrome{
-  clip-path:none;inset:0;
-  background:
-    linear-gradient(0deg,rgba(13,17,23,.8) 0%,rgba(13,17,23,.94) 100%),
-    url('assets/themes/gta-v/dashboard/bottombar-skyline.jpg') 50% 62%/cover no-repeat,
-    #0d1117;
-  align-items:stretch;
-}
+/* ---------- GTA V dashboard chrome: supplied overlay.png ----------
+   The old CSS-generated bars are retired; the overlay IS the chrome. */
 body.dashboard-mode.theme-gta-v.nav-driving #maneuver-card{top:calc(68px + env(safe-area-inset-top))}
 body.dashboard-mode.theme-gta-v.nav-driving #drive-bar{bottom:calc(74px + env(safe-area-inset-bottom))}
 /* V's wordmark is a SignPainter script accent over the minimal panel —
@@ -131,19 +107,8 @@ body.dashboard-mode.theme-gta-v .dash-wx{margin-left:auto;color:#c9d4c9;text-sha
 body.dashboard-mode.theme-gta-v .dash-clock{margin:0;gap:12px}
 body.dashboard-mode.theme-gta-v #dash-date{color:#8a9a8c;text-shadow:none;font-size:20px}
 body.dashboard-mode.theme-gta-v #dash-time{color:#f2f5f2;text-shadow:none;font-size:26px}
-/* V's pause-menu tab strip: hairline separators, green underline on active */
-body.dashboard-mode.theme-gta-v .dash-tabs{flex:1;padding:0 0 0 20px;gap:0}
-body.dashboard-mode.theme-gta-v .dash-tabs button{
-  font-family:var(--vcfont);font-weight:600;font-size:25px;letter-spacing:5px;text-transform:uppercase;
-  color:#aebbae;background:none;border:0;border-left:1px solid rgba(255,255,255,.1);
-  border-radius:0;cursor:pointer;padding:0 30px;text-shadow:none;opacity:1;height:100%;
-  display:flex;align-items:center;
-}
-body.dashboard-mode.theme-gta-v .dash-tabs button:first-child{border-left:0}
-body.dashboard-mode.theme-gta-v .dash-tabs button.on{
-  color:#7CFF6B;text-shadow:none;opacity:1;
-  box-shadow:inset 0 -3px 0 #7CFF6B;
-}
+/* V's pause-menu tab strip: retired — overlay provides the visuals,
+   hit-areas are positioned above. */
 body.dashboard-mode.theme-gta-v .dash-dest{padding:10px 8px}
 body.dashboard-mode.theme-gta-v #dash-dest{
   font-family:'SignPainter','Pricedown Bl',cursive;font-size:32px;font-weight:400;
