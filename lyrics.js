@@ -32,7 +32,7 @@
 (function () {
   var LRCLIB = 'https://lrclib.net/api/get';
   var TICK_MS = 400;
-  var OFFSET_MS = 600;          // tunable; conceptually +500-800ms
+  var OFFSET_MS = -400;         // tunable; lyrics were ~1s early at +600
   var WORD_WINDOW_MAX = 12000;  // cap the word-spread window per line
   var AMBIENT_CYCLE_MS = 6000;
   var CACHE_MAX = 50;
@@ -519,7 +519,7 @@
   }
 
   function setOffset(ms) {
-    var v = Math.max(0, Math.min(5000, Math.round(ms) || 0));
+    var v = Math.max(-2000, Math.min(5000, Math.round(ms) || 0));
     OFFSET_MS = v;
     return v;
   }
