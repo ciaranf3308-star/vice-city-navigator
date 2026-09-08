@@ -1451,11 +1451,12 @@ function syncDashTrip(remainSec) {
   const eta = $('dash-eta'), dst = $('dash-dest');
   if (!eta || !dst) return;
   if (navActive && typeof remainSec === 'number') {
-    eta.textContent = 'ARRIVE IN ' + Math.max(1, Math.round(remainSec / 60)) + ' MIN';
+    const mins = Math.max(1, Math.round(remainSec / 60));
+    eta.innerHTML = '<span class="eta-label">Arrive in</span><span class="eta-time">' + mins + ' min</span>';
     const label = (typeof dest !== 'undefined' && dest && dest.label) ? dest.label : '';
     dst.textContent = (label || 'EN ROUTE').toUpperCase().slice(0, 28);
   } else {
-    eta.textContent = '—';
+    eta.innerHTML = '<span class="eta-label">Arrive in</span><span class="eta-time">—</span>';
     /* dst (locality plate) is owned by syncDashLocality when not navigating —
        don't wipe it here. */
   }

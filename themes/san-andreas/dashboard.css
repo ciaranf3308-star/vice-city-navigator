@@ -81,8 +81,10 @@ body.dashboard-mode.theme-san-andreas #dash-bottombar{
   display:block;position:absolute;left:0;right:0;bottom:0;height:110px;z-index:25;
   background:
     repeating-linear-gradient(90deg,rgba(255,255,255,.022) 0 2px,transparent 2px 5px),
-    linear-gradient(180deg,#2e2416 0%,#171208 30%,#0c0a07 70%,#060503 100%);
-  box-shadow:inset 0 -14px 22px rgba(0,0,0,.7), inset 0 30px 18px rgba(255,220,150,.06);
+    radial-gradient(ellipse 400px 60px at 20% 80%, rgba(255,255,255,.03) 0%, transparent 70%),
+    radial-gradient(ellipse 300px 50px at 70% 90%, rgba(0,0,0,.4) 0%, transparent 70%),
+    linear-gradient(180deg,#1e1810 0%,#12100a 30%,#0a0806 70%,#050403 100%);
+  box-shadow:inset 0 -14px 22px rgba(0,0,0,.8), inset 0 30px 18px rgba(255,220,150,.04);
   pointer-events:auto;
   /* hero's machined profile: DEEP sharp notches, tabs ride the contour */
   clip-path:polygon(0 100%,0 45%,1% 40%,2% 25%,3% 25%,4% 40%,5% 45%,6% 45%,7% 30%,8% 15%,9% 15%,10% 30%,11% 45%,12% 45%,13% 35%,14% 20%,15% 20%,16% 35%,17% 45%,18% 45%,19% 30%,20% 15%,21% 15%,22% 30%,23% 45%,24% 45%,25% 35%,26% 20%,27% 20%,28% 35%,29% 45%,30% 45%,31% 30%,32% 15%,33% 15%,34% 30%,35% 45%,55% 45%,56% 35%,57% 25%,58% 25%,59% 35%,60% 45%,61% 45%,62% 30%,63% 18%,64% 18%,65% 30%,66% 45%,67% 45%,68% 35%,69% 22%,70% 22%,71% 35%,72% 45%,73% 45%,74% 30%,75% 18%,76% 18%,77% 30%,78% 45%,79% 40%,80% 30%,81% 30%,82% 40%,83% 45%,84% 45%,85% 35%,86% 25%,87% 25%,88% 35%,89% 45%,90% 45%,91% 35%,92% 25%,93% 25%,94% 35%,95% 45%,96% 45%,97% 40%,98% 40%,99% 45%,100% 45%,100% 100%);
@@ -125,10 +127,14 @@ body.dashboard-mode.theme-san-andreas .dash-tabs button{
   display:flex;flex-direction:column;align-items:center;gap:3px;
 }
 body.dashboard-mode.theme-san-andreas .dash-tabs button svg{width:30px;height:30px}
-/* hero MAP: solid green box, black icon + label */
+/* hero MAP: solid green box, black icon + lowercase label */
 body.dashboard-mode.theme-san-andreas .dash-tabs button.on{
-  background:linear-gradient(180deg,#8fbf7a,#6da055);color:#101408;text-shadow:none;
+  background:linear-gradient(180deg,#9ccb84,#7aa862);color:#101408;text-shadow:none;
   box-shadow:0 3px 0 rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.35);
+  border-radius:14px;padding:12px 22px;
+}
+body.dashboard-mode.theme-san-andreas .dash-tabs button.on span{
+  text-transform:lowercase;font-weight:800;letter-spacing:1px;
 }
 /* locality: inset plate, flexes to fill */
 body.dashboard-mode.theme-san-andreas .dash-dest{
@@ -144,18 +150,29 @@ body.dashboard-mode.theme-san-andreas #dash-dest{
   text-shadow:0 2px 0 #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   max-width:100%;min-width:280px;min-height:44px;padding:10px 34px;
 }
-/* compass + ETA */
+/* compass + ETA: hero layout */
 body.dashboard-mode.theme-san-andreas .dash-trip{
-  position:static;display:flex;align-items:center;gap:14px;padding:0;pointer-events:none;
+  position:static;display:flex;align-items:center;gap:12px;padding:0;pointer-events:none;
 }
 body.dashboard-mode.theme-san-andreas #dash-compass{
-  position:static;font-size:34px;color:#e8dcc0;text-shadow:0 2px 0 #000;transform-origin:50% 50%;
+  position:static;font-size:32px;color:#e8e0d0;text-shadow:0 2px 0 #000;transform-origin:50% 50%;
 }
-body.dashboard-mode.theme-san-andreas .dash-north{display:none}
+body.dashboard-mode.theme-san-andreas .dash-north{
+  display:inline;font-family:'Bank Gothic',sans-serif;font-size:20px;color:#c9b98a;
+  text-shadow:0 2px 0 #000;margin-left:-8px;
+}
+body.dashboard-mode.theme-san-andreas .dash-trip::after{
+  content:"";width:2px;height:44px;background:rgba(201,185,138,.4);margin:0 4px;
+}
 body.dashboard-mode.theme-san-andreas #dash-eta{
-  position:static;font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:22px;
-  font-weight:700;letter-spacing:1px;color:#8fbf7a;text-shadow:0 2px 0 #000;white-space:nowrap;
-  text-transform:uppercase;
+  position:static;font-family:'Bank Gothic','Arial Narrow',sans-serif;
+  text-shadow:0 2px 0 #000;white-space:nowrap;text-transform:uppercase;
+}
+body.dashboard-mode.theme-san-andreas #dash-eta .eta-label{
+  display:block;font-size:13px;letter-spacing:2px;color:#c9b98a;font-weight:400;
+}
+body.dashboard-mode.theme-san-andreas #dash-eta .eta-time{
+  display:block;font-size:28px;font-weight:700;letter-spacing:1px;color:#8fbf7a;
 }
 body.dashboard-mode.theme-san-andreas .dash-zoom{display:none}
 /* (tagline script positioning lives with the right-column rules below) */
