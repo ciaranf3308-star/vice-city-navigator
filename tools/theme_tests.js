@@ -173,7 +173,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v61"), 'SW theme cache v61');
+ok(swSrc.includes("ws-theme-v62"), 'SW theme cache v62');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
@@ -429,7 +429,7 @@ ok(cssSrc.includes('vc-logo-script'), 'VC hero logo script styled');
    layouts and drive-HUD clearances, not one shared silhouette ---------- */
 const barHeights = {
   'vice-city': ['78px', '100px'],
-  'san-andreas': ['84px', '104px'],
+  'san-andreas': ['76px', '92px'],
   'gta-v': ['56px', '64px'],
   'rdr2': ['72px', '72px'],
 };
@@ -454,8 +454,8 @@ ok(/theme-vice-city #dash-bottombar\{[^}]*rgba\(1,205,254/.test(cssSrc), 'VC foo
 ok(/theme-vice-city \.dash-tag::before/.test(cssSrc), 'VC footer separates arrival and slogan with a divider');
 ok(/theme-vice-city #dash-dest\{[^}]*overflow:visible/.test(cssSrc), 'VC locality plate never truncates');
 ok(!/theme-vice-city \.dash-tabs button\{[^}]*linear-gradient/.test(cssSrc), 'VC tabs are flat neon text, not chunky buttons');
-ok(/theme-san-andreas \.dash-tabs button\.on\{[^}]*box-shadow:inset 0 -3px 0 #e8a33d/.test(cssSrc),
-  'SA active tab is a lit amber underline, not a chunky tile');
+ok(/theme-san-andreas \.dash-tabs button\.on\{[^}]*box-shadow:inset 0 -3px 0 #d8a94e/.test(cssSrc),
+  'SA active tab is a muted gold underline, not a chunky tile');
 ok(/theme-gta-v \.dash-tabs button\{[^}]*border-left:1px solid/.test(cssSrc), 'V tab strip uses hairline separators');
 ok(/theme-gta-v \.dash-tag\{display:none\}/.test(cssSrc), 'V drops the 80s script tagline');
 ok(/theme-rdr2 \.dash-tag\{display:none\}/.test(cssSrc), 'RDR2 drops the 80s script tagline');
@@ -515,7 +515,7 @@ ok(/body\.dashboard-mode \.vc-title\{[^}]*font-size:52px/.test(cssSrc),
    the stage is letterboxed or zoomed below 1. */
 ok(!/DASH_STAGE_NODES = \[[^\]]*'menu-panel'/.test(appSrc),
   'menu panel is not reparented into the scaled dash stage');
-for (const [id, top, bottom] of [['vice-city', 76, 100], ['san-andreas', 84, 104], ['gta-v', 56, 64], ['rdr2', 72, 72]]) {
+for (const [id, top, bottom] of [['vice-city', 76, 100], ['san-andreas', 76, 92], ['gta-v', 56, 64], ['rdr2', 72, 72]]) {
   ok(new RegExp(`'${id}':\\s*\\{\\s*top:\\s*${top},\\s*bottom:\\s*${bottom}\\s*\\}`).test(appSrc),
     `DASH_BAR_HEIGHTS: ${id} bars ${top}/${bottom}px (stage coordinates)`);
 }
@@ -627,12 +627,19 @@ ok(appSrc.includes("'sa-grove-panel'") && /DASH_STAGE_NODES = \[[^\]]*'sa-grove-
 ok(!cssSrc.includes("dashboard/maneuver.png"), 'SA maneuver card is a clean console panel, not photo art');
 ok(/theme-san-andreas #sa-grove-panel\{[^}]*display:none/.test(cssSrc), 'SA Grove Street scene panel removed (unified hud carries the art)');
 ok(!cssSrc.includes("dashboard/bottombar-palms.jpg"), 'SA bottom bar drops the scenic palm photo block');
-ok(/theme-san-andreas \.dash-tabs button\{[^}]*font-size:13px/.test(cssSrc),
+ok(/theme-san-andreas \.dash-tabs button\{[^}]*font-size:12px/.test(cssSrc),
   'SA tabs are low-profile icon+label, not giant tiles');
 ok(!/theme-san-andreas \.dash-tabs button::before\{[^}]*mask-image/.test(cssSrc),
   'SA tabs carry no generic icon glyphs');
-ok(/theme-san-andreas \.sasp\{[^}]*width:600px/.test(cssSrc),
-  'SA Spotify widget is the right-side hero object (600px, straight, grounded)');
+ok(/theme-san-andreas \.sasp\{[^}]*width:540px/.test(cssSrc),
+  'SA radio unit is the right-side hero object (540px, part of the dash, not a sticker)');
+ok(/theme-san-andreas \.sasp\{[^}]*right:60px/.test(cssSrc),
+  'SA radio unit sits slightly right of the map edge');
+ok(cssSrc.includes('theme-san-andreas .dash-tabs button + button'), 'SA footer tabs use thin separators, not tiles');
+ok(/theme-san-andreas #dash-dest\{[^}]*max-width:76%/.test(cssSrc), 'SA locality plate is slim, ~20-25% narrower');
+const skinSaSrc = fs.readFileSync(path.join(REPO, 'themes/san-andreas/spotify-skin.css'), 'utf8');
+ok(skinSaSrc.includes("font-family: 'Bank Gothic', 'Arial Narrow', sans-serif;"),
+  'SA song title uses Bank Gothic, never blackletter');
 ok(/theme-san-andreas \.sasp\{[^}]*transform:none/.test(cssSrc),
   'SA Spotify widget sits straight inside the map area without touching the bars');
 ok(/theme-san-andreas #map-tools\{display:none\}/.test(cssSrc),
@@ -658,20 +665,22 @@ ok(indexSrc.includes('Good Music</span><span class="tag-line">Better Times'), 'd
 const saStyle2 = JSON.parse(fs.readFileSync(path.join(REPO, 'themes/san-andreas/style.json'), 'utf8'));
 const saPaint = id => saStyle2.layers.find(l => l.id === id).paint;
 const saLayer = id => saStyle2.layers.find(l => l.id === id);
-ok(saPaint('sa-grass')['fill-color'] === '#b9ba7e', 'SA grass: light olive-tan');
-ok(saPaint('sa-woods')['fill-color'] === '#6f904b', 'SA woods: deeper medium green');
-ok(saPaint('sa-urban')['fill-color'] === '#dcc49c', 'SA urban: warm light beige blocks');
-ok(saPaint('sa-land')['background-color'] === '#e8d8b4', 'SA land: pale sand');
-ok(saPaint('sa-water')['fill-color'] === '#6ea3b8', 'SA water: visible muted blue');
-ok(saPaint('sa-road-motorway')['line-color'] === '#262626', 'SA motorways: asphalt charcoal');
-ok(saPaint('sa-road-minor')['line-color'] === '#454545', 'SA minor roads: lighter charcoal');
-ok(saPaint('sa-parks')['fill-color'] === '#8aa653', 'SA parks: muted medium green (distinct from land)');
+ok(saPaint('sa-grass')['fill-color'] === '#8b955a', 'SA grass: open land, greener');
+ok(saPaint('sa-woods')['fill-color'] === '#788a4d', 'SA woods: distinct medium green');
+ok(saPaint('sa-urban')['fill-color'] === '#c9bea0', 'SA urban: cream blocks');
+ok(saPaint('sa-land')['background-color'] === '#d8cfad', 'SA land: clear cream');
+ok(saPaint('sa-water')['fill-color'] === '#5c95a3', 'SA water: clear muted blue');
+ok(saPaint('sa-road-motorway')['line-color'] === '#1e1e1e', 'SA motorways: near-black');
+ok(saPaint('sa-road-minor')['line-color'] === '#353535', 'SA minor roads: charcoal');
+ok(saPaint('sa-parks')['fill-color'] === '#87985b', 'SA parks: muted medium green (distinct from land)');
+ok(saLayer('sa-label-road-minor').minzoom === 14, 'SA minor road labels start at zoom 14 (less tiny clutter)');
+ok(saLayer('sa-buildings').minzoom === 15, 'SA buildings appear at zoom 15 (less tiny clutter)');
 ok(saLayer('sa-label-road-major').minzoom === 10, 'SA major road labels start at zoom 10');
 const saThemeSrc = fs.readFileSync(path.join(REPO, 'themes/san-andreas/theme.js'), 'utf8');
-ok(/routeColor: '#d9a83f'/.test(saThemeSrc), 'SA route is muted ochre, not neon');
+ok(/routeColor: '#f2b53c'/.test(saThemeSrc), 'SA route is strong warm yellow, clearly separated from roads');
 ok(/playerMarker: 'assets\/themes\/san-andreas\/player.svg'/.test(saThemeSrc), 'SA player marker is the crisp vector arrow');
 ok(fs.existsSync(path.join(REPO, 'assets/themes/san-andreas/player.svg')), 'SA player SVG on disk');
-ok(saLayer('sa-label-road-minor').minzoom === 13, 'SA minor road labels start at zoom 13 (less clutter)');
+ok(saLayer('sa-label-road-minor').minzoom === 14, 'SA minor road labels start at zoom 14 (less clutter)');
 ok(!/theme-san-andreas #map::after/.test(cssSrc), 'SA map has no vignette overlay (clean hero map)');
 ok(/theme-gta-v #dash-topbar \.dash-chrome\{[^}]*topbar-skyline\.jpg/.test(cssSrc), 'V top bar uses the v-hud skyline strip');
 ok(/theme-gta-v #dash-bottombar \.dash-chrome\{[^}]*bottombar-skyline\.jpg/.test(cssSrc), 'V bottom bar uses the v-hud skyline strip');

@@ -12,9 +12,9 @@
 
     map: {
       styleUrl: 'themes/san-andreas/style.json',
-      routeColor: '#d9a83f',
-      routeCasingColor: '#3d2f14',
-      routeGlowColor: '#c9962e',
+      routeColor: '#f2b53c',
+      routeCasingColor: '#2e2008',
+      routeGlowColor: '#e09f2a',
       routeGlowOpacity: 0.3,
       routeWidth: 4,
       routeCasingWidth: 8,

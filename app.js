@@ -1162,7 +1162,7 @@ const DASH_STAGE_NODES = ['map', 'fx', 'explore-ui', 'drive-hud', 'spotify-pane'
    layoutDashMenu() scales these by the live stage zoom. */
 const DASH_BAR_HEIGHTS = {
   'vice-city':   { top: 76, bottom: 100 },
-  'san-andreas': { top: 84, bottom: 104 },
+  'san-andreas': { top: 76, bottom: 92 },
   'gta-v':       { top: 56, bottom: 64 },
   'rdr2':        { top: 72, bottom: 72 },
 };
@@ -1483,10 +1483,12 @@ function syncDashTrip(remainSec) {
     const label = (typeof dest !== 'undefined' && dest && dest.label) ? dest.label : '';
     dst.textContent = (label || 'EN ROUTE').toUpperCase().slice(0, 28);
   } else {
-    /* VC idle: compass only, no arrival placeholder. Other themes keep theirs. */
+    /* VC/SA idle: compass only, no arrival placeholder. Other themes keep theirs. */
     const isVC = document.body.classList.contains('theme-vice-city');
-    eta.innerHTML = isVC ? '' : '<span class="eta-label">Arrive in</span><span class="eta-time">—</span>';
-    eta.style.display = isVC ? 'none' : '';
+    const isSA = document.body.classList.contains('theme-san-andreas');
+    const compassOnly = isVC || isSA;
+    eta.innerHTML = compassOnly ? '' : '<span class="eta-label">Arrive in</span><span class="eta-time">—</span>';
+    eta.style.display = compassOnly ? 'none' : '';
     /* dst (locality plate) is owned by syncDashLocality when not navigating —
        don't wipe it here. */
   }

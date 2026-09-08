@@ -10,8 +10,8 @@
   },
   "san-andreas": {
     "locked": true,
-    "sha256": "8fd4d160872b4941e4f208fd47f361e3b0ffc522ce46c996870098456e36e3ff",
-    "note": "mega-fix pass 2026-09-08 (sunset-skyline top bar, aged-metal console, pale-sand map, 600px hero radio widget) \u2014 user-authorized full correction pass"
+    "sha256": "b6ec204a1484fd630346e9f23d48eb2b6f4d2099c890c0f2902dc7cf8b5fe1f4",
+    "note": "Locked after user-authorized 2026-09-08 HERO CONVERGENCE mega pass 2 (hero map palette: cream land / green parks / charcoal roads / blue water; 76px dark framed header; 92px console footer; 540px radio unit; slim locality plaque; compass-only idle)."
   },
   "vice-city": {
     "locked": false,
