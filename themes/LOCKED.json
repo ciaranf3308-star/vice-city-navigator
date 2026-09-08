@@ -11,7 +11,7 @@
   "san-andreas": {
     "locked": true,
     "sha256": "2088fed2bab2f9922918aee6774299affa9c3e21001d0787d824ade39ef3834f",
-    "note": "Locked 2026-09-08: hero-convergence pass 2 + drive-bar de-neoned (solid olive console, gold accents, no blur/glow)."
+    "note": "Locked 2026-09-08: hero-convergence pass 2 + drive-bar de-neoned (solid olive console, gold accents). SW theme cache v63 (cache-bust for the de-neoned bar)."
   },
   "vice-city": {
     "locked": false,
