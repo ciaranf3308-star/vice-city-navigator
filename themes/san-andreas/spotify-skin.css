@@ -127,6 +127,14 @@ body.dashboard-mode.theme-san-andreas .sasp-idle{
   padding:6%;box-sizing:border-box;pointer-events:auto;
 }
 body.dashboard-mode.theme-san-andreas .sasp-idle[hidden]{display:none}
+/* Idle also covers the art's drawn transport strip (baked-in pause glyph +
+   30% progress) so the disconnected state never implies something is playing.
+   The lowrider stays visible. */
+body.dashboard-mode.theme-san-andreas .sasp-idle::after{
+  content:"";position:absolute;left:5px;top:280px;width:220px;height:82px;
+  background:rgba(13,15,10,.94);box-shadow:inset 0 0 26px rgba(0,0,0,.9);
+  pointer-events:none;
+}
 body.dashboard-mode.theme-san-andreas .sasp-idle-kicker{
   font-family:'Beckett','Pricedown Bl',serif;font-size:24px;color:#f5edd8;
   text-shadow:0 2px 0 #000;
