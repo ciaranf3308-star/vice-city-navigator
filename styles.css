@@ -561,31 +561,16 @@ body.dashboard-mode.theme-vice-city #next-stats .ns-sep{opacity:.7}
 .sa-logo{display:none}
 body.dashboard-mode.theme-san-andreas #dash-topbar{
   display:block;position:absolute;left:0;right:0;top:0;height:86px;z-index:25;
-  background:none;box-shadow:none;pointer-events:none;overflow:visible;
-}
-/* hero two-pic bar: night city left (taller), sunset right — different heights, angular seam */
-body.dashboard-mode.theme-san-andreas #dash-topbar .tbar-night{
-  position:absolute;left:0;top:0;width:63%;height:96px;
-  background:#0a0e1a url('themes/san-andreas/dashboard/topbar-night.jpg') center/cover no-repeat;
-  clip-path:polygon(0 0,100% 0,97% 100%,2.5% 100%,0 82%);
+  background:#0a0e1a url('themes/san-andreas/dashboard/topbar-panorama.jpg') center/cover no-repeat;
   box-shadow:0 5px 10px rgba(0,0,0,.55);
+  pointer-events:none;
+  /* hero's machined edge: straight profile, angled cuts at each end */
+  clip-path:polygon(0 0,100% 0,100% 80%,97.5% 100%,2.5% 100%,0 80%);
 }
-body.dashboard-mode.theme-san-andreas #dash-topbar .tbar-night::after{
+body.dashboard-mode.theme-san-andreas #dash-topbar::before{
   content:"";position:absolute;left:0;right:0;bottom:0;height:3px;
-  background:linear-gradient(90deg,#8ab4ff,#8ab4ff 90%,transparent);
-  clip-path:polygon(0 0,97% 100%,2.5% 100%,0 0);
-  opacity:.8;
-}
-body.dashboard-mode.theme-san-andreas #dash-topbar .tbar-sunset{
-  position:absolute;right:0;top:0;width:39%;height:86px;
-  background:#3a1c0c url('themes/san-andreas/dashboard/topbar-sunset-panel.jpg') center/cover no-repeat;
-  clip-path:polygon(5% 0,100% 0,100% 80%,97.5% 100%,0 100%);
-  box-shadow:0 5px 10px rgba(0,0,0,.55);
-}
-body.dashboard-mode.theme-san-andreas #dash-topbar .tbar-sunset::after{
-  content:"";position:absolute;left:0;right:0;bottom:0;height:3px;
-  background:linear-gradient(90deg,transparent,#f5c96b 12%,#f5c96b);
-  clip-path:polygon(5% 0,0 100%,100% 100%,100% 80%,97.5% 100%);
+  background:linear-gradient(90deg,transparent,#f5c96b 6%,#f5c96b 94%,transparent);
+  clip-path:polygon(0 0,2.5% 100%,97.5% 100%,100% 0);
 }
 /* photographic bar: no painted haze needed; keep a whisper at the base for the gold edge */
 body.dashboard-mode.theme-san-andreas #dash-topbar::after{
@@ -602,7 +587,7 @@ body.dashboard-mode.theme-san-andreas .dash-brand{
 }
 body.dashboard-mode.theme-san-andreas .dash-brand .dash-logo,
 body.dashboard-mode.theme-san-andreas .dash-brand .dash-palm{display:none}
-body.dashboard-mode.theme-san-andreas .sa-logo{display:block;height:64px;width:auto;max-width:24vw;flex:none}
+body.dashboard-mode.theme-san-andreas .sa-logo{display:block;height:46px;width:auto;max-width:20vw;flex:none}
 /* "A Better Tomorrow" script rides the photo at far right, hero-style */
 body.dashboard-mode.theme-san-andreas #dash-topbar .dash-tomorrow{
   position:absolute;right:22px;top:50%;transform:translateY(-54%);
@@ -612,9 +597,11 @@ body.dashboard-mode.theme-san-andreas #dash-topbar .dash-tomorrow{
 /* live overlays, placed with intent: temp+icon left/centre, date centre,
    time right-centre; cream HUD text with a subtle black shadow */
 body.dashboard-mode.theme-san-andreas .dash-wx{
-  position:absolute;left:32%;top:0;bottom:0;display:flex;align-items:center;gap:10px;
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:30px;font-weight:600;
-  letter-spacing:2px;color:#f5e6b8;text-shadow:0 2px 4px rgba(0,0,0,.85);
+  position:absolute;left:30%;top:0;bottom:0;display:flex;align-items:center;gap:12px;
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:34px;font-weight:700;
+  letter-spacing:2px;color:#fff6d8;
+  -webkit-text-stroke:1.5px #0a0a0a;paint-order:stroke fill;
+  text-shadow:0 3px 6px rgba(0,0,0,.9);
 }
 body.dashboard-mode.theme-san-andreas #dash-wxicon{display:inline-flex;width:34px;height:34px}
 body.dashboard-mode.theme-san-andreas #dash-wxicon svg{width:100%;height:100%}
@@ -624,11 +611,15 @@ body.dashboard-mode.theme-san-andreas .dash-clock{
 }
 body.dashboard-mode.theme-san-andreas #dash-date{
   position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  font-size:24px;font-weight:600;color:#f5e6b8;text-shadow:0 2px 4px rgba(0,0,0,.85);
+  font-size:28px;font-weight:700;color:#fff6d8;
+  -webkit-text-stroke:1.5px #0a0a0a;paint-order:stroke fill;
+  text-shadow:0 3px 6px rgba(0,0,0,.9);
 }
 body.dashboard-mode.theme-san-andreas #dash-time{
   position:absolute;left:64%;top:50%;transform:translate(-50%,-50%);
-  font-size:32px;font-weight:600;color:#ffd34d;text-shadow:0 2px 4px rgba(0,0,0,.85);
+  font-size:38px;font-weight:700;color:#ffd34d;
+  -webkit-text-stroke:1.5px #0a0a0a;paint-order:stroke fill;
+  text-shadow:0 3px 6px rgba(0,0,0,.9);
 }
 /* ---------- bottom console: designed CSS console, no photo strip ---------- */
 body.dashboard-mode.theme-san-andreas #dash-bottombar{

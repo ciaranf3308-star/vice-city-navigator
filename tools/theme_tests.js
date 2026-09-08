@@ -161,8 +161,8 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v54"), 'SW shell cache v53');
-ok(swSrc.includes("ws-theme-v17"), 'SW theme cache v16');
+ok(swSrc.includes("ws-shell-v55"), 'SW shell cache v55');
+ok(swSrc.includes("ws-theme-v18"), 'SW theme cache v18');
 
 /* ---------- per-theme typography (game-authentic fonts) ---------- */
 for (const f of ['bank-gothic.woff', 'beckett.woff2', 'chalet-london.woff2',
@@ -379,8 +379,10 @@ ok(appSrc.includes('nav-driving') && /setUiMode/.test(appSrc), 'drive-mode chrom
 ok(cssSrc.includes('body.dashboard-mode.nav-driving #maneuver-card'), 'drive HUD clears the top bar on every theme');
 ok(cssSrc.includes('body.dashboard-mode.nav-driving #drive-bar'), 'drive trip bar clears the bottom bar on every theme');
 ok(!cssSrc.includes('.dash-skyline') && !indexSrc.includes('dash-skyline'), 'old skyline img fully retired in favour of the authored top bar strip');
-ok(/tbar-night/.test(cssSrc) && /tbar-sunset/.test(cssSrc),
-  'SA top bar is the hero two-pic split (night left, sunset right)');
+ok(/topbar-panorama\.jpg/.test(cssSrc),
+  'SA top bar is one seamless night-to-sunset panorama (hero, not two smushed pics)');
+ok(!/tbar-night/.test(indexSrc) && !/tbar-sunset/.test(indexSrc),
+  'SA top bar has no split-panel divs');
 ok(!/theme-san-andreas #dash-topbar\{[^}]*radial-gradient\(120px 120px at 62%/.test(cssSrc),
   'SA top bar no longer uses the CSS-painted sun disc');
 ok(/theme-gta-v #dash-topbar\{[^}]*#7CFF6B/.test(cssSrc), 'GTA V chrome uses pause-menu neon green');
@@ -540,15 +542,13 @@ for (const f of ['topbar.png', 'bottombar.png', 'maneuver.png', 'grove-panel.png
 }
 const saLogo = pngSize(saDash('sa-logo.png'));
 ok(saLogo && saLogo.w >= 500 && saLogo.h >= 150, 'SA standalone wordmark extracted with transparency');
-ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/topbar-night.jpg')),
-  'SA top bar night panel art exists');
-ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/topbar-sunset-panel.jpg')),
-  'SA top bar sunset panel art exists');
+ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/topbar-panorama.jpg')),
+  'SA top bar seamless panorama art exists');
 
-ok(/topbar-night\.jpg/.test(cssSrc) && /topbar-sunset-panel\.jpg/.test(cssSrc),
-  'SA top bar panels use photographic art (not CSS gradients)');
-ok(/tbar-night\{[^}]*clip-path:polygon/.test(cssSrc) && /tbar-sunset\{[^}]*clip-path:polygon/.test(cssSrc),
-  'SA top bar panels have the hero machined angular edges');
+ok(/topbar-panorama\.jpg/.test(cssSrc),
+  'SA top bar panorama is photographic art (not a CSS gradient)');
+ok(/theme-san-andreas #dash-topbar\{[^}]*clip-path:polygon/.test(cssSrc),
+  'SA top bar has the hero machined angular edge');
 ok(/theme-san-andreas #dash-bottombar\{[^}]*clip-path:polygon/.test(cssSrc),
   'SA bottom bar has the hero machined angular edge');
 ok(indexSrc.includes('dash-tomorrow'),
@@ -581,7 +581,7 @@ ok(appSrc.includes("applyBodyTheme(VCNThemes.currentId())") && /Paint the theme 
   'theme chrome paints before tiles arrive (no chrome-less dashboard offline)');
 ok(indexSrc.includes('class="sa-logo"'), 'SA dashboard mounts the standalone wordmark element');
 ok(indexSrc.includes('dashboard/sa-logo.png'), 'SA wordmark uses the extracted logo art');
-ok(/theme-san-andreas \.sa-logo\{[^}]*height:64px/.test(cssSrc),
+ok(/theme-san-andreas \.sa-logo\{[^}]*height:46px/.test(cssSrc),
   'SA wordmark is sized by bar height so it always fits with breathing room');
 ok(/theme-san-andreas #dash-bottombar \.dash-chrome\{[^}]*display:flex/.test(cssSrc),
   'SA bottom console lays out with flex, not art-slot coordinates');
@@ -1228,3 +1228,5 @@ console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
 ok(/function saArrowSvg/.test(appSrc), 'SA has its own block-arrow set (hero font-theme match)');
 ok(/t\.id === 'san-andreas'/.test(appSrc) || /id === "san-andreas"/.test(appSrc), 'SA arrows branch on the san-andreas theme');
+ok(cssSrc.includes('-webkit-text-stroke'), 'SA dash type has the heavy outlined SA treatment');
+ok(/\.sa-logo\{[^}]*height:46px/.test(cssSrc), 'SA logo is contained (46px, not overlapping the map)');
