@@ -337,6 +337,8 @@ body.dashboard-mode.radio-off #spotify-pane{display:none}
    tab buttons and an LED-marquee destination plate. Pure overlays on the
    1920x720 canvas; the map is never resized or inset. */
 #dash-topbar,#dash-bottombar{display:none}
+/* theme-specific topbar art is hidden unless its theme shows it */
+#dash-topbar .dash-los-santos{display:none}
 /* inner layer: same silhouette inset by the neon edge width, so the pink
    outer layer reads as a continuous neon tube */
 #dash-topbar .dash-chrome,#dash-bottombar .dash-chrome{

@@ -41,6 +41,12 @@ body.dashboard-mode.theme-san-andreas #dash-topbar .dash-tomorrow{
   height:44px;width:auto;max-width:220px;object-fit:contain;
   filter:drop-shadow(0 2px 4px rgba(0,0,0,.8));pointer-events:none;
 }
+/* "Los Santos" script sits left of the Tomorrow tag, hero-style */
+body.dashboard-mode.theme-san-andreas #dash-topbar .dash-los-santos{
+  display:block;position:absolute;right:260px;top:50%;transform:translateY(-58%);
+  height:52px;width:auto;max-width:300px;object-fit:contain;
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,.8));pointer-events:none;
+}
 /* live overlays, placed with intent: temp+icon left/centre, date centre,
    time right-centre; cream HUD text with a subtle black shadow */
 body.dashboard-mode.theme-san-andreas .dash-wx{
@@ -144,51 +150,57 @@ body.dashboard-mode.theme-san-andreas #dash-eta{
   text-transform:uppercase;
 }
 body.dashboard-mode.theme-san-andreas .dash-zoom{display:none}
-/* right palm panel: photographic sunset with the tagline script over it, hero-style */
-body.dashboard-mode.theme-san-andreas .dash-tag{
-  position:static;width:300px;height:76px;flex:0 0 auto;
-  font-size:0;line-height:0;color:transparent;text-shadow:none;transform:none;
-  display:block;padding:0;white-space:normal;
-  background:
-    url('dashboard/script-music.png') 50% 50%/220px auto no-repeat,
-    url('dashboard/bottombar-palms.jpg') 50% 50%/cover no-repeat;
-  border:1px solid rgba(201,162,39,.5);
-  clip-path:polygon(12px 0,100% 0,100% 100%,0 100%,0 12px);
-  filter:drop-shadow(0 2px 4px rgba(0,0,0,.6));
-}
+/* (tagline script positioning lives with the right-column rules below) */
 /* ---------- maneuver card: authored frame, stats row underneath ---------- */
 body.dashboard-mode.theme-san-andreas.nav-driving #maneuver-card{
   top:calc(100px + env(safe-area-inset-top));left:24px;right:auto;
-  width:560px;max-width:560px;height:124px;
+  width:520px;max-width:520px;height:208px;
   background:url('dashboard/maneuver.png') 50% 50%/100% 100% no-repeat;
   border:0;border-radius:0;box-shadow:none;
   backdrop-filter:none;-webkit-backdrop-filter:none;
-  display:flex;align-items:center;gap:0 20px;padding:8px 30px 8px 34px;
+  display:flex;flex-wrap:wrap;align-items:center;gap:0 18px;
+  padding:18px 36px 14px 40px;
 }
-body.dashboard-mode.theme-san-andreas #maneuver-arrow{flex:0 0 72px;width:72px;height:72px}
+body.dashboard-mode.theme-san-andreas #maneuver-arrow{flex:0 0 84px;width:84px;height:84px}
 body.dashboard-mode.theme-san-andreas #maneuver-arrow svg{
   width:100%;height:100%;filter:drop-shadow(0 3px 3px rgba(0,0,0,.75))}
 body.dashboard-mode.theme-san-andreas .banner-text{
-  flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:0 18px;
+  flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:4px;
 }
 body.dashboard-mode.theme-san-andreas #next-dist{
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:44px;font-weight:600;
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:52px;font-weight:600;
   letter-spacing:3px;color:#fff;text-shadow:0 3px 0 #000;line-height:1;
 }
 body.dashboard-mode.theme-san-andreas #next-instr{
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:24px;font-weight:600;
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:26px;font-weight:600;
   letter-spacing:2px;color:#ffd34d;text-shadow:0 2px 0 #000;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:300px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px;
 }
 body.dashboard-mode.theme-san-andreas #next-stats{
   flex:0 0 100%;
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:17px;letter-spacing:2px;
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:19px;letter-spacing:2px;
   color:#e8dcc0;text-shadow:0 2px 0 #000;opacity:.9;white-space:nowrap;overflow:hidden;
-  text-overflow:ellipsis;
+  text-overflow:ellipsis;border-top:1px solid rgba(201,162,39,.35);padding-top:8px;
 }
-body.dashboard-mode.theme-san-andreas #sa-grove-panel{display:none;background:none}
+/* hero right column: Grove Street scene panel above the music widget */
+body.dashboard-mode.theme-san-andreas #sa-grove-panel{
+  display:block;position:absolute;z-index:24;
+  right:70px;top:calc(100px + env(safe-area-inset-top));width:540px;height:172px;
+  background:url('dashboard/grove-panel.png') 50% 50%/100% 100% no-repeat;
+  filter:drop-shadow(0 4px 10px rgba(0,0,0,.6));pointer-events:none;
+}
 body.dashboard-mode.theme-san-andreas .sasp{
-  width:540px;right:70px;top:90px;bottom:auto;translate:none;transform:none;
+  width:540px;right:70px;top:calc(282px + env(safe-area-inset-top));bottom:auto;
+  translate:none;transform:none;
+}
+/* "Good Music Better Times" script rides below the music widget, hero-style */
+body.dashboard-mode.theme-san-andreas #dash-bottombar .dash-tag{
+  position:absolute;right:90px;bottom:calc(104px + env(safe-area-inset-bottom));
+  width:280px;height:88px;flex:none;
+  font-size:0;line-height:0;color:transparent;text-shadow:none;transform:none;
+  display:block;padding:0;white-space:normal;
+  background:url('dashboard/script-music.png') 50% 50%/240px auto no-repeat;
+  border:0;clip-path:none;filter:drop-shadow(0 3px 5px rgba(0,0,0,.85));
 }
 /* hero map is clean: no floating zoom pills on this theme */
 body.dashboard-mode.theme-san-andreas #map-tools{display:none}
