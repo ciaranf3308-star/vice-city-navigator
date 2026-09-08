@@ -581,8 +581,8 @@ ok(appSrc.includes("applyBodyTheme(VCNThemes.currentId())") && /Paint the theme 
   'theme chrome paints before tiles arrive (no chrome-less dashboard offline)');
 ok(indexSrc.includes('class="sa-logo"'), 'SA dashboard mounts the standalone wordmark element');
 ok(indexSrc.includes('dashboard/sa-logo.png'), 'SA wordmark uses the extracted logo art');
-ok(/theme-san-andreas \.sa-logo\{[^}]*height:46px/.test(cssSrc),
-  'SA wordmark is sized by bar height so it always fits with breathing room');
+ok(/theme-san-andreas \.sa-logo\{[^}]*height:112px/.test(cssSrc),
+  'SA wordmark is hero-sized and overlaps the map');
 ok(/theme-san-andreas #dash-bottombar \.dash-chrome\{[^}]*display:flex/.test(cssSrc),
   'SA bottom console lays out with flex, not art-slot coordinates');
 ok(/theme-san-andreas \.dash-tabs button\{[^}]*border:1px solid rgba\(201,162,39/.test(cssSrc),
@@ -1229,4 +1229,7 @@ process.exit(fail ? 1 : 0);
 ok(/function saArrowSvg/.test(appSrc), 'SA has its own block-arrow set (hero font-theme match)');
 ok(/t\.id === 'san-andreas'/.test(appSrc) || /id === "san-andreas"/.test(appSrc), 'SA arrows branch on the san-andreas theme');
 ok(cssSrc.includes('-webkit-text-stroke'), 'SA dash type has the heavy outlined SA treatment');
-ok(/\.sa-logo\{[^}]*height:46px/.test(cssSrc), 'SA logo is contained (46px, not overlapping the map)');
+ok(/theme-san-andreas \.sa-logo\{[^}]*height:112px/.test(cssSrc),
+  'SA logo is hero-big (112px) overlapping the map, not clipped');
+ok(indexSrc.indexOf('class="sa-logo"') > indexSrc.indexOf('</header>'),
+  'SA logo sits outside the clipped topbar so it can overlap');

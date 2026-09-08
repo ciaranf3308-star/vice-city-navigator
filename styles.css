@@ -587,7 +587,11 @@ body.dashboard-mode.theme-san-andreas .dash-brand{
 }
 body.dashboard-mode.theme-san-andreas .dash-brand .dash-logo,
 body.dashboard-mode.theme-san-andreas .dash-brand .dash-palm{display:none}
-body.dashboard-mode.theme-san-andreas .sa-logo{display:block;height:46px;width:auto;max-width:20vw;flex:none}
+body.dashboard-mode.theme-san-andreas .sa-logo{
+  display:block;position:absolute;left:28px;top:10px;height:112px;width:auto;max-width:34vw;
+  z-index:30;pointer-events:none;
+  filter:drop-shadow(0 3px 6px rgba(0,0,0,.85)) drop-shadow(0 0 2px rgba(0,0,0,.9));
+}
 /* "A Better Tomorrow" script rides the photo at far right, hero-style */
 body.dashboard-mode.theme-san-andreas #dash-topbar .dash-tomorrow{
   position:absolute;right:22px;top:50%;transform:translateY(-54%);
