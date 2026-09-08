@@ -14,7 +14,31 @@ body.dashboard-mode.theme-gta-v #dash-bottombar{
 body.dashboard-mode.theme-gta-v #dash-topbar .dash-chrome,
 body.dashboard-mode.theme-gta-v #dash-bottombar .dash-chrome{
   background:transparent;
+  visibility:hidden;
 }
+body.dashboard-mode.theme-gta-v #dash-topbar .dash-chrome > *,
+body.dashboard-mode.theme-gta-v #dash-bottombar .dash-chrome > *{
+  visibility:hidden;
+}
+/* Keep the tab buttons live as invisible hit-areas over the overlay icons.
+   Overlay icons (x in 2048): map 250, radio 350, phone 450, settings 650. */
+body.dashboard-mode.theme-gta-v #dash-bottombar .dash-tabs{
+  visibility:visible;
+  position:absolute;left:0;right:0;top:0;bottom:0;
+}
+body.dashboard-mode.theme-gta-v #dash-bottombar .dash-tabs button{
+  visibility:visible;
+  position:absolute;top:0;bottom:0;width:6%;
+  background:transparent;border:none;color:transparent;
+}
+body.dashboard-mode.theme-gta-v #dash-bottombar .dash-tabs button svg,
+body.dashboard-mode.theme-gta-v #dash-bottombar .dash-tabs button span{
+  display:none;
+}
+body.dashboard-mode.theme-gta-v #dash-bottombar .dash-tabs button[data-dtab="map"]{left:9.2%}
+body.dashboard-mode.theme-gta-v #dash-bottombar .dash-tabs button[data-dtab="radio"]{left:14.1%}
+body.dashboard-mode.theme-gta-v #dash-bottombar .dash-tabs button[data-dtab="phone"]{left:19.0%}
+body.dashboard-mode.theme-gta-v #dash-bottombar .dash-tabs button[data-dtab="settings"]{left:28.7%}
 body.dashboard-mode.theme-gta-v::before{
   content:'';position:absolute;inset:0;z-index:24;pointer-events:none;
   background:url('dashboard/overlay.png') 50% 50%/100% 100% no-repeat;
