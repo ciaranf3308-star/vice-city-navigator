@@ -1040,6 +1040,15 @@ for (const tid of ['vice-city', 'san-andreas', 'gta-v', 'rdr2']) {
     ok(cssAll.includes(`.wslyr-${tid} .f${fi}`), `lyrics: ${tid} defines type family f${fi}`);
   }
 }
+// Lyric type is game-authentic on every theme: no generic Outfit anywhere
+// in the lyric styles; each theme declares its own --lyr-font.
+const lyrFace = { 'vice-city': 'Pricedown Bl', 'san-andreas': 'Bank Gothic', 'gta-v': 'Chalet London', 'rdr2': 'RDR Lino' };
+for (const [tid, face] of Object.entries(lyrFace)) {
+  ok(new RegExp(`\\.wslyr-${tid}\\{[^}]*--lyr-font:'${face}'`).test(cssAll),
+    `lyrics: ${tid} lyric typeface is ${face}`);
+}
+const wslyrCss = cssAll.slice(cssAll.indexOf('.wslyr{'));
+ok(!wslyrCss.includes("'Outfit'"), 'lyrics: no Outfit anywhere in the lyric styles');
 for (const k of ['wslyr-in-spring', 'wslyr-in-blur', 'wslyr-in-pop', 'wslyr-in-sweep', 'wslyr-in-snap', 'wslyr-in-flicker']) {
   ok(cssAll.includes(k), `lyrics: entrance animation ${k} defined`);
 }
