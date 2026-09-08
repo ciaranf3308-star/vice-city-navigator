@@ -44,7 +44,7 @@ body.dashboard-mode.theme-gta-v .dash-brand{
 }
 body.dashboard-mode.theme-gta-v .dash-brand::before{
   content:'';flex:none;width:58px;height:58px;
-  background:url('dashboard/v-mark.png') 50% 50%/contain no-repeat;
+  background:url('dashboard/logo-v.png') 50% 50%/contain no-repeat;
 }
 body.dashboard-mode.theme-gta-v .dash-palm{display:none}
 body.dashboard-mode.theme-gta-v .dash-logo{
@@ -114,14 +114,11 @@ body.dashboard-mode.theme-gta-v .dash-tabs button::before{
   background:50% 50%/contain no-repeat;
   opacity:.75;
 }
-body.dashboard-mode.theme-gta-v .dash-tabs button[data-dtab="map"]::before{background-image:url('dashboard/icon-map.png')}
-body.dashboard-mode.theme-gta-v .dash-tabs button[data-dtab="radio"]::before{background-image:url('dashboard/icon-radio.png')}
-body.dashboard-mode.theme-gta-v .dash-tabs button[data-dtab="phone"]::before{background-image:url('dashboard/icon-phone.png')}
-body.dashboard-mode.theme-gta-v .dash-tabs button[data-dtab="settings"]::before{background-image:url('dashboard/icon-settings.png')}
-/* Vehicle: use the inline SVG (no PNG was generated for it) */
-body.dashboard-mode.theme-gta-v .dash-tabs button[data-dtab="vehicle"]::before{display:none}
-body.dashboard-mode.theme-gta-v .dash-tabs button[data-dtab="vehicle"] svg{
-  display:block;width:30px;height:30px;flex:none;
+body.dashboard-mode.theme-gta-v .dash-tabs button[data-dtab="map"]::before{background-image:url('dashboard/tab-map.png')}
+body.dashboard-mode.theme-gta-v .dash-tabs button[data-dtab="radio"]::before{background-image:url('dashboard/tab-radio.png')}
+body.dashboard-mode.theme-gta-v .dash-tabs button[data-dtab="phone"]::before{background-image:url('dashboard/tab-phone.png')}
+body.dashboard-mode.theme-gta-v .dash-tabs button[data-dtab="vehicle"]::before{background-image:url('dashboard/tab-vehicle.png')}
+body.dashboard-mode.theme-gta-v .dash-tabs button[data-dtab="settings"]::before{background-image:url('dashboard/tab-settings.png')}
   color:#b9c2bc;opacity:.75;
 }
 body.dashboard-mode.theme-gta-v .dash-tabs button span{
@@ -135,7 +132,6 @@ body.dashboard-mode.theme-gta-v .dash-tabs button::after{
 }
 body.dashboard-mode.theme-gta-v .dash-tabs button.on::after{background:#2ce68c}
 body.dashboard-mode.theme-gta-v .dash-tabs button.on::before{opacity:1}
-body.dashboard-mode.theme-gta-v .dash-tabs button.on[data-dtab="vehicle"] svg{color:#2ce68c;opacity:1}
 body.dashboard-mode.theme-gta-v .dash-tabs button.on span{color:#f2f5f2}
 /* Center: LOS SANTOS COUNTY — theme identity plate */
 body.dashboard-mode.theme-gta-v .dash-dest{

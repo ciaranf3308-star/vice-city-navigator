@@ -173,7 +173,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v95"), 'SW theme cache v76');
+ok(swSrc.includes("ws-theme-v96"), 'SW theme cache v76');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -463,8 +463,8 @@ ok(/theme-vice-city #dash-dest\{[^}]*overflow:visible/.test(cssSrc), 'VC localit
 ok(!/theme-vice-city \.dash-tabs button\{[^}]*linear-gradient/.test(cssSrc), 'VC tabs are flat neon text, not chunky buttons');
 ok(/\.dash-tabs button\.on/.test(cssSrc) && /theme-san-andreas \.dash-tabs button\.on\{[^}]*background:rgba\(240,230,200/.test(cssSrc),
   'SA active tab is the hero cream parallelogram (icon-only), not a chunky tile');
-ok(/theme-gta-v \.dash-tabs button\[data-dtab="map"\]::before\{[^}]*icon-map\.png/.test(cssSrc), 'V tabs use generated icons (map)');
-ok(/theme-gta-v \.dash-tabs button\[data-dtab="settings"\]::before\{[^}]*icon-settings\.png/.test(cssSrc), 'V tabs use generated icons (settings)');
+ok(/theme-gta-v \.dash-tabs button\[data-dtab="map"\]::before\{[^}]*tab-map\.png/.test(cssSrc), 'V tabs use generated icons (map)');
+ok(/theme-gta-v \.dash-tabs button\[data-dtab="settings"\]::before\{[^}]*tab-settings\.png/.test(cssSrc), 'V tabs use generated icons (settings)');
 ok(/theme-gta-v \.dash-tag\{display:none/.test(cssSrc), 'V drops the 80s script tagline');
 ok(/theme-rdr2 \.dash-tag\{display:none\}/.test(cssSrc), 'RDR2 drops the 80s script tagline');
 ok(/theme-rdr2 \.dash-brand\{[^}]*margin:0 auto/.test(cssSrc), 'RDR2 centers its ornate title plate');
@@ -583,7 +583,7 @@ for (const [theme, file] of dashAssets) {
 }
 // theme-scoped usage: each asset is only wired into its own theme's chrome
 const gvDashAssets = ['topbar-bg.png','bottombar-bg.png','widget-bg.png','v-mark.png',
-  'icon-map.png','icon-radio.png','icon-phone.png','icon-car.png','icon-settings.png',
+  'tab-map.png','tab-radio.png','tab-phone.png','tab-vehicle.png','tab-settings.png',
   'palms.png','skyline.png','noise.png','lyrics-bg.png','dest-plate.png','compass.png',
   'divider.png','diamond.png','chevron.png','btn-ring.png'];
 for (const f of gvDashAssets) {
