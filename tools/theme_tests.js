@@ -428,6 +428,27 @@ ok(appSrc.includes('layoutDashMenu(); // bar heights changed with the theme'),
 ok(appSrc.includes('layoutDashMenu(); // dock (or undock) the body-level menu panel'),
   'app-mode switch docks/undocks the menu panel');
 
+/* ---------- dashboard route-setting: search bar + planning drawer ---------- */
+/* The explore search bar used to sit at top:12px in stage coordinates —
+   directly behind the opaque dash top bar (z-index 25 > explore-ui 10),
+   so dashboard users had no visible way to set a route. It now drops
+   below the per-theme bar heights, and the planning drawer docks to the
+   live stage rect in real pixels like the menu panel. */
+for (const [id, top] of [['vice-city', 88], ['san-andreas', 84], ['gta-v', 68], ['rdr2', 84]]) {
+  ok(new RegExp(`body\\.dashboard-mode\\.theme-${id} #search-bar\\{top:calc\\(${top}px`).test(cssSrc),
+    `dashboard search bar clears the ${id} top bar (${top}px)`);
+}
+ok(/body\.dashboard-mode #menu-btn\{display:none\}/.test(cssSrc),
+  'dashboard hides the floating menu button behind the bar (bottom-bar tabs open the menu)');
+ok(!/DASH_STAGE_NODES = \[[^\]]*'drawer'/.test(appSrc),
+  'planning drawer is not reparented into the scaled dash stage');
+ok(/function layoutDashDrawer\(\)/.test(appSrc) && appSrc.includes('getBoundingClientRect()'),
+  'layoutDashDrawer docks the drawer to the live stage rect');
+ok(appSrc.includes('layoutDashDrawer(); // and the planning drawer'),
+  'stage refit and theme switch re-dock the planning drawer');
+ok(appSrc.includes('layoutDashDrawer(); // dock the drawer to the live stage rect in dashboard mode'),
+  'opening planning re-docks the drawer');
+
 /* ---------- bespoke dashboard bar assets (authentic game-UI textures) ---------- */
 const dashAssets = [
   ['vice-city', 'vc-logo.png'],

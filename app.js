@@ -321,6 +321,7 @@ function applyBodyTheme(id) {
   const cur = VCNThemes.get(id);
   if (cur && cur.ui && cur.ui.bodyClass) document.body.classList.add(cur.ui.bodyClass);
   layoutDashMenu(); // bar heights changed with the theme — re-dock the menu panel
+  layoutDashDrawer(); // and the planning drawer
 }
 async function fetchThemeStyle(theme) {
   const res = await fetch(theme.map.styleUrl, { cache: 'no-cache' });
@@ -978,6 +979,7 @@ function setUiMode(mode) {
 function openPlanning(view) {
   closeMenu();
   setUiMode('planning');
+  layoutDashDrawer(); // dock the drawer to the live stage rect in dashboard mode
   $('poi-detail').hidden = view !== 'poi';
   if (view !== 'route') $('route-card').hidden = true;
   if (view === 'search') {
@@ -1085,6 +1087,32 @@ function layoutDashMenu() {
   panel.style.bottom = Math.max(0, window.innerHeight - (r.bottom - bottomClear)) + 'px';
 }
 
+/* Dock the body-level planning drawer (search / results / route preview)
+   the same way: it is deliberately not reparented into the scaled stage,
+   so fixed offsets would land it in the letterbox or under the dash bars.
+   Real CSS pixels, clear of the current theme's bar heights. */
+function layoutDashDrawer() {
+  const drawer = $('drawer');
+  if (!drawer) return;
+  if (!dashboardLayoutActive()) {
+    drawer.style.left = ''; drawer.style.top = '';
+    drawer.style.bottom = ''; drawer.style.width = '';
+    return;
+  }
+  const stage = $('dash-stage');
+  let r = null;
+  try { r = stage && stage.getBoundingClientRect(); } catch (e) {}
+  if (!r || !r.width) return; // stage not built yet; CSS fallback applies
+  const s = r.width / DASH_W; // live stage zoom (zoom or transform scale)
+  const bars = DASH_BAR_HEIGHTS[wsThemeId()] || DASH_BAR_HEIGHTS['vice-city'];
+  const pad = 12;
+  drawer.style.left = Math.max(0, r.left + pad) + 'px';
+  drawer.style.top = (r.top + (bars.top + pad) * s) + 'px';
+  drawer.style.width = Math.max(320, Math.min(560, r.width - pad * 2)) + 'px';
+  const bottomClear = (bars.bottom + pad) * s;
+  drawer.style.bottom = Math.max(0, window.innerHeight - (r.bottom - bottomClear)) + 'px';
+}
+
 function buildDashboardStage() {
   let stage = $('dash-stage');
   if (stage) return stage;
@@ -1130,6 +1158,7 @@ function fitDashboardStage() {
   stage.style.left = ((vw - DASH_W * s) / 2) + 'px';
   stage.style.top = ((vh - DASH_H * s) / 2) + 'px';
   layoutDashMenu(); // re-dock the body-level menu panel to the new stage rect
+  layoutDashDrawer(); // and the planning drawer
 }
 
 /* The Vice City widget floats over the right of the map, so the camera's
@@ -1156,6 +1185,7 @@ function applyAppMode() {
   if (on) { buildDashboardStage(); fitDashboardStage(); }
   else teardownDashboardStage();
   layoutDashMenu(); // dock (or undock) the body-level menu panel
+  layoutDashDrawer(); // dock (or undock) the planning drawer
   const pane = $('spotify-pane');
   if (pane) pane.hidden = !on;
   if (on) mountSpotifySkin(wsThemeId());

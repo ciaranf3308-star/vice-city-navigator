@@ -320,6 +320,16 @@ body.dashboard-mode #drive-bar{left:760px;max-width:none}
 /* Vice City's floating HUD is ~900px wide with its tilt: slide chrome left of it */
 body.dashboard-mode[data-spotskin="vice-city"] #search-bar{right:900px}
 body.dashboard-mode[data-spotskin="vice-city"] #maneuver-card{right:900px}
+/* Dashboard: the top bar owns the top of the stage, so the explore search
+   drops below it — per-theme bar heights + margin — instead of hiding
+   behind it. The floating menu button would sit behind the bar too; the
+   bottom-bar Settings/Vehicle tabs already open the menu, so it hides. */
+body.dashboard-mode #menu-btn{display:none}
+body.dashboard-mode #search-bar{left:12px;max-width:520px}
+body.dashboard-mode.theme-vice-city #search-bar{top:calc(88px + env(safe-area-inset-top))}
+body.dashboard-mode.theme-san-andreas #search-bar{top:calc(84px + env(safe-area-inset-top))}
+body.dashboard-mode.theme-gta-v #search-bar{top:calc(68px + env(safe-area-inset-top))}
+body.dashboard-mode.theme-rdr2 #search-bar{top:calc(84px + env(safe-area-inset-top))}
 /* RADIO tab hides the music widget for a full-bleed map */
 body.dashboard-mode.radio-off #spotify-pane{display:none}
 
