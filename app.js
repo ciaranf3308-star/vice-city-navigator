@@ -792,14 +792,56 @@ let compassHeading = null;
 let compassAt = 0;
 let gpsCourse = null;
 let gpsCourseAt = 0;
-let gpsSpeed = null; // m/s, from coords.speed or fix-to-fix
+let gpsSpeed = null; // m/s, validated (see setGpsSpeed) — from coords.speed or fix-to-fix
+let gpsSpeedAt = 0;  // timestamp of the last accepted fix
+let gpsRejectSince = 0; // when the current rejection streak started (0 = none)
+/* ---------------- validated GPS speed ----------------
+   Phone GPS occasionally reports a wild coords.speed on a bad fix
+   (e.g. 182 m/s while sitting still). Displaying it raw puts "657 km/h"
+   on the cluster. Every candidate is validated before it becomes
+   gpsSpeed — never invented, only physically-impossible jumps refused:
+   - non-finite / negative candidates are dropped
+   - displacement cross-check: fix-to-fix travel is ground truth. If the
+     phone barely moved but the candidate claims speed, the fix is bogus —
+     fall back to the displacement-derived speed
+   - acceleration gate: vs the last accepted speed, |dv| must fit within
+     12 m/s^2 (emergency braking is ~10; 12 is generous)
+   - re-anchor: if candidates keep failing for > 5 s, trust displacement
+     so one bad anchor can't freeze the readout forever
+   Staleness: readers use freshGpsSpeed() — anything older than 10 s is
+   unknown and displays '--', never a frozen number. */
+function setGpsSpeed(candidate, fixMs, dtSec) {
+  const now = Date.now();
+  const dt = (typeof dtSec === 'number' && dtSec > 0) ? dtSec : 1;
+  const fix = (typeof fixMs === 'number' && isFinite(fixMs) && fixMs >= 0) ? fixMs : 0;
+  let v = (typeof candidate === 'number' && isFinite(candidate) && candidate >= 0) ? candidate : NaN;
+  // displacement cross-check: the phone isn't moving, the claim is bogus
+  if (!isNaN(v) && fix < 2 && v > 10) v = fix;
+  else if (!isNaN(v) && gpsSpeed === null && fix < 5 && v > 15) v = fix; // first fix: extra strict
+  if (isNaN(v)) {
+    // receiver gave nothing usable; displacement is still truth
+    if (gpsSpeed === null || now - gpsRejectSince > 5000) { gpsSpeed = fix; gpsSpeedAt = now; gpsRejectSince = 0; }
+    return;
+  }
+  if (gpsSpeed !== null) {
+    if (Math.abs(v - gpsSpeed) > 12 * dt + 3) {
+      if (!gpsRejectSince) gpsRejectSince = now;
+      if (now - gpsRejectSince > 5000) { gpsSpeed = fix; gpsSpeedAt = now; gpsRejectSince = 0; }
+      return; // impossible jump: hold the last good value
+    }
+  }
+  gpsSpeed = v; gpsSpeedAt = now; gpsRejectSince = 0;
+}
+function freshGpsSpeed() {
+  return (gpsSpeed !== null && Date.now() - gpsSpeedAt <= 10000) ? gpsSpeed : null;
+}
 let orientationListening = false;
 let lastBearingPush = 0;
 function screenAngle() {
   try { return (screen.orientation && screen.orientation.angle) || 0; }
   catch (e) { return 0; }
 }
-function clearlyMoving() { return gpsSpeed !== null && gpsSpeed > 2.5; }
+function clearlyMoving() { const s = freshGpsSpeed(); return s !== null && s > 2.5; }
 
 /* ---------------- wanted level: stars for speeding (GTA V) ----------------
    Heat builds while over the posted limit (faster the further over),
@@ -819,8 +861,9 @@ function starsForHeat(h) {
 function wantedTick(dt) {
   if (!document.body.classList.contains('dashboard-mode')) return;
   const gta = document.body.classList.contains('theme-gta-v');
-  const kmh = (typeof gpsSpeed === 'number' && !isNaN(gpsSpeed) && gpsSpeed >= 0)
-    ? gpsSpeed * 3.6 : null;
+  const gsp = freshGpsSpeed();
+  const kmh = (typeof gsp === 'number' && !isNaN(gsp) && gsp >= 0)
+    ? gsp * 3.6 : null;
   if (gta && kmh !== null && speedLimitKmh && kmh > speedLimitKmh) {
     wantedHeat = Math.min(100, wantedHeat + (kmh - speedLimitKmh) * dt * 0.6);
   } else {
@@ -877,8 +920,9 @@ function parseMaxspeed(s) {
 /* </test-extract> */
 function updateSpeedo() {
   if (!speedDisplayActive()) return;
-  const kmh = (typeof gpsSpeed === 'number' && !isNaN(gpsSpeed) && gpsSpeed >= 0)
-    ? Math.round(gpsSpeed * 3.6) : null;
+  const gsp = freshGpsSpeed();
+  const kmh = (typeof gsp === 'number' && !isNaN(gsp) && gsp >= 0)
+    ? Math.round(gsp * 3.6) : null;
   if (dashboardLayoutActive()) {
     const el = $('speedo');
     if (!el || !userPos) return; // no fix yet: stay hidden
@@ -1786,16 +1830,17 @@ function onPos(pos) {
     const d = haversine(lastPos.p, p);
     if (dt > 0 && d > 4) {
       const v = d / dt;
-      gpsSpeed = (typeof cSpeed === 'number' && !isNaN(cSpeed)) ? cSpeed : v;
+      setGpsSpeed(cSpeed, v, dt); // validated: wild coords.speed spikes are refused
       if (v > 1.5) {
         heading = Math.atan2(p[0] - lastPos.p[0], p[1] - lastPos.p[1]) * 180 / Math.PI;
         gpsCourse = heading; gpsCourseAt = now;
       }
     } else if (typeof cSpeed === 'number' && !isNaN(cSpeed)) {
-      gpsSpeed = cSpeed;
+      // barely moved: displacement (~0) anchors the validation
+      setGpsSpeed(cSpeed, d / Math.max(dt, 1), dt);
     }
   } else if (typeof cSpeed === 'number' && !isNaN(cSpeed)) {
-    gpsSpeed = cSpeed;
+    setGpsSpeed(cSpeed, 0, 1); // first fix: no displacement yet, extra-strict cross-check
   }
   lastPos = { p, t: pos.timestamp };
   if (heading !== null) lastHeading = heading; // GPS travel heading wins when moving
@@ -2160,7 +2205,8 @@ function teardownDashboardStage() {
     const n = $(id);
     const home = n && n._dashHome;
     if (n && home && home.parent) {
-      home.parent.insertBefore(n, home.next);
+      const next = (home.next && home.next.parentNode === home.parent) ? home.next : null;
+      home.parent.insertBefore(n, next);
       delete n._dashHome;
     }
   }
@@ -2184,6 +2230,53 @@ function fitDashboardStage() {
   stage.style.top = ((vh - DASH_H * s) / 2) + 'px';
   layoutDashMenu(); // re-dock the body-level menu panel to the new stage rect
   layoutDashDrawer(); // and the planning drawer
+}
+
+/* ---------------- cluster stage: fixed 1920x720 canvas ----------------
+   Mirrors the dashboard stage: #map and #spotify-pane are reparented into
+   #cluster-ui (the 1920x720 canvas) on entry and restored to their homes on
+   exit, so the cluster always keeps the dashboard's aspect ratio no matter
+   the screen. Children are stage-absolute (see styles.css); JS only zooms
+   and centers the canvas, exactly like fitDashboardStage. */
+const CLUSTER_W = 1920, CLUSTER_H = 720;
+const CLUSTER_STAGE_NODES = ['map', 'spotify-pane'];
+function buildClusterStage() {
+  const stage = $('cluster-ui');
+  if (!stage) return stage;
+  for (const id of CLUSTER_STAGE_NODES) {
+    const n = $(id);
+    if (!n || n.parentNode === stage) continue;
+    n._clusterHome = { parent: n.parentNode, next: n.nextSibling };
+    stage.appendChild(n);
+  }
+  return stage;
+}
+function teardownClusterStage() {
+  for (const id of CLUSTER_STAGE_NODES) {
+    const n = $(id);
+    const home = n && n._clusterHome;
+    if (n && home && home.parent) {
+      const next = (home.next && home.next.parentNode === home.parent) ? home.next : null;
+      home.parent.insertBefore(n, next);
+      delete n._clusterHome;
+    }
+  }
+}
+function fitClusterStage() {
+  const ui = $('cluster-ui');
+  if (!ui) return;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const s = Math.min(1, vw / CLUSTER_W, vh / CLUSTER_H);
+  if (s > 0 && 'zoom' in ui.style) {
+    ui.style.transform = '';
+    ui.style.zoom = String(s);
+  } else {
+    ui.style.zoom = '';
+    ui.style.transform = 'scale(' + s + ')';
+    ui.style.transformOrigin = 'top left';
+  }
+  ui.style.left = ((vw - CLUSTER_W * s) / 2) + 'px';
+  ui.style.top = ((vh - CLUSTER_H * s) / 2) + 'px';
 }
 
 /* The Vice City widget floats over the right of the map, so the camera's
@@ -2233,9 +2326,15 @@ function applyAppMode() {
   const flags = modeBodyFlags(appMode);
   document.body.classList.toggle('dashboard-mode', flags.dashboard);
   document.body.classList.toggle('cluster-mode', flags.cluster);
+  /* Stage lifecycle: tear down the stage we're leaving BEFORE building the
+     one we're entering. A build records each node's pre-stage home; if the
+     old stage were torn down after the new build, its stale home would yank
+     the shared map/Spotify nodes right back out of the new stage. */
+  teardownClusterStage();
+  teardownDashboardStage();
   if (dash) { try { window.scrollTo(0, 0); } catch (e) {}
     buildDashboardStage(); fitDashboardStage(); }
-  else teardownDashboardStage();
+  if (clu) { buildClusterStage(); fitClusterStage(); }
   const cui = $('cluster-ui');
   if (cui) cui.hidden = !clu;
   if (clu) refreshClusterLive();
@@ -2706,9 +2805,12 @@ function wireSpotifyMenu() {
     // map-safe (fitDashboardStage only zooms, then map.resize()).
     clearTimeout(rsT);
     rsT = setTimeout(() => {
-      if (appMode !== 'dashboard') return;
-      fitDashboardStage();
-      if (map && map.resize) { try { map.resize(); } catch (e) {} }
+      if (appMode === 'dashboard') {
+        fitDashboardStage();
+        if (map && map.resize) { try { map.resize(); } catch (e) {} }
+      } else if (appMode === 'cluster') {
+        fitClusterStage();
+      }
     }, 150);
   });
 }

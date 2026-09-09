@@ -248,16 +248,123 @@ html body.theme-san-andreas:not(.dashboard-mode) .sasp.is-idle .sasp-main{visibi
 /* ================= Cluster Mode: San Andreas =================
    NOTE: lives here, not dashboard.css — that file is HERO-locked
    (themes/LOCKED.json). Strictly cluster-scoped, no phone impact.
-   Grove Street console: Bank Gothic numerals, gold chamfer, green accents. */
-body.cluster-mode.theme-san-andreas{background:radial-gradient(120% 90% at 50% 112%, #18230f 0%, #0b0e07 60%, #000 100%)}
-body.cluster-mode.theme-san-andreas #cluster-speed-num{font-family:'Bank Gothic',sans-serif;color:#f6efdb;
-  text-shadow:0 4px 0 #111,0 8px 30px rgba(0,0,0,.7)}
-body.cluster-mode.theme-san-andreas #cluster-speed-unit{font-family:'Bank Gothic',sans-serif;color:#7ec850;letter-spacing:12px}
+   Fixed 1920x720 stage geometry (the dashboard's canvas) — #cluster-ui is
+   zoomed to fit like #dash-stage, so the composition is identical on
+   every screen.
+   Grove Street console: dark olive plates, gold chamfer, Bank Gothic,
+   green accents, US-style speed-limit sign. */
+
+/* ---- backdrop: warm desert night, amber horizon glow ---- */
+body.cluster-mode.theme-san-andreas{background:#0a0906}
+body.cluster-mode.theme-san-andreas #cluster-backdrop{display:block;position:absolute;inset:0;z-index:30;
+  background:
+    radial-gradient(90% 42% at 50% 0%, rgba(232,163,61,.14) 0%, rgba(232,163,61,0) 70%),
+    linear-gradient(180deg, #241c0e 0%, #141208 34%, #0a0906 78%, #060504 100%)}
+
+/* ---- header: grove console bar ---- */
+body.cluster-mode.theme-san-andreas #cluster-header{display:flex;align-items:center;gap:23px;
+  position:absolute;top:0;left:0;right:0;height:50px;z-index:33;padding:0 31px;
+  background:linear-gradient(180deg, #1d1a10 0%, #141208 100%);
+  border-top:2px solid #e8a33d;border-bottom:1px solid rgba(232,163,61,.55);
+  box-shadow:0 3px 12px rgba(0,0,0,.6)}
+body.cluster-mode.theme-san-andreas #cluster-logo{background:none;border:none;padding:0;cursor:pointer;
+  display:flex;align-items:center}
+body.cluster-mode.theme-san-andreas #cluster-logo img{display:none}
+body.cluster-mode.theme-san-andreas #cluster-logo::after{content:"SAN ANDREAS";
+  font-family:'Bank Gothic',sans-serif;font-size:33px;letter-spacing:5px;color:#e8a33d;
+  text-shadow:0 3px 0 #000}
+body.cluster-mode.theme-san-andreas #cluster-wx{display:flex;align-items:center;gap:10px;
+  font-family:'Bank Gothic',sans-serif;font-size:24px;color:#7ec850;letter-spacing:2px}
+body.cluster-mode.theme-san-andreas #cluster-clock{position:absolute;left:50%;transform:translateX(-50%);
+  display:flex;align-items:baseline;gap:19px}
+body.cluster-mode.theme-san-andreas #cluster-date{font-family:'Bank Gothic',sans-serif;font-size:20px;
+  color:#8f8468;letter-spacing:4px}
+body.cluster-mode.theme-san-andreas #cluster-time{font-family:'Bank Gothic',sans-serif;font-size:35px;
+  color:#f6efdb;letter-spacing:3px;text-shadow:0 3px 0 #000}
+body.cluster-mode.theme-san-andreas #cluster-tagline{display:none}
+body.cluster-mode.theme-san-andreas #menu-btn{display:none}
+
+/* ---- nav card: gold chamfer frame ---- */
+body.cluster-mode.theme-san-andreas #cluster-minimap{left:38px;top:79px;width:576px;height:446px;z-index:30;
+  border:4px solid #e8a33d;border-radius:12px;background:rgba(20,18,8,.94);
+  box-shadow:inset 0 0 0 2px #0a0906,inset 0 0 0 5px rgba(126,200,80,.35),0 10px 42px rgba(0,0,0,.65)}
+body.cluster-mode.theme-san-andreas #map{left:56px;top:173px;width:541px;height:259px;border-radius:6px;z-index:31}
+body.cluster-mode.theme-san-andreas #cluster-turn:not([hidden]){left:56px;top:90px;transform:none;z-index:32;
+  width:541px;max-width:none;display:flex;align-items:center;gap:17px}
+body.cluster-mode.theme-san-andreas #cluster-turn-arrow{width:65px;height:65px;flex:0 0 auto;
+  filter:drop-shadow(0 3px 0 #000)}
+body.cluster-mode.theme-san-andreas #cluster-turn-arrow svg{width:100%;height:100%}
+body.cluster-mode.theme-san-andreas #cluster-turn-arrow svg path{fill:#7ec850}
+body.cluster-mode.theme-san-andreas #cluster-turn-distance{font-family:'Bank Gothic',sans-serif;font-size:56px;
+  letter-spacing:2px;color:#f6efdb;text-shadow:0 3px 0 #000;line-height:1}
+body.cluster-mode.theme-san-andreas #cluster-turn-road{font-family:'Bank Gothic',sans-serif;font-size:33px;
+  letter-spacing:2px;color:#e8a33d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:365px}
+body.cluster-mode.theme-san-andreas #cluster-turn-instruction{display:none}
+body.cluster-mode.theme-san-andreas #cluster-trip:not([hidden]){display:flex;position:absolute;left:56px;top:446px;
+  width:541px;z-index:32;align-items:center;justify-content:center;gap:19px;
+  font-family:'Bank Gothic',sans-serif;font-size:31px;letter-spacing:2px;color:#e8a33d;
+  text-shadow:0 3px 0 #000}
+body.cluster-mode.theme-san-andreas #cluster-trip .trip-sep{color:#7ec850}
+body.cluster-mode.theme-san-andreas #cluster-trip .trip-cyan{color:#7ec850}
+
+/* ---- hero speed: Bank Gothic block numerals ---- */
+body.cluster-mode.theme-san-andreas #cluster-speed{top:40%}
+body.cluster-mode.theme-san-andreas #cluster-speed-num{font-family:'Bank Gothic',sans-serif;font-weight:400;
+  font-size:211px;line-height:.95;color:#f6efdb;font-variant-numeric:tabular-nums;
+  text-shadow:0 7px 0 #111,0 15px 46px rgba(0,0,0,.7)}
+body.cluster-mode.theme-san-andreas #cluster-speed-unit{font-family:'Bank Gothic',sans-serif;font-size:42px;
+  color:#7ec850;letter-spacing:12px;margin-top:8px;text-shadow:0 3px 0 #000}
 body.cluster-mode.theme-san-andreas #cluster-speed.over #cluster-speed-num{color:#ffd34d}
-body.cluster-mode.theme-san-andreas #cluster-minimap{border:4px solid #e8a33d;border-radius:10px;
-  box-shadow:0 0 0 2px #111,0 0 24px rgba(232,163,61,.35),inset 0 0 0 2px rgba(126,200,80,.22)}
-body.cluster-mode.theme-san-andreas #cluster-turn-distance{font-family:'Bank Gothic',sans-serif;letter-spacing:2px}
-body.cluster-mode.theme-san-andreas #cluster-turn-road{color:#e8a33d;font-family:'Bank Gothic',sans-serif;letter-spacing:2px}
-body.cluster-mode.theme-san-andreas #cluster-music{border:2px solid #e8a33d;border-radius:10px;background:rgba(14,13,10,.82)}
-body.cluster-mode.theme-san-andreas #cluster-music-title{font-family:'Bank Gothic',sans-serif;color:#f6efdb}
-body.cluster-mode.theme-san-andreas #cluster-mode-exit{border-color:#7ec850;color:#7ec850;border-radius:10px}
+/* US-style limit sign instead of the EU roundel */
+body.cluster-mode.theme-san-andreas #cluster-limit:not([hidden]){left:50%;top:40%;transform:translate(259px,29px);
+  width:119px;height:142px;border-radius:10px;background:#f4f1e6;border:5px solid #141208;
+  flex-direction:column;gap:0}
+body.cluster-mode.theme-san-andreas #cluster-limit::before{content:"SPEED LIMIT";
+  font-family:'Bank Gothic',sans-serif;font-size:14px;letter-spacing:2px;color:#141208;line-height:1;
+  margin-bottom:5px}
+body.cluster-mode.theme-san-andreas #cluster-limit-num{font-family:'Bank Gothic',sans-serif;font-size:56px;
+  font-weight:400;color:#141208;line-height:1}
+
+/* ---- drive gauge: grove colors ---- */
+body.cluster-mode.theme-san-andreas #cluster-gauge{display:block;position:absolute;left:50%;top:57%;
+  transform:translateX(-50%);width:422px;height:137px;z-index:32}
+body.cluster-mode.theme-san-andreas #cluster-gauge-svg{width:100%;height:100%;overflow:visible}
+body.cluster-mode.theme-san-andreas .cg-tick{stroke:rgba(246,239,219,.18);stroke-width:7;stroke-linecap:round;
+  transition:stroke .45s ease,filter .45s ease,opacity .45s ease}
+body.cluster-mode.theme-san-andreas .cg-tick.lit-regen{stroke:#7ec850;filter:drop-shadow(0 0 6px rgba(126,200,80,.9))}
+body.cluster-mode.theme-san-andreas .cg-tick.lit-power{stroke:#e8a33d;filter:drop-shadow(0 0 6px rgba(232,163,61,.9))}
+body.cluster-mode.theme-san-andreas .cg-tick.lit-coast{stroke:#f6efdb;filter:drop-shadow(0 0 6px rgba(246,239,219,.7))}
+body.cluster-mode.theme-san-andreas .cg-label{position:absolute;font-family:'Bank Gothic',sans-serif;
+  font-size:29px;letter-spacing:3px}
+body.cluster-mode.theme-san-andreas .cg-regen{left:6px;bottom:22px;color:#7ec850}
+body.cluster-mode.theme-san-andreas .cg-coast{left:50%;bottom:0;transform:translateX(-50%);color:#8f8468}
+body.cluster-mode.theme-san-andreas .cg-power{right:6px;bottom:22px;color:#e8a33d}
+
+/* ---- the REAL Spotify widget, shared with the dashboard ----
+   Same #spotify-pane / .sasp surface as every other mode — one DOM, one
+   skin, one SpotifyCore session. Cluster only docks it into the right
+   zone; nothing is cloned or remounted. (Placed after the phone .sasp
+   rules so it wins ties on source order.) */
+html body.theme-san-andreas.cluster-mode #spotify-pane{position:absolute;left:0;top:0;width:1920px;height:720px;
+  right:auto;bottom:auto;max-width:none;min-width:0;pointer-events:none;z-index:31;overflow:hidden;
+  container-type:size;padding:0}
+html body.theme-san-andreas.cluster-mode #spotify-stage{position:absolute;inset:0;pointer-events:none;
+  width:auto;height:auto}
+html body.theme-san-andreas.cluster-mode .sasp{position:absolute;top:auto;bottom:65px;right:38px;left:auto;
+  width:576px;max-width:none;margin:0}
+
+/* ---- footer: grove console tabs ---- */
+body.cluster-mode.theme-san-andreas #cluster-footer{display:flex;align-items:center;position:absolute;
+  left:0;right:0;bottom:0;height:50px;z-index:33;padding:0 31px;
+  background:linear-gradient(0deg, #141208 0%, #1d1a10 100%);
+  border-top:2px solid #e8a33d;box-shadow:0 -3px 12px rgba(0,0,0,.6)}
+body.cluster-mode.theme-san-andreas #cluster-tabs{display:flex;align-items:stretch;gap:0;height:100%}
+body.cluster-mode.theme-san-andreas #cluster-tabs button{background:none;border:none;cursor:pointer;
+  font-family:'Bank Gothic',sans-serif;font-size:25px;letter-spacing:4px;color:#8f8468;padding:0 27px;
+  border-right:1px solid rgba(232,163,61,.25)}
+body.cluster-mode.theme-san-andreas #cluster-tabs button.on{color:#141208;background:#e8a33d;
+  text-shadow:none;box-shadow:inset 0 0 0 2px #141208}
+body.cluster-mode.theme-san-andreas #cluster-footer-logo{display:none}
+body.cluster-mode.theme-san-andreas #cluster-footer::after{content:"GROVE STREET";
+  margin-left:auto;font-family:'Bank Gothic',sans-serif;font-size:24px;letter-spacing:6px;color:#7ec850}
+body.cluster-mode.theme-san-andreas #cluster-mode-exit{display:none}
