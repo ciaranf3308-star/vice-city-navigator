@@ -170,3 +170,22 @@ body.dashboard-mode.theme-san-andreas .sasp-idle-hint{
   line-height:1.7;color:#8f8468;text-transform:uppercase;margin:0;
 }
 body.dashboard-mode.theme-san-andreas .sasp.is-idle .sasp-main{visibility:hidden}
+/* ---------- lyric engine clamps ----------
+   The shared .wslyr sizes are cqw-based (9cqw of the 701px widget =
+   ~63px) — far too big for the 279px right panel, so lyrics overflowed
+   and clipped. Clamp to px exactly like the GTA V / RDR2 skins do. */
+body.dashboard-mode.theme-san-andreas .sasp-lyrics .wslyr{position:absolute;inset:0}
+body.dashboard-mode.theme-san-andreas .sasp-lyrics .wslyr-hero.s-xl{font-size:24px}
+body.dashboard-mode.theme-san-andreas .sasp-lyrics .wslyr-hero.s-lg{font-size:20px}
+body.dashboard-mode.theme-san-andreas .sasp-lyrics .wslyr-hero.s-md{font-size:17px}
+body.dashboard-mode.theme-san-andreas .sasp-lyrics .wslyr-hero.s-sm{font-size:16px} /* never tiny */
+body.dashboard-mode.theme-san-andreas .sasp-lyrics .wslyr-prev{font-size:13px;opacity:.6}
+body.dashboard-mode.theme-san-andreas .sasp-lyrics .wslyr-next{font-size:12px;opacity:.6}
+body.dashboard-mode.theme-san-andreas .sasp-lyrics .wslyr-state .wslyr-wait{font-size:28px}
+body.dashboard-mode.theme-san-andreas .sasp-lyrics .wslyr-state .wslyr-cap{font-size:11px}
+body.dashboard-mode.theme-san-andreas .sasp-lyrics .wslyr-hero{left:6%;right:6%} /* keep inside the panel */
+body.dashboard-mode.theme-san-andreas .sasp-lyrics .wslyr-hero.v-up{top:18%;max-height:68%}
+body.dashboard-mode.theme-san-andreas .sasp-lyrics .wslyr-hero.v-low{top:38%;max-height:54%}
+body.dashboard-mode.theme-san-andreas .sasp-lyrics .wslyr-hero .wslyr-w{
+  text-shadow:.07em .07em 0 #1a1206,0 0 .35em rgba(255,180,40,.45);
+} /* guarantee contrast on the dark panel */
