@@ -171,7 +171,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v67"), 'SW shell cache v67');
+ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
 ok(swSrc.includes("ws-theme-v167"), 'SW theme cache v167');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
@@ -585,8 +585,8 @@ ok(/body\.dashboard-mode\.theme-san-andreas #search-bar\{display:none\}/.test(cs
   'SA dashboard hides the search pill for the hero composition');
 ok(/body\.dashboard-mode\.theme-rdr2 #search-bar\{display:none\}/.test(cssSrc),
   'RDR2 dashboard hides the search pill for the hero composition');
-ok(appSrc.includes("openPlanning('search')") && /saDash && !dismissing/.test(appSrc),
-  'SA dashboard MAP tab opens planning when there is nothing to dismiss');
+ok(appSrc.includes("openPlanning('search')") && /dashMode && !dismissing/.test(appSrc),
+  'dashboard MAP tab opens planning on every theme when there is nothing to dismiss');
 ok(/body\.dashboard-mode #menu-btn\{display:none\}/.test(cssSrc),
   'dashboard hides the floating menu button behind the bar (bottom-bar tabs open the menu)');
 ok(!/DASH_STAGE_NODES = \[[^\]]*'drawer'/.test(appSrc),

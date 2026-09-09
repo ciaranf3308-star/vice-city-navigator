@@ -312,12 +312,17 @@ body.theme-rdr2 #search-bar span{opacity:.85}
 #drawer[hidden]{display:none}
 #drawer-handle{display:none}
 #drawer-close{position:absolute;top:10px;right:10px;width:40px;height:40px;font-size:15px}
+#search-row{display:flex;gap:10px;align-items:stretch;margin-top:34px}
 #search{
-  width:100%;font:inherit;font-size:17px;color:var(--ink);
+  flex:1;min-width:0;font:inherit;font-size:17px;color:var(--ink);
   background:rgba(255,255,255,.06);border:1.5px solid var(--purple);border-radius:14px;
-  padding:14px;outline:none;margin-top:34px;
+  padding:14px;outline:none;
 }
 #search:focus{border-color:var(--pink);box-shadow:0 0 14px rgba(255,113,206,.4)}
+#voice-search-btn{flex:0 0 54px;font-size:22px;border-radius:14px}
+#voice-search-btn[hidden]{display:none}
+#voice-search-btn.listening{background:#ff2e56;border-color:#ff2e56;animation:voice-pulse 1.2s ease-out infinite}
+@keyframes voice-pulse{0%{box-shadow:0 0 0 0 rgba(255,46,86,.55)}100%{box-shadow:0 0 0 12px rgba(255,46,86,0)}}
 #results{list-style:none;margin:8px 0 0;padding:0;max-height:300px;overflow-y:auto}
 #results li{
   padding:13px 12px;border-bottom:1px solid rgba(185,103,255,.25);

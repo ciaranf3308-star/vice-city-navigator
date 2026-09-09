@@ -577,6 +577,9 @@ function buildThemeSelector() {
 
 function locateUser(center) {
   if (!('geolocation' in navigator)) return;
+  // Center on the last known fix straight away so the button always
+  // answers visibly, then refine with a fresh fix when it arrives.
+  if (center && userPos && map) map.flyTo({ center: userPos, duration: 800 });
   navigator.geolocation.getCurrentPosition(
     pos => {
       userPos = [pos.coords.longitude, pos.coords.latitude];
@@ -584,8 +587,8 @@ function locateUser(center) {
       if (window.VCNPlaces) VCNPlaces.maybeRefresh(userPos); // ambient POIs
       if (center && map) map.flyTo({ center: userPos, zoom: 14, duration: 1200 });
     },
-    () => { if (center) toast('Location unavailable — showing Dublin.'); },
-    { enableHighAccuracy: true, timeout: 8000 }
+    () => { if (center && !userPos) toast('Location unavailable — showing Dublin.'); },
+    { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 }
   );
 }
 
@@ -1316,6 +1319,51 @@ async function runSearch(q) {
   } catch (e) { toast('Search failed — check your connection.'); }
 }
 
+/* ---------------- voice search (speech-to-text) ----------------
+   Web Speech API: Chrome/Android (the car) supports it. Where the
+   browser has no SpeechRecognition (e.g. iOS Safari) the mic button
+   hides itself instead of failing. */
+let voiceRec = null, voiceListening = false;
+function wireVoiceSearch() {
+  const btn = $('voice-search-btn'), input = $('search');
+  if (!btn || !input) return;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { btn.hidden = true; return; }
+  btn.addEventListener('click', () => {
+    if (voiceListening) { try { voiceRec.stop(); } catch (e) {} return; }
+    const rec = new SR();
+    voiceRec = rec;
+    rec.lang = 'en-IE';
+    rec.interimResults = true;
+    rec.maxAlternatives = 1;
+    rec.onresult = e => {
+      let text = '';
+      for (const r of e.results) text += r[0].transcript;
+      input.value = text;
+      const last = e.results[e.results.length - 1];
+      if (last.isFinal) { const q = text.trim(); if (q) runSearch(q); }
+    };
+    rec.onerror = e => {
+      if (e.error === 'not-allowed' || e.error === 'service-not-allowed')
+        toast('Microphone blocked — allow it in the browser site settings.');
+      else if (e.error === 'no-speech') toast('Didn’t catch that — tap the mic and try again.');
+      else if (e.error !== 'aborted') toast('Voice search isn’t available right now.');
+    };
+    rec.onend = () => {
+      voiceListening = false; voiceRec = null;
+      btn.classList.remove('listening');
+      input.placeholder = 'Search places…';
+    };
+    voiceListening = true;
+    btn.classList.add('listening');
+    input.placeholder = 'Listening…';
+    try { rec.start(); } catch (e) { rec.onend(); }
+  });
+}
+function stopVoiceSearch() {
+  if (voiceListening && voiceRec) { try { voiceRec.stop(); } catch (e) {} }
+}
+
 /* ---------------- routing ---------------- */
 async function osrmRoute(from, to) {
   const url = `${OSRM}/${from[0]},${from[1]};${to[0]},${to[1]}?overview=full&geometries=geojson&steps=true`;
@@ -1697,6 +1745,7 @@ function openPlanning(view) {
   }
 }
 function closeDrawer() {
+  stopVoiceSearch();
   setUiMode(navActive ? 'drive' : 'explore');
 }
 function openMenu() {
@@ -2435,15 +2484,15 @@ function wireControls() {
         return;
       }
       if (t === 'settings') { openMenu(); setDashTab(t); return; }
-      const saDash = document.body.classList.contains('dashboard-mode') &&
-        document.body.classList.contains('theme-san-andreas');
+      const dashMode = document.body.classList.contains('dashboard-mode');
       const dismissing = !$('menu-panel').hidden || document.body.classList.contains('radio-off');
       closeMenu();
       document.body.classList.remove('radio-off');
       setDashTab('map');
-      // SA dashboard hides the search pill for the hero composition; the MAP
-      // tab is the explicit entry point to route planning there.
-      if (t === 'map' && saDash && !dismissing) openPlanning('search');
+      // Dashboard hides the floating search pill on every theme (hero
+      // compositions), so the MAP tab is the explicit entry point to
+      // route planning / search there.
+      if (t === 'map' && dashMode && !dismissing) openPlanning('search');
     });
   });
   initDashClock();
@@ -2577,6 +2626,7 @@ function wireControls() {
 /* ---------------- boot ---------------- */
 initAppMode();
 wireSearch();
+wireVoiceSearch();
 wireSavedPlaces();
 wireMarkerSheet();
 wireControls();
