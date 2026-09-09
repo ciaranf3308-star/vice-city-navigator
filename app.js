@@ -1334,7 +1334,7 @@ function syncDashPadding() {
   // keep the camera target clear of them whether driving or exploring.
   const dash = b.contains('dashboard-mode');
   if (dash && b.contains('theme-vice-city'))
-    map.setPadding({ top: 76, right: 900, bottom: 100, left: 8 });
+    map.setPadding({ top: 76, right: 765, bottom: 100, left: 8 });
   else if (dash)
     map.setPadding({ top: 76, right: 8, bottom: 88, left: 8 });
   else map.setPadding({ top: 0, right: 0, bottom: 0, left: 0 });
