@@ -211,8 +211,9 @@ body.dashboard-mode.theme-vice-city #dash-bottombar .dash-chrome{
 }
 body.dashboard-mode.theme-vice-city #map-tools{display:none}
 body.dashboard-mode.theme-vice-city .dash-zoom{
+  position:absolute;right:360px;top:50%;transform:translateY(-50%);z-index:2;
   display:flex;align-items:center;gap:10px;flex:0 0 auto;
-  margin-left:24px;
+  margin:0;
 }
 body.dashboard-mode.theme-vice-city .dash-zoom button{
   width:44px;height:44px;border-radius:50%;cursor:pointer;
