@@ -272,15 +272,20 @@ function buildClusterGauge() {
   if (!svg || clusterGaugeTicks.length) return;
   if (typeof document.createElementNS !== 'function') return;
   const NS = 'http://www.w3.org/2000/svg';
-  const N = 25, cx = 200, cy = 188, rx = 168, ry = 120, mid = (N - 1) / 2;
+  /* Shallow ribbon cradling the speed block from below: REGEN on the
+     left end, POWER on the right, COAST on the lengthened centre tick.
+     i=0 stays the left end so the regen/coast/power zone mapping and
+     the centre-out fill logic below are unchanged. */
+  const N = 25, cx = 235, cy = -300, rx = 362, ry = 470, mid = (N - 1) / 2;
   for (let i = 0; i < N; i++) {
-    const a = (195 + (150 * i) / (N - 1)) * Math.PI / 180;
+    const a = (118 - (56 * i) / (N - 1)) * Math.PI / 180;
+    const c = Math.cos(a), s = Math.sin(a);
     const ln = document.createElementNS(NS, 'line');
-    ln.setAttribute('x1', (cx + (rx - 18) * Math.cos(a)).toFixed(1));
-    ln.setAttribute('y1', (cy + (ry - 13) * Math.sin(a)).toFixed(1));
-    ln.setAttribute('x2', (cx + rx * Math.cos(a)).toFixed(1));
-    ln.setAttribute('y2', (cy + ry * Math.sin(a)).toFixed(1));
-    ln.setAttribute('class', 'cg-tick');
+    ln.setAttribute('x1', (cx + (rx - 15) * c).toFixed(1));
+    ln.setAttribute('y1', (cy + (ry - 11) * s).toFixed(1));
+    ln.setAttribute('x2', (cx + rx * c).toFixed(1));
+    ln.setAttribute('y2', (cy + ry * s).toFixed(1));
+    ln.setAttribute('class', 'cg-tick' + (i === mid ? ' cg-mid' : ''));
     ln.dataset.zone = i < mid - 2 ? 'regen' : (i > mid + 2 ? 'power' : 'coast');
     ln.dataset.slot = String(Math.round(Math.abs(i - mid)));
     svg.appendChild(ln);
@@ -291,10 +296,13 @@ function buildClusterGauge() {
 /* Fills from the centre outward per band — never snaps across the arc. */
 function syncDriveForceGauge() {
   if (!clusterGaugeTicks.length) return;
-  const litSlots = driveForceBand; // 0..3 of ~5 slots per side
+  /* Band 0..3 (from real GPS acceleration) spreads across the side's
+     ticks from the centre outward: 1 -> 4 -> 7 -> 10 lit. The inference
+     is untouched — this is only how much of the ribbon illuminates. */
+  const litSlots = driveForceBand; // 0..3
   clusterGaugeTicks.forEach(ln => {
     const zone = ln.dataset.zone, slot = +ln.dataset.slot;
-    const active = driveForceState !== 'coast' && zone === driveForceState && slot <= litSlots + 1;
+    const active = driveForceState !== 'coast' && zone === driveForceState && (slot - 3) <= litSlots * 3;
     const coastOn = driveForceState === 'coast' && zone === 'coast';
     ln.classList.toggle('lit-regen', active && zone === 'regen');
     ln.classList.toggle('lit-power', active && zone === 'power');
@@ -943,7 +951,7 @@ function updateSpeedo() {
     if (!el || !userPos) return; // no fix yet: stay hidden
     el.hidden = false;
     const num = $('speedo-num');
-    const txt = kmh === null ? '–' : String(kmh);
+    const txt = kmh === null ? '--' : String(kmh);
     if (num.textContent !== txt) num.textContent = txt;
     const lim = $('speedo-limit');
     if (speedLimitKmh) {
@@ -979,7 +987,12 @@ function updateClusterSpeed(kmh) {
     } else lim.hidden = true;
   }
   const sp = $('cluster-speed');
-  if (sp) sp.classList.toggle('over', kmh !== null && !!speedLimitKmh && kmh > speedLimitKmh);
+  if (sp) {
+    sp.classList.toggle('over', kmh !== null && !!speedLimitKmh && kmh > speedLimitKmh);
+    /* Pricedown Bl's hyphen renders as a solid block, so the unavailable
+       state gets its own class for a clean fallback-font placeholder. */
+    sp.classList.toggle('na', kmh == null);
+  }
   /* Inferred drive meter — same GPS stream, no second watcher. */
   updateDriveForce(kmh);
 }

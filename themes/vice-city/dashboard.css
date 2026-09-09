@@ -399,17 +399,36 @@ body.cluster-mode.theme-vice-city::before{content:'';position:fixed;inset:-70px;
   pointer-events:none;background:url('dashboard/cluster-sunset.jpg') center / cover no-repeat;
   filter:blur(45px) brightness(.5) saturate(1.25)}
 body.cluster-mode.theme-vice-city #cluster-ui{background:#05020c url('dashboard/cluster-sunset.jpg') center / 100% 100% no-repeat}
+/* ---- instrument field: the speed cluster emerges from the art ----
+   No card, no rectangle — layered falloff only: a deep field behind the
+   digits, a faint reflection below, pink/cyan ambience at the flanks,
+   and quieted art where the map and Spotify dock so bright pixels never
+   compete with glanceable instruments. The sunset stays luminous in the
+   negative space. */
 body.cluster-mode.theme-vice-city #cluster-backdrop{display:block;position:absolute;inset:0;z-index:30;
   background:
-    radial-gradient(55% 44% at 50% 44%, rgba(5,2,12,.66) 0%, rgba(5,2,12,0) 70%),
-    linear-gradient(180deg, rgba(5,2,12,.52) 0%, rgba(5,2,12,0) 24%, rgba(5,2,12,0) 66%, rgba(5,2,12,.62) 100%)}
+    radial-gradient(29% 40% at 45.5% 38%, rgba(7,2,15,.78) 0%, rgba(7,2,15,.38) 55%, rgba(7,2,15,0) 75%),
+    radial-gradient(15% 9% at 45.5% 60%, rgba(255,113,206,.06) 0%, rgba(255,113,206,0) 70%),
+    radial-gradient(7% 16% at 29% 40%, rgba(1,205,254,.10) 0%, rgba(1,205,254,0) 70%),
+    radial-gradient(7% 16% at 62% 40%, rgba(255,45,149,.10) 0%, rgba(255,45,149,0) 70%),
+    linear-gradient(90deg, rgba(5,2,12,.50) 0%, rgba(5,2,12,0) 30%),
+    linear-gradient(270deg, rgba(5,2,12,.50) 0%, rgba(5,2,12,0) 34%),
+    linear-gradient(180deg, rgba(5,2,12,.50) 0%, rgba(5,2,12,0) 22%, rgba(5,2,12,0) 64%, rgba(5,2,12,.60) 100%)}
 
 /* ---- header: the dashboard topbar IS the cluster header ----
-   Same 78px neon chrome (re-scoped above); the cluster-specific header is
-   retired and only brand + temp + clock show. Brand opens the menu. */
+   Same DOM, cluster-scoped tightening only (~18% lighter): dashboard
+   mode is untouched. Brand opens the menu. */
 body.cluster-mode.theme-vice-city #cluster-header{display:none}
 body.cluster-mode.theme-vice-city #menu-btn{display:none}
-body.cluster-mode.theme-vice-city #dash-topbar{z-index:34}
+body.cluster-mode.theme-vice-city #dash-topbar{z-index:34;height:64px;
+  background-size:100% 1px,100% 1px,auto;
+  filter:drop-shadow(0 0 10px rgba(255,46,136,.45)) drop-shadow(0 4px 14px rgba(255,46,136,.20))}
+body.cluster-mode.theme-vice-city #dash-topbar .dash-chrome{gap:20px;padding:0 28px}
+body.cluster-mode.theme-vice-city #dash-topbar .dash-logo{font-size:38px}
+body.cluster-mode.theme-vice-city #dash-topbar .dash-palm{width:23px;height:31px}
+body.cluster-mode.theme-vice-city #dash-topbar .dash-wx{font-size:23px;gap:8px}
+body.cluster-mode.theme-vice-city #dash-topbar #dash-date{font-size:21px}
+body.cluster-mode.theme-vice-city #dash-topbar #dash-time{font-size:29px}
 body.cluster-mode.theme-vice-city #dash-bottombar{z-index:32}
 body.cluster-mode.theme-vice-city #dash-topbar .dash-brand{pointer-events:auto;cursor:pointer}
 body.cluster-mode.theme-vice-city #dash-topbar .sa-logo,
@@ -417,76 +436,144 @@ body.cluster-mode.theme-vice-city #dash-topbar .dash-los-santos,
 body.cluster-mode.theme-vice-city #dash-topbar .rdr2-logo{display:none}
 
 /* ---- footer: the dashboard bottombar IS the cluster footer ----
-   Same 100px neon chrome; dashboard-only children hide, and the cluster tab
-   switcher + script logo ride transparently on the bar. */
+   Same chrome, cluster-scoped ~16% lighter; dashboard-only children hide,
+   and the cluster tab switcher + script logo ride transparently on the bar. */
 body.cluster-mode.theme-vice-city #dash-bottombar .dash-tabs,
 body.cluster-mode.theme-vice-city #dash-bottombar .dash-dest,
 body.cluster-mode.theme-vice-city #dash-bottombar .dash-zoom,
 body.cluster-mode.theme-vice-city #dash-bottombar .dash-trip,
 body.cluster-mode.theme-vice-city #dash-bottombar .dash-tag{display:none}
+body.cluster-mode.theme-vice-city #dash-bottombar{height:84px;
+  background-size:100% 3px,auto;
+  filter:drop-shadow(0 0 10px rgba(255,46,136,.45)) drop-shadow(0 -4px 14px rgba(255,46,136,.18))}
 body.cluster-mode.theme-vice-city #cluster-footer{display:flex;align-items:center;position:absolute;left:0;right:0;bottom:0;
-  height:100px;z-index:33;padding:0 40px 0 48px;
+  height:84px;z-index:33;padding:0 36px 0 44px;
   background:none;border:none;box-shadow:none}
 body.cluster-mode.theme-vice-city #cluster-mode-exit{display:none}
 
-/* ---- nav card ---- */
-body.cluster-mode.theme-vice-city #cluster-minimap{left:24px;top:88px;width:500px;height:512px;z-index:30;
-  border:3px solid #ff2d95;border-radius:26px;background:rgba(9,5,20,.94);
-  box-shadow:inset 0 0 0 2px rgba(1,205,254,.85),0 0 30px rgba(255,45,149,.55),0 10px 44px rgba(0,0,0,.6)}
-/* the map fills the nav card edge to edge (16px insets); when a turn is being
-   announced the turn header takes the card top and the map drops below it */
-body.cluster-mode.theme-vice-city #map{left:40px;top:104px;width:468px;height:480px;border-radius:10px;z-index:31}
-body.cluster-mode.theme-vice-city #cluster-ui:has(#cluster-turn:not([hidden])) #map{top:216px;height:368px}
-/* turn header lives on the card top */
-body.cluster-mode.theme-vice-city #cluster-turn:not([hidden]){left:40px;top:104px;transform:none;z-index:32;
-  width:468px;max-width:none;display:flex;align-items:center;gap:18px}
-body.cluster-mode.theme-vice-city #cluster-turn-arrow{width:72px;height:72px;flex:0 0 auto}
-body.cluster-mode.theme-vice-city #cluster-turn-arrow svg{width:100%;height:100%}
-body.cluster-mode.theme-vice-city #cluster-turn-arrow svg path{fill:#ff71ce}
+/* ---- nav card: a built-in instrument, not a map iframe ----
+   ~13% less visual mass (500x512 -> 460x486) so the centre breathes.
+   Material: dark navy structure, one thin cyan outer energy edge, one
+   selective pink counter-edge, tiny corner energy ticks, inward shadow
+   falling toward the live map. The map stays the content hero. */
+body.cluster-mode.theme-vice-city #cluster-minimap{left:24px;top:74px;width:460px;height:486px;z-index:30;
+  border:1px solid rgba(1,205,254,.55);border-radius:18px;
+  background:linear-gradient(180deg,#0d0819,#070412);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,45,149,.30),
+    inset 0 16px 32px rgba(0,0,0,.55),
+    inset 0 -16px 32px rgba(0,0,0,.55),
+    0 18px 44px rgba(0,0,0,.55),
+    0 0 24px rgba(1,205,254,.10)}
+/* corner energy ticks: cyan pair + pink pair, the frame's jewellery */
+body.cluster-mode.theme-vice-city #cluster-minimap::before,
+body.cluster-mode.theme-vice-city #cluster-minimap::after{content:'';position:absolute;inset:6px;z-index:0;
+  pointer-events:none;background-repeat:no-repeat}
+body.cluster-mode.theme-vice-city #cluster-minimap::before{
+  background:
+    linear-gradient(#8ef4ff,#8ef4ff) left top / 20px 2px no-repeat,
+    linear-gradient(#8ef4ff,#8ef4ff) left top / 2px 20px no-repeat,
+    linear-gradient(#8ef4ff,#8ef4ff) right bottom / 20px 2px no-repeat,
+    linear-gradient(#8ef4ff,#8ef4ff) right bottom / 2px 20px no-repeat;
+  filter:drop-shadow(0 0 4px rgba(1,205,254,.8))}
+body.cluster-mode.theme-vice-city #cluster-minimap::after{
+  background:
+    linear-gradient(#ff7ab8,#ff7ab8) right top / 14px 2px no-repeat,
+    linear-gradient(#ff7ab8,#ff7ab8) right top / 2px 14px no-repeat,
+    linear-gradient(#ff7ab8,#ff7ab8) left bottom / 14px 2px no-repeat,
+    linear-gradient(#ff7ab8,#ff7ab8) left bottom / 2px 14px no-repeat;
+  filter:drop-shadow(0 0 4px rgba(255,45,149,.8))}
+/* the map fills the nav card (14px insets); when a turn is being announced
+   the turn header takes the card top and the map drops below it */
+body.cluster-mode.theme-vice-city #map{left:38px;top:88px;width:432px;height:458px;border-radius:8px;z-index:31}
+body.cluster-mode.theme-vice-city #cluster-ui:has(#cluster-turn:not([hidden])) #map{top:210px;height:336px}
+/* attribution: legally retained, visually a whisper on the map's edge */
+body.cluster-mode.theme-vice-city #map .maplibregl-ctrl-attrib{font-size:9px!important;line-height:1.5;
+  background:rgba(5,2,12,.55)!important;color:rgba(220,220,235,.50)!important;
+  padding:2px 8px;border-radius:6px 0 0 0}
+body.cluster-mode.theme-vice-city #map .maplibregl-ctrl-attrib a{color:rgba(220,220,235,.55)!important}
+/* turn header lives on the card top, visually attached to the minimap */
+body.cluster-mode.theme-vice-city #cluster-turn:not([hidden]){left:38px;top:88px;transform:none;z-index:32;
+  width:432px;max-width:none;display:flex;align-items:center;gap:16px}
+body.cluster-mode.theme-vice-city #cluster-turn-arrow{width:64px;height:64px;flex:0 0 auto}
+body.cluster-mode.theme-vice-city #cluster-turn-arrow svg{width:100%;height:100%;stroke:#ff71ce}
 body.cluster-mode.theme-vice-city #cluster-turn-arrow{filter:drop-shadow(0 0 10px rgba(255,45,149,.8))}
 body.cluster-mode.theme-vice-city #cluster-turn-main{gap:2px}
-body.cluster-mode.theme-vice-city #cluster-turn-distance{font-family:'Pricedown Bl',sans-serif;font-size:62px;line-height:1;
+body.cluster-mode.theme-vice-city #cluster-turn-distance{font-family:'Pricedown Bl',sans-serif;font-size:56px;line-height:1;
   color:#ff71ce;letter-spacing:2px;text-shadow:0 0 14px rgba(255,45,149,.75)}
-body.cluster-mode.theme-vice-city #cluster-turn-road{font-family:'Pricedown Bl',sans-serif;font-size:36px;color:#01cdfe;
-  letter-spacing:3px;text-shadow:0 0 10px rgba(1,205,254,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:330px}
+body.cluster-mode.theme-vice-city #cluster-turn-road{font-family:'Pricedown Bl',sans-serif;font-size:32px;color:#01cdfe;
+  letter-spacing:3px;text-shadow:0 0 10px rgba(1,205,254,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:300px}
 body.cluster-mode.theme-vice-city #cluster-turn-instruction{display:none}
 body.cluster-mode.theme-vice-city #cluster-turn-compass{display:flex;flex-direction:column;align-items:center;gap:2px;
-  margin-left:auto;color:#ff71ce;font-family:'Pricedown Bl',sans-serif;font-size:30px}
+  margin-left:auto;color:#ff71ce;font-family:'Pricedown Bl',sans-serif;font-size:28px}
 body.cluster-mode.theme-vice-city #cluster-compass-needle{width:0;height:0;
   border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:14px solid #ff71ce;
   filter:drop-shadow(0 0 6px rgba(255,45,149,.8));transition:transform .3s}
-/* trip strip on the card bottom */
-body.cluster-mode.theme-vice-city #cluster-trip:not([hidden]){display:flex;position:absolute;left:40px;top:548px;width:468px;z-index:32;
-  align-items:center;justify-content:center;gap:22px;
-  font-family:'Pricedown Bl',sans-serif;font-size:34px;letter-spacing:2px;color:#ff71ce;
+/* trip strip floats over the card bottom */
+body.cluster-mode.theme-vice-city #cluster-trip:not([hidden]){display:flex;position:absolute;left:38px;top:502px;width:432px;z-index:32;
+  align-items:center;justify-content:center;gap:20px;
+  font-family:'Pricedown Bl',sans-serif;font-size:30px;letter-spacing:2px;color:#ff71ce;
   text-shadow:0 0 10px rgba(255,45,149,.7)}
 body.cluster-mode.theme-vice-city #cluster-trip .trip-sep{color:#01cdfe;text-shadow:0 0 10px rgba(1,205,254,.7)}
 body.cluster-mode.theme-vice-city #cluster-trip .trip-cyan{color:#01cdfe;text-shadow:0 0 10px rgba(1,205,254,.7)}
 
-/* ---- hero speed ---- */
-body.cluster-mode.theme-vice-city #cluster-speed{top:36%}
-body.cluster-mode.theme-vice-city #cluster-speed-num{font-family:'Pricedown Bl',sans-serif;font-weight:400;font-size:212px;
-  line-height:.95;color:#fff;font-variant-numeric:tabular-nums;
-  text-shadow:0 0 16px rgba(255,113,206,.9),0 0 70px rgba(255,45,149,.5),0 8px 30px rgba(0,0,0,.7)}
-body.cluster-mode.theme-vice-city #cluster-speed-unit{font-family:'Pricedown Bl',sans-serif;font-size:44px;color:#ff71ce;
-  letter-spacing:16px;margin-top:2px;text-shadow:0 0 12px rgba(255,45,149,.7)}
-body.cluster-mode.theme-vice-city #cluster-speed.over #cluster-speed-num{color:#ffd34d;
-  text-shadow:0 0 20px rgba(255,211,77,.8),0 8px 30px rgba(0,0,0,.7)}
-body.cluster-mode.theme-vice-city #cluster-limit:not([hidden]){left:50%;top:36%;transform:translate(250px,40px)}
+/* ---- hero speed: the first thing the eye sees ----
+   Optical centre 45.5%: the bright map card carries more visual weight
+   than the dark Spotify mass, so the instrument sits a breath left of
+   geometric centre. Warm-white face, controlled hot-pink bloom, a
+   restrained cyan separation line, dark grounding — the glow supports
+   the glyph, never replaces it. */
+body.cluster-mode.theme-vice-city #cluster-speed{top:38%;left:45.5%}
+body.cluster-mode.theme-vice-city #cluster-speed-num{font-family:'Pricedown Bl',sans-serif;font-weight:400;font-size:224px;
+  line-height:.95;color:#fff7fa;font-variant-numeric:tabular-nums;
+  text-shadow:
+    0 2px 0 rgba(24,3,16,.85),
+    0 0 12px rgba(255,113,206,.55),
+    0 0 36px rgba(255,45,149,.30),
+    1px 0 0 rgba(1,205,254,.22);
+  transition:color .6s ease}
+/* Pricedown Bl's hyphen renders as a solid block, so the unavailable
+   state uses a compatible condensed fallback: clean "--", dimmed. */
+body.cluster-mode.theme-vice-city #cluster-speed.na #cluster-speed-num{
+  font-family:'Oswald','Arial Narrow',sans-serif;font-weight:500;font-size:200px;letter-spacing:22px;
+  color:rgba(255,247,250,.52);
+  text-shadow:0 2px 0 rgba(24,3,16,.85),0 0 18px rgba(255,45,149,.25)}
+body.cluster-mode.theme-vice-city #cluster-speed-unit{font-family:'Pricedown Bl',sans-serif;font-size:38px;color:#ff71ce;
+  letter-spacing:10px;margin-top:-4px;text-shadow:0 0 10px rgba(255,45,149,.6)}
+/* overspeed: digits warm toward red-pink with a breath more glow.
+   No flashing, no banners — obvious without panic. */
+body.cluster-mode.theme-vice-city #cluster-speed.over #cluster-speed-num{color:#ff8d8d;
+  text-shadow:
+    0 2px 0 rgba(24,3,16,.85),
+    0 0 14px rgba(255,110,110,.65),
+    0 0 44px rgba(255,45,80,.38),
+    1px 0 0 rgba(1,205,254,.18)}
+/* ---- speed limit: the real EU roundel, unthemed ----
+   A road-safety symbol, not a neon element — attached to the digit
+   block by spacing and alignment. Hidden entirely when unknown. */
+body.cluster-mode.theme-vice-city #cluster-limit:not([hidden]){left:45.5%;top:38%;
+  transform:translate(200px,-48px);width:104px;height:104px}
 
-/* ---- power arc gauge ---- */
-body.cluster-mode.theme-vice-city #cluster-gauge{display:block;position:absolute;left:50%;top:53%;transform:translateX(-50%);
-  width:420px;height:200px;z-index:32}
+/* ---- drive-force instrument: one object with the speed ----
+   A shallow ribbon cradling the digit block from below: REGEN (cyan)
+   left, POWER (pink) right, COAST (dim ivory) under the lengthened
+   centre tick. Ticks interpolate toward their state — smooth, calm,
+   never snapping. No needle, no fake kW. */
+body.cluster-mode.theme-vice-city #cluster-gauge{display:block;position:absolute;left:45.5%;top:368px;
+  transform:translateX(-50%);width:470px;height:206px;z-index:32}
 body.cluster-mode.theme-vice-city #cluster-gauge-svg{width:100%;height:100%;overflow:visible}
-body.cluster-mode.theme-vice-city .cg-tick{stroke:rgba(255,255,255,.16);stroke-width:7;stroke-linecap:round;
+body.cluster-mode.theme-vice-city .cg-tick{stroke:rgba(235,235,248,.15);stroke-width:5;stroke-linecap:round;
   transition:stroke .45s ease,filter .45s ease,opacity .45s ease}
-body.cluster-mode.theme-vice-city .cg-tick.lit-regen{stroke:#01cdfe;filter:drop-shadow(0 0 6px rgba(1,205,254,.9))}
-body.cluster-mode.theme-vice-city .cg-tick.lit-power{stroke:#ff2d95;filter:drop-shadow(0 0 6px rgba(255,45,149,.9))}
-body.cluster-mode.theme-vice-city .cg-tick.lit-coast{stroke:#e8e8f2;filter:drop-shadow(0 0 6px rgba(232,232,242,.7))}
-body.cluster-mode.theme-vice-city .cg-label{position:absolute;font-family:'Pricedown Bl',sans-serif;font-size:30px;letter-spacing:3px}
-body.cluster-mode.theme-vice-city .cg-regen{left:6px;bottom:34px;color:#01cdfe;text-shadow:0 0 10px rgba(1,205,254,.7);transform:rotate(-24deg)}
-body.cluster-mode.theme-vice-city .cg-coast{left:50%;bottom:0;transform:translateX(-50%);color:#8f8fa3}
-body.cluster-mode.theme-vice-city .cg-power{right:6px;bottom:34px;color:#ff2d95;text-shadow:0 0 10px rgba(255,45,149,.7);transform:rotate(24deg)}
+body.cluster-mode.theme-vice-city .cg-tick.cg-mid{stroke:rgba(235,235,248,.32);stroke-width:6}
+body.cluster-mode.theme-vice-city .cg-tick.lit-regen{stroke:#01cdfe;filter:drop-shadow(0 0 5px rgba(1,205,254,.85))}
+body.cluster-mode.theme-vice-city .cg-tick.lit-power{stroke:#ff2d95;filter:drop-shadow(0 0 5px rgba(255,45,149,.85))}
+body.cluster-mode.theme-vice-city .cg-tick.lit-coast{stroke:#e8e8f2;filter:drop-shadow(0 0 5px rgba(232,232,242,.6))}
+body.cluster-mode.theme-vice-city .cg-label{position:absolute;font-family:'Pricedown Bl',sans-serif;font-size:25px;
+  letter-spacing:4px;line-height:1;white-space:nowrap}
+body.cluster-mode.theme-vice-city .cg-regen{left:22px;top:138px;color:#01cdfe;text-shadow:0 0 10px rgba(1,205,254,.7)}
+body.cluster-mode.theme-vice-city .cg-coast{left:50%;top:180px;transform:translateX(-50%);color:#8f8fa3;font-size:21px;
+  letter-spacing:5px}
+body.cluster-mode.theme-vice-city .cg-power{right:22px;top:138px;color:#ff2d95;text-shadow:0 0 10px rgba(255,45,149,.7)}
 
 /* ---- the REAL Spotify widget, shared with the dashboard ----
    Cluster shows the same #spotify-pane / #spotify-stage surface — one DOM,
@@ -498,13 +585,17 @@ body.cluster-mode.theme-vice-city .vcsp{position:absolute;top:auto;bottom:112px;
   left:auto;translate:none;width:670px;margin:0;
   filter:drop-shadow(0 24px 32px rgba(0,0,0,.6)) drop-shadow(0 0 26px rgba(255,45,149,.28))}
 
-/* ---- tab switcher + script logo ride on the bottombar (see footer block above) ---- */
-body.cluster-mode.theme-vice-city #cluster-tabs{display:flex;align-items:center;gap:8px}
-body.cluster-mode.theme-vice-city #cluster-tabs button{background:none;border:none;cursor:pointer;
-  font-family:'Pricedown Bl',sans-serif;font-size:27px;letter-spacing:4px;color:#01cdfe;padding:8px 20px;
-  text-shadow:0 0 10px rgba(1,205,254,.6)}
+/* ---- tab switcher + script logo ride on the bottombar (see footer block above) ----
+   Flat game-menu navigation, not touchscreen tiles: the active tab is
+   unmistakable via a crisp pink underline, never a glowing button. */
+body.cluster-mode.theme-vice-city #cluster-tabs{display:flex;align-items:center;gap:6px}
+body.cluster-mode.theme-vice-city #cluster-tabs button{background:none;border:none;cursor:pointer;position:relative;
+  font-family:'Pricedown Bl',sans-serif;font-size:24px;letter-spacing:5px;color:#01cdfe;padding:10px 18px 12px;
+  text-shadow:0 0 10px rgba(1,205,254,.55)}
 body.cluster-mode.theme-vice-city #cluster-tabs button.on{color:#ff71ce;text-shadow:0 0 14px rgba(255,45,149,.9)}
-body.cluster-mode.theme-vice-city #cluster-tabs button:not(:last-child){border-right:1px solid rgba(1,205,254,.35)}
-body.cluster-mode.theme-vice-city #cluster-footer-logo{margin-left:auto;font-family:'Yellowtail',cursive;font-size:36px;
+body.cluster-mode.theme-vice-city #cluster-tabs button.on::after{content:'';position:absolute;left:18px;right:18px;bottom:5px;
+  height:2px;background:#ff2d95;box-shadow:0 0 8px rgba(255,45,149,.9)}
+body.cluster-mode.theme-vice-city #cluster-tabs button:not(:last-child){border-right:1px solid rgba(1,205,254,.30)}
+body.cluster-mode.theme-vice-city #cluster-footer-logo{margin-left:auto;font-family:'Yellowtail',cursive;font-size:32px;
   color:#ff71ce;transform:rotate(-4deg);text-shadow:0 0 12px rgba(255,45,149,.85)}
 

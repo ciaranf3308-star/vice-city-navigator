@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v169"), 'SW theme cache v169');
+ok(swSrc.includes("ws-theme-v170"), 'SW theme cache v170');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -1853,7 +1853,7 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
     'VC cluster paints the sunset 1:1 on the stage (no crop: art is 8:3, stage is 8:3)');
   ok(/body\.cluster-mode\.theme-vice-city::before\{[^}]*cluster-sunset\.jpg[^}]*blur/.test(cssSrc),
     'VC cluster letterbox is the same art blurred+dimmed, not a second crop');
-  ok(/body\.cluster-mode\.theme-vice-city #map\{[^}]*width:468px;height:480px/.test(cssSrc),
+  ok(/body\.cluster-mode\.theme-vice-city #map\{[^}]*width:432px;height:458px/.test(cssSrc),
     'VC cluster map fills its nav card frame');
   ok(cssSrc.includes('#cluster-ui:has(#cluster-turn:not([hidden])) #map'),
     'VC cluster map yields the card top to the turn header while navigating');
