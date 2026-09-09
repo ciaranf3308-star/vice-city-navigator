@@ -266,7 +266,12 @@
   }
 
   /* The lnglat rect the fog canvas should cover: the current
-     viewport expanded by REGION_PAD on every side. */
+     viewport expanded by REGION_PAD on every side.
+     Web-Mercator only exists to +/-85.051129 deg: past that
+     fromLngLat() yields +/-Infinity, which poisons the canvas
+     source's tile math and the fog layer renders as opaque black.
+     The map can't show beyond this latitude anyway, so clamp here. */
+  const MERCATOR_MAX_LAT = 85.051129;
   function computeRegion() {
     const b = map.getBounds();
     const sw = b.getSouthWest(), ne = b.getNorthEast();
@@ -277,8 +282,8 @@
     return {
       west: west - dLng * REGION_PAD,
       east: east + dLng * REGION_PAD,
-      south: Math.max(sw.lat - dLat * REGION_PAD, -90),
-      north: Math.min(ne.lat + dLat * REGION_PAD, 90),
+      south: Math.max(sw.lat - dLat * REGION_PAD, -MERCATOR_MAX_LAT),
+      north: Math.min(ne.lat + dLat * REGION_PAD, MERCATOR_MAX_LAT),
       precision: precisionForZoom(map.getZoom()),
     };
   }
