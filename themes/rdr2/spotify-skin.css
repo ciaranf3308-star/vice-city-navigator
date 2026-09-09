@@ -17,7 +17,7 @@
    ============================================================ */
 
 .rdsp {
-  position: absolute; left: auto; right: 70px; top: 50%; translate: 0 -50%;
+  position: absolute; left: auto; right: 70px; top: 45%; translate: 0 -50%;
   width: 600px; aspect-ratio: 1 / 1;
   transform: rotate(-6.5deg); transform-origin: center;
   container-type: size;

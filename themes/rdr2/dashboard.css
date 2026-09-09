@@ -200,9 +200,9 @@ body.dashboard-mode.theme-rdr2 .dash-tabs button.on{
   box-shadow:inset 0 0 0 1px rgba(216,179,106,.35), 0 2px 8px rgba(0,0,0,.5);
   text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 12px rgba(216,179,106,.25);
 }
-/* trip + zoom: pinned right */
+/* trip + zoom: zoom left balances trip right, tabs stay centered */
 body.dashboard-mode.theme-rdr2 .dash-zoom{
-  position:absolute;right:190px;top:0;bottom:0;z-index:2;
+  position:absolute;left:190px;top:0;bottom:0;z-index:2;
   display:flex;align-items:center;gap:10px;padding:10px 8px;
 }
 body.dashboard-mode.theme-rdr2 .dash-zoom button{
