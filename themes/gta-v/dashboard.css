@@ -202,7 +202,26 @@ body.dashboard-mode.theme-gta-v .dash-dest::before{
   width:76px;height:2px;background:#2ce68c;
   box-shadow:0 0 10px rgba(44,230,140,.65);
 }
-body.dashboard-mode.theme-gta-v .dash-zoom{display:none !important}
+/* Map controls: slim pause-menu circles with hairline rules and a mint
+   press state — the user asked for these back. */
+body.dashboard-mode.theme-gta-v .dash-zoom{
+  display:flex;align-items:center;gap:12px;
+  padding:0 30px;flex:none;
+}
+body.dashboard-mode.theme-gta-v .dash-zoom button{
+  width:48px;height:48px;border-radius:50%;flex:none;
+  border:1px solid rgba(242,245,242,.18);
+  background:rgba(255,255,255,.02);
+  color:#f2f5f2;cursor:pointer;
+  font-family:'Chalet Comprime','Arial Narrow',sans-serif;
+  font-size:24px;font-weight:600;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  text-shadow:none;
+}
+body.dashboard-mode.theme-gta-v .dash-zoom button:active{
+  border-color:#2ce68c;color:#2ce68c;
+  box-shadow:0 0 14px rgba(44,230,140,.45);
+}
 body.dashboard-mode.theme-gta-v .dash-tag{display:none}
 /* Right: compass + trip info — never truncated */
 body.dashboard-mode.theme-gta-v .dash-trip{
