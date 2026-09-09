@@ -332,14 +332,15 @@ ok(!fs.existsSync(path.join(REPO, 'themes/gta-v/spotify/header.png')), 'GV chopp
 ok(gvSkinJs.includes("register('gta-v'"), 'GV skin registers as gta-v');
 ok(gvSkinJs.includes('data-lyrics-stage'), 'GV lyric stage hook present');
 ok(gvSkinJs.includes('setLyricsRenderer') && gvSkinJs.includes('clearLyrics'), 'GV lyric renderer hooks present');
-ok(/\.gvsp-artwrap\s*\{[^}]*width:\s*148px[^}]*height:\s*148px/.test(gvSkinCss),
-  'GV art rect matches the console frame (148px square)');
-ok(!gvSkinJs.includes('hud.png'), 'GV skin does not use the hud art overlay');
+ok(/\.gvsp-artwrap\s*\{[^}]*left:\s*6\.8%[^}]*width:\s*33\.4%/.test(gvSkinCss),
+  'GV art rect sits in the hud frame opening (measured fractions)');
+ok(gvSkinJs.includes('hud.png'), 'GV skin overlays the supplied hud art directly');
 const gvSkinJsCode = stripComments(gvSkinJs), gvSkinCssCode = stripComments(gvSkinCss);
 for (const banned of ['miniviz', 'stagepeek', 'fullstage', 'gvsp-viz', 'spectrum', 'spotify-close', 'background-size: cover', 'vcsp-']) {
   ok(!gvSkinJsCode.includes(banned) && !gvSkinCssCode.includes(banned), `GV skin has no ${banned}`);
 }
 ok(gvSkinJsCode.includes('gvsp-') && gvSkinCssCode.includes('.gvsp'), 'GV skin uses gvsp- prefix');
+ok(/\.gvsp-hud\s*\{[^}]*inset:\s*0/.test(gvSkinCssCode), 'GV hud is one full-bleed skin layer');
 ok(gvSkinCssCode.includes('#2ce68c') && gvSkinCssCode.includes('#0b0b0b'), 'GV skin muted mint on charcoal console');
 ok(gvSkinCssCode.includes("'SignPainter'") && gvSkinCssCode.includes("'Chalet London'"), 'GV skin SignPainter script + Chalet London');
 ok(!/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(gvSkinJsCode) && !/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(gvSkinCssCode), 'GV skin has no emojis');
@@ -792,7 +793,7 @@ ok(saLayer('sa-label-road-major').minzoom === 10, 'SA major road labels start at
 ok(!/theme-san-andreas #map::after/.test(cssSrc), 'SA map has no vignette overlay (clean hero map)');
 ok(/theme-gta-v #dash-topbar\{[^}]*background:#0b0b0b/.test(cssSrc), 'V top bar is flat pause-menu black (researched)');
 ok(/theme-gta-v #dash-bottombar\{[^}]*background:#0b0b0b/.test(cssSrc), 'V bottom bar is flat pause-menu black (researched)');
-ok(/theme-gta-v \.gvsp\{[^}]*background:#0b0b0b/.test(cssSrc), 'V music panel is flat pause-menu black (researched)');
+ok(/theme-gta-v \.gvsp\{[^}]*aspect-ratio:\s*1155\s*\/\s*1362/.test(cssSrc), 'V music panel is the hud art at its own proportions');
 ok(/theme-gta-v \.dash-tabs button\{[^}]*background:transparent/.test(cssSrc), 'V tabs are transparent icon+text buttons');
 ok(/theme-rdr2 #dash-dest\{[^}]*border-image-source:url\('assets\/themes\/rdr2\/dashboard\/menu_header_1a\.png'\)/.test(cssSrc),
    'RDR2 destination plate uses the ornate menu-header frame');
@@ -815,13 +816,13 @@ ok(!vcSkinSrc.includes('rotate(6deg)'), 'VC widget is straight (hero has no tilt
 // every theme widget: explicit larger size, ~6-7 degree tilt (except VC hero-match), no-overlap idle states
 // (san-andreas pass 4: straight Radio Los Santos bezel, asserted in the pass 4 block)
 const skinSpecs = [
-  ['gta-v', 'gvsp', 'border-radius: 18px', 'width: 520px'],
+  ['gta-v', 'gvsp', 'aspect-ratio: 1155 / 1362', 'width: 520px'],
   ['rdr2', 'rdsp', 'rotate(-6.5deg)', 'width: 600px'],
 ];
-for (const [theme, cls, tilt, size] of skinSpecs) {
+for (const [theme, cls, shape, size] of skinSpecs) {
   const css = fs.readFileSync(path.join(REPO, `themes/${theme}/spotify-skin.css`), 'utf8');
   const js = fs.readFileSync(path.join(REPO, `themes/${theme}/spotify-skin.js`), 'utf8');
-  ok(css.includes(tilt), `${theme}: widget tilted ${tilt}`);
+  ok(css.includes(shape), `${theme}: widget shape pinned (${shape})`);
   ok(css.includes(size), `${theme}: widget sized up (${size})`);
   ok(css.includes(`.${cls}.is-idle`), `${theme}: disconnected idle owns its stage (no overlaps)`);
   ok(js.includes("root.classList.toggle('is-idle'"), `${theme}: render toggles the is-idle class`);

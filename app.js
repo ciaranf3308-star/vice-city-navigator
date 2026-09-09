@@ -1499,6 +1499,8 @@ function endNav() {
     map.easeTo({ pitch: 0, duration: 600 });
   }
   routeCoords = []; steps = []; stepIdx = 0;
+  try { const mc2 = $('maneuver-card'); if (mc2) mc2.classList.remove('has-maneuver'); } catch (e) {}
+  try { const tm = $('trip-meta'); if (tm) tm.textContent = ''; } catch (e) {}
 }
 function onPosErr() { /* keep last known position; toast once */ }
 
@@ -1604,6 +1606,11 @@ function drawRouteKeepView() {
 }
 
 function updateBanner(dMan) {
+  /* Idle state: the maneuver card stays hidden until a real maneuver
+     exists — never two literal "—" dashes (GTA V hides the card via
+     the .has-maneuver hook in its theme CSS; other themes unaffected). */
+  const mc = $('maneuver-card');
+  if (mc) mc.classList.toggle('has-maneuver', steps.length > 0);
   if (!steps.length) return;
   const nextIdx = Math.min(stepIdx + 1, steps.length - 1);
   const next = steps[nextIdx];
@@ -2115,11 +2122,14 @@ function syncDashTrip(remainSec) {
     dst.textContent = (label || 'EN ROUTE').slice(0, 28);
     if (sub) sub.textContent = ''; /* destination owns the plate during nav */
   } else {
-    /* VC/SA/RDR2 idle: compass only, no arrival placeholder. Other themes keep theirs. */
+    /* Idle: no "Arrive in —" placeholder. VC/SA/RDR2 show compass only;
+       GTA V's pause-menu bar does the same — the ETA pill returns with
+       the route. Other themes keep their placeholder. */
     const isVC = document.body.classList.contains('theme-vice-city');
     const isSA = document.body.classList.contains('theme-san-andreas');
     const isRDR2 = document.body.classList.contains('theme-rdr2');
-    const compassOnly = isVC || isSA || isRDR2;
+    const isGTAV = document.body.classList.contains('theme-gta-v');
+    const compassOnly = isVC || isSA || isRDR2 || isGTAV;
     eta.innerHTML = compassOnly ? '' : '<span class="eta-label">Arrive in</span><span class="eta-time">—</span>';
     eta.style.display = compassOnly ? 'none' : '';
     /* dst (locality plate) is owned by syncDashLocality when not navigating —

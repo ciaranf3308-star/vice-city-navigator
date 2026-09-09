@@ -212,11 +212,18 @@ body.dashboard-mode.theme-gta-v #dash-sub{
 }
 /* Wanted level: authentic v-hud stars, earned by speeding.
    Sits above the speed cluster, bottom-left — all the driving
-   feedback in one column. Hollow = unearned, filled = heat. */
+   feedback in one column. Hollow = unearned, filled = heat.
+   The art itself is never restyled (verified authentic in-game
+   silhouettes); the plate keeps the row from floating bare over
+   the map. */
 body.dashboard-mode.theme-gta-v #wanted{
   display:flex;position:absolute;left:20px;bottom:304px;z-index:30;
   gap:8px;pointer-events:none;
-  filter:drop-shadow(0 2px 8px rgba(0,0,0,.6));
+  background:rgba(8,10,8,.72);
+  border:1px solid rgba(242,245,242,.14);
+  border-radius:10px;
+  padding:10px 14px;
+  filter:drop-shadow(0 4px 14px rgba(0,0,0,.55));
 }
 body.dashboard-mode.theme-gta-v #wanted[hidden]{display:none}
 body.dashboard-mode.theme-gta-v .wstar{
@@ -271,176 +278,22 @@ body.dashboard-mode.theme-gta-v #dash-eta{
   font-variant-numeric:tabular-nums;white-space:nowrap;
 }
 
-/* ============ RIGHT MUSIC PANEL — pause-menu panel ============
-   Overrides the base hud skin (spotify-skin.css): kills the tilt,
-   the neon, the hud.png overlay; flat black panel, mint accents.
-   Panel: right:20px, top/bottom clear the 120px bars. */
+/* ============ RIGHT MUSIC PANEL — the hud.png IS the widget ============
+   The GTA V Spotify skin overlays themes/gta-v/spotify/hud.png
+   directly as one unified skin (see spotify-skin.css for the measured
+   openings). This section only sizes/positions it on the 1920x720
+   canvas: right side, vertically centred, clear of the 120px bars.
+   The base skin owns every pixel inside. */
 body.dashboard-mode.theme-gta-v .gvsp{
-  position:absolute;left:auto;right:20px;top:140px;bottom:140px;width:460px;
-  transform:none;translate:0 0;aspect-ratio:auto;z-index:25;overflow:hidden;
-  background:#0b0b0b;
-  border:1px solid rgba(242,245,242,.12);
-  box-shadow:0 10px 34px rgba(0,0,0,.6);
-  color:#f2f5f2;
+  position:absolute;left:auto;right:20px;top:50%;translate:0 -50%;
+  width:396px;aspect-ratio:1155/1362;z-index:25;
+  filter:drop-shadow(0 14px 36px rgba(0,0,0,.6));
 }
-body.dashboard-mode.theme-gta-v .gvsp-hud{display:none}
-/* Grain over the panel + NOW PLAYING kicker (pause-menu section header) */
-body.dashboard-mode.theme-gta-v .gvsp::before{
-  content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
-  background:url('dashboard/noise.png');background-size:180px;opacity:.05;
-}
-body.dashboard-mode.theme-gta-v .gvsp::after{
-  content:'NOW PLAYING';position:absolute;z-index:5;left:0;right:0;top:5px;
-  text-align:center;pointer-events:none;
-  font-family:'Chalet Comprime','Arial Narrow',sans-serif;font-weight:700;
-  font-size:11px;letter-spacing:4px;color:#2ce68c;
-}
-/* Album art: centered square, top of the stack.
-   position:static on the wrap re-anchors the art to the panel itself —
-   the base .gvsp-artwrap is position:relative, which would pin the art to
-   the in-flow card row instead of centering it on the panel. right/bottom
-   reset the base inset:0 so the explicit width/height win. */
-body.dashboard-mode.theme-gta-v .gvsp-artwrap{position:static;width:0;height:0;background:none}
-body.dashboard-mode.theme-gta-v .gvsp-header{display:none}
-body.dashboard-mode.theme-gta-v .gvsp-art,
-body.dashboard-mode.theme-gta-v .gvsp-art-idle{
-  position:absolute;z-index:2;
-  left:50%;transform:translateX(-50%);top:20px;right:auto;bottom:auto;
-  width:148px;height:148px;
-  border:1px solid rgba(242,245,242,.14);
-  box-shadow:0 0 0 1px rgba(44,230,140,.22), 0 10px 30px rgba(0,0,0,.6);
-}
-body.dashboard-mode.theme-gta-v .gvsp-art{object-fit:cover;background:#0b0b0b}
-body.dashboard-mode.theme-gta-v .gvsp-art-idle{
-  display:flex;align-items:center;justify-content:center;background:#0b0b0b;
-}
-body.dashboard-mode.theme-gta-v .gvsp-art-idle svg{
-  width:34%;height:auto;fill:#2ce68c;opacity:.5;filter:none;
-}
-/* Track: centered, real hierarchy, breathing room (padding:0 resets the
-   base card's padding-top so the 176px top is exact) */
-body.dashboard-mode.theme-gta-v .gvsp-track{
-  position:absolute;z-index:3;left:24px;right:24px;top:176px;text-align:center;padding:0;
-}
-body.dashboard-mode.theme-gta-v .gvsp-title{
-  font-family:'Chalet Comprime','Arial Narrow',sans-serif;font-weight:700;
-  font-size:25px;letter-spacing:.5px;line-height:1.25;color:#f2f5f2;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:none;
-}
-body.dashboard-mode.theme-gta-v .gvsp-artist{
-  margin-top:6px;font-family:'Chalet London',system-ui,sans-serif;
-  font-size:15px;letter-spacing:.08em;line-height:1.4;color:#9aa3a8;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:none;
-}
-body.dashboard-mode.theme-gta-v .gvsp-artist.gvsp-status{color:#2ce68c}
-/* Progress: 6px mint bar (padding:0 resets the base card padding — the
-   dashboard positions this absolutely, so base flow padding just offsets it) */
-body.dashboard-mode.theme-gta-v .gvsp-progress{
-  position:absolute;z-index:3;left:24px;right:24px;top:240px;padding:0;
-}
-body.dashboard-mode.theme-gta-v .gvsp-bar{
-  position:relative;height:16px;cursor:pointer;touch-action:none;
-}
-body.dashboard-mode.theme-gta-v .gvsp-bar::before{
-  content:'';position:absolute;left:0;right:0;top:5px;height:6px;
-  background:rgba(242,245,242,.14);
-}
-body.dashboard-mode.theme-gta-v .gvsp-bar-fill{
-  position:absolute;left:0;top:5px;height:6px;width:0%;
-  background:#2ce68c;box-shadow:none;
-}
-body.dashboard-mode.theme-gta-v .gvsp-bar-knob{
-  position:absolute;top:8px;width:14px;height:14px;margin:-7px 0 0 -7px;
-  border-radius:50%;background:#f2f5f2;border:2px solid #2ce68c;box-shadow:none;
-}
-body.dashboard-mode.theme-gta-v .gvsp-times{
-  display:flex;justify-content:space-between;margin-top:6px;
-  font-family:'Chalet London',system-ui,sans-serif;font-size:12px;
-  letter-spacing:.05em;color:#9aa3a8;font-variant-numeric:tabular-nums;
-  text-shadow:none;
-}
-/* Transport: circular mint-accent buttons (user's music-panel language).
-   padding:0 resets the base 14px/16px card padding — with it the row was
-   93px tall and overlapped the lyrics stage. */
-body.dashboard-mode.theme-gta-v .gvsp-controls{
-  position:absolute;z-index:3;left:0;right:0;top:285px;padding:0;
-  display:flex;align-items:center;justify-content:center;gap:24px;
-}
-body.dashboard-mode.theme-gta-v .gvsp-tbtn{
-  width:52px;height:52px;min-width:52px;min-height:52px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;cursor:pointer;
-  color:#f2f5f2;background:transparent;
-  border:1px solid rgba(242,245,242,.28);box-shadow:none;
-  -webkit-tap-highlight-color:transparent;
-}
-body.dashboard-mode.theme-gta-v .gvsp-tbtn.big{
-  width:62px;height:62px;min-width:62px;min-height:62px;
-  border-color:#2ce68c;color:#2ce68c;
-}
-body.dashboard-mode.theme-gta-v .gvsp-tbtn:active{transform:scale(.94)}
-body.dashboard-mode.theme-gta-v .gvsp-tbtn svg{
-  width:46%;height:46%;fill:currentColor;filter:none;
-}
-/* Lyrics: quiet stage with the Los Santos night skyline faint behind it.
-   The panel is 440px tall (1920x720 canvas); the stack above ends at 347px,
-   so the stage gets top:353/bottom:12 = 75px — room for the engine's
-   prev+hero+next composition with nothing clipped. */
-body.dashboard-mode.theme-gta-v .gvsp-lyrics{
-  position:absolute;z-index:3;left:20px;right:20px;top:353px;bottom:12px;
-  min-height:0; /* reset the base 140px card min-height — it would stretch
-                   the 75px stage past the panel's overflow:hidden */
-  overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;gap:6px;padding:8px 14px;pointer-events:none;
-  background:
-    linear-gradient(rgba(11,11,11,.9),rgba(11,11,11,.9)),
-    url('dashboard/skyline-divider.png') 50% 100%/cover no-repeat;
-  border:1px solid rgba(242,245,242,.07);
-}
-/* Ambient fallback (connected, no lyrics yet): same stage slot as lyrics —
-   without this it falls back to the base in-flow 140px box and paints over
-   the album art. */
-body.dashboard-mode.theme-gta-v .gvsp-ambient{
-  position:absolute;z-index:3;left:20px;right:20px;top:353px;bottom:12px;
-  height:auto;overflow:hidden;
-  background:
-    linear-gradient(rgba(11,11,11,.9),rgba(11,11,11,.9)),
-    url('dashboard/skyline-divider.png') 50% 100%/cover no-repeat;
-  border:1px solid rgba(242,245,242,.07);
-  border-top:1px solid rgba(242,245,242,.07);
-}
-body.dashboard-mode.theme-gta-v .gvsp-ambient[hidden]{display:none}
-body.dashboard-mode.theme-gta-v .gv-lyric-line{
-  font-family:'Chalet London',system-ui,sans-serif;
-  font-size:16px;line-height:1.4;color:#9aa3a8;opacity:.55;text-shadow:none;
-  transition:opacity .3s ease;
-}
-body.dashboard-mode.theme-gta-v .gv-lyric-line.ghost{opacity:.35;font-size:14px}
-body.dashboard-mode.theme-gta-v .gv-lyric-line.next{opacity:.7}
-body.dashboard-mode.theme-gta-v .gv-lyric-line.active{
-  opacity:1;font-size:18px;color:#f2f5f2;
-}
-/* Disconnected: connect CTA owns the panel.
-   min-height:0 overrides the base 320px card min-height — without it the
-   absolutely-positioned box (top:218/bottom:40 = 182px) stretches to 320px,
-   overflows the panel's overflow:hidden and the hint text clips. */
-body.dashboard-mode.theme-gta-v .gvsp-idle{
-  position:absolute;z-index:4;left:24px;right:24px;top:218px;bottom:40px;
-  min-height:0;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;gap:14px;pointer-events:none;
-}
-/* Idle hiding, dashboard-scoped: the base `.gvsp.is-idle …` rules lose to
-   the dashboard absolute-position rules on specificity, so without these
-   the progress bar and transport buttons paint through behind the CTA. */
-body.dashboard-mode.theme-gta-v .gvsp.is-idle .gvsp-header,
-body.dashboard-mode.theme-gta-v .gvsp.is-idle .gvsp-main,
-body.dashboard-mode.theme-gta-v .gvsp.is-idle .gvsp-progress,
-body.dashboard-mode.theme-gta-v .gvsp.is-idle .gvsp-controls,
-body.dashboard-mode.theme-gta-v .gvsp.is-idle .gvsp-lyrics,
-body.dashboard-mode.theme-gta-v .gvsp.is-idle .gvsp-ambient{display:none}
+/* Drive-HUD clearances already track the 120px bar heights; the widget
+   (396px wide -> ~467px tall, centred) clears them by construction. */
 body.dashboard-mode.theme-gta-v .gvsp-idle-kicker{
-  font-family:'Chalet Comprime','Arial Narrow',sans-serif;font-weight:700;
-  font-size:28px;letter-spacing:1px;color:#f2f5f2;text-shadow:none;
+  font-family:'SignPainter','Chalet London',cursive;
+  font-size:30px;color:#f2f5f2;text-shadow:0 2px 12px rgba(0,0,0,.85);
 }
 body.dashboard-mode.theme-gta-v .gvsp-connect-btn{
   pointer-events:auto;font-family:'Chalet Comprime','Arial Narrow',sans-serif;
@@ -494,6 +347,11 @@ body.dashboard-mode.theme-gta-v #maneuver-end{
   font-family:'Chalet London',system-ui,sans-serif;
 }
 body.dashboard-mode.theme-gta-v #maneuver-end:hover{border-color:#2ce68c;color:#2ce68c}
+/* Idle state: no maneuver, no card — never two literal "—" dashes.
+   The shared app.js toggles .has-maneuver on #maneuver-card; without it
+   the card stays hidden (dashboard rule beats the nav-driving display). */
+body.theme-gta-v #maneuver-card:not(.has-maneuver){display:none}
+body.dashboard-mode.theme-gta-v.nav-driving #maneuver-card:not(.has-maneuver){display:none}
 
 /* Drive-HUD clearances track the real 120px bar heights */
 body.dashboard-mode.theme-gta-v.nav-driving #drive-bar{bottom:calc(130px + env(safe-area-inset-bottom))}
@@ -503,6 +361,38 @@ body.dashboard-mode.theme-gta-v #menu-panel{top:132px;bottom:132px}
 body.theme-gta-v{--vcfont:'Chalet Comprime','Arial Narrow',sans-serif;--vclabel:'Chalet London',system-ui,sans-serif}
 body.theme-gta-v .vc-title span{color:#f2f5f2}
 body.theme-gta-v .dest-pin{background-image:url('assets/themes/gta-v/blips/waypoint.png')}
+/* ============ DRIVE PILL — pause-menu minimal (phone + dashboard) ============
+   The shared #drive-bar ships Vice City neon (purple border, cyan icons).
+   GTA V gets hairline green rules on near-black, pale icons, zero glow. */
+body.theme-gta-v #drive-bar{
+  background:rgba(8,10,8,.94);
+  border:1px solid rgba(44,230,140,.45);
+  box-shadow:0 10px 26px rgba(0,0,0,.6);
+}
+body.theme-gta-v #trip-meta{color:#f2f5f2}
+body.theme-gta-v #drive-bar .ctl{
+  color:#dfe6e1;background:rgba(255,255,255,.03);
+  border:1px solid rgba(242,245,242,.24);
+  box-shadow:none;
+}
+body.theme-gta-v #drive-bar .ctl:hover{border-color:rgba(44,230,140,.6);color:#f2f5f2}
+body.theme-gta-v #drive-bar .ctl.on{
+  color:#2ce68c;border-color:#2ce68c;background:rgba(44,230,140,.1);box-shadow:none;
+}
+body.theme-gta-v #drive-bar .ctl.danger{
+  color:#e0685f;border-color:rgba(224,104,95,.55);box-shadow:none;
+}
+body.theme-gta-v #drive-menu-btn{
+  color:#dfe6e1;background:rgba(8,10,8,.9);
+  border:1px solid rgba(242,245,242,.24);
+  box-shadow:none;
+}
+/* recenter pulse: green, not cyan */
+body.theme-gta-v #follow-btn:not(.on){animation:gvn-pulse 1.6s ease-in-out infinite}
+@keyframes gvn-pulse{
+  0%,100%{box-shadow:0 0 10px rgba(44,230,140,.25)}
+  50%{box-shadow:0 0 22px rgba(44,230,140,.6)}
+}
 /* ============ GTA V menu panel: minimal pause-menu console ============
    Hairline green rules on near-black, Chalet type, generous whitespace. */
 body.theme-gta-v{--sw-on:#2ce68c}

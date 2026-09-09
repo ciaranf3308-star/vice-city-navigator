@@ -416,6 +416,8 @@ body.theme-rdr2 #search-bar span{opacity:.85}
   color:var(--yellow);white-space:nowrap;min-width:0;flex:1;
   overflow:hidden;text-overflow:ellipsis;
 }
+/* Idle: no route, no readout — the pill is buttons only, never a "—" dash. */
+#trip-meta:empty{display:none}
 #drive-bar .ctl{width:44px;height:44px;font-size:17px;flex:0 0 auto}
 /* when the user pans away, the recenter button pulses — hard to miss */
 #follow-btn:not(.on){animation:vcn-pulse 1.6s ease-in-out infinite}

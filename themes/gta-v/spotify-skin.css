@@ -1,59 +1,60 @@
 /* ============================================================
-   GTA V Spotify skin — radio console rebuild.
-   A charcoal/black glass radio console, not a web card.
-   - 1px grey borders, restrained green accents
-   - Album art left, track info right
-   - Thin progress bar, 5 transport controls
-   - Lyrics stage or ambient skyline below
+   GTA V Spotify skin — the supplied hud.png IS the widget.
+   ------------------------------------------------------------
+   themes/gta-v/spotify/hud.png (1155x1362, user-supplied) is
+   overlaid directly as one unified skin/chrome layer; live HTML
+   is positioned into its measured openings. Never cropped apart,
+   recomposed, or reinterpreted.
+
+   Measured openings (fractions of the hud):
+   - album cut-out : x 0.065-0.405, y 0.303-0.594  (inset rounded
+                     frame, top-left; art sits ABOVE the hud here —
+                     the frame interior is opaque dark in the art)
+   - track panel   : x ~0.42-0.95, y 0.28-0.585   (dark panel in
+                     the art: title / artist / source / progress /
+                     transport live over it)
+   - lyric stage   : x 0.13-0.88, y 0.59-0.90      (palm-skyline
+                     scene; LOS SANTOS label strip lives at x
+                     0.05-0.13, palm badge at the right edge)
+   - top chrome    : palms + skyline + the Los Santos highway sign
+                     (pure art, no DOM over it)
+
+   Z-order: hud art < album art < track / progress / transport /
+   lyrics / idle. The map shows through transparent pixels.
+
+   LYRICS: owned by the shared kinetic karaoke engine (lyrics.js,
+     LRCLIB provider) mounted into [data-lyrics-stage] via
+     window.WSLyrics.render(). skin.setLyricsRenderer(fn) /
+     skin.clearLyrics() remain as an override hook. Never invent
+     lyric text, never scrape, never fake FFT from Spotify audio
+     (the Web API exposes none).
    ============================================================ */
 
 .gvsp {
   position: absolute; left: auto; right: 48px; top: 50%; translate: 0 -50%;
-  width: 520px;
-  display: flex; flex-direction: column;
-  background: linear-gradient(180deg, rgba(18,18,18,.96) 0%, rgba(11,11,11,.96) 100%);
-  border: 1px solid rgba(154,163,168,.28);
-  border-radius: 18px;
-  box-shadow: 0 18px 50px rgba(0,0,0,.65), 0 2px 12px rgba(0,0,0,.5),
-              inset 0 1px 0 rgba(255,255,255,.06);
+  width: 520px; aspect-ratio: 1155 / 1362;
+  container-type: inline-size;
   font-family: 'Chalet London', 'Helvetica Neue', Arial, sans-serif;
   color: #e8f0e8;
   user-select: none; -webkit-user-select: none;
-  overflow: hidden;
   pointer-events: auto;
+  filter: drop-shadow(0 18px 44px rgba(0,0,0,.6));
 }
 .gvsp img { display: block; }
 
-/* ---------- header: WAYSTATION RADIO ---------- */
-.gvsp-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 20px 12px;
-  border-bottom: 1px solid rgba(154,163,168,.18);
-  background: rgba(0,0,0,.25);
-}
-.gvsp-header-title {
-  font-family: 'Chalet Comprime', 'Arial Narrow', sans-serif;
-  font-size: 19px; font-weight: 700; letter-spacing: 4px;
-  text-transform: uppercase; color: #f2f5f2;
-}
-.gvsp-header-status {
-  font-family: 'Chalet Comprime', 'Arial Narrow', sans-serif;
-  font-size: 13px; letter-spacing: 2px; text-transform: uppercase;
-  color: #2ce68c; opacity: .85;
+/* ---------- the hud itself: one unified skin layer ---------- */
+.gvsp-hud {
+  position: absolute; inset: 0; z-index: 1;
+  width: 100%; height: 100%;
+  pointer-events: none;
 }
 
-/* ---------- main: album art + track info ---------- */
-.gvsp-main {
-  display: flex; gap: 18px;
-  padding: 18px 20px;
-  align-items: flex-start;
-}
+/* ---------- album art: lives in the frame opening, above the art ---------- */
 .gvsp-artwrap {
-  position: relative; flex: none;
-  width: 148px; height: 148px;
-  border-radius: 10px; overflow: hidden;
-  border: 1px solid rgba(44,230,140,.35);
-  box-shadow: 0 0 18px rgba(44,230,140,.18), inset 0 0 20px rgba(0,0,0,.4);
+  position: absolute; z-index: 2;
+  left: 6.8%; top: 30.6%; width: 33.4%; aspect-ratio: 1 / 1;
+  border-radius: 9%;
+  overflow: hidden;
   background: #05070a;
 }
 .gvsp-art {
@@ -68,45 +69,59 @@
   background: radial-gradient(70% 70% at 50% 40%, #10161c 0%, #05070a 75%);
 }
 .gvsp-art-idle svg {
-  width: 32%; height: auto; fill: #2ce68c; opacity: .4;
+  width: 30%; height: auto; fill: #2ce68c; opacity: .45;
 }
+
+/* ---------- track: title / artist / source in the dark panel ---------- */
 .gvsp-track {
-  flex: 1; min-width: 0;
-  display: flex; flex-direction: column; justify-content: center;
-  padding-top: 4px;
+  position: absolute; z-index: 3;
+  left: 43.5%; right: 6.5%; top: 30.5%;
 }
 .gvsp-title {
   font-family: 'Chalet Comprime', 'Arial Narrow', sans-serif;
-  font-size: 26px; font-weight: 700; line-height: 1.15; letter-spacing: .5px;
+  font-size: 20px; font-weight: 700; line-height: 1.15; letter-spacing: .5px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   color: #f2f5f2;
-  margin-bottom: 6px;
+  text-shadow: 0 2px 10px rgba(0,0,0,.85);
+  margin-bottom: 3px;
 }
 .gvsp-artist {
-  font-size: 16px; letter-spacing: .5px;
+  font-size: 13px; letter-spacing: .5px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   color: #9aa3a8;
-  margin-bottom: 4px;
+  text-shadow: 0 1px 6px rgba(0,0,0,.85);
+  margin-bottom: 2px;
 }
-.gvsp-artist.gvsp-status { color: #ffd319; }
+.gvsp-artist.gvsp-status { color: #2ce68c; }
+/* themed source line — never a bare "ON <DEVICE>" debug label */
 .gvsp-device {
-  font-size: 12px; letter-spacing: 1px; text-transform: uppercase;
-  color: #5a6266;
+  font-family: 'Chalet Comprime', 'Arial Narrow', sans-serif;
+  font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+  color: #2ce68c;
+  text-shadow: 0 1px 6px rgba(0,0,0,.9);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.gvsp-device:empty { display: none; }
+.gvsp-device::before {
+  content: ''; display: inline-block;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #2ce68c; margin-right: 7px; vertical-align: 1px;
+  box-shadow: 0 0 6px rgba(44,230,140,.8);
 }
 
 /* ---------- progress ---------- */
 .gvsp-progress {
-  padding: 4px 20px 0;
+  position: absolute; z-index: 3;
+  left: 43.5%; right: 6.5%; top: 43.5%;
 }
 .gvsp-bar {
-  position: relative; height: 22px; cursor: pointer; touch-action: none;
+  position: relative; height: 18px; cursor: pointer; touch-action: none;
 }
 .gvsp-bar::before {
   content: ''; position: absolute; left: 0; right: 0; top: 50%;
   height: 4px; margin-top: -2px; border-radius: 2px;
-  background: rgba(255,255,255,.12);
-  box-shadow: inset 0 1px 2px rgba(0,0,0,.6);
+  background: rgba(255,255,255,.14);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.7);
 }
 .gvsp-bar-fill {
   position: absolute; left: 0; top: 50%; height: 4px; margin-top: -2px;
@@ -125,53 +140,55 @@
 .gvsp-bar:hover .gvsp-bar-knob { opacity: 1; }
 .gvsp-times {
   display: flex; justify-content: space-between;
-  font-size: 12px; letter-spacing: 1px; color: #7a8287;
+  font-size: 11px; letter-spacing: 1px; color: #7a8287;
   font-variant-numeric: tabular-nums;
-  margin-top: 2px;
+  text-shadow: 0 1px 4px rgba(0,0,0,.9);
 }
 
-/* ---------- controls ---------- */
+/* ---------- transport: along the bottom of the dark panel ---------- */
 .gvsp-controls {
-  display: flex; align-items: center; justify-content: center; gap: 18px;
-  padding: 14px 20px 16px;
-  border-bottom: 1px solid rgba(154,163,168,.14);
+  position: absolute; z-index: 3;
+  left: 43.5%; right: 6.5%; top: 51%;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
 }
 .gvsp-tbtn {
-  width: 52px; height: 52px; flex: none;
+  width: 34px; height: 34px; flex: none;
   border-radius: 50%; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  color: #b8c0c5; background: rgba(255,255,255,.04);
-  border: 1px solid rgba(154,163,168,.35);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 2px 8px rgba(0,0,0,.4);
+  color: #c9d2d6; background: rgba(8,10,8,.55);
+  border: 1px solid rgba(242,245,242,.28);
+  box-shadow: 0 2px 8px rgba(0,0,0,.5);
   -webkit-tap-highlight-color: transparent;
   transition: all .15s ease;
 }
-.gvsp-tbtn:hover { color: #f2f5f2; border-color: rgba(44,230,140,.5); }
+.gvsp-tbtn:hover { color: #f2f5f2; border-color: rgba(44,230,140,.55); }
 .gvsp-tbtn:active { transform: scale(.93); }
 .gvsp-tbtn.big {
-  width: 68px; height: 68px;
+  width: 40px; height: 40px;
   color: #0b0b0b; background: #2ce68c;
   border: 1px solid #2ce68c;
-  box-shadow: 0 0 20px rgba(44,230,140,.35), 0 4px 12px rgba(0,0,0,.4);
+  box-shadow: 0 0 16px rgba(44,230,140,.35), 0 4px 10px rgba(0,0,0,.5);
 }
 .gvsp-tbtn.big:hover { background: #4df09e; color: #0b0b0b; }
 .gvsp-tbtn.active {
   color: #2ce68c; border-color: #2ce68c;
-  box-shadow: 0 0 12px rgba(44,230,140,.4), inset 0 0 8px rgba(44,230,140,.15);
+  box-shadow: 0 0 10px rgba(44,230,140,.35), inset 0 0 6px rgba(44,230,140,.12);
 }
 .gvsp-tbtn svg {
   width: 46%; height: 46%; fill: currentColor;
 }
 .gvsp-tbtn.big svg { width: 52%; height: 52%; }
 
-/* ---------- lyrics stage ---------- */
+/* ---------- lyrics stage: the palm-skyline scene ---------- */
 .gvsp-lyrics {
-  position: relative;
+  position: absolute; z-index: 3;
+  left: 14%; right: 9%; top: 60.5%; bottom: 10.5%;
   container-type: inline-size;
-  min-height: 140px; max-height: 200px;
   overflow: hidden;
-  padding: 0;
   pointer-events: none;
+  /* keep words readable over the scene without hiding it */
+  background: linear-gradient(180deg, rgba(5,7,5,.55) 0%, rgba(5,7,5,.25) 60%, rgba(5,7,5,.55) 100%);
+  border-radius: 8px;
 }
 .gvsp-lyrics.has-lyrics { pointer-events: auto; }
 /* WSLyrics builds .wslyr with absolute slots — contain them here */
@@ -179,81 +196,78 @@
   position: absolute; inset: 0;
 }
 /* Override the old overlay font sizes (cqw was tuned for the hud) */
-.gvsp-lyrics .wslyr-hero.s-xl { font-size: 28px; }
-.gvsp-lyrics .wslyr-hero.s-lg { font-size: 22px; }
+.gvsp-lyrics .wslyr-hero.s-xl { font-size: 26px; }
+.gvsp-lyrics .wslyr-hero.s-lg { font-size: 21px; }
 .gvsp-lyrics .wslyr-hero.s-md { font-size: 18px; }
 .gvsp-lyrics .wslyr-hero.s-sm { font-size: 17px; } /* never tiny */
 .gvsp-lyrics .wslyr-prev { font-size: 14px; }
 .gvsp-lyrics .wslyr-next { font-size: 13px; }
-.gvsp-lyrics .wslyr-state .wslyr-wait { font-size: 32px; }
+.gvsp-lyrics .wslyr-state .wslyr-wait { font-size: 30px; }
 .gvsp-lyrics .wslyr-state .wslyr-cap { font-size: 12px; }
 /* Clamp lyric composition extremes: keep the variation, lose the
    tiny / lost-in-corner / washed-out outliers. */
-.gvsp-lyrics .wslyr-hero.v-up { top: 20%; max-height: 66%; }
-.gvsp-lyrics .wslyr-hero.v-low { top: 40%; max-height: 52%; }
+.gvsp-lyrics .wslyr-hero.v-up { top: 18%; max-height: 68%; }
+.gvsp-lyrics .wslyr-hero.v-low { top: 38%; max-height: 54%; }
 .gvsp-lyrics .wslyr-hero { left: 8%; right: 8%; } /* keep inside the panel */
 .gvsp-lyrics .wslyr-prev,
 .gvsp-lyrics .wslyr-next { opacity: .55; } /* never wash out */
 .gvsp-lyrics .wslyr-hero .wslyr-w {
-  text-shadow: 0 2px 8px rgba(0,0,0,.85), 0 0 2px rgba(0,0,0,.9);
+  text-shadow: 0 2px 8px rgba(0,0,0,.9), 0 0 2px rgba(0,0,0,.9);
 } /* guarantee contrast on any panel tone */
 
-/* ---------- ambient: skyline when no lyrics ---------- */
+/* ---------- ambient: the art's own skyline is the backdrop ---------- */
 .gvsp-ambient {
-  position: relative;
-  height: 140px;
+  position: absolute; z-index: 3;
+  left: 14%; right: 9%; top: 60.5%; bottom: 10.5%;
   overflow: hidden;
-  border-top: 1px solid rgba(154,163,168,.14);
+  border-radius: 8px;
 }
 .gvsp-ambient[hidden] { display: none; }
-.gvsp-ambient-skyline {
-  position: absolute; inset: 0;
-  background: url('../dashboard/skyline-divider.png') 50% 100%/cover no-repeat;
-  opacity: .35;
-  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 40%);
-  mask-image: linear-gradient(180deg, transparent 0%, #000 40%);
-}
 .gvsp-ambient-label {
-  position: absolute; left: 0; right: 0; bottom: 12px;
+  position: absolute; left: 0; right: 0; bottom: 8px;
   text-align: center;
   font-family: 'Chalet Comprime', 'Arial Narrow', sans-serif;
-  font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
-  color: #5a6266;
+  font-size: 12px; letter-spacing: 4px; text-transform: uppercase;
+  color: rgba(242,245,242,.55);
+  text-shadow: 0 1px 6px rgba(0,0,0,.9);
 }
 
-/* ---------- idle / disconnected ---------- */
+/* ---------- idle / disconnected: the Connect state lives in the stage ---------- */
 .gvsp-idle {
+  position: absolute; z-index: 4;
+  left: 14%; right: 9%; top: 60.5%; bottom: 10.5%;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; gap: 14px;
-  padding: 40px 20px;
-  min-height: 320px;
+  text-align: center; gap: 10px;
+  padding: 12px;
+  background: linear-gradient(180deg, rgba(5,7,5,.6) 0%, rgba(5,7,5,.3) 100%);
+  border-radius: 8px;
 }
 .gvsp-idle[hidden], .gvsp-idle.is-hidden { display: none !important; }
 /* Disconnected: hide ALL playback UI — no overlap */
-.gvsp.is-idle .gvsp-header,
-.gvsp.is-idle .gvsp-main,
 .gvsp.is-idle .gvsp-progress,
 .gvsp.is-idle .gvsp-controls,
 .gvsp.is-idle .gvsp-lyrics,
 .gvsp.is-idle .gvsp-ambient { display: none; }
 .gvsp-idle-kicker {
   font-family: 'SignPainter', 'Chalet London', cursive;
-  font-size: 42px;
+  font-size: 30px;
   color: #f2f5f2;
-  text-shadow: 0 2px 12px rgba(0,0,0,.8);
+  text-shadow: 0 2px 12px rgba(0,0,0,.85);
 }
 .gvsp-connect-btn {
-  padding: 14px 42px;
+  padding: 12px 34px;
   font-family: 'Chalet Comprime', 'Arial Narrow', sans-serif;
-  font-size: 17px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+  font-size: 16px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
   color: #0b0b0b; background: #2ce68c;
-  border: none; border-radius: 8px; cursor: pointer;
+  border: none; border-radius: 4px; cursor: pointer;
   box-shadow: 0 4px 16px rgba(44,230,140,.3);
   transition: all .15s ease;
+  pointer-events: auto;
 }
 .gvsp-connect-btn:hover { background: #4df09e; }
 .gvsp-connect-btn:active { transform: scale(.96); }
 .gvsp-idle-hint {
-  font-size: 14px; line-height: 1.6;
-  color: #7a8287;
+  font-size: 13px; line-height: 1.5;
+  color: #9aa3a8;
+  text-shadow: 0 1px 6px rgba(0,0,0,.9);
 }

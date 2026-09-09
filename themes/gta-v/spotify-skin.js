@@ -1,13 +1,12 @@
 /* ============================================================
-   WayStation — GTA V Spotify skin (dashboard mode only).
+   WayStation — GTA V Spotify skin.
    ------------------------------------------------------------
-   Radio console rebuild: a charcoal/black glass console, not
-   an image overlay. Structure:
-   - header: WAYSTATION RADIO + status
-   - main: album art (148px) + track title/artist/device
-   - progress: thin bar with times
-   - controls: shuffle, prev, play, next, repeat
-   - lyrics stage OR ambient skyline
+   The supplied hud.png (themes/gta-v/spotify/hud.png, 1155x1362)
+   IS the widget: overlaid directly as one unified skin/chrome
+   layer, live HTML positioned into its measured openings
+   (album cut-out / dark track panel / palm-skyline lyric stage).
+   The art dictates the DOM placement — never cropped apart,
+   recomposed, or reinterpreted.
 
    LYRICS: owned by the shared kinetic karaoke engine (lyrics.js,
      LRCLIB provider) mounted into [data-lyrics-stage] via
@@ -52,25 +51,20 @@
     let statusTimer = null;
     let lyricsRenderer = null;
 
-    /* ---------- dom ---------- */
+    /* ---------- dom: hud.png is the skin; live HTML goes in its openings ---------- */
     function build() {
       root = el('div', 'gvsp');
       root.innerHTML =
-        '<div class="gvsp-header">' +
-          '<span class="gvsp-header-title">Waystation Radio</span>' +
-          '<span class="gvsp-header-status" data-header-status>Los Santos</span>' +
+        '<img class="gvsp-hud" src="' + ART + 'hud.png" alt="" aria-hidden="true">' +
+        '<div class="gvsp-artwrap">' +
+          '<div class="gvsp-art-idle">' + SVG.note + '</div>' +
+          '<img class="gvsp-art a" alt="">' +
+          '<img class="gvsp-art b" alt="">' +
         '</div>' +
-        '<div class="gvsp-main">' +
-          '<div class="gvsp-artwrap">' +
-            '<div class="gvsp-art-idle">' + SVG.note + '</div>' +
-            '<img class="gvsp-art a" alt="">' +
-            '<img class="gvsp-art b" alt="">' +
-          '</div>' +
-          '<div class="gvsp-track">' +
-            '<div class="gvsp-title">Los Santos Radio</div>' +
-            '<div class="gvsp-artist">Connect Spotify to play</div>' +
-            '<div class="gvsp-device" data-device></div>' +
-          '</div>' +
+        '<div class="gvsp-track">' +
+          '<div class="gvsp-title">Los Santos Radio</div>' +
+          '<div class="gvsp-artist">Connect Spotify to play</div>' +
+          '<div class="gvsp-device" data-device></div>' +
         '</div>' +
         '<div class="gvsp-progress">' +
           '<div class="gvsp-bar" role="slider" aria-label="Seek" tabindex="0" aria-valuemin="0" aria-valuemax="100">' +
@@ -88,7 +82,6 @@
         '</div>' +
         '<div class="gvsp-lyrics" data-lyrics-stage="1"></div>' +
         '<div class="gvsp-ambient">' +
-          '<div class="gvsp-ambient-skyline"></div>' +
           '<div class="gvsp-ambient-label">Waystation Radio &mdash; Los Santos</div>' +
         '</div>' +
         '<div class="gvsp-idle">' +
@@ -136,7 +129,6 @@
       root.classList.toggle('is-connected', connected);
       const title = q('.gvsp-title'), artist = q('.gvsp-artist');
       const deviceEl = q('[data-device]');
-      const headerStatus = q('[data-header-status]');
       const toggle = q('.gvsp-tbtn[data-act="toggle"]');
       const shuffleBtn = q('.gvsp-tbtn[data-act="shuffle"]');
       const repeatBtn = q('.gvsp-tbtn[data-act="repeat"]');
@@ -147,7 +139,6 @@
         artist.textContent = 'Connect Spotify to play';
         artist.classList.remove('gvsp-status');
         if (deviceEl) deviceEl.textContent = '';
-        if (headerStatus) headerStatus.textContent = 'Offline';
         if (shuffleBtn) shuffleBtn.classList.remove('active');
         if (repeatBtn) { repeatBtn.classList.remove('active'); repeatBtn.dataset.mode = 'off'; }
         setArt('', null);
@@ -155,7 +146,6 @@
         updateProgress(0, 0);
         return;
       }
-      if (headerStatus) headerStatus.textContent = 'Los Santos';
       if (!s || !s.item) {
         title.textContent = 'Nothing playing';
         artist.textContent = 'Press play in Spotify';
@@ -175,8 +165,9 @@
       artist.textContent = (item.artists || []).map(a => a.name).join(', ') || '—';
       artist.dataset.real = artist.textContent;
       artist.classList.remove('gvsp-status');
+      /* Themed source line — "VIA PIXEL 9", never a bare debug label. */
       if (deviceEl) {
-        deviceEl.textContent = s.device && s.device.name ? 'On ' + s.device.name : '';
+        deviceEl.textContent = s.device && s.device.name ? 'Via ' + String(s.device.name).toUpperCase() : '';
       }
       const imgs = item.album && item.album.images;
       /* Atomic per track: capture item.id — title, artist, art, duration
