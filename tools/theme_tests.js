@@ -1857,7 +1857,7 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
     'VC cluster map fills its nav card frame');
   ok(cssSrc.includes('#cluster-ui:has(#cluster-turn:not([hidden])) #map'),
     'VC cluster map yields the card top to the turn header while navigating');
-  ok(/body\.cluster-mode\.theme-vice-city \.vcsp\{[^}]*filter:drop-shadow/.test(cssSrc),
+  ok(/body\.cluster-mode\.theme-vice-city \.vcsp\{[^}]*filter:\s*drop-shadow/.test(cssSrc),
     'VC cluster music widget wears a drop shadow');
   ok(cssSrc.includes('body.cluster-mode.theme-vice-city #cluster-header{display:none}'),
     'VC cluster retires its old header for the dashboard topbar');
