@@ -389,11 +389,16 @@ body.theme-vice-city .menu-section details.advanced summary{color:#eafcff}
    Neon-noir instrument cluster: header bar, nav card, hero speed,
    power arc, music widget, tab footer. Shared DOM only restyled. */
 
-/* ---- backdrop: the sunset panorama fills the viewport ----
-   Body-level so it also kills the letterbox dead space around the 1920x720
-   stage; the stage itself goes transparent and a scrim keeps the HUD legible. */
-body.cluster-mode.theme-vice-city{background:#05020c url('dashboard/cluster-sunset.jpg') center / cover no-repeat}
-body.cluster-mode.theme-vice-city #cluster-ui{background:transparent}
+/* ---- backdrop: the sunset panorama, uncropped ----
+   Your art is 2048x768 (8:3) — exactly the stage's aspect ratio — so it
+   paints the 1920x720 stage 1:1 with zero cropping. Outside the stage the
+   same art sits heavily blurred + dimmed as ambient fill, so the letterbox
+   carries its colours instead of a second hard crop or black bars. */
+body.cluster-mode.theme-vice-city{background:#05020c}
+body.cluster-mode.theme-vice-city::before{content:'';position:fixed;inset:-70px;z-index:0;
+  pointer-events:none;background:url('dashboard/cluster-sunset.jpg') center / cover no-repeat;
+  filter:blur(45px) brightness(.5) saturate(1.25)}
+body.cluster-mode.theme-vice-city #cluster-ui{background:#05020c url('dashboard/cluster-sunset.jpg') center / 100% 100% no-repeat}
 body.cluster-mode.theme-vice-city #cluster-backdrop{display:block;position:absolute;inset:0;z-index:30;
   background:
     radial-gradient(55% 44% at 50% 44%, rgba(5,2,12,.66) 0%, rgba(5,2,12,0) 70%),
@@ -428,7 +433,10 @@ body.cluster-mode.theme-vice-city #cluster-mode-exit{display:none}
 body.cluster-mode.theme-vice-city #cluster-minimap{left:24px;top:88px;width:500px;height:512px;z-index:30;
   border:3px solid #ff2d95;border-radius:26px;background:rgba(9,5,20,.94);
   box-shadow:inset 0 0 0 2px rgba(1,205,254,.85),0 0 30px rgba(255,45,149,.55),0 10px 44px rgba(0,0,0,.6)}
-body.cluster-mode.theme-vice-city #map{left:40px;top:216px;width:468px;height:320px;border-radius:10px;z-index:31}
+/* the map fills the nav card edge to edge (16px insets); when a turn is being
+   announced the turn header takes the card top and the map drops below it */
+body.cluster-mode.theme-vice-city #map{left:40px;top:104px;width:468px;height:480px;border-radius:10px;z-index:31}
+body.cluster-mode.theme-vice-city #cluster-ui:has(#cluster-turn:not([hidden])) #map{top:216px;height:368px}
 /* turn header lives on the card top */
 body.cluster-mode.theme-vice-city #cluster-turn:not([hidden]){left:40px;top:104px;transform:none;z-index:32;
   width:468px;max-width:none;display:flex;align-items:center;gap:18px}
@@ -487,7 +495,8 @@ body.cluster-mode.theme-vice-city .cg-power{right:6px;bottom:34px;color:#ff2d95;
    rules exclude .cluster-mode, so the widget keeps its dashboard design.) */
 /* pane layer comes from the shared cluster stage; only the widget docks per-theme */
 body.cluster-mode.theme-vice-city .vcsp{position:absolute;top:auto;bottom:112px;right:36px;
-  left:auto;translate:none;width:670px;margin:0}
+  left:auto;translate:none;width:670px;margin:0;
+  filter:drop-shadow(0 24px 32px rgba(0,0,0,.6)) drop-shadow(0 0 26px rgba(255,45,149,.28))}
 
 /* ---- tab switcher + script logo ride on the bottombar (see footer block above) ---- */
 body.cluster-mode.theme-vice-city #cluster-tabs{display:flex;align-items:center;gap:8px}

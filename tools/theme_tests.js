@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v168"), 'SW theme cache v168');
+ok(swSrc.includes("ws-theme-v169"), 'SW theme cache v169');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -1778,10 +1778,12 @@ ok(/fitClusterStage\(\);?\s*\n?\s*}?\s*else teardownClusterStage/.test(appSrc) |
   'applyAppMode builds + fits the cluster stage on entry');
 ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
   'resize refits the cluster stage');
-// cluster children are stage-absolute, never viewport-fixed
+// cluster children are stage-absolute, never viewport-fixed (the body::before
+// ambient letterbox is viewport-level by design, not a stage child)
 {
   const vcCss = fs.readFileSync(path.join(REPO, 'themes/vice-city/dashboard.css'), 'utf8');
-  const vcCluster = vcCss.slice(vcCss.indexOf('Cluster Mode: Vice City HERO'));
+  const vcCluster = vcCss.slice(vcCss.indexOf('Cluster Mode: Vice City HERO'))
+    .replace(/body\.cluster-mode\.theme-vice-city::before\{[^}]*\}/, '');
   ok(!/position:fixed/.test(vcCluster), 'VC cluster: no viewport-fixed survivors in the stage');
   const saPhone = fs.readFileSync(path.join(REPO, 'themes/san-andreas/phone.css'), 'utf8');
   const saCluster = saPhone.slice(saPhone.indexOf('Cluster Mode: San Andreas'));
@@ -1847,10 +1849,16 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
   ok(swSrc.includes('themes/vice-city/dashboard/cluster-sunset.jpg'), 'SW precaches the VC cluster sunset');
   ok(appSrc.includes("const CLUSTER_STAGE_NODES = ['map', 'spotify-pane', 'dash-topbar', 'dash-bottombar']"),
     'dash bars reparent into the cluster stage');
-  ok(/body\.cluster-mode\.theme-vice-city\{background:[^}]*cluster-sunset\.jpg/.test(cssSrc),
-    'VC cluster paints the sunset panorama on the viewport');
-  ok(cssSrc.includes('body.cluster-mode.theme-vice-city #cluster-ui{background:transparent}'),
-    'VC cluster stage is transparent over the sunset');
+  ok(/body\.cluster-mode\.theme-vice-city #cluster-ui\{[^}]*cluster-sunset\.jpg[^}]*\/ 100% 100%/.test(cssSrc),
+    'VC cluster paints the sunset 1:1 on the stage (no crop: art is 8:3, stage is 8:3)');
+  ok(/body\.cluster-mode\.theme-vice-city::before\{[^}]*cluster-sunset\.jpg[^}]*blur/.test(cssSrc),
+    'VC cluster letterbox is the same art blurred+dimmed, not a second crop');
+  ok(/body\.cluster-mode\.theme-vice-city #map\{[^}]*width:468px;height:480px/.test(cssSrc),
+    'VC cluster map fills its nav card frame');
+  ok(cssSrc.includes('#cluster-ui:has(#cluster-turn:not([hidden])) #map'),
+    'VC cluster map yields the card top to the turn header while navigating');
+  ok(/body\.cluster-mode\.theme-vice-city \.vcsp\{[^}]*filter:drop-shadow/.test(cssSrc),
+    'VC cluster music widget wears a drop shadow');
   ok(cssSrc.includes('body.cluster-mode.theme-vice-city #cluster-header{display:none}'),
     'VC cluster retires its old header for the dashboard topbar');
   ok(/body\.cluster-mode\.theme-vice-city #cluster-footer\{[^}]*background:none/.test(cssSrc),
