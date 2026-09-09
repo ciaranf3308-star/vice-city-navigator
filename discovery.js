@@ -46,9 +46,10 @@
   const MAX_CELLS = 100000;   // cap on persisted discovered cells
   const MAX_STAMPS = 3000;    // cap on reveal stamps per repaint
   const RENDER_SCALE = 0.5;   // fog is soft — half-res texture
-  const REGION_PAD = 2.5;     // canvas extends 250% of the viewport past each edge
-                                // (6x viewport: a fast 2-level zoom-out still stays inside the
-                                // painted region, so the fog box never shows mid-gesture)
+  const REGION_PAD = 0.75;    // canvas extends 75% of the viewport past each edge
+                                // (2.5x viewport: the proven-working v155 geometry. The 6x
+                                // experiment in v158 blacked out the map on real devices;
+                                // root cause not isolated remotely, so revert to known-good.)
   const REGION_KEEP = 0.2;    // rebuild the region once the viewport strays past this margin
   const MAX_TEX = 2048;       // texture size cap (px)
   const KM2_PER_CELL = 0.014; // precision-7 cell area (mid latitudes)
@@ -184,7 +185,7 @@
     return {
       fill: ui.fogFill || FOG_FILL_COLOR,
       // Dense but never a blackout: the map whispers through the fog.
-      fillOpacity: Math.max(0.87, Math.min(base, 0.9)),
+      fillOpacity: Math.max(0.93, base),
     };
   }
 
