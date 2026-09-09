@@ -1393,6 +1393,34 @@ ok(spotKt.includes('expires_at'), 'android: handoff token matches the web auth s
 ok(fs.existsSync(path.join(AND, 'gradlew')), 'android: gradle wrapper script present');
 ok(fs.existsSync(path.join(AND, 'gradle/wrapper/gradle-wrapper.jar')), 'android: gradle wrapper jar present');
 
+
+{
+  const pmSrc = appSrc.split('/* <test-extract:parseMaxspeed> */')[1].split('/* </test-extract> */')[0];
+  const pmBox = {};
+  vm.createContext(pmBox);
+  vm.runInContext(pmSrc, pmBox, { filename: 'parseMaxspeed' });
+  const parseMaxspeed = pmBox.parseMaxspeed;
+  ok(typeof parseMaxspeed === 'function', 'parseMaxspeed extracts for testing');
+  ok(parseMaxspeed('50') === 50, 'maxspeed 50 -> 50');
+  ok(parseMaxspeed('80') === 80, 'maxspeed 80 -> 80');
+  ok(parseMaxspeed('120') === 120, 'maxspeed 120 -> 120');
+  ok(parseMaxspeed('30 mph') === 48, 'maxspeed 30 mph -> 48 kmh');
+  ok(parseMaxspeed('60 mph') === 97, 'maxspeed 60 mph -> 97 kmh');
+  ok(parseMaxspeed('IE:urban') === 50, 'maxspeed IE:urban -> 50');
+  ok(parseMaxspeed('IE:rural') === 80, 'maxspeed IE:rural -> 80');
+  ok(parseMaxspeed('IE:motorway') === 120, 'maxspeed IE:motorway -> 120');
+  ok(parseMaxspeed('none') === null, 'maxspeed none -> null');
+  ok(parseMaxspeed('signals') === null, 'maxspeed signals -> null');
+  ok(parseMaxspeed('') === null, 'maxspeed empty -> null');
+  ok(parseMaxspeed(null) === null, 'maxspeed null -> null');
+}
+ok(indexSrc.includes('id="speedo"'), 'index has the #speedo cluster');
+ok(indexSrc.includes('id="speedo-limit"') && indexSrc.includes('id="speedo-num"'), 'speedo has limit + speed readouts');
+ok(/DASH_STAGE_NODES\s*=\s*\[[^\]]*'speedo'/.test(appSrc), 'speedo is reparented into the dash stage');
+ok(/body\.dashboard-mode #speedo\{[^}]*display:flex/.test(fs.readFileSync(path.join(REPO, 'styles.css'), 'utf8')), 'speedo shows in dashboard mode');
+ok(appSrc.includes('maybeFetchSpeedLimit'), 'app fetches posted limits from OSM');
+ok(appSrc.includes('overpass'), 'limit lookup uses Overpass');
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
 ok(/function saArrowSvg/.test(appSrc), 'SA has its own block-arrow set (hero font-theme match)');
@@ -1423,3 +1451,4 @@ ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/bottombar-palms.j
 }
 ok(fs.existsSync(path.join(REPO, 'themes/vice-city/dashboard.css')), 'VC dashboard.css exists (factored)');
 ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard.css')), 'SA dashboard.css exists (factored)');
+

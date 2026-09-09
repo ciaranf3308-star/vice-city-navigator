@@ -559,6 +559,41 @@ body.dashboard-mode.nav-driving #drive-bar{bottom:calc(88px + env(safe-area-inse
 /* County/region subtitle under the locality name. Hidden unless a theme
    opts in (GTA V renders it as the "BLAINE COUNTY" line). */
 #dash-sub{display:none;}
+
+/* ---------------- speed cluster (dashboard only) ----------------
+   Google Maps-style: live GPS speed pill + EU posted-limit roundel,
+   bottom-left of the stage, just above each theme's bottom bar. */
+#speedo{display:none}
+body.dashboard-mode #speedo{
+  display:flex;position:absolute;left:20px;z-index:30;
+  flex-direction:column;align-items:center;gap:10px;pointer-events:none;
+  filter:drop-shadow(0 4px 14px rgba(0,0,0,.55));
+}
+body.dashboard-mode #speedo[hidden]{display:none}
+/* per-theme: sit just above each theme's bottom bar (stage coords) */
+body.dashboard-mode.theme-vice-city #speedo{bottom:122px}
+body.dashboard-mode.theme-san-andreas #speedo{bottom:148px}
+body.dashboard-mode.theme-gta-v #speedo{bottom:86px}
+body.dashboard-mode.theme-rdr2 #speedo{bottom:94px}
+/* posted limit: EU roundel */
+#speedo-limit{
+  width:66px;height:66px;border-radius:50%;
+  background:#f2f2f2;border:7px solid #d8232a;
+  display:flex;align-items:center;justify-content:center;
+}
+body.dashboard-mode #speedo-limit[hidden]{display:none}
+#speedo-limit-num{font:700 27px/1 Arial,Helvetica,sans-serif;color:#141414;letter-spacing:-.5px}
+/* current speed pill */
+#speedo-cur{
+  display:flex;align-items:baseline;gap:7px;
+  background:rgba(8,8,10,.8);border:1px solid rgba(255,255,255,.18);
+  border-radius:18px;padding:12px 20px 10px;color:#fff;
+}
+#speedo-num{font:700 44px/1 'Arial Narrow',Arial,sans-serif;letter-spacing:1px}
+#speedo-unit{font:600 13px/1 'Arial Narrow',Arial,sans-serif;letter-spacing:2px;color:rgba(255,255,255,.55)}
+/* over the limit: Google Maps turns the readout red */
+#speedo.over #speedo-cur{border-color:rgba(255,70,60,.8)}
+#speedo.over #speedo-num{color:#ff5b50;text-shadow:0 0 18px rgba(255,60,50,.45)}
 .dash-zoom{display:flex;align-items:center;gap:10px;padding:12px 14px}
 .dash-zoom button{
   width:52px;height:52px;border-radius:8px;cursor:pointer;

@@ -610,6 +610,96 @@ function screenAngle() {
   catch (e) { return 0; }
 }
 function clearlyMoving() { return gpsSpeed !== null && gpsSpeed > 2.5; }
+
+/* ---------------- speed cluster: GPS speed + OSM posted limit ----------------
+   Google Maps-style: live speed from the GPS fix, limit from the nearest
+   OSM way's maxspeed tag (Overpass, debounced by distance/time, cached).
+   Dashboard-only; degrades to speed-alone when the limit is unknown. */
+let speedLimitKmh = null;      // posted limit, null = unknown
+let limitQueryAt = 0, limitQueryPos = null, limitPending = false;
+const limitCache = new Map();  // ~100m grid key -> kmh
+/* <test-extract:parseMaxspeed> */
+function parseMaxspeed(s) {
+  s = String(s == null ? '' : s).trim().toLowerCase();
+  if (!s || s === 'none' || s === 'signals' || s === 'walk' || s === 'no') return null;
+  if (s === 'ie:urban') return 50;    // Ireland's conditional tags
+  if (s === 'ie:rural') return 80;
+  if (s === 'ie:motorway' || s === 'ie:trunk') return 120;
+  let m = s.match(/^([\d.]+)\s*mph/);
+  if (m) return Math.round(parseFloat(m[1]) * 1.60934);
+  m = s.match(/^([\d.]+)/);
+  if (m) return Math.round(parseFloat(m[1])); // default unit: km/h
+  return null;
+}
+/* </test-extract> */
+function updateSpeedo() {
+  if (!document.body.classList.contains('dashboard-mode')) return;
+  const el = $('speedo');
+  if (!el || !userPos) return; // no fix yet: stay hidden
+  el.hidden = false;
+  const kmh = (typeof gpsSpeed === 'number' && !isNaN(gpsSpeed) && gpsSpeed >= 0)
+    ? Math.round(gpsSpeed * 3.6) : null;
+  const num = $('speedo-num');
+  const txt = kmh === null ? '–' : String(kmh);
+  if (num.textContent !== txt) num.textContent = txt;
+  const lim = $('speedo-limit');
+  if (speedLimitKmh) {
+    lim.hidden = false;
+    const ltxt = String(speedLimitKmh);
+    if ($('speedo-limit-num').textContent !== ltxt) $('speedo-limit-num').textContent = ltxt;
+    el.classList.toggle('over', kmh !== null && kmh > speedLimitKmh);
+  } else {
+    lim.hidden = true;
+    el.classList.remove('over');
+  }
+}
+async function maybeFetchSpeedLimit(lat, lon) {
+  if (!document.body.classList.contains('dashboard-mode')) return;
+  const key = lat.toFixed(3) + ',' + lon.toFixed(3);
+  if (limitCache.has(key)) {
+    if (speedLimitKmh !== limitCache.get(key)) { speedLimitKmh = limitCache.get(key); updateSpeedo(); }
+    return;
+  }
+  const now = Date.now();
+  if (limitPending || now - limitQueryAt < 15000) return;
+  if (limitQueryPos && haversine(limitQueryPos, [lon, lat]) < 80) return;
+  limitPending = true; limitQueryAt = now; limitQueryPos = [lon, lat];
+  const q = '[out:json][timeout:10];way(around:30,' + lat.toFixed(5) + ',' +
+    lon.toFixed(5) + ')[maxspeed];out tags center 1;';
+  const hosts = ['https://overpass.kumi.systems/api/interpreter',
+                 'https://overpass-api.de/api/interpreter'];
+  let best = null;
+  for (const h of hosts) {
+    try {
+      const ctl = new AbortController();
+      const to = setTimeout(() => ctl.abort(), 9000);
+      let r;
+      try {
+        r = await fetch(h, { method: 'POST', body: 'data=' + encodeURIComponent(q), signal: ctl.signal });
+      } finally { clearTimeout(to); }
+      if (!r.ok) continue;
+      const j = await r.json();
+      const ways = (j.elements || []).filter(e => e.tags && e.tags.maxspeed);
+      if (!ways.length) break; // road simply untagged: stop, don't burn the fallback
+      const cosLat = Math.cos(lat * Math.PI / 180);
+      ways.sort((a, b) => {
+        const ca = a.center || {}, cb = b.center || {};
+        const da = Math.hypot((ca.lat - lat) * 111320, (ca.lon - lon) * 111320 * cosLat);
+        const db = Math.hypot((cb.lat - lat) * 111320, (cb.lon - lon) * 111320 * cosLat);
+        return da - db;
+      });
+      best = parseMaxspeed(ways[0].tags.maxspeed);
+      break;
+    } catch (e) { /* try the next host */ }
+  }
+  if (best) {
+    speedLimitKmh = best;
+    limitCache.set(key, best);
+    if (limitCache.size > 240) limitCache.delete(limitCache.keys().next().value);
+  }
+  limitPending = false;
+  updateSpeedo();
+}
 function onOrientation(e) {
   let h = null;
   if (typeof e.webkitCompassHeading === 'number' && !isNaN(e.webkitCompassHeading)) {
@@ -1339,6 +1429,14 @@ function endNav() {
   syncDashTrip();
   try { const vc = $('vc-maneuver'); if (vc) vc.hidden = true; } catch (e) {}
   if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+  /* Hand the GPS watch back to the passive dashboard feed so the speed
+     cluster keeps working after the route ends. */
+  if (document.body.classList.contains('dashboard-mode') && 'geolocation' in navigator) {
+    try {
+      watchId = navigator.geolocation.watchPosition(onPos, onPosErr,
+        { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 });
+    } catch (e) {}
+  }
   if (window.VCNVoice) VCNVoice.cancel();
   setUiMode('explore');
   if (map) {
@@ -1382,6 +1480,8 @@ function onPos(pos) {
   if (heading !== null) lastHeading = heading; // GPS travel heading wins when moving
   else if (!clearlyMoving() && compassHeading !== null) lastHeading = compassHeading; // compass when slow
   updatePlayerArrow();
+  updateSpeedo(); // live speed readout (dashboard)
+  maybeFetchSpeedLimit(pos.coords.latitude, pos.coords.longitude); // posted limit
 
   if (!navActive || !steps.length) return;
 
@@ -1591,7 +1691,7 @@ function dashboardLayoutActive() {
    coordinates; the stage is zoomed to fit the window. Menus, drawers
    and toasts stay at body level so they remain usable at any scale. */
 const DASH_W = 1920, DASH_H = 720;
-const DASH_STAGE_NODES = ['map', 'fx', 'explore-ui', 'drive-hud', 'spotify-pane', 'dash-topbar', 'dash-bottombar', 'sa-grove-panel'];
+const DASH_STAGE_NODES = ['map', 'fx', 'explore-ui', 'drive-hud', 'spotify-pane', 'dash-topbar', 'dash-bottombar', 'sa-grove-panel', 'speedo'];
 /* NOTE: #menu-panel is deliberately NOT reparented into the stage — it
    stays at body level so it never shrinks with the stage zoom. */
 
@@ -1760,6 +1860,18 @@ function applyAppMode() {
     document.body.classList.remove('radio-off');
     setDashTab('map');
     tickDashClock(); refreshDashWeather(); syncDashTrip(); queueDashLocality();
+    /* Passive GPS watch for the speed cluster (and heading/POIs outside nav).
+       Navigation restarts this same watch with its own options; endNav hands
+       it back here so the speedo keeps living after a route ends. */
+    if (watchId === null && 'geolocation' in navigator) {
+      try {
+        watchId = navigator.geolocation.watchPosition(onPos, onPosErr,
+          { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 });
+      } catch (e) {}
+    }
+  } else {
+    if (watchId !== null) { try { navigator.geolocation.clearWatch(watchId); } catch (e) {} watchId = null; }
+    const sp = $('speedo'); if (sp) sp.hidden = true;
   }
   if (map && map.resize) { try { map.resize(); } catch (e) {} }
   syncDashPadding();
