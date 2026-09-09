@@ -7,6 +7,8 @@ import android.util.Log
 import android.view.View
 import android.webkit.GeolocationPermissions
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceError
+import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -24,6 +26,9 @@ class MainActivity : Activity() {
 
     private var webView: WebView? = null
     private var locationGranted = false
+    private var retryCount = 0
+    private var retryRunnable: Runnable? = null
+    private var loadFailed = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -93,7 +98,48 @@ class MainActivity : Activity() {
                 // PKCE flow completes without leaving the app.
                 return false
             }
+
+            // Same dead-page trap as the car renderer: one failed load must
+            // not strand the user on the error page — retry with backoff.
+            override fun onPageStarted(view: WebView, url: String, favicon: android.graphics.Bitmap?) {
+                loadFailed = false
+            }
+
+            override fun onPageFinished(view: WebView, url: String) {
+                // onPageFinished also fires for the error page itself.
+                if (loadFailed) return
+                retryCount = 0
+                retryRunnable?.let { view.removeCallbacks(it) }
+                retryRunnable = null
+            }
+
+            override fun onReceivedError(
+                view: WebView,
+                request: WebResourceRequest,
+                error: WebResourceError
+            ) {
+                if (request.isForMainFrame) {
+                    loadFailed = true
+                    schedulePhoneRetry(view)
+                }
+            }
         }
+    }
+
+    private fun schedulePhoneRetry(view: WebView) {
+        retryRunnable?.let { view.removeCallbacks(it) }
+        val delayMs = when {
+            retryCount < 4 -> longArrayOf(2_000L, 4_000L, 8_000L, 16_000L)[retryCount]
+            else -> 60_000L
+        }
+        retryCount++
+        Log.i(TAG, "phone page load failed; retry $retryCount in ${delayMs}ms")
+        val r = Runnable {
+            retryRunnable = null
+            try { view.reload() } catch (e: Exception) { schedulePhoneRetry(view) }
+        }
+        retryRunnable = r
+        view.postDelayed(r, delayMs)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -108,6 +154,8 @@ class MainActivity : Activity() {
     }
 
     override fun onDestroy() {
+        retryRunnable?.let { webView?.removeCallbacks(it) }
+        retryRunnable = null
         webView?.destroy()
         webView = null
         super.onDestroy()

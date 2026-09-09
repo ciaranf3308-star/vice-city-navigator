@@ -12,6 +12,8 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceError
+import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.GeolocationPermissions
 import android.webkit.WebView
@@ -52,6 +54,9 @@ class CarWebViewRenderer(private val carContext: CarContext) {
         /** Only this origin is ever granted WebView geolocation. */
         const val WAYSTATION_ORIGIN = "https://ciaranf3308-star.github.io"
         private const val POLL_MS = 2000L
+
+        /** Retry backoff after a failed dashboard load (ms), then every 60s. */
+        private val BACKOFF_MS = longArrayOf(2_000L, 4_000L, 8_000L, 16_000L)
     }
 
     /** JS nav state → host NavigationManager (wired in WayStationScreen). */
@@ -60,11 +65,83 @@ class CarWebViewRenderer(private val carContext: CarContext) {
     /** JS Spotify auth state → show/hide the native Connect action. */
     var onSpotifyConnected: ((Boolean) -> Unit)? = null
 
+    /** Page load state → the screen shows a native Reload action while the
+     *  dashboard has failed to load (true = loaded OK). */
+    var onPageLoadState: ((Boolean) -> Unit)? = null
+
     /** Native location permission state (wired in WayStationScreen). */
     var locationPermissionGranted: (() -> Boolean)? = null
 
     private val main = Handler(Looper.getMainLooper())
     private val spotifyAuth = SpotifyAuthManager(carContext)
+
+    // ---------------- load-failure retry ----------------
+    // The dashboard URL is loaded exactly once per surface attach. If that
+    // single load races a network handoff (the usual case: the phone's data
+    // path flaps for a few seconds right as Android Auto connects), the
+    // WebView lands on the dead "Web page not available" page and never
+    // recovers — the head unit sits on a white/error surface forever.
+    // onReceivedError/onReceivedHttpError therefore schedule reload retries
+    // with backoff (2s → 4s → 8s → 16s → every 60s) until a page finishes.
+    private var retryCount = 0
+    private var retryRunnable: Runnable? = null
+    // Set by onReceivedError/onReceivedHttpError for the main frame; cleared
+    // by onPageStarted. Guards onPageFinished, which also fires for the
+    // built-in error page itself — without this the error page's finish
+    // would cancel the retry we just scheduled.
+    private var loadFailed = false
+
+    private fun scheduleRetry() {
+        cancelRetry()
+        val delayMs = when {
+            retryCount < BACKOFF_MS.size -> BACKOFF_MS[retryCount]
+            else -> 60_000L
+        }
+        retryCount++
+        Log.i(TAG, "page load failed; retry $retryCount in ${delayMs}ms")
+        val r = Runnable {
+            retryRunnable = null
+            try {
+                webView?.reload()
+            } catch (e: Exception) {
+                Log.w(TAG, "retry reload threw", e)
+                scheduleRetry()
+            }
+        }
+        retryRunnable = r
+        main.postDelayed(r, delayMs)
+    }
+
+    private fun cancelRetry() {
+        retryRunnable?.let { main.removeCallbacks(it) }
+        retryRunnable = null
+    }
+
+    private fun notePageLoaded() {
+        cancelRetry()
+        retryCount = 0
+        onPageLoadState?.invoke(true)
+    }
+
+    private fun notePageFailed(reason: String) {
+        Log.w(TAG, "dashboard page failed: $reason")
+        loadFailed = true
+        onPageLoadState?.invoke(false)
+        scheduleRetry()
+    }
+
+    /** Manual escape hatch (native Reload action): reset backoff, reload now. */
+    fun reloadNow() {
+        cancelRetry()
+        retryCount = 0
+        onPageLoadState?.invoke(false)
+        try {
+            webView?.reload()
+        } catch (e: Exception) {
+            Log.w(TAG, "manual reload threw", e)
+            scheduleRetry()
+        }
+    }
 
     private var virtualDisplay: VirtualDisplay? = null
     private var presentation: Presentation? = null
@@ -112,6 +189,8 @@ class CarWebViewRenderer(private val carContext: CarContext) {
                 )
             )
             Log.i(TAG, "pipeline up: ${w}x${h}@${dpi}")
+            cancelRetry()
+            retryCount = 0
             wv.loadUrl(DASH_URL)
         } catch (e: Exception) {
             Log.e(TAG, "attach failed", e)
@@ -121,6 +200,7 @@ class CarWebViewRenderer(private val carContext: CarContext) {
 
     /** Full teardown in reverse order. Idempotent. */
     fun detach() {
+        cancelRetry()
         main.removeCallbacks(pollRunnable)
         pollRunning = false
         try { webView?.stopLoading() } catch (e: Exception) { }
@@ -175,11 +255,35 @@ class CarWebViewRenderer(private val carContext: CarContext) {
         wv.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView, url: String, favicon: android.graphics.Bitmap?) {
                 handoffDone = false // new page → token handoff may run again
+                loadFailed = false
             }
 
             override fun onPageFinished(view: WebView, url: String) {
+                // onPageFinished also fires for the built-in error page;
+                // only a clean finish counts as loaded (see loadFailed).
+                if (!loadFailed) notePageLoaded()
                 forwardAreas()
                 startPoll()
+            }
+
+            override fun onReceivedError(
+                view: WebView,
+                request: WebResourceRequest,
+                error: WebResourceError
+            ) {
+                if (request.isForMainFrame) {
+                    notePageFailed("net error ${error.errorCode} on ${request.url}")
+                }
+            }
+
+            override fun onReceivedHttpError(
+                view: WebView,
+                request: WebResourceRequest,
+                errorResponse: android.webkit.WebResourceResponse
+            ) {
+                if (request.isForMainFrame) {
+                    notePageFailed("HTTP ${errorResponse.statusCode} on ${request.url}")
+                }
             }
         }
     }

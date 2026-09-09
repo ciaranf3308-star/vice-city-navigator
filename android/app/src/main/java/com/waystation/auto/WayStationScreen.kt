@@ -39,6 +39,7 @@ class WayStationScreen(carContext: CarContext) : Screen(carContext) {
     private var navActive = false
     private var spotifyConnected = false
     private var locationGranted = false
+    private var pageFailed = false
 
     private val surfaceCallback = object : SurfaceCallback {
         override fun onSurfaceAvailable(surfaceContainer: SurfaceContainer) {
@@ -99,6 +100,17 @@ class WayStationScreen(carContext: CarContext) : Screen(carContext) {
             }
         }
         renderer.locationPermissionGranted = { locationGranted }
+        // Dashboard load state drives the native Reload action: while the
+        // page has failed (and is auto-retrying) the user gets a manual
+        // escape hatch on the head unit instead of a dead surface.
+        renderer.onPageLoadState = { loaded ->
+            main.post {
+                val failed = !loaded
+                if (failed == pageFailed) return@post
+                pageFailed = failed
+                invalidate()
+            }
+        }
         refreshLocationState()
     }
 
@@ -164,6 +176,14 @@ class WayStationScreen(carContext: CarContext) : Screen(carContext) {
                 Action.Builder()
                     .setTitle("Connect Spotify")
                     .setOnClickListener { renderer.startSpotifyAuth() }
+                    .build()
+            )
+        }
+        if (pageFailed) {
+            actions.add(
+                Action.Builder()
+                    .setTitle("Reload")
+                    .setOnClickListener { renderer.reloadNow() }
                     .build()
             )
         }
