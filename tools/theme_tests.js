@@ -171,8 +171,8 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v62"), 'SW shell cache v61');
-ok(swSrc.includes("ws-theme-v162"), 'SW theme cache v130');
+ok(swSrc.includes("ws-shell-v63"), 'SW shell cache v63');
+ok(swSrc.includes("ws-theme-v163"), 'SW theme cache v163');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -311,6 +311,11 @@ ok(/\.vcsp-art\s*\{[^}]*left:\s*7\.5%/.test(vcSkinCssCode), 'VC album art sits i
 ok(/\.vcsp-lyrics\s*\{[^}]*left:\s*41%/.test(vcSkinCssCode), 'VC lyric stage sits on the sunset, beside the album');
 ok(!vcSkinCssCode.includes('.vcsp-logo') && !vcSkinJs.includes('vcsp-logo'), 'no chopped logo — it is part of the hud');
 ok(/\.vcsp-controls\s*\{[^}]*background:\s*none/.test(vcSkinCssCode), 'VC controls float on the art (no background slab)');
+/* Regression: the transport row must stay above the hud.png chrome line
+   (measured at 94.5% of the art) — bottom:<7% put the buttons ON the chrome. */
+ok(/\.vcsp-controls\s*\{[^}]*bottom:\s*([0-9.]+)%/.test(vcSkinCssCode) &&
+   parseFloat(vcSkinCssCode.match(/\.vcsp-controls\s*\{[^}]*bottom:\s*([0-9.]+)%/)[1]) >= 7,
+   'VC transport row bottom edge stays >=7% above the widget bottom (clear of the 94.5% art chrome line)');
 ok(vcSkinCssCode.includes('.vcsp-idle') && !vcSkinCssCode.includes('vcsp-connect-pill'), 'VC idle/connect lives inside the widget, no generic card');
 ok(vcSkinJs.includes('vcsp-idle') && !vcSkinJsCode.includes('vcsp-connect\'') && !vcSkinJsCode.includes('vcsp-connect"'), 'VC skin JS renders the in-widget idle state');
 
@@ -528,7 +533,7 @@ ok(/body\.dashboard-mode \.vc-title\{[^}]*font-size:52px/.test(cssSrc),
    the stage is letterboxed or zoomed below 1. */
 ok(!/DASH_STAGE_NODES = \[[^\]]*'menu-panel'/.test(appSrc),
   'menu panel is not reparented into the scaled dash stage');
-for (const [id, top, bottom] of [['vice-city', 76, 100], ['san-andreas', 126, 126], ['gta-v', 56, 64], ['rdr2', 72, 72]]) {
+for (const [id, top, bottom] of [['vice-city', 76, 100], ['san-andreas', 126, 126], ['gta-v', 120, 120], ['rdr2', 104, 84]]) {
   ok(new RegExp(`'${id}':\\s*\\{\\s*top:\\s*${top},\\s*bottom:\\s*${bottom}\\s*\\}`).test(appSrc),
     `DASH_BAR_HEIGHTS: ${id} bars ${top}/${bottom}px (stage coordinates)`);
 }
@@ -666,7 +671,7 @@ ok(/theme-san-andreas \.sasp\{[^}]*top:83px/.test(skinSaSrc),
   'SA radio sits at the hero\'s radio y (83px stage), overlapping the bars');
 ok(/\.sasp-bezel/.test(skinSaSrc) && skinJsSa.includes('dashboard/radio-hero7-r2.png'),
   'SA Spotify outer skin is the hero7 radio slice');
-ok(/\.sasp-idle::after\{[^}]*left:5px;top:280px;width:260px/.test(skinSaSrc),
+ok(/\.sasp-idle::after\{[^}]*left:-22px;top:276px;width:317px/.test(skinSaSrc),
   'SA idle covers the art\'s drawn transport strip (no phantom pause/progress when disconnected)');
 ok(/\.sasp\{[^}]*container-type:size/.test(skinSaSrc),
   'SA widget is a cqw/cqh container (lyrics size against widget, not viewport)');
@@ -804,6 +809,11 @@ for (const [theme, cls, tilt, size] of skinSpecs) {
   ok(js.includes('!connected && !hasTrack'), `${theme}: is-idle requires disconnected AND no track (lyric void fix)`);
 }
 ok(appSrc.includes('syncDashPadding'), 'camera viewport offsets left of the VC widget');
+/* Regression: dashboard camera padding must clear every theme's real bars
+   (SA 126/126, GTA V 120/120, RDR2 104/84) — the old hardcoded top:76 /
+   bottom:VC?100:88 left the camera target under the SA/GTA V bars. */
+ok(/DASH_BAR_HEIGHTS\[themeId\]/.test(appSrc) && /top:\s*bars\.top/.test(appSrc) && /bottom:\s*bars\.bottom/.test(appSrc),
+  'syncDashPadding reads bar clearances from DASH_BAR_HEIGHTS per theme');
 ok(cssSrc.includes('#dash-bottombar::before'), 'VC bottom bar has a neon top edge');
 ok(!cssSrc.includes('#spotify-close'), 'no close-button styles');
 ok(/\#spotify-pane\{[\s\S]*?background:transparent/.test(cssSrc), 'pane transparent');

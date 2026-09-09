@@ -1759,8 +1759,8 @@ const DASH_STAGE_NODES = ['map', 'fx', 'explore-ui', 'drive-hud', 'spotify-pane'
 const DASH_BAR_HEIGHTS = {
   'vice-city':   { top: 76, bottom: 100 },
   'san-andreas': { top: 126, bottom: 126 },
-  'gta-v':       { top: 56, bottom: 64 },
-  'rdr2':        { top: 72, bottom: 72 },
+  'gta-v':       { top: 120, bottom: 120 },
+  'rdr2':        { top: 104, bottom: 84 },
 };
 
 /* Dock the body-level menu panel against the LIVE dashboard stage rect.
@@ -1897,8 +1897,13 @@ function syncDashPadding() {
     else if (b.contains('theme-gta-v')) right = 568;      // .gvsp: right:48px, width:520px
     else if (b.contains('theme-rdr2')) right = 670;       // .rdsp: right:70px, width:600px
   }
-  if (dash)
-    m.setPadding({ top: 76, right: right, bottom: b.contains('theme-vice-city') ? 100 : 88, left: 8 });
+  if (dash) {
+    // Bar clearances come from the shared per-theme table (stage coords) so
+    // the camera target clears every theme's real bars, not just VC's.
+    const themeId = (window.VCNThemes && VCNThemes.currentId()) || 'vice-city';
+    const bars = DASH_BAR_HEIGHTS[themeId] || { top: 76, bottom: 88 };
+    m.setPadding({ top: bars.top, right: right, bottom: bars.bottom, left: 8 });
+  }
   else m.setPadding({ top: 0, right: 0, bottom: 0, left: 0 });
 }
 

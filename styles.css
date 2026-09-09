@@ -126,6 +126,12 @@ body{
   position:absolute;right:12px;bottom:calc(20px + env(safe-area-inset-bottom));
   display:flex;flex-direction:column;gap:10px;
 }
+/* Phone drive mode: the centered #drive-bar (max-width 100vw-24px) overlaps
+   the right zoom coins at 390px viewports — lift the coins clear of it.
+   (Speedo is dashboard-only, so nothing else lives in this band.) */
+body.nav-driving:not(.dashboard-mode) #map-tools{
+  bottom:calc(96px + env(safe-area-inset-bottom));
+}
 
 /* ---------- explore chrome per-theme skins ----------
    The menu button + "Where to?" pill wear each theme's own design
