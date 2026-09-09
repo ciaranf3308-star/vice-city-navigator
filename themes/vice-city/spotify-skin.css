@@ -39,7 +39,7 @@
 /* ---------- album art: UNDER the hud, through its cut-out ---------- */
 .vcsp-art {
   position: absolute; z-index: 1;
-  left: 7.5%; top: 34.3%; width: 31.9%; height: 35%;
+  left: 7.5%; top: 34.3%; width: 31.9%; height: 32%;
   object-fit: cover; border-radius: 2.5cqw;
   opacity: 0; transition: opacity .45s ease;
   background: #0a0e24;
@@ -48,7 +48,7 @@
 /* small atmospheric placeholder in the opening while nothing loads */
 .vcsp-art-idle {
   position: absolute; z-index: 1;
-  left: 7.5%; top: 34.3%; width: 31.9%; height: 35%;
+  left: 7.5%; top: 34.3%; width: 31.9%; height: 32%;
   border-radius: 2.5cqw;
   background: radial-gradient(70% 70% at 50% 38%, #16204a 0%, #070a1e 72%);
   display: flex; align-items: center; justify-content: center;
@@ -68,7 +68,7 @@
 /* ---------- track info on the dark panel under the album ---------- */
 .vcsp-track {
   position: absolute; z-index: 3;
-  left: 6%; right: 64%; top: 70%;
+  left: 6%; right: 64%; top: 68.5%;
   text-align: left;
 }
 .vcsp-title {
@@ -89,7 +89,7 @@
 /* ---------- progress on the dark panel ---------- */
 .vcsp-progress {
   position: absolute; z-index: 3;
-  left: 6%; right: 64%; top: 80%;
+  left: 6%; right: 64%; top: 79%;
 }
 .vcsp-bar { position: relative; height: 2.2cqh; cursor: pointer; touch-action: none; }
 .vcsp-bar::before {
@@ -118,7 +118,7 @@
 /* ---------- transport on the dark panel ---------- */
 .vcsp-controls {
   position: absolute; z-index: 3;
-  left: 6%; right: 64%; top: 86%; bottom: 2%;
+  left: 6%; right: 64%; top: 85%; bottom: 2%;
   display: flex; align-items: center; justify-content: center; gap: 2.5cqw;
   background: none; padding: 0;
 }
