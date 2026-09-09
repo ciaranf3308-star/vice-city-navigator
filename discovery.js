@@ -46,10 +46,9 @@
   const MAX_CELLS = 100000;   // cap on persisted discovered cells
   const MAX_STAMPS = 3000;    // cap on reveal stamps per repaint
   const RENDER_SCALE = 0.5;   // fog is soft — half-res texture
-  const REGION_PAD = 0.75;    // canvas extends 75% of the viewport past each edge
-                                // (2.5x viewport: the proven-working v155 geometry. The 6x
-                                // experiment in v158 blacked out the map on real devices;
-                                // root cause not isolated remotely, so revert to known-good.)
+  const REGION_PAD = 1.5;     // canvas extends 150% of the viewport past each edge
+                                // (4x viewport: bisecting 2.5x (worked) and 6x (blacked out).
+                                // Mercator clamp still guards the poles.)
   const REGION_KEEP = 0.2;    // rebuild the region once the viewport strays past this margin
   const MAX_TEX = 2048;       // texture size cap (px)
   const KM2_PER_CELL = 0.014; // precision-7 cell area (mid latitudes)
