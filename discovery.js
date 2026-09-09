@@ -2,7 +2,7 @@
    Vice City Navigator — Discovery / Fog of War
    ------------------------------------------------------------
    Remembers where the player has physically driven and renders
-   a fog-of-war overlay for Discovery Mode. Completely
+   a GTA-style fog-of-war overlay for Discovery Mode. Completely
    theme-independent and network-free: discovery DATA is just
    geohash cells, so switching map themes later never loses
    progress.
@@ -10,8 +10,15 @@
    Pipeline: GPS movement -> reveal(lnglat) marks the precision-7
    cell plus its 8 neighbours (roughly a 250-400 m discovery
    radius) as discovered, along with coarser parents -> persisted
-   to localStorage (debounced) -> refreshFog() paints every
-   undiscovered cell in the viewport as fog polygons.
+   to localStorage (debounced) -> refreshFog() repaints the fog
+   canvas.
+
+   Render: a full-viewport canvas overlay sits above the map
+   tiles. It is filled with the theme's fog colour, then soft
+   radial "reveals" are punched out (destination-out) at every
+   discovered cell in view. Overlapping soft stamps along the
+   driven path merge into organic, GTA-like revealed trails —
+   no hard grid edges, no blocky cells.
 
    Safety: fog is ONLY shown when the user deliberately opens
    Discovery Mode via setFogVisible(true). Drive/navigation mode
@@ -25,15 +32,12 @@
      These colours belong to the fog system itself. The discovery data
      is pure geohashes and stays valid under any visual theme. */
   const LS_KEY = 'vcn-discovery-v1';
-  const SOURCE_ID = 'vcn-fog';
-  const FILL_LAYER_ID = 'vcn-fog-fill';
-  const EDGE_LAYER_ID = 'vcn-fog-edge';
+  const CANVAS_ID = 'vcn-fog-canvas';
   const FOG_FILL_COLOR = '#0b0b18';
   const FOG_FILL_OPACITY = 0.82;
-  const FOG_EDGE_COLOR = '#f5d020';
-  const FOG_EDGE_OPACITY = 0.15;
   const MAX_CELLS = 100000;   // cap on persisted discovered cells
-  const MAX_FOG_CELLS = 1500; // cap on fog polygons per rebuild
+  const MAX_STAMPS = 3000;    // cap on reveal stamps per repaint
+  const RENDER_SCALE = 0.5;   // fog is soft — half-res canvas, CSS upscaled
   const KM2_PER_CELL = 0.014; // precision-7 cell area (mid latitudes)
   const IRELAND_KM2 = 84421;  // denominator for the discovery %
 
@@ -100,40 +104,15 @@
     return out;
   }
 
-  /* Every cell hash of the given precision covering a lat/lng bbox.
-     Walks the grid from the south-west cell — geohash cells tile the
-     world with no gaps, so fixed steps land on exact cell centres.
-     `limit` bails out early once we know the caller will drop a
-     precision level anyway. (Antimeridian-crossing bboxes are out of
-     scope for this app and yield no cells.) */
-  function geohashesInBounds(sw, ne, precision, limit) {
-    const b0 = geohashBounds(geohashEncode(sw.lat, sw.lng, precision));
-    const h = b0.latMax - b0.latMin, w = b0.lngMax - b0.lngMin;
-    const cells = [], seen = new Set();
-    const max = limit || Infinity;
-    let lat = (b0.latMin + b0.latMax) / 2, rows = 0, done = false;
-    while (lat - h / 2 < ne.lat && rows++ < 40000 && !done) {
-      let lng = (b0.lngMin + b0.lngMax) / 2, cols = 0;
-      while (lng - w / 2 < ne.lng && cols++ < 40000) {
-        const cell = geohashEncode(lat, lng, precision);
-        if (!seen.has(cell)) {
-          seen.add(cell);
-          cells.push(cell);
-          if (cells.length >= max) { done = true; break; }
-        }
-        lng += w;
-      }
-      lat += h;
-    }
-    return cells;
-  }
-
   /* ---------------- state ---------------- */
   let map = null;
   let fogVisible = false;
   let discovered = new Set(); // geohash strings, precisions 5-7
   let persistTimer = null;
   let capLogged = false;
+  let fogCanvas = null;
+  let fogCtx = null;
+  let refreshQueued = false;
 
   /* ---------------- persistence (debounced, private-mode safe) ---------------- */
   function loadPersisted() {
@@ -177,60 +156,76 @@
     return true;
   }
 
-  /* ---------------- map layers ---------------- */
-  function ensureLayers() {
-    if (!map || map.getSource(SOURCE_ID)) return;
-    map.addSource(SOURCE_ID, {
-      type: 'geojson',
-      data: { type: 'FeatureCollection', features: [] },
-    });
-    // Sit below ambient POI blips when they exist, so discovered
-    // places stay readable; harmless when places.js isn't loaded.
-    const before = map.getLayer('vcn-poi') ? 'vcn-poi' : undefined;
-    map.addLayer({
-      id: FILL_LAYER_ID, type: 'fill', source: SOURCE_ID,
-      layout: { visibility: 'none' },
-      paint: { 'fill-color': FOG_FILL_COLOR, 'fill-opacity': FOG_FILL_OPACITY },
-    }, before);
-    map.addLayer({
-      id: EDGE_LAYER_ID, type: 'line', source: SOURCE_ID,
-      minzoom: 13,
-      layout: { visibility: 'none' },
-      paint: {
-        'line-color': FOG_EDGE_COLOR,
-        'line-opacity': FOG_EDGE_OPACITY,
-        'line-width': 1,
-      },
-    }, before);
+  /* ---------------- fog canvas overlay ----------------
+     A DOM canvas above the map tiles (below markers/controls).
+     Filled with fog colour; discovered ground is revealed by
+     punching soft radial holes. Because it is DOM — not a map
+     style layer — it survives setStyle() untouched. */
+  function ensureFogCanvas() {
+    if (fogCanvas || !map) return;
+    const container = map.getContainer();
+    if (!container) return;
+    fogCanvas = document.createElement('canvas');
+    fogCanvas.id = CANVAS_ID;
+    fogCanvas.style.cssText =
+      'position:absolute;inset:0;width:100%;height:100%;' +
+      'pointer-events:none;z-index:1;display:none;';
+    // Sit directly above the tile canvas, below markers & controls.
+    const cc = container.querySelector('.maplibregl-canvas-container');
+    if (cc && cc.nextSibling) container.insertBefore(fogCanvas, cc.nextSibling);
+    else container.appendChild(fogCanvas);
+    fogCtx = fogCanvas.getContext('2d');
   }
 
   /* ---------------- fog presentation per theme ----------------
      Discovery DATA is pure geohashes and never changes; only the fog
      paint follows the active theme (VC dark/gold, SA dark/tan,
-     GTA V muted grey, Frontier parchment/ink). */
+     GTA V muted grey, Frontier parchment/ink). Read fresh on every
+     repaint so theme switches apply instantly. */
   function fogTheme() {
     const t = (window.VCNThemes && VCNThemes.current()) || null;
     const ui = (t && t.ui) || {};
     return {
       fill: ui.fogFill || FOG_FILL_COLOR,
       fillOpacity: (ui.fogFillOpacity != null) ? ui.fogFillOpacity : FOG_FILL_OPACITY,
-      edge: ui.fogEdge || FOG_EDGE_COLOR,
-      edgeOpacity: (ui.fogEdgeOpacity != null) ? ui.fogEdgeOpacity : FOG_EDGE_OPACITY,
     };
   }
-  function applyFogTheme() {
-    if (!map) return;
-    const f = fogTheme();
-    if (map.getLayer(FILL_LAYER_ID)) {
-      map.setPaintProperty(FILL_LAYER_ID, 'fill-color', f.fill);
-      map.setPaintProperty(FILL_LAYER_ID, 'fill-opacity', f.fillOpacity);
-    }
-    if (map.getLayer(EDGE_LAYER_ID)) {
-      map.setPaintProperty(EDGE_LAYER_ID, 'line-color', f.edge);
-      map.setPaintProperty(EDGE_LAYER_ID, 'line-opacity', f.edgeOpacity);
-    }
+
+  function hexToRgba(hex, alpha) {
+    const h = String(hex).replace('#', '');
+    const v = h.length === 3
+      ? h.split('').map(c => c + c).join('')
+      : h.padEnd(6, '0').slice(0, 6);
+    const n = parseInt(v, 16);
+    return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' +
+      (n & 255) + ',' + alpha + ')';
   }
-  /* ---------------- fog rebuild (moveend only, never per-frame) ---------------- */
+
+  /* One soft reveal stamp: a wide partial-erase halo for the GTA
+     feathered edge, then a tighter full-erase core. Overlapping
+     stamps along the driven path merge into a continuous trail. */
+  function softStamp(ctx, x, y, r) {
+    let g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, 'rgba(0,0,0,0.55)');
+    g.addColorStop(0.65, 'rgba(0,0,0,0.28)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, 6.2832);
+    ctx.fill();
+
+    const rc = r * 0.6;
+    g = ctx.createRadialGradient(x, y, 0, x, y, rc);
+    g.addColorStop(0, 'rgba(0,0,0,1)');
+    g.addColorStop(0.75, 'rgba(0,0,0,0.92)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(x, y, rc, 0, 6.2832);
+    ctx.fill();
+  }
+
+  /* ---------------- fog repaint ---------------- */
   function precisionForZoom(z) {
     if (z >= 14) return 7;
     if (z >= 11) return 6;
@@ -238,57 +233,97 @@
     return 4;
   }
 
-  function refreshFog() {
-    if (!map || !fogVisible) return;
-    const src = map.getSource(SOURCE_ID);
-    if (!src) return;
-    const bounds = map.getBounds();
-    if (!bounds) return;
+  /* Discovered cells at the render precision whose bounds touch the
+     viewport. Coarser precisions are derived from the stored finer
+     cells via prefix, so old discoveries still render zoomed out. */
+  function discoveredInViewport(precision, bounds) {
     const sw = bounds.getSouthWest(), ne = bounds.getNorthEast();
-    const bbox = { sw: { lat: sw.lat, lng: sw.lng }, ne: { lat: ne.lat, lng: ne.lng } };
-
-    let precision = precisionForZoom(map.getZoom());
-    let cells = geohashesInBounds(bbox.sw, bbox.ne, precision, MAX_FOG_CELLS * 4);
-    // Too many cells for one frame: drop one precision level and
-    // re-enumerate (once). Coarser cells generalise the fog at
-    // wide zooms, which is exactly what we want there.
-    if (cells.length > MAX_FOG_CELLS && precision > 1) {
-      precision -= 1;
-      cells = geohashesInBounds(bbox.sw, bbox.ne, precision, MAX_FOG_CELLS * 4);
-    }
-    if (cells.length > MAX_FOG_CELLS) cells = cells.slice(0, MAX_FOG_CELLS);
-
-    // Below precision 5 the discovered set has no direct hits — match
-    // against the coarser prefixes it implies instead, so a discovered
-    // neighbourhood doesn't re-fog when zoomed out.
-    const coarse = { 4: new Set(), 3: new Set() };
-    if (precision <= 4) {
+    const out = [];
+    if (precision >= 5) {
       for (const h of discovered) {
-        if (h.length >= 4) coarse[4].add(h.slice(0, 4));
-        if (h.length >= 3) coarse[3].add(h.slice(0, 3));
+        if (h.length !== precision) continue;
+        let b;
+        try { b = geohashBounds(h); } catch (e) { continue; }
+        if (b.lngMax < sw.lng || b.lngMin > ne.lng ||
+            b.latMax < sw.lat || b.latMin > ne.lat) continue;
+        out.push(b);
+        if (out.length >= MAX_STAMPS) break;
+      }
+    } else {
+      const prefixes = new Set();
+      for (const h of discovered) {
+        if (h.length >= precision) prefixes.add(h.slice(0, precision));
+      }
+      for (const p of prefixes) {
+        let b;
+        try { b = geohashBounds(p); } catch (e) { continue; }
+        if (b.lngMax < sw.lng || b.lngMin > ne.lng ||
+            b.latMax < sw.lat || b.latMin > ne.lat) continue;
+        out.push(b);
+        if (out.length >= MAX_STAMPS) break;
       }
     }
-    const isKnown = h =>
-      discovered.has(h) || (coarse[h.length] ? coarse[h.length].has(h) : false);
+    return out;
+  }
 
-    const features = [];
-    for (const h of cells) {
-      if (isKnown(h)) continue;
-      const b = geohashBounds(h);
-      features.push({
-        type: 'Feature',
-        properties: { geohash: h },
-        geometry: {
-          type: 'Polygon',
-          coordinates: [[
-            [b.lngMin, b.latMin], [b.lngMax, b.latMin],
-            [b.lngMax, b.latMax], [b.lngMin, b.latMax],
-            [b.lngMin, b.latMin],
-          ]],
-        },
-      });
+  function refreshFog() {
+    if (!map || !fogVisible) return;
+    ensureFogCanvas();
+    if (!fogCtx) return;
+    const container = map.getContainer();
+    const w = container.clientWidth, h = container.clientHeight;
+    if (!w || !h) return;
+    const bounds = map.getBounds();
+    if (!bounds) return;
+
+    fogCanvas.width = Math.max(1, Math.round(w * RENDER_SCALE));
+    fogCanvas.height = Math.max(1, Math.round(h * RENDER_SCALE));
+
+    const ctx = fogCtx;
+    ctx.setTransform(RENDER_SCALE, 0, 0, RENDER_SCALE, 0, 0);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.clearRect(0, 0, w, h);
+
+    const f = fogTheme();
+    ctx.fillStyle = hexToRgba(f.fill, f.fillOpacity);
+    ctx.fillRect(0, 0, w, h);
+
+    const precision = precisionForZoom(map.getZoom());
+    const cells = discoveredInViewport(precision, bounds);
+    if (cells.length === 0) return;
+
+    ctx.globalCompositeOperation = 'destination-out';
+    for (const b of cells) {
+      const cx = (b.lngMin + b.lngMax) / 2;
+      const cy = (b.latMin + b.latMax) / 2;
+      let p;
+      try { p = map.project([cx, cy]); } catch (e) { continue; }
+      if (p.x < -200 || p.y < -200 || p.x > w + 200 || p.y > h + 200) continue;
+      let c;
+      try { c = map.project([b.lngMax, b.latMax]); } catch (e) { continue; }
+      // Half-diagonal of the cell on screen; ×1.35 so neighbouring
+      // stamps overlap into one continuous revealed trail.
+      const r = Math.hypot(c.x - p.x, c.y - p.y) * 1.35;
+      if (r < 1) continue;
+      softStamp(ctx, p.x, p.y, r);
     }
-    src.setData({ type: 'FeatureCollection', features });
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  /* Coalesce rapid repaint requests (GPS reveals, resizes) into one
+     per animation frame — never a repaint storm. */
+  function queueRefreshFog() {
+    if (refreshQueued || !fogVisible) return;
+    refreshQueued = true;
+    const run = () => {
+      refreshQueued = false;
+      try { refreshFog(); } catch (e) { /* keep the map alive */ }
+    };
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(run);
+    } else {
+      setTimeout(run, 16);
+    }
   }
 
   /* ---------------- public API ---------------- */
@@ -296,21 +331,26 @@
     init(m) {
       map = m;
       loadPersisted();
-      ensureLayers();
-      applyFogTheme();
-      map.on('moveend', () => { if (fogVisible) refreshFog(); });
+      ensureFogCanvas();
+      map.on('moveend', queueRefreshFog);
+      map.on('zoomend', queueRefreshFog);
+      if (typeof window !== 'undefined') {
+        window.addEventListener('resize', queueRefreshFog);
+      }
     },
 
-    /* Rebuild map-side fog state after a style change (setStyle drops
-       all custom sources/layers). Discovered cells are untouched. */
+    /* Rebuild map-side fog state after a style change. The canvas is
+       DOM, not a style layer, so it survives setStyle() — this just
+       repaints in case the container was rebuilt. Discovered cells
+       are untouched. */
     rehydrate() {
       if (!map) return;
-      ensureLayers();
-      applyFogTheme();
-      if (fogVisible) { this.setFogVisible(true); }
+      ensureFogCanvas();
+      if (fogVisible) queueRefreshFog();
     },
-    /* Re-paint fog for the newly active theme (no style change). */
-    applyTheme() { applyFogTheme(); },
+    /* Re-paint fog for the newly active theme (no style change). The
+       theme colour is read fresh at paint time. */
+    applyTheme() { queueRefreshFog(); },
 
     /* Mark the ground around a GPS fix as discovered. The precision-7
        cell plus its 8 neighbours form a ~460 m square — roughly a
@@ -327,20 +367,23 @@
           if (tryAdd(h.slice(0, p))) added = true;
         }
       }
-      if (added) schedulePersist();
+      if (added) {
+        schedulePersist();
+        queueRefreshFog(); // live reveal while driving
+      }
     },
 
     setFogVisible(on) {
       fogVisible = !!on;
-      if (!map) return;
-      const v = fogVisible ? 'visible' : 'none';
-      if (map.getLayer(FILL_LAYER_ID)) map.setLayoutProperty(FILL_LAYER_ID, 'visibility', v);
-      if (map.getLayer(EDGE_LAYER_ID)) map.setLayoutProperty(EDGE_LAYER_ID, 'visibility', v);
+      ensureFogCanvas();
+      if (fogCanvas) {
+        fogCanvas.style.display = fogVisible ? 'block' : 'none';
+      }
       if (fogVisible) refreshFog();
     },
     isFogVisible() { return fogVisible; },
 
-    refreshFog,
+    refreshFog: queueRefreshFog,
 
     stats() {
       let n = 0;
