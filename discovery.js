@@ -178,9 +178,11 @@
   function fogTheme() {
     const t = (window.VCNThemes && VCNThemes.current()) || null;
     const ui = (t && t.ui) || {};
+    const base = (ui.fogFillOpacity != null) ? ui.fogFillOpacity : FOG_FILL_OPACITY;
     return {
       fill: ui.fogFill || FOG_FILL_COLOR,
-      fillOpacity: (ui.fogFillOpacity != null) ? ui.fogFillOpacity : FOG_FILL_OPACITY,
+      // Proper pea-souper: the fog never goes sheer, in any theme.
+      fillOpacity: Math.max(0.93, base),
     };
   }
 
@@ -199,23 +201,40 @@
      stamps along the driven path merge into a continuous trail. */
   function softStamp(ctx, x, y, r) {
     let g = ctx.createRadialGradient(x, y, 0, x, y, r);
-    g.addColorStop(0, 'rgba(0,0,0,0.55)');
-    g.addColorStop(0.65, 'rgba(0,0,0,0.28)');
+    g.addColorStop(0, 'rgba(0,0,0,0.5)');
+    g.addColorStop(0.55, 'rgba(0,0,0,0.32)');
+    g.addColorStop(0.8, 'rgba(0,0,0,0.12)');
     g.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = g;
     ctx.beginPath();
     ctx.arc(x, y, r, 0, 6.2832);
     ctx.fill();
 
-    const rc = r * 0.6;
+    const rc = r * 0.55;
     g = ctx.createRadialGradient(x, y, 0, x, y, rc);
     g.addColorStop(0, 'rgba(0,0,0,1)');
-    g.addColorStop(0.75, 'rgba(0,0,0,0.92)');
+    g.addColorStop(0.7, 'rgba(0,0,0,0.9)');
     g.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = g;
     ctx.beginPath();
     ctx.arc(x, y, rc, 0, 6.2832);
     ctx.fill();
+  }
+
+  /* Deterministic pseudo-random in [0,1) from a geohash + salt.
+     Jitters each stamp's centre/size so the underlying square cell
+     grid never reads as rectangles — and because it's seeded by the
+     cell itself, every repaint is identical (no shimmer). */
+  function hash01(str, salt) {
+    let h = 2166136261 ^ salt;
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    h ^= h >>> 13;
+    h = Math.imul(h, 0x5bd1e995);
+    h ^= h >>> 15;
+    return (h >>> 0) / 4294967296;
   }
 
   /* ---------------- geo-anchored fog render ---------------- */
@@ -303,7 +322,7 @@
   /* Discovered cells at the region's render precision whose bounds
      touch the region. Coarser precisions are derived from the stored
      finer cells via prefix, so old discoveries still render zoomed
-     out. */
+     out. Returns {b, h} pairs — the hash seeds the stamp jitter. */
   function discoveredInRegion(region) {
     const out = [];
     const p = region.precision;
@@ -318,7 +337,7 @@
         if (h.length !== p) continue;
         const b = cachedBounds(h);
         if (!b || !inR(b)) continue;
-        out.push(b);
+        out.push({ b, h });
         if (out.length >= MAX_STAMPS) break;
       }
     } else {
@@ -329,7 +348,7 @@
       for (const pre of prefixes) {
         const b = cachedBounds(pre);
         if (!b || !inR(b)) continue;
-        out.push(b);
+        out.push({ b, h: pre });
         if (out.length >= MAX_STAMPS) break;
       }
     }
@@ -357,7 +376,7 @@
     const latSpan = region.north - region.south;
 
     ctx.globalCompositeOperation = 'destination-out';
-    for (const b of cells) {
+    for (const { b, h } of cells) {
       const clng = unwrapLng((b.lngMin + b.lngMax) / 2, region.west);
       const clat = (b.latMin + b.latMax) / 2;
       const x = (clng - region.west) / lngSpan * cw;
@@ -365,11 +384,14 @@
       if (x < -300 || y < -300 || x > cw + 300 || y > ch + 300) continue;
       const wM = (b.lngMax - b.lngMin) * mPerDegLng;
       const hM = (b.latMax - b.latMin) * 110540;
-      // Half-diagonal of the cell on screen; ×1.35 so neighbouring
-      // stamps overlap into one continuous revealed trail.
-      const r = Math.hypot(wM, hM) / 2 * pxPerM * 1.35;
+      // Half-diagonal of the cell; ×1.9 so neighbouring stamps melt
+      // into one continuous organic blob, plus per-cell jitter so the
+      // square grid never shows through.
+      const r = Math.hypot(wM, hM) / 2 * pxPerM * 1.9 * (0.85 + hash01(h, 3) * 0.35);
       if (r < 1) continue;
-      softStamp(ctx, x, y, r);
+      const jx = (hash01(h, 1) - 0.5) * 0.6 * r;
+      const jy = (hash01(h, 2) - 0.5) * 0.6 * r;
+      softStamp(ctx, x + jx, y + jy, r);
     }
     ctx.globalCompositeOperation = 'source-over';
   }
