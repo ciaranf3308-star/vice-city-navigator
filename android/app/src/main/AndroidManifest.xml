@@ -30,6 +30,20 @@
             android:name="androidx.car.app.minCarApiLevel"
             android:value="1" />
 
+        <!-- Phone launcher: one app, one install. The same APK that Android
+             Auto picks up also opens the site on the phone (normal mode) —
+             search and plan on the phone, drive it on the head unit. -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:theme="@style/Theme.WayStationCar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <!-- The car app entry point. Appears in the Android Auto launcher
              as "WayStation" under the NAVIGATION category. -->
         <service

@@ -1,9 +1,12 @@
-# WayStation — Android Auto car shell
+# WayStation — Android app (phone + Android Auto)
 
-Personal / internal test build. Renders the **real WayStation dashboard**
-inside a hardware-accelerated WebView on the Android Auto Surface. No
-native map, no native UI rewrite — the web app (`?dashboard=1&car=1`) is
-the source of truth.
+Personal / internal test build. **One APK, one install:** a phone launcher
+(`MainActivity` — fullscreen WebView over the production site in normal
+mode, so you can search and plan on the phone) **and** the Android Auto
+car app (the real WayStation dashboard rendered inside a
+hardware-accelerated WebView on the Android Auto Surface) live in the same
+app. No native map, no native UI rewrite — the web app is the source of
+truth on both surfaces.
 
 ## Architecture
 
