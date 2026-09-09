@@ -570,11 +570,6 @@ body.dashboard-mode #speedo{
   filter:drop-shadow(0 4px 14px rgba(0,0,0,.55));
 }
 body.dashboard-mode #speedo[hidden]{display:none}
-/* per-theme: sit just above each theme's bottom bar (stage coords) */
-body.dashboard-mode.theme-vice-city #speedo{bottom:122px}
-body.dashboard-mode.theme-san-andreas #speedo{bottom:148px}
-body.dashboard-mode.theme-gta-v #speedo{bottom:86px}
-body.dashboard-mode.theme-rdr2 #speedo{bottom:94px}
 /* posted limit: EU roundel */
 #speedo-limit{
   width:66px;height:66px;border-radius:50%;
