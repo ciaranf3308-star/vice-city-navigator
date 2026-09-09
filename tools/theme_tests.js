@@ -1421,6 +1421,36 @@ ok(/body\.dashboard-mode #speedo\{[^}]*display:flex/.test(fs.readFileSync(path.j
 ok(appSrc.includes('maybeFetchSpeedLimit'), 'app fetches posted limits from OSM');
 ok(appSrc.includes('overpass'), 'limit lookup uses Overpass');
 
+
+/* ---------- wanted level: stars for speeding (GTA V) ---------- */
+{
+  const wSrc = appSrc.split('/* <test-extract:wanted> */')[1].split('/* </test-extract> */')[0];
+  const wBox = {};
+  vm.createContext(wBox);
+  vm.runInContext(wSrc, wBox, { filename: 'wanted' });
+  ok(typeof wBox.starsForHeat === 'function', 'starsForHeat extracts for testing');
+  ok(wBox.starsForHeat(0) === 0, 'wanted: 0 heat -> 0 stars');
+  ok(wBox.starsForHeat(11) === 0, 'wanted: 11 heat -> 0 stars');
+  ok(wBox.starsForHeat(12) === 1, 'wanted: 12 heat -> 1 star');
+  ok(wBox.starsForHeat(29) === 1, 'wanted: 29 heat -> 1 star');
+  ok(wBox.starsForHeat(30) === 2, 'wanted: 30 heat -> 2 stars');
+  ok(wBox.starsForHeat(50) === 3, 'wanted: 50 heat -> 3 stars');
+  ok(wBox.starsForHeat(70) === 4, 'wanted: 70 heat -> 4 stars');
+  ok(wBox.starsForHeat(90) === 5, 'wanted: 90 heat -> 5 stars');
+  ok(wBox.starsForHeat(100) === 5, 'wanted: 100 heat -> 5 stars');
+}
+ok(indexSrc.includes('id="wanted"'), 'index has the #wanted row');
+ok((indexSrc.match(/class="wstar"/g) || []).length === 5, 'wanted row has 5 stars');
+ok(/DASH_STAGE_NODES\s*=\s*\[[^\]]*'wanted'/.test(appSrc), 'wanted is reparented into the dash stage');
+ok(appSrc.includes('resetWanted'), 'wanted resets when the drive ends');
+ok(fs.existsSync(path.join(REPO, 'themes/gta-v/dashboard/wanted-star-fill.png')), 'wanted fill star asset exists');
+ok(fs.existsSync(path.join(REPO, 'themes/gta-v/dashboard/wanted-star-hollow.png')), 'wanted hollow star asset exists');
+{
+  const gvCss = fs.readFileSync(path.join(REPO, 'themes/gta-v/dashboard.css'), 'utf8');
+  ok(/\.wstar\.on\{[^}]*wanted-star-fill\.png/.test(gvCss), 'earned star uses the fill asset');
+  ok(/\.wstar\{[^}]*wanted-star-hollow\.png/.test(gvCss), 'unearned star uses the hollow asset');
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
 ok(/function saArrowSvg/.test(appSrc), 'SA has its own block-arrow set (hero font-theme match)');

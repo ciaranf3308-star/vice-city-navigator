@@ -594,6 +594,9 @@ body.dashboard-mode #speedo-limit[hidden]{display:none}
 /* over the limit: Google Maps turns the readout red */
 #speedo.over #speedo-cur{border-color:rgba(255,70,60,.8)}
 #speedo.over #speedo-num{color:#ff5b50;text-shadow:0 0 18px rgba(255,60,50,.45)}
+
+/* wanted level row: GTA V theme only (its CSS owns the display) */
+#wanted{display:none}
 .dash-zoom{display:flex;align-items:center;gap:10px;padding:12px 14px}
 .dash-zoom button{
   width:52px;height:52px;border-radius:8px;cursor:pointer;

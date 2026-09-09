@@ -611,6 +611,59 @@ function screenAngle() {
 }
 function clearlyMoving() { return gpsSpeed !== null && gpsSpeed > 2.5; }
 
+/* ---------------- wanted level: stars for speeding (GTA V) ----------------
+   Heat builds while over the posted limit (faster the further over),
+   decays while driving legal — GTA evade feel. 5 authentic v-hud stars.
+   Resets when the drive ends (endNav) or the dashboard closes. */
+let wantedHeat = 0;    // 0..100
+let wantedStars = 0;   // 0..5 displayed
+let wantedLastAt = 0;  // last tick timestamp
+/* <test-extract:wanted> */
+const WANTED_STOPS = [12, 30, 50, 70, 90]; // heat needed for stars 1..5
+function starsForHeat(h) {
+  let s = 0;
+  for (let i = 0; i < WANTED_STOPS.length; i++) if (h >= WANTED_STOPS[i]) s = i + 1;
+  return s;
+}
+/* </test-extract> */
+function wantedTick(dt) {
+  if (!document.body.classList.contains('dashboard-mode')) return;
+  const gta = document.body.classList.contains('theme-gta-v');
+  const kmh = (typeof gpsSpeed === 'number' && !isNaN(gpsSpeed) && gpsSpeed >= 0)
+    ? gpsSpeed * 3.6 : null;
+  if (gta && kmh !== null && speedLimitKmh && kmh > speedLimitKmh) {
+    wantedHeat = Math.min(100, wantedHeat + (kmh - speedLimitKmh) * dt * 0.6);
+  } else {
+    wantedHeat = Math.max(0, wantedHeat - dt * 5);
+  }
+  const stars = starsForHeat(wantedHeat);
+  if (stars !== wantedStars) {
+    const up = stars > wantedStars;
+    wantedStars = stars;
+    updateWanted(up);
+  }
+}
+function updateWanted(flash) {
+  const el = $('wanted');
+  if (!el) return;
+  const show = document.body.classList.contains('dashboard-mode') &&
+               document.body.classList.contains('theme-gta-v') &&
+               wantedStars > 0;
+  el.hidden = !show;
+  if (!show) return;
+  const kids = el.children;
+  for (let i = 0; i < kids.length; i++) kids[i].classList.toggle('on', i < wantedStars);
+  if (flash) { // GTA flashes the row when the level rises
+    el.classList.remove('flash');
+    void el.offsetWidth;
+    el.classList.add('flash');
+  }
+}
+function resetWanted() {
+  wantedHeat = 0; wantedStars = 0;
+  updateWanted(false);
+}
+
 /* ---------------- speed cluster: GPS speed + OSM posted limit ----------------
    Google Maps-style: live speed from the GPS fix, limit from the nearest
    OSM way's maxspeed tag (Overpass, debounced by distance/time, cached).
@@ -1437,6 +1490,7 @@ function endNav() {
         { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 });
     } catch (e) {}
   }
+  resetWanted(); // drive's over: the heat dies with it
   if (window.VCNVoice) VCNVoice.cancel();
   setUiMode('explore');
   if (map) {
@@ -1482,6 +1536,10 @@ function onPos(pos) {
   updatePlayerArrow();
   updateSpeedo(); // live speed readout (dashboard)
   maybeFetchSpeedLimit(pos.coords.latitude, pos.coords.longitude); // posted limit
+  // wanted level: tick heat from the GPS speed
+  const wNow = Date.now();
+  if (wantedLastAt) wantedTick(Math.min(5, (wNow - wantedLastAt) / 1000));
+  wantedLastAt = wNow;
 
   if (!navActive || !steps.length) return;
 
@@ -1691,7 +1749,7 @@ function dashboardLayoutActive() {
    coordinates; the stage is zoomed to fit the window. Menus, drawers
    and toasts stay at body level so they remain usable at any scale. */
 const DASH_W = 1920, DASH_H = 720;
-const DASH_STAGE_NODES = ['map', 'fx', 'explore-ui', 'drive-hud', 'spotify-pane', 'dash-topbar', 'dash-bottombar', 'sa-grove-panel', 'speedo'];
+const DASH_STAGE_NODES = ['map', 'fx', 'explore-ui', 'drive-hud', 'spotify-pane', 'dash-topbar', 'dash-bottombar', 'sa-grove-panel', 'speedo', 'wanted'];
 /* NOTE: #menu-panel is deliberately NOT reparented into the stage — it
    stays at body level so it never shrinks with the stage zoom. */
 
@@ -1872,6 +1930,7 @@ function applyAppMode() {
   } else {
     if (watchId !== null) { try { navigator.geolocation.clearWatch(watchId); } catch (e) {} watchId = null; }
     const sp = $('speedo'); if (sp) sp.hidden = true;
+    resetWanted();
   }
   if (map && map.resize) { try { map.resize(); } catch (e) {} }
   syncDashPadding();

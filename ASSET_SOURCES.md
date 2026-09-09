@@ -57,6 +57,17 @@ generic pixel-art blips with the v-hud HUD icon set. It supersedes the
 - Replaces the generic pixel-art set from the multi-theme foundation
   (old notes below retained for history).
 
+### GTA V wanted stars (v-hud HUD icon set)
+- Source: same v-hud repo, `resources/VHud/wanted/star1.png` +
+  `star2.png` (64×64 RGBA; star1 is the filled star at low alpha,
+  star2 the hollow outline).
+- WayStation files: `assets/themes/gta-v/dashboard/wanted-star-fill.png`
+  (star1 with alpha normalized to full range, RGB forced black for CSS
+  tinting) + `assets/themes/gta-v/dashboard/wanted-star-hollow.png`
+  (star2 as-is). Used for the speeding wanted-level row; tinted white
+  in CSS via `brightness(0) invert(1)`.
+- License: v-hud is MIT-licensed (mod-original artwork, not Rockstar files).
+
 ### San Andreas fonts (documented game typefaces)
 
 Per the GTA Wiki font table, SA uses Pricedown (mission text/HUD),

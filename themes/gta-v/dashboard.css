@@ -210,6 +210,29 @@ body.dashboard-mode.theme-gta-v #dash-sub{
   font-size:14px;letter-spacing:6px;text-transform:uppercase;
   color:rgba(242,245,242,.6);white-space:nowrap;
 }
+/* Wanted level: authentic v-hud stars, earned by speeding.
+   Sits above the speed cluster, bottom-left — all the driving
+   feedback in one column. Hollow = unearned, filled = heat. */
+body.dashboard-mode.theme-gta-v #wanted{
+  display:flex;position:absolute;left:20px;bottom:252px;z-index:30;
+  gap:8px;pointer-events:none;
+  filter:drop-shadow(0 2px 8px rgba(0,0,0,.6));
+}
+body.dashboard-mode.theme-gta-v #wanted[hidden]{display:none}
+body.dashboard-mode.theme-gta-v .wstar{
+  width:38px;height:38px;
+  background:url('dashboard/wanted-star-hollow.png') 50% 50%/contain no-repeat;
+  filter:brightness(0) invert(1); /* black art -> white */
+  opacity:.35;
+}
+body.dashboard-mode.theme-gta-v .wstar.on{
+  background-image:url('dashboard/wanted-star-fill.png');
+  opacity:1;
+  filter:brightness(0) invert(1) drop-shadow(0 0 10px rgba(255,214,130,.6));
+}
+/* the game flashes the row when the level rises */
+body.dashboard-mode.theme-gta-v #wanted.flash{animation:wanted-flash .9s ease}
+@keyframes wanted-flash{0%,100%{opacity:1}25%,75%{opacity:.35}50%{opacity:1}}
 /* Map controls: slim pause-menu circles with hairline rules and a mint
    press state — the user asked for these back. */
 body.dashboard-mode.theme-gta-v .dash-zoom{
