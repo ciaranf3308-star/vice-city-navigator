@@ -68,6 +68,7 @@ body.dashboard-mode.theme-rdr2 #dash-topbar .dash-chrome{
   position:absolute;inset:0;z-index:2;
   display:flex;align-items:center;justify-content:space-between;
   padding:0 30px;background:none;pointer-events:none;
+  overflow:visible; /* badge overhangs onto the map */
 }
 body.dashboard-mode.theme-rdr2 #dash-topbar .dash-chrome > *{pointer-events:auto}
 /* the badge: user's supplied frontier logo, centered and dominant.
