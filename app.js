@@ -163,46 +163,151 @@ function syncClusterTurn(data) {
   if (r) { if (r.textContent !== data.road) r.textContent = data.road; r.hidden = !data.road; }
   const ins = $('cluster-turn-instruction');
   if (ins && ins.textContent !== data.instruction) ins.textContent = data.instruction;
-}
-
-/* Small now-playing readout. Same SpotifyCore state the dashboard skins
-   use — no second polling loop. Quiet placeholder when disconnected. */
-function syncClusterMusic() {
-  const box = $('cluster-music');
-  if (!box || !clusterLayoutActive()) return;
-  const core = window.SpotifyCore;
-  const s = core && core.getState ? core.getState() : null;
-  const track = s && s.item;
-  const art = $('cluster-music-art'), title = $('cluster-music-title'), artist = $('cluster-music-artist');
-  if (!core || !core.isConnected || !core.isConnected() || !track || !track.id) {
-    box.classList.add('disconnected');
-    box.classList.remove('playing');
-    if (art) art.removeAttribute('src');
-    if (title && title.textContent !== 'Spotify') title.textContent = 'Spotify';
-    if (artist && artist.textContent !== 'Not connected') artist.textContent = 'Not connected';
-    return;
+  /* VC hero compass needle follows the live map bearing. */
+  const needle = $('cluster-compass-needle');
+  if (needle && typeof map !== 'undefined' && map) {
+    try { needle.style.transform = `rotate(${-map.getBearing()}deg)`; } catch (e) {}
   }
-  box.classList.remove('disconnected');
-  box.classList.toggle('playing', !!s.is_playing);
-  const imgs = (track.album && track.album.images) || [];
-  const src = (imgs[1] || imgs[0] || {}).url || '';
-  if (art) {
-    if (src && art.getAttribute('src') !== src) art.setAttribute('src', src);
-    else if (!src) art.removeAttribute('src');
-  }
-  const tname = track.name || '';
-  const aname = (track.artists || []).map(a => a.name).filter(Boolean).join(', ');
-  if (title && title.textContent !== tname) title.textContent = tname;
-  if (artist && artist.textContent !== aname) artist.textContent = aname;
 }
 
 /* Push the current live state into every cluster region — called when
    entering cluster mode so the shell is correct immediately, not just
-   after the next GPS fix, nav update or Spotify poll. */
+   after the next GPS fix or nav update. (Spotify needs no sync: the real
+   #spotify-pane widget is shared with the dashboard, not duplicated.) */
 function refreshClusterLive() {
   updateSpeedo();
   syncClusterTurn(currentTurnData());
-  syncClusterMusic();
+  buildClusterGauge();
+  bindClusterTabs();
+  startClusterClock();
+}
+
+/* ============ Vice City cluster hero ============
+   Pixel contract: themes/vice-city/cluster/hero.png. The slots live in
+   the shared #cluster-ui DOM; only the VC skin shows them. Everything
+   displayed is real live state — no fabricated battery, range or gear. */
+
+/* --- header clock + weather --- */
+const VC_DAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+const VC_MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sept', 'oct', 'nov', 'dec'];
+function syncClusterHeader() {
+  if (!clusterLayoutActive() || !document.body.classList.contains('theme-vice-city')) return;
+  const now = new Date();
+  const d = $('cluster-date'), t = $('cluster-time');
+  if (d) d.textContent = `${VC_DAYS[now.getDay()]} ${String(now.getDate()).padStart(2, '0')} ${VC_MONTHS[now.getMonth()]}`;
+  if (t) t.textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  /* Last-known weather from the same cache the dashboard paints from. */
+  try {
+    const c = JSON.parse(localStorage.getItem(WX_CACHE_KEY) || 'null');
+    const te = $('cluster-temp');
+    if (te && c && typeof c.t === 'number') te.textContent = c.t + '°C';
+  } catch (e) {}
+}
+let clusterClockT = null;
+function startClusterClock() {
+  stopClusterClock();
+  syncClusterHeader();
+  clusterClockT = setInterval(() => { if (clusterLayoutActive()) syncClusterHeader(); }, 15000);
+}
+function stopClusterClock() {
+  if (clusterClockT) { clearInterval(clusterClockT); clusterClockT = null; }
+}
+
+/* --- trip strip on the nav card: "12 min • 6,8 km • 21:36" --- */
+function syncClusterTrip(remainDist, remainDur) {
+  const el = $('cluster-trip');
+  if (!el || !clusterLayoutActive()) return;
+  if (!navActive || remainDist == null || remainDur == null) { el.hidden = true; return; }
+  el.hidden = false;
+  const mins = Math.max(1, Math.round(remainDur / 60));
+  el.innerHTML = `<span>${mins} min</span><span class="trip-sep">•</span>` +
+    `<span class="trip-cyan">${fmtDist(remainDist)}</span><span class="trip-sep">•</span>` +
+    `<span>${etaString(remainDur)}</span>`;
+}
+
+/* --- inferred drive meter: REGEN / COAST / POWER arc ---
+   This is NOT vehicle telemetry. It is a visual inference of driving
+   force derived from longitudinal GPS speed change (the same stream that
+   feeds gpsSpeed). No battery kW, no SOC, no range, no gear is shown or
+   implied anywhere — those need a real vehicle telemetry provider. */
+let smoothedAcceleration = 0;  // m/s^2, low-pass filtered
+let driveForceState = 'coast'; // 'regen' | 'coast' | 'power'
+let driveForceBand = 0;        // 0 coast, 1 light, 2 medium, 3 strong
+let dfPrevMps = null, dfPrevT = 0;
+function updateDriveForce(kmh) {
+  if (typeof kmh === 'number' && isFinite(kmh) && kmh >= 0) {
+    const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    if (dfPrevMps !== null) {
+      const dt = (now - dfPrevT) / 1000;
+      if (dt > 0.2 && dt < 10) {
+        const rawAccel = (kmh / 3.6 - dfPrevMps) / dt;
+        /* Reject unrealistic instantaneous spikes (GPS noise, tunnels). */
+        if (Math.abs(rawAccel) < 8) smoothedAcceleration = smoothedAcceleration * 0.8 + rawAccel * 0.2;
+      } else if (dt >= 10) {
+        smoothedAcceleration = 0; // stale gap: decay back to coast
+      }
+    }
+    dfPrevMps = kmh / 3.6; dfPrevT = now;
+  } else {
+    dfPrevMps = null; smoothedAcceleration = 0;
+  }
+  const a = smoothedAcceleration, mag = Math.abs(a);
+  /* ±0.08 m/s^2 dead zone so GPS noise never flickers the meter. */
+  driveForceState = a < -0.08 ? 'regen' : (a > 0.08 ? 'power' : 'coast');
+  driveForceBand = mag < 0.08 ? 0 : mag < 0.35 ? 1 : mag < 0.8 ? 2 : 3;
+  syncDriveForceGauge();
+}
+let clusterGaugeTicks = [];
+function buildClusterGauge() {
+  const svg = $('cluster-gauge-svg');
+  if (!svg || clusterGaugeTicks.length) return;
+  if (typeof document.createElementNS !== 'function') return;
+  const NS = 'http://www.w3.org/2000/svg';
+  const N = 25, cx = 200, cy = 188, rx = 168, ry = 120, mid = (N - 1) / 2;
+  for (let i = 0; i < N; i++) {
+    const a = (195 + (150 * i) / (N - 1)) * Math.PI / 180;
+    const ln = document.createElementNS(NS, 'line');
+    ln.setAttribute('x1', (cx + (rx - 18) * Math.cos(a)).toFixed(1));
+    ln.setAttribute('y1', (cy + (ry - 13) * Math.sin(a)).toFixed(1));
+    ln.setAttribute('x2', (cx + rx * Math.cos(a)).toFixed(1));
+    ln.setAttribute('y2', (cy + ry * Math.sin(a)).toFixed(1));
+    ln.setAttribute('class', 'cg-tick');
+    ln.dataset.zone = i < mid - 2 ? 'regen' : (i > mid + 2 ? 'power' : 'coast');
+    ln.dataset.slot = String(Math.round(Math.abs(i - mid)));
+    svg.appendChild(ln);
+    clusterGaugeTicks.push(ln);
+  }
+  syncDriveForceGauge();
+}
+/* Fills from the centre outward per band — never snaps across the arc. */
+function syncDriveForceGauge() {
+  if (!clusterGaugeTicks.length) return;
+  const litSlots = driveForceBand; // 0..3 of ~5 slots per side
+  clusterGaugeTicks.forEach(ln => {
+    const zone = ln.dataset.zone, slot = +ln.dataset.slot;
+    const active = driveForceState !== 'coast' && zone === driveForceState && slot <= litSlots + 1;
+    const coastOn = driveForceState === 'coast' && zone === 'coast';
+    ln.classList.toggle('lit-regen', active && zone === 'regen');
+    ln.classList.toggle('lit-power', active && zone === 'power');
+    ln.classList.toggle('lit-coast', coastOn);
+  });
+}
+
+/* --- footer tabs + header logo: presentation switching only, no dead tabs --- */
+let clusterTabsBound = false;
+function bindClusterTabs() {
+  if (clusterTabsBound) return; clusterTabsBound = true;
+  if (typeof document.querySelectorAll !== 'function') return;
+  document.querySelectorAll('#cluster-tabs button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.tab;
+      if (tab === 'cluster') return;
+      if (tab === 'dashboard') { WayStation.setAppMode('dashboard'); return; }
+      if (tab === 'map') { WayStation.setAppMode('normal'); return; }
+    });
+  });
+  const logo = $('cluster-logo');
+  if (logo) logo.addEventListener('click', () => openMenu());
 }
 
 /* ---------------- maneuver arrows (original SVG) ---------------- */
@@ -816,6 +921,8 @@ function updateClusterSpeed(kmh) {
   }
   const sp = $('cluster-speed');
   if (sp) sp.classList.toggle('over', kmh !== null && !!speedLimitKmh && kmh > speedLimitKmh);
+  /* Inferred drive meter — same GPS stream, no second watcher. */
+  updateDriveForce(kmh);
 }
 async function maybeFetchSpeedLimit(lat, lon) {
   if (!speedDisplayActive()) return;
@@ -1648,6 +1755,7 @@ function endNav() {
   }
   resetWanted(); // drive's over: the heat dies with it
   syncClusterTurn(null);
+  syncClusterTrip(null, null);
   if (window.VCNVoice) VCNVoice.cancel();
   setUiMode('explore');
   if (map) {
@@ -1787,6 +1895,7 @@ function updateBanner(dMan) {
     `<span class="ns-sep"> • </span><span>${fmtDist(remainDist)}</span>` +
     `<span class="ns-sep"> • </span><span>${etaString(remainDur)}</span>`;
   syncDashTrip(remainDur);
+  syncClusterTrip(remainDist, remainDur);
   /* VC dashboard hero card: same live data, no fakes. */
   try {
     const vc = $('vc-maneuver');
@@ -2130,11 +2239,15 @@ function applyAppMode() {
   const cui = $('cluster-ui');
   if (cui) cui.hidden = !clu;
   if (clu) refreshClusterLive();
+  else stopClusterClock();
   layoutDashMenu(); // dock (or undock) the body-level menu panel
   layoutDashDrawer(); // dock (or undock) the planning drawer
   const pane = $('spotify-pane');
-  if (pane) pane.hidden = !dash;
-  if (dash) mountSpotifySkin(wsThemeId());
+  /* The SAME widget serves dashboard and cluster: one DOM, one skin,
+     one SpotifyCore session. Cluster only repositions it (theme CSS). */
+  const spotVisible = dash || clu;
+  if (pane) pane.hidden = !spotVisible;
+  if (spotVisible) mountSpotifySkin(wsThemeId());
   else unmountSpotifySkin();
   if (dash) {
     document.body.classList.remove('radio-off');
@@ -2324,6 +2437,10 @@ function paintDashWeather(temp, code) {
   const t = $('dash-temp'), ic = $('dash-wxicon');
   if (t) t.textContent = temp + '°C';
   if (ic) ic.innerHTML = dashWxIcon(code);
+  /* The VC cluster hero header shares the same weather feed. */
+  const ct = $('cluster-temp'), ci = $('cluster-wxicon');
+  if (ct) ct.textContent = temp + '°C';
+  if (ci) ci.innerHTML = dashWxIcon(code);
 }
 function paintDashWeatherCache() {
   try {
@@ -2468,7 +2585,9 @@ let spotifySkinId = null;
    active — in normal mode no player exists anywhere. */
 function mountSpotifySkin(themeId) {
   if (!window.SpotifySkins || !window.SpotifyCore || !$('spotify-stage')) return;
-  if (!dashboardLayoutActive()) { unmountSpotifySkin(); return; }
+  /* The widget is shared by dashboard and cluster — one DOM, one skin,
+     one session. Cluster only repositions it (theme CSS). */
+  if (!dashboardLayoutActive() && !clusterLayoutActive()) { unmountSpotifySkin(); return; }
   let want = 'default';
   try {
     const theme = window.VCNThemes && VCNThemes.get(themeId);
@@ -2533,9 +2652,6 @@ async function initSpotify() {
   syncSpotifyMenu();
   try {
     SpotifyCore.on('auth', syncSpotifyMenu);
-    // Cluster now-playing follows the same polled state — no second loop.
-    SpotifyCore.on('auth', syncClusterMusic);
-    SpotifyCore.on('state', syncClusterMusic);
     // Auth/token failures were completely silent — the menu just sat on
     // "Not connected" with no explanation. Surface them.
     SpotifyCore.on('error', err => {

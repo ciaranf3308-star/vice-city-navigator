@@ -324,9 +324,9 @@ ok(vcSkinJs.includes('vcsp-idle') && !vcSkinJsCode.includes('vcsp-connect\'') &&
    truncated text). phone.css docks it as a compact bottom sheet that
    reuses the hud.png openings at phone width. */
 const vcPhoneSrc = fs.readFileSync(path.join(REPO, 'themes/vice-city/phone.css'), 'utf8');
-ok(/theme-vice-city:not\(\.dashboard-mode\) #spotify-pane\{[^}]*bottom:0/.test(vcPhoneSrc),
+ok(/theme-vice-city:not\(\.dashboard-mode\)(?::not\(\.cluster-mode\))? #spotify-pane\{[^}]*bottom:0/.test(vcPhoneSrc),
   'VC phone Spotify pane docks as a bottom sheet (map stays visible)');
-ok(/theme-vice-city:not\(\.dashboard-mode\) \.vcsp\{[^}]*max-width:430px/.test(vcPhoneSrc),
+ok(/theme-vice-city:not\(\.dashboard-mode\)(?::not\(\.cluster-mode\))? \.vcsp\{[^}]*max-width:430px/.test(vcPhoneSrc),
   'VC phone widget is compact (not the 670px dashboard object)');
 ok(!/background-size:\s*cover/.test(vcPhoneSrc), 'VC phone skin never crops the concept art');
 
@@ -429,17 +429,34 @@ ok((appSrc.match(/new maplibregl\.Map/g) || []).length === 1, 'single MapLibre i
 ok(indexSrc.includes('id="cluster-ui"'), 'cluster shell in index.html');
 for (const id of ['cluster-speed', 'cluster-speed-num', 'cluster-speed-unit', 'cluster-limit', 'cluster-limit-num',
                   'cluster-turn', 'cluster-turn-arrow', 'cluster-turn-distance', 'cluster-turn-road', 'cluster-turn-instruction',
-                  'cluster-minimap', 'cluster-music', 'cluster-music-art', 'cluster-music-title', 'cluster-music-artist',
+                  'cluster-turn-main', 'cluster-turn-compass', 'cluster-compass-needle',
+                  'cluster-minimap', 'cluster-trip',
+                  'cluster-backdrop', 'cluster-header', 'cluster-logo', 'cluster-temp', 'cluster-wxicon',
+                  'cluster-date', 'cluster-time', 'cluster-tagline', 'cluster-gauge', 'cluster-gauge-svg',
+                  'cluster-footer', 'cluster-tabs', 'cluster-footer-logo',
                   'cluster-mode-exit']) {
   ok(indexSrc.includes(`id="${id}"`), `cluster region present: ${id}`);
 }
+// no duplicate cluster Spotify surface: the real #spotify-pane is shared
+for (const id of ['cluster-music', 'cluster-music-art', 'cluster-music-title', 'cluster-music-artist',
+                  'cluster-music-panel', 'cluster-lyrics', 'cluster-pos', 'cluster-bar', 'cluster-dur',
+                  'cluster-music-transport', 'cluster-prev', 'cluster-play', 'cluster-next']) {
+  ok(!indexSrc.includes(`id="${id}"`), `no duplicate cluster Spotify DOM: ${id}`);
+}
+ok(indexSrc.includes('id="spotify-pane"') && indexSrc.includes('id="spotify-stage"'),
+  'shared Spotify widget surface present');
+for (const tab of ['data-tab="cluster"', 'data-tab="dashboard"', 'data-tab="map"']) {
+  ok(indexSrc.includes(tab), `cluster presentation tab: ${tab}`);
+}
+ok(!indexSrc.includes('data-tab="vehicle"') && !indexSrc.includes('data-tab="phone"') &&
+   !indexSrc.includes('data-tab="radio"'), 'cluster tabs: no dead views');
 
 // cluster live regions (commit 2): stub-DOM behavioural tests
 const liveEls = {};
 function stubEl() {
   const cls = new Set(), attrs = {};
   return {
-    textContent: '', hidden: false,
+    textContent: '', hidden: false, style: {},
     classList: { toggle(c, f) { f ? cls.add(c) : cls.delete(c); }, contains(c) { return cls.has(c); },
                  add(c) { cls.add(c); }, remove(c) { cls.delete(c); } },
     getAttribute(k) { return k in attrs ? attrs[k] : null; },
@@ -449,8 +466,8 @@ function stubEl() {
 }
 for (const id of ['cluster-speed', 'cluster-speed-num', 'cluster-limit', 'cluster-limit-num',
                   'cluster-turn', 'cluster-turn-arrow', 'cluster-turn-distance', 'cluster-turn-road',
-                  'cluster-turn-instruction', 'cluster-music', 'cluster-music-art', 'cluster-music-title',
-                  'cluster-music-artist']) liveEls[id] = stubEl();
+                  'cluster-turn-instruction', 'cluster-turn-compass', 'cluster-compass-needle', 'cluster-trip',
+                  'cluster-gauge-svg', 'cluster-date', 'cluster-time', 'cluster-temp']) liveEls[id] = stubEl();
 const liveBox = {
   URLSearchParams,
   $: (id) => liveEls[id] || null,
@@ -458,10 +475,16 @@ const liveBox = {
   window: {},
 };
 vm.createContext(liveBox);
-for (const fn of ['clusterLayoutActive', 'updateClusterSpeed', 'syncClusterTurn', 'syncClusterMusic',
-                  'nextTurnData', 'arrowKind', 'arrowSvg', 'themeArrowColor', 'fmtDist', 'roadName', 'instrText']) {
+for (const fn of ['clusterLayoutActive', 'updateClusterSpeed', 'syncClusterTurn',
+                  'nextTurnData', 'arrowKind', 'arrowSvg', 'themeArrowColor', 'fmtDist', 'roadName', 'instrText',
+                  'updateDriveForce', 'syncDriveForceGauge', 'buildClusterGauge']) {
   vm.runInContext(extractFn(appSrc, fn), liveBox, { filename: 'app.js#' + fn });
 }
+liveBox.clusterGaugeTicks = []; liveBox.dfPrevMps = null; liveBox.dfPrevT = 0;
+liveBox.smoothedAcceleration = 0; liveBox.driveForceState = 'coast'; liveBox.driveForceBand = 0;
+// drive meter needs a clock the stub can advance
+let dfNow = 100000;
+liveBox.performance = { now: () => dfNow };
 // speed visibility rules
 liveBox.appMode = 'cluster'; liveBox.speedLimitKmh = null;
 liveBox.updateClusterSpeed(null);
@@ -510,40 +533,69 @@ liveBox.syncClusterTurn(td2);
 ok(liveEls['cluster-turn-road'].hidden === true, 'cluster turn: road row hidden when no road');
 liveBox.syncClusterTurn(null);
 ok(liveEls['cluster-turn'].hidden === true, 'cluster turn: hidden when nav ends');
-// music: quiet disconnected state vs live track
+// inferred drive meter: truthful state names, no fake telemetry
 liveBox.appMode = 'cluster';
-liveBox.window.SpotifyCore = null;
-liveBox.syncClusterMusic();
-ok(liveEls['cluster-music'].classList.contains('disconnected'), 'cluster music: disconnected state');
-ok(liveEls['cluster-music-title'].textContent === 'Spotify' &&
-   liveEls['cluster-music-artist'].textContent === 'Not connected',
-  'cluster music: quiet placeholder, no fake track');
-liveBox.window.SpotifyCore = {
-  isConnected: () => true,
-  getState: () => ({ is_playing: true, item: { id: 't1', name: 'Midnight City',
-    artists: [{ name: 'M83' }], album: { images: [{ url: 'big' }, { url: 'mid' }] } } }),
-};
-liveBox.syncClusterMusic();
-ok(!liveEls['cluster-music'].classList.contains('disconnected'), 'cluster music: live state clears placeholder');
-ok(liveEls['cluster-music-title'].textContent === 'Midnight City', 'cluster music: title from Spotify state');
-ok(liveEls['cluster-music-artist'].textContent === 'M83', 'cluster music: artist from Spotify state');
-ok(liveEls['cluster-music-art'].getAttribute('src') === 'mid', 'cluster music: art from Spotify state');
+liveBox.updateDriveForce(null);
+ok(liveBox.driveForceState === 'coast' && liveBox.driveForceBand === 0, 'drive meter: unknown speed coasts');
+ok(liveBox.smoothedAcceleration === 0, 'drive meter: no fake force value');
+// steady cruise: tiny GPS jitter stays inside the dead zone
+liveBox.updateDriveForce(84); dfNow += 1000; liveBox.updateDriveForce(84.2); dfNow += 1000;
+liveBox.updateDriveForce(83.9);
+ok(liveBox.driveForceState === 'coast', 'drive meter: GPS noise does not flicker the meter');
+// hard acceleration: 84 -> 96 km/h over 2 s ~= +1.7 m/s^2 -> power, strong band
+dfNow += 1000; liveBox.updateDriveForce(84); dfNow += 1000; liveBox.updateDriveForce(92);
+dfNow += 1000; liveBox.updateDriveForce(96);
+ok(liveBox.driveForceState === 'power' && liveBox.driveForceBand >= 2, 'drive meter: acceleration reads POWER');
+// hard braking: 96 -> 80 km/h over 2 s -> regen
+dfNow += 1000; liveBox.updateDriveForce(88); dfNow += 1000; liveBox.updateDriveForce(80);
+ok(liveBox.driveForceState === 'regen' && liveBox.driveForceBand >= 1, 'drive meter: deceleration reads REGEN');
+// absurd spike is rejected, never flips the meter
+liveBox.updateDriveForce(80); dfNow += 500; liveBox.updateDriveForce(400);
+ok(liveBox.driveForceState === 'regen', 'drive meter: unrealistic GPS spike rejected');
+// gauge render: no ticks yet -> no throw
+liveBox.syncDriveForceGauge();
+// truthful naming only — no battery/kW telemetry anywhere
+for (const name of ['batteryKw', 'regenKw', 'motorPower', 'batterySoc', 'batteryPercent']) {
+  ok(!appSrc.includes(name), `no fake telemetry: ${name}`);
+}
+ok(appSrc.includes('smoothedAcceleration') && appSrc.includes('driveForceState'),
+  'drive meter uses truthful state names');
+// hero slots: VC-only, hidden by default in the shared stylesheet
+for (const sel of ['#cluster-backdrop', '#cluster-header', '#cluster-gauge', '#cluster-footer',
+                   '#cluster-trip']) {
+  ok(cssSrc.includes(`body.cluster-mode ${sel}{`) || cssSrc.includes(`body.cluster-mode ${sel},`),
+    `cluster hero slot hidden by default: ${sel}`);
+}
+for (const sel of ['#cluster-header', '#cluster-footer', '#cluster-gauge', '#cluster-trip',
+                   '#cluster-turn-compass']) {
+  ok(cssSrc.includes(`body.cluster-mode.theme-vice-city ${sel}`), `VC hero skin styles ${sel}`);
+}
+ok(cssSrc.includes('.cg-tick'), 'VC hero: gauge tick styling present');
 // wiring (source-level guards)
 ok(/maybeFetchSpeedLimit\(lat, lon\) \{\s*\n\s*if \(!speedDisplayActive\(\)\)/.test(appSrc),
   'speed limit lookup runs in cluster mode too');
 ok(appSrc.includes('syncClusterTurn(currentTurnData())'), 'nav banner feeds the cluster turn block');
-ok(appSrc.includes("SpotifyCore.on('state', syncClusterMusic)"), 'cluster music follows Spotify state events');
+// Spotify: the same widget is shared, never duplicated
+ok(!/function syncClusterMusic/.test(appSrc), 'no duplicate cluster Spotify sync function');
+ok(appSrc.includes('if (spotVisible) mountSpotifySkin(wsThemeId());'),
+  'cluster mounts the real Spotify skin (same widget as dashboard)');
+ok(appSrc.includes('pane.hidden = !spotVisible'), 'Spotify pane visible in cluster mode');
 ok(appSrc.includes('if (clu) refreshClusterLive();'), 'entering cluster mode refreshes every live region');
 ok(/if \(speedDisplayActive\(\)\) \{\s*\n\s*if \(watchId === null/.test(appSrc),
   'passive speed watch: single shared watchId for dashboard + cluster');
 // no watcher is created inside the per-fix updaters
-for (const fn of ['updateSpeedo', 'updateClusterSpeed', 'maybeFetchSpeedLimit', 'syncClusterTurn', 'syncClusterMusic']) {
+for (const fn of ['updateSpeedo', 'updateClusterSpeed', 'maybeFetchSpeedLimit', 'syncClusterTurn', 'updateDriveForce']) {
   ok(!/watchPosition/.test(extractFn(appSrc, fn)), `no geolocation watcher inside ${fn}`);
 }
+// presentation tabs: cluster stays the active mode, dashboard + map reachable
+ok(appSrc.includes("if (tab === 'dashboard') { WayStation.setAppMode('dashboard'); return; }"),
+  'cluster tab switches to dashboard');
+ok(appSrc.includes("if (tab === 'map') { WayStation.setAppMode('normal'); return; }"),
+  'cluster tab switches to map');
 ok(cssSrc.includes('body.cluster-mode #map'), 'cluster CSS frames the live map');
 ok(cssSrc.includes('#cluster-speed-num'), 'cluster CSS sizes the hero speed');
 ok(cssSrc.includes('#cluster-turn'), 'cluster CSS positions the turn block');
-ok(cssSrc.includes('#cluster-music'), 'cluster CSS sizes the now-playing panel');
+ok(cssSrc.includes('body.cluster-mode.theme-vice-city #spotify-pane'), 'VC cluster positions the shared Spotify widget');
 ok(cssSrc.includes('body.cluster-mode #drawer'), 'cluster hides the planning drawer');
 ok(cssSrc.includes('body.cluster-mode #search-bar'), 'cluster hides the search pill');
 ok(cssSrc.includes('body.cluster-mode #menu-btn'), 'cluster keeps the menu button reachable');

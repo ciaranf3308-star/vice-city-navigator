@@ -310,13 +310,24 @@
      app.js; the section stays hidden unless body.cluster-mode is set.
      NOTE: must sit BEFORE the scripts — app.js touches it at boot. -->
 <section id="cluster-ui" hidden aria-label="Cluster mode">
+  <div id="cluster-backdrop" aria-hidden="true"></div>
+  <header id="cluster-header">
+    <button id="cluster-logo" type="button" aria-label="Open menu"><img src="themes/vice-city/dashboard/waystation-logo.png" alt="WayStation"></button>
+    <div id="cluster-wx"><span id="cluster-temp">--°C</span><span id="cluster-wxicon" aria-hidden="true"></span></div>
+    <div id="cluster-clock"><span id="cluster-date"></span><span id="cluster-time"></span></div>
+    <div id="cluster-tagline" aria-hidden="true">Good Roads<span>Better Times</span></div>
+  </header>
   <div id="cluster-minimap" aria-hidden="true"></div>
   <div id="cluster-turn" hidden>
     <div id="cluster-turn-arrow" aria-hidden="true"></div>
-    <div id="cluster-turn-distance"></div>
-    <div id="cluster-turn-road"></div>
+    <div id="cluster-turn-main">
+      <div id="cluster-turn-distance"></div>
+      <div id="cluster-turn-road"></div>
+    </div>
+    <div id="cluster-turn-compass" aria-hidden="true"><i id="cluster-compass-needle"></i><span>N</span></div>
     <div id="cluster-turn-instruction"></div>
   </div>
+  <div id="cluster-trip" hidden></div>
   <div id="cluster-speed">
     <div id="cluster-speed-num">--</div>
     <div id="cluster-speed-unit">km/h</div>
@@ -324,11 +335,20 @@
   <div id="cluster-limit" hidden>
     <div id="cluster-limit-num"></div>
   </div>
-  <div id="cluster-music">
-    <img id="cluster-music-art" alt="">
-    <div id="cluster-music-title"></div>
-    <div id="cluster-music-artist"></div>
+  <div id="cluster-gauge" aria-hidden="true">
+    <svg id="cluster-gauge-svg" viewBox="0 0 400 200"></svg>
+    <span class="cg-label cg-regen">REGEN</span>
+    <span class="cg-label cg-coast">COAST</span>
+    <span class="cg-label cg-power">POWER</span>
   </div>
+  <footer id="cluster-footer">
+    <nav id="cluster-tabs" aria-label="Presentation">
+      <button type="button" data-tab="cluster" class="on">CLUSTER</button>
+      <button type="button" data-tab="dashboard">DASHBOARD</button>
+      <button type="button" data-tab="map">MAP</button>
+    </nav>
+    <div id="cluster-footer-logo" aria-hidden="true">Vice city</div>
+  </footer>
   <button id="cluster-mode-exit" type="button">Exit cluster</button>
 </section>
 
