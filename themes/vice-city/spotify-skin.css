@@ -39,7 +39,7 @@
 /* ---------- album art: UNDER the hud, through its cut-out ---------- */
 .vcsp-art {
   position: absolute; z-index: 1;
-  left: 7.5%; top: 34.3%; width: 31.9%; height: 32%;
+  left: 7.5%; top: 34.3%; width: 31.9%; height: 35%;
   object-fit: cover; border-radius: 2.5cqw;
   opacity: 0; transition: opacity .45s ease;
   background: #0a0e24;
@@ -48,7 +48,7 @@
 /* small atmospheric placeholder in the opening while nothing loads */
 .vcsp-art-idle {
   position: absolute; z-index: 1;
-  left: 7.5%; top: 34.3%; width: 31.9%; height: 32%;
+  left: 7.5%; top: 34.3%; width: 31.9%; height: 35%;
   border-radius: 2.5cqw;
   background: radial-gradient(70% 70% at 50% 38%, #16204a 0%, #070a1e 72%);
   display: flex; align-items: center; justify-content: center;
@@ -68,7 +68,7 @@
 /* ---------- track info on the dark panel under the album ---------- */
 .vcsp-track {
   position: absolute; z-index: 3;
-  left: 6%; right: 64%; top: 68.5%;
+  left: 6%; right: 64%; top: 71%;
   text-align: left;
 }
 .vcsp-title {
@@ -89,7 +89,7 @@
 /* ---------- progress on the dark panel ---------- */
 .vcsp-progress {
   position: absolute; z-index: 3;
-  left: 6%; right: 64%; top: 79%;
+  left: 6%; right: 64%; top: 80.5%;
 }
 .vcsp-bar { position: relative; height: 2.2cqh; cursor: pointer; touch-action: none; }
 .vcsp-bar::before {
@@ -118,12 +118,12 @@
 /* ---------- transport on the dark panel ---------- */
 .vcsp-controls {
   position: absolute; z-index: 3;
-  left: 6%; right: 64%; top: 85%; bottom: 2%;
+  left: 6%; right: 64%; top: 87%; bottom: 2%;
   display: flex; align-items: center; justify-content: center; gap: 2.5cqw;
   background: none; padding: 0;
 }
 .vcsp-tbtn {
-  width: 4.9cqw; height: 4.9cqw; min-width: 34px; min-height: 34px;
+  width: 4.4cqw; height: 4.4cqw; min-width: 32px; min-height: 32px;
   border-radius: 50%; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   color: #fff; background: rgba(10,16,40,.55);
@@ -132,7 +132,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 .vcsp-tbtn.big {
-  width: 5.9cqw; height: 5.9cqw; min-width: 40px; min-height: 40px;
+  width: 5.3cqw; height: 5.3cqw; min-width: 36px; min-height: 36px;
   border-color: #ff4fc3;
   box-shadow: 0 0 20px rgba(255,47,179,.6), inset 0 0 12px rgba(255,47,179,.3);
 }
