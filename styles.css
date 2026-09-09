@@ -91,10 +91,14 @@ body{
 }
 .big-btn:active{transform:scale(.98)}
 .ghost-btn{
+  display:block;width:100%;text-align:center;
   font:inherit;font-weight:600;font-size:14px;color:var(--hot);cursor:pointer;
-  background:transparent;border:1.5px solid var(--hot);border-radius:12px;
-  padding:10px 14px;margin-top:8px;
+  background:rgba(255,255,255,.05);border:1.5px solid var(--hot);border-radius:12px;
+  padding:13px 14px;margin-top:10px;-webkit-tap-highlight-color:transparent;
+  transition:background .15s ease,transform .1s ease,box-shadow .15s ease;
 }
+.ghost-btn:hover{background:rgba(255,255,255,.1)}
+.ghost-btn:active{transform:scale(.98)}
 .vc-title{
   font-family:var(--vcfont);font-weight:900;
   font-size:34px;letter-spacing:3px;line-height:1;margin:0;
@@ -123,32 +127,111 @@ body{
   display:flex;flex-direction:column;gap:10px;
 }
 
-/* ---------- menu panel: GTA-styled settings ---------- */
+/* ---------- menu panel: GTA-styled settings ----------
+   Section cards, custom toggle switches, big touch targets. Per-theme
+   skins live in the theme files (SA's skin is here — its dashboard.css
+   is locked — via elevated-specificity overrides below). */
 #menu-panel{
   position:absolute;top:0;bottom:0;left:0;z-index:30;
-  width:min(360px,88vw);overflow-y:auto;
+  width:min(360px,88vw);overflow-y:auto;overscroll-behavior:contain;
   background:var(--panel);border-right:2px solid var(--pink);
   box-shadow:0 0 30px rgba(255,113,206,.35), inset 0 0 40px rgba(255,46,136,.07);
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   padding:16px 16px calc(16px + env(safe-area-inset-bottom));
+  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.25) transparent;
 }
 #menu-panel[hidden]{display:none}
-.menu-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:6px}
-.menu-section{margin-top:18px;border-top:1px solid rgba(185,103,255,.3);padding-top:12px}
+#menu-panel::-webkit-scrollbar{width:10px}
+#menu-panel::-webkit-scrollbar-track{background:transparent}
+#menu-panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.22);border-radius:5px;border:2px solid transparent;background-clip:content-box}
+.menu-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+#menu-close{
+  width:56px;height:56px;font-size:20px;flex:none;
+  border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-family:inherit;font-weight:700;
+  color:var(--cyan);background:rgba(1,205,254,.08);
+  border:2px solid var(--cyan);box-shadow:0 0 14px rgba(1,205,254,.35);
+  -webkit-tap-highlight-color:transparent;
+}
+#menu-close:active{transform:scale(.94)}
+.menu-section{
+  margin-top:16px;padding:16px 16px 14px;border-radius:16px;
+  background:rgba(255,255,255,.028);
+  border:1px solid rgba(185,103,255,.28);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+}
 .menu-section h3{
   font-family:var(--vclabel);font-weight:600;font-size:13px;letter-spacing:3px;
-  text-transform:uppercase;color:var(--purple);margin:0 0 10px;
+  text-transform:uppercase;color:var(--purple);margin:0 0 12px;
+  display:flex;align-items:center;gap:12px;
 }
-.menu-section .row{display:flex;align-items:center;gap:10px;font-size:16px;margin:8px 0;cursor:pointer}
-.menu-section .stack{display:block;font-size:14px;color:var(--purple);margin:10px 0}
+.menu-section h3::after{
+  content:"";flex:1;height:1px;min-width:20px;
+  background:currentColor;opacity:.35;border-radius:1px;
+}
+/* toggle rows: label left, fat switch right */
+.menu-section .row{
+  display:flex;align-items:center;gap:14px;
+  min-height:52px;font-size:16px;margin:8px 0;padding:6px 4px;
+  border-radius:10px;cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.menu-section .row:hover{background:rgba(255,255,255,.04)}
+.menu-section .row input[type="checkbox"]{
+  order:2;margin-left:auto;flex:none;cursor:pointer;
+  appearance:none;-webkit-appearance:none;position:relative;margin-top:0;margin-bottom:0;
+  width:58px;height:34px;border-radius:17px;outline:none;
+  background:rgba(255,255,255,.09);border:2px solid rgba(255,255,255,.28);
+  transition:background .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+.menu-section .row input[type="checkbox"]::after{
+  content:"";position:absolute;top:50%;left:4px;translate:0 -50%;
+  width:24px;height:24px;border-radius:50%;
+  background:#fff;opacity:.65;
+  transition:left .18s ease,background .18s ease,opacity .18s ease,box-shadow .18s ease;
+}
+.menu-section .row input[type="checkbox"]:checked{
+  background:color-mix(in srgb, var(--sw-on,#ff71ce) 32%, transparent);
+  border-color:var(--sw-on,#ff71ce);
+  box-shadow:0 0 12px color-mix(in srgb, var(--sw-on,#ff71ce) 55%, transparent);
+}
+.menu-section .row input[type="checkbox"]:checked::after{
+  left:calc(100% - 28px);background:var(--sw-on,#ff71ce);opacity:1;
+  box-shadow:0 0 10px var(--sw-on,#ff71ce);
+}
+.menu-section .row input[type="checkbox"]:focus-visible{
+  outline:2px solid var(--sw-on,#ff71ce);outline-offset:3px;
+}
+.menu-section .stack{display:block;font-size:14px;color:var(--purple);margin:12px 0}
 .menu-section select,.menu-section input[type="url"]{
-  width:100%;margin-top:6px;font:inherit;font-size:15px;color:var(--ink);
-  background:rgba(255,255,255,.06);border:1.5px solid var(--purple);border-radius:10px;
-  padding:10px;outline:none;
+  width:100%;margin-top:8px;font:inherit;font-size:15px;color:var(--ink);
+  background-color:rgba(255,255,255,.06);border:1.5px solid var(--purple);border-radius:10px;
+  padding:12px;outline:none;
 }
-.menu-section input[type="checkbox"]{width:20px;height:20px;accent-color:var(--pink)}
-.stats{font-family:var(--vclabel);font-size:15px;letter-spacing:1px;color:var(--yellow);margin:6px 0}
-.hint{display:block;font-size:12px;color:rgba(185,103,255,.85);margin-top:8px;line-height:1.5}
+.menu-section select{
+  appearance:none;-webkit-appearance:none;cursor:pointer;padding-right:44px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9'%3E%3Cpath d='M1 1l6 6 6-6' fill='none' stroke='%23ffffff' stroke-opacity='.65' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 16px center;
+}
+.menu-section select:focus,.menu-section input[type="url"]:focus{
+  border-color:var(--pink);box-shadow:0 0 14px rgba(255,113,206,.35);
+}
+.stats{
+  font-family:var(--vclabel);font-size:15px;letter-spacing:1px;color:var(--yellow);
+  margin:8px 0;padding:10px 14px;border-radius:10px;
+  background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.12);
+}
+.hint{display:block;font-size:12px;color:rgba(185,103,255,.85);margin-top:10px;line-height:1.55}
+.menu-section details.advanced{
+  margin-top:12px;border:1px dashed rgba(255,255,255,.22);border-radius:12px;padding:0 14px;
+}
+.menu-section details.advanced summary{
+  list-style:none;cursor:pointer;font-size:14px;color:var(--ink);
+  padding:14px 0;display:flex;align-items:center;gap:10px;-webkit-tap-highlight-color:transparent;
+}
+.menu-section details.advanced summary::-webkit-details-marker{display:none}
+.menu-section details.advanced summary::after{content:"+";margin-left:auto;font-size:20px;line-height:1;opacity:.7}
+.menu-section details.advanced[open] summary::after{content:"\2013"}
+.menu-section details.advanced[open]{padding-bottom:14px}
 
 /* ---------- planning drawer (desktop) / bottom sheet (mobile) ---------- */
 #drawer{
@@ -451,23 +534,80 @@ body.dashboard-mode #menu-panel{
   overflow-y:auto;
 }
 /* car-scale type + touch targets */
-body.dashboard-mode .menu-head{margin-bottom:10px;align-items:center}
+body.dashboard-mode .menu-head{margin-bottom:14px;align-items:center}
 body.dashboard-mode .vc-title{font-size:52px;letter-spacing:4px}
 body.dashboard-mode #menu-close{width:68px;height:68px;font-size:28px;flex:none}
-body.dashboard-mode .menu-section{margin-top:28px;padding-top:20px}
-body.dashboard-mode .menu-section h3{font-size:20px;letter-spacing:5px;margin:0 0 16px}
-body.dashboard-mode .menu-section .row{font-size:24px;margin:16px 0;gap:18px}
-body.dashboard-mode .menu-section .stack{font-size:20px;margin:16px 0}
+body.dashboard-mode .menu-section{margin-top:24px;padding:24px;border-radius:20px}
+body.dashboard-mode .menu-section h3{font-size:20px;letter-spacing:5px;margin:0 0 18px}
+body.dashboard-mode .menu-section .row{font-size:26px;margin:14px 0;gap:18px;min-height:68px;padding:8px 6px}
+body.dashboard-mode .menu-section .stack{font-size:20px;margin:18px 0}
 body.dashboard-mode .menu-section select,
 body.dashboard-mode .menu-section input[type="url"]{
-  font-size:22px;padding:18px;margin-top:12px;border-radius:14px;
+  font-size:22px;padding:18px;margin-top:12px;border-radius:14px;min-height:68px;
+  background-position:right 22px center;
 }
 body.dashboard-mode .menu-section input[type="checkbox"]{width:36px;height:36px;flex:none}
-body.dashboard-mode .menu-section details.advanced summary{font-size:20px;padding:10px 0;cursor:pointer}
-body.dashboard-mode .stats{font-size:21px;margin:12px 0}
+/* custom car-size toggle switch (overrides the test-pinned base above) */
+body.dashboard-mode .menu-section .row input[type="checkbox"]{
+  width:88px;height:50px;border-radius:25px;border-width:2.5px;
+}
+body.dashboard-mode .menu-section .row input[type="checkbox"]::after{
+  width:38px;height:38px;left:5px;
+}
+body.dashboard-mode .menu-section .row input[type="checkbox"]:checked::after{
+  left:calc(100% - 43px);
+}
+body.dashboard-mode .menu-section details.advanced{margin-top:16px}
+body.dashboard-mode .menu-section details.advanced summary{font-size:22px;padding:16px 0;cursor:pointer}
+body.dashboard-mode .stats{font-size:21px;margin:12px 0;padding:14px 18px}
 body.dashboard-mode .hint{font-size:17px;line-height:1.65;margin-top:14px}
 body.dashboard-mode .ghost-btn{font-size:21px;padding:16px 24px;margin-top:14px;border-radius:14px}
 body.dashboard-mode .attrib{font-size:16px;margin-top:24px}
+
+/* ============ SAN ANDREAS menu skin (lives here: themes/san-andreas/dashboard.css is LOCKED) ============
+   Grove Street: deep green glass, gold chunky borders, Bank Gothic, sharp corners.
+   `html body...` outranks the locked file's `body.theme-san-andreas ...` selectors. */
+body.theme-san-andreas{--sw-on:#7ec850}
+html body.theme-san-andreas #menu-panel{
+  background:linear-gradient(165deg,rgba(20,34,24,.98),rgba(9,17,11,.98));
+  border-right:3px solid #e8a33d;border-radius:0;
+  box-shadow:0 0 34px rgba(232,163,61,.28), inset 0 0 50px rgba(0,0,0,.5);
+}
+html body.theme-san-andreas .menu-section{
+  background:rgba(126,200,80,.05);
+  border:2px solid rgba(232,163,61,.45);border-radius:6px;
+  box-shadow:inset 0 0 24px rgba(0,0,0,.35);
+}
+html body.theme-san-andreas .menu-section h3{
+  color:#e8a33d;letter-spacing:4px;
+  text-shadow:0 2px 0 rgba(0,0,0,.6);
+}
+html body.theme-san-andreas .menu-section h3::after{background:#7ec850;opacity:.5;height:2px}
+html body.theme-san-andreas .menu-section .row{color:#f0e6c8}
+html body.theme-san-andreas .menu-section .row:hover{background:rgba(232,163,61,.08)}
+html body.theme-san-andreas .menu-section .stack{color:#f0e6c8}
+html body.theme-san-andreas .menu-section select,
+html body.theme-san-andreas .menu-section input[type="url"]{
+  background-color:rgba(0,0,0,.4);border:2px solid #7ec850;border-radius:6px;color:#f0e6c8;
+}
+html body.theme-san-andreas .menu-section .row input[type="checkbox"]{border-radius:6px}
+html body.theme-san-andreas .menu-section .row input[type="checkbox"]::after{border-radius:3px}
+html body.theme-san-andreas .stats{
+  color:#7ec850;background:rgba(0,0,0,.45);border:1px solid rgba(232,163,61,.4);border-radius:6px;
+}
+html body.theme-san-andreas .hint{color:rgba(240,230,200,.72)}
+html body.theme-san-andreas .ghost-btn{
+  color:#e8a33d;border:2px solid #e8a33d;border-radius:6px;background:rgba(232,163,61,.08);
+  letter-spacing:1px;
+}
+html body.theme-san-andreas .ghost-btn:hover{background:rgba(232,163,61,.18)}
+html body.theme-san-andreas #menu-close{
+  color:#e8a33d;border-color:#e8a33d;border-radius:6px;background:rgba(232,163,61,.08);
+  box-shadow:0 0 14px rgba(232,163,61,.35);
+}
+html body.theme-san-andreas .attrib{color:rgba(232,163,61,.55)}
+html body.theme-san-andreas .menu-section details.advanced{border:2px dashed rgba(232,163,61,.4);border-radius:6px}
+html body.dashboard-mode.theme-san-andreas #menu-panel{border-radius:0}
 
 /* ---------- toast ---------- */
 #toast{

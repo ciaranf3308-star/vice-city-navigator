@@ -412,15 +412,33 @@ body.dashboard-mode.theme-gta-v #menu-panel{top:132px;bottom:132px}
 body.theme-gta-v{--vcfont:'Chalet Comprime','Arial Narrow',sans-serif;--vclabel:'Chalet London',system-ui,sans-serif}
 body.theme-gta-v .vc-title span{color:#f2f5f2}
 body.theme-gta-v .dest-pin{background-image:url('assets/themes/gta-v/blips/waypoint.png')}
-body.theme-gta-v #menu-panel{background:rgba(11,11,11,.96);border-right:2px solid #2ce68c}
-body.theme-gta-v .menu-section{border-top:1px solid rgba(242,245,242,.08)}
-body.theme-gta-v .menu-section h3{color:#2ce68c}
+/* ============ GTA V menu panel: minimal pause-menu console ============
+   Hairline green rules on near-black, Chalet type, generous whitespace. */
+body.theme-gta-v{--sw-on:#2ce68c}
+body.theme-gta-v #menu-panel{background:rgba(8,10,8,.98);border-right:1px solid rgba(44,230,140,.55);box-shadow:none}
+body.theme-gta-v .menu-head .vc-title{color:#f2f5f2;letter-spacing:6px}
+body.theme-gta-v #menu-close{color:#2ce68c;border-color:rgba(44,230,140,.6);background:transparent;box-shadow:none;border-radius:4px}
+body.theme-gta-v .menu-section{
+  border:1px solid rgba(242,245,242,.1);border-top:1px solid rgba(44,230,140,.4);border-radius:4px;
+  background:transparent;box-shadow:none;padding:28px;margin-top:28px;
+}
+body.theme-gta-v .menu-section h3{color:#2ce68c;font-weight:400;letter-spacing:6px}
+body.theme-gta-v .menu-section h3::after{opacity:.25}
+body.theme-gta-v .menu-section .row{color:#e8ece8;min-height:56px}
+body.theme-gta-v .menu-section .row:hover{background:rgba(242,245,242,.04)}
 body.theme-gta-v .menu-section .stack{color:#9aa3a8}
 body.theme-gta-v .menu-section select,
 body.theme-gta-v .menu-section input[type="url"]{
-  background:rgba(242,245,242,.05);border:1px solid rgba(242,245,242,.14);color:#f2f5f2}
-body.theme-gta-v .menu-section input[type="checkbox"]{accent-color:#2ce68c}
-body.theme-gta-v .stats{color:#2ce68c}
+  background-color:rgba(242,245,242,.05);border:1px solid rgba(242,245,242,.16);border-radius:4px;color:#f2f5f2}
+body.theme-gta-v .menu-section select:focus,
+body.theme-gta-v .menu-section input[type="url"]:focus{border-color:#2ce68c;box-shadow:none}
+body.theme-gta-v .menu-section .row input[type="checkbox"]{border-radius:12px}
+body.theme-gta-v .stats{color:#2ce68c;background:transparent;border:1px solid rgba(242,245,242,.1);border-radius:4px}
 body.theme-gta-v .hint{color:rgba(154,163,168,.85)}
-body.theme-gta-v .ghost-btn{color:#2ce68c;border-color:#2ce68c}
-body.theme-gta-v .attrib{color:rgba(44,230,140,.5)}
+body.theme-gta-v .ghost-btn{
+  color:#2ce68c;border:1px solid rgba(44,230,140,.6);border-radius:4px;background:transparent;letter-spacing:2px;
+}
+body.theme-gta-v .ghost-btn:hover{background:rgba(44,230,140,.08)}
+body.theme-gta-v .attrib{color:rgba(154,163,168,.5)}
+body.theme-gta-v .menu-section details.advanced{border:1px dashed rgba(242,245,242,.2);border-radius:4px}
+body.dashboard-mode.theme-gta-v .menu-section{padding:32px}

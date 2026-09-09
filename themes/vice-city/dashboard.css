@@ -329,3 +329,57 @@ body.dashboard-mode.theme-vice-city #sa-grove-panel{display:none}
 #vc-maneuver,#vc-right-panel{display:none}
 body.dashboard-mode.theme-vice-city #vc-maneuver,
 body.dashboard-mode.theme-vice-city #vc-right-panel{display:block}
+
+/* ============ VICE CITY menu panel: neon-noir console ============
+   Hot pink + cyan glow on dark glass, Pricedown title, subtle scanlines. */
+body.theme-vice-city{--sw-on:#ff71ce}
+body.theme-vice-city #menu-panel{
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.022) 0 1px, transparent 1px 3px),
+    linear-gradient(160deg, rgba(26,11,44,.97), rgba(10,4,24,.97));
+  border-right:2px solid var(--pink);
+  box-shadow:0 0 44px rgba(255,46,136,.4), inset 0 0 60px rgba(255,46,136,.06);
+}
+body.theme-vice-city .menu-head .vc-title{
+  color:var(--pink);
+  text-shadow:0 0 8px rgba(255,113,206,.95),0 0 26px rgba(255,46,136,.8),0 0 70px rgba(255,46,136,.45);
+}
+body.theme-vice-city #menu-close{
+  color:var(--cyan);border-color:var(--cyan);
+  background:rgba(1,205,254,.07);
+  box-shadow:0 0 16px rgba(1,205,254,.45), inset 0 0 10px rgba(1,205,254,.12);
+}
+body.theme-vice-city .menu-section{
+  background:rgba(20,8,35,.62);
+  border:1px solid rgba(255,113,206,.3);
+  box-shadow:0 0 20px rgba(255,46,136,.12), inset 0 0 26px rgba(255,46,136,.05);
+}
+body.theme-vice-city .menu-section h3{
+  color:var(--pink);
+  text-shadow:0 0 12px rgba(255,113,206,.85),0 0 34px rgba(255,46,136,.5);
+}
+body.theme-vice-city .menu-section .row{color:#ffd9f2}
+body.theme-vice-city .menu-section .row:hover{background:rgba(255,113,206,.07)}
+body.theme-vice-city .menu-section .stack{color:var(--purple)}
+body.theme-vice-city .menu-section select,
+body.theme-vice-city .menu-section input[type="url"]{
+  background-color:rgba(1,205,254,.05);border:1.5px solid rgba(1,205,254,.55);color:#eafcff;
+}
+body.theme-vice-city .menu-section select:focus,
+body.theme-vice-city .menu-section input[type="url"]:focus{
+  border-color:var(--pink);box-shadow:0 0 16px rgba(255,113,206,.45);
+}
+body.theme-vice-city .stats{
+  color:var(--yellow);background:rgba(0,0,0,.4);border:1px solid rgba(255,251,150,.3);
+  text-shadow:0 0 10px rgba(255,251,150,.5);
+}
+body.theme-vice-city .hint{color:rgba(185,103,255,.9)}
+body.theme-vice-city .ghost-btn{
+  color:#fff;border:1.5px solid var(--cyan);background:rgba(1,205,254,.08);
+  text-shadow:0 0 8px rgba(1,205,254,.8);
+  box-shadow:0 0 14px rgba(1,205,254,.25), inset 0 0 12px rgba(1,205,254,.08);
+}
+body.theme-vice-city .ghost-btn:hover{background:rgba(1,205,254,.16)}
+body.theme-vice-city .attrib{color:rgba(1,205,254,.55)}
+body.theme-vice-city .menu-section details.advanced{border-color:rgba(1,205,254,.35)}
+body.theme-vice-city .menu-section details.advanced summary{color:#eafcff}
