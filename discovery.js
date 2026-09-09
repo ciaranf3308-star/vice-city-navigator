@@ -10,15 +10,22 @@
    Pipeline: GPS movement -> reveal(lnglat) marks the precision-7
    cell plus its 8 neighbours (roughly a 250-400 m discovery
    radius) as discovered, along with coarser parents -> persisted
-   to localStorage (debounced) -> refreshFog() repaints the fog
+   to localStorage (debounced) -> renderFog() repaints the fog
    canvas.
 
-   Render: a full-viewport canvas overlay sits above the map
-   tiles. It is filled with the theme's fog colour, then soft
-   radial "reveals" are punched out (destination-out) at every
-   discovered cell in view. Overlapping soft stamps along the
-   driven path merge into organic, GTA-like revealed trails —
-   no hard grid edges, no blocky cells.
+   Render: the fog is a MapLibre CanvasSource — an offscreen
+   canvas pinned to lnglat corners and composited by the GPU as a
+   raster layer. Because the fog lives in WORLD space, panning and
+   zooming move it pixel-locked with the map: revealed ground can
+   never slide, drift, or lag behind the way a screen-space DOM
+   overlay did (that overlay only repainted on moveend, so the
+   exposed area visibly moved while panning).
+
+   The canvas covers the viewport expanded by REGION_PAD on every
+   side, so ordinary pans need zero repaints — the GPU just moves
+   the texture. A repaint only happens when (a) new ground is
+   revealed, (b) the viewport nears the canvas edge, (c) the zoom
+   precision band changes, or (d) the theme changes.
 
    Safety: fog is ONLY shown when the user deliberately opens
    Discovery Mode via setFogVisible(true). Drive/navigation mode
@@ -32,12 +39,16 @@
      These colours belong to the fog system itself. The discovery data
      is pure geohashes and stays valid under any visual theme. */
   const LS_KEY = 'vcn-discovery-v1';
-  const CANVAS_ID = 'vcn-fog-canvas';
+  const FOG_SOURCE_ID = 'vcn-fog-src';
+  const FOG_LAYER_ID = 'vcn-fog-layer';
   const FOG_FILL_COLOR = '#0b0b18';
   const FOG_FILL_OPACITY = 0.82;
   const MAX_CELLS = 100000;   // cap on persisted discovered cells
   const MAX_STAMPS = 3000;    // cap on reveal stamps per repaint
-  const RENDER_SCALE = 0.5;   // fog is soft — half-res canvas, CSS upscaled
+  const RENDER_SCALE = 0.5;   // fog is soft — half-res texture
+  const REGION_PAD = 0.75;    // canvas extends 75% of the viewport past each edge
+  const REGION_KEEP = 0.2;    // rebuild the region once the viewport strays past this margin
+  const MAX_TEX = 2048;       // texture size cap (px)
   const KM2_PER_CELL = 0.014; // precision-7 cell area (mid latitudes)
   const IRELAND_KM2 = 84421;  // denominator for the discovery %
 
@@ -110,9 +121,12 @@
   let discovered = new Set(); // geohash strings, precisions 5-7
   let persistTimer = null;
   let capLogged = false;
-  let fogCanvas = null;
+  let fogCanvas = null;      // offscreen canvas owned by the CanvasSource
   let fogCtx = null;
+  let fogRegion = null;      // {west,east,north,south,precision} lnglat rect the canvas covers
+  let fogDirty = false;      // data/theme changed since last paint
   let refreshQueued = false;
+  const boundsCache = new Map(); // geohash -> bounds (pure function memo)
 
   /* ---------------- persistence (debounced, private-mode safe) ---------------- */
   function loadPersisted() {
@@ -154,27 +168,6 @@
     }
     discovered.add(hash);
     return true;
-  }
-
-  /* ---------------- fog canvas overlay ----------------
-     A DOM canvas above the map tiles (below markers/controls).
-     Filled with fog colour; discovered ground is revealed by
-     punching soft radial holes. Because it is DOM — not a map
-     style layer — it survives setStyle() untouched. */
-  function ensureFogCanvas() {
-    if (fogCanvas || !map) return;
-    const container = map.getContainer();
-    if (!container) return;
-    fogCanvas = document.createElement('canvas');
-    fogCanvas.id = CANVAS_ID;
-    fogCanvas.style.cssText =
-      'position:absolute;inset:0;width:100%;height:100%;' +
-      'pointer-events:none;z-index:1;display:none;';
-    // Sit directly above the tile canvas, below markers & controls.
-    const cc = container.querySelector('.maplibregl-canvas-container');
-    if (cc && cc.nextSibling) container.insertBefore(fogCanvas, cc.nextSibling);
-    else container.appendChild(fogCanvas);
-    fogCtx = fogCanvas.getContext('2d');
   }
 
   /* ---------------- fog presentation per theme ----------------
@@ -225,7 +218,7 @@
     ctx.fill();
   }
 
-  /* ---------------- fog repaint ---------------- */
+  /* ---------------- geo-anchored fog render ---------------- */
   function precisionForZoom(z) {
     if (z >= 14) return 7;
     if (z >= 11) return 6;
@@ -233,32 +226,109 @@
     return 4;
   }
 
-  /* Discovered cells at the render precision whose bounds touch the
-     viewport. Coarser precisions are derived from the stored finer
-     cells via prefix, so old discoveries still render zoomed out. */
-  function discoveredInViewport(precision, bounds) {
-    const sw = bounds.getSouthWest(), ne = bounds.getNorthEast();
+  function cachedBounds(h) {
+    let b = boundsCache.get(h);
+    if (!b) {
+      try { b = geohashBounds(h); } catch (e) { return null; }
+      if (boundsCache.size > 40000) boundsCache.clear();
+      boundsCache.set(h, b);
+    }
+    return b;
+  }
+
+  /* Unwrap a longitude into the region's continuous frame so the
+     antimeridian never breaks the linear canvas mapping. */
+  function unwrapLng(lng, west) {
+    while (lng < west - 180) lng += 360;
+    while (lng > west + 180) lng -= 360;
+    return lng;
+  }
+
+  /* The lnglat rect the fog canvas should cover: the current
+     viewport expanded by REGION_PAD on every side. */
+  function computeRegion() {
+    const b = map.getBounds();
+    const sw = b.getSouthWest(), ne = b.getNorthEast();
+    let west = sw.lng, east = ne.lng;
+    if (east < west) east += 360; // antimeridian
+    const dLng = Math.max(east - west, 1e-9);
+    const dLat = Math.max(ne.lat - sw.lat, 1e-9);
+    return {
+      west: west - dLng * REGION_PAD,
+      east: east + dLng * REGION_PAD,
+      south: Math.max(sw.lat - dLat * REGION_PAD, -90),
+      north: Math.min(ne.lat + dLat * REGION_PAD, 90),
+      precision: precisionForZoom(map.getZoom()),
+    };
+  }
+
+  /* True while the viewport (plus a REGION_KEEP margin) still sits
+     comfortably inside the painted region — i.e. the GPU can keep
+     moving the texture and no repaint is needed. */
+  function regionCovers(region) {
+    const b = map.getBounds();
+    const sw = b.getSouthWest(), ne = b.getNorthEast();
+    let west = sw.lng, east = ne.lng;
+    if (east < west) east += 360;
+    const dLng = Math.max(east - west, 1e-9);
+    const dLat = Math.max(ne.lat - sw.lat, 1e-9);
+    const vw = west - dLng * REGION_KEEP, ve = east + dLng * REGION_KEEP;
+    const vs = sw.lat - dLat * REGION_KEEP, vn = ne.lat + dLat * REGION_KEEP;
+    const rw = region.west, re = region.east;
+    // Compare in one continuous frame.
+    const uw = unwrapLng(vw, rw), uve = uw + (ve - vw);
+    return rw <= uw && re >= uve && region.south <= vs && region.north >= vn;
+  }
+
+  function ensureOffscreenCanvas() {
+    if (fogCanvas) return;
+    fogCanvas = document.createElement('canvas');
+    fogCtx = fogCanvas.getContext('2d');
+  }
+
+  /* Size the canvas to the viewport (expanded region at RENDER_SCALE).
+     Resizing resets the canvas, so the caller always repaints after. */
+  function sizeCanvas() {
+    const c = map.getContainer();
+    const w = Math.min(MAX_TEX, Math.max(2,
+      Math.round(c.clientWidth * (1 + 2 * REGION_PAD) * RENDER_SCALE)));
+    const h = Math.min(MAX_TEX, Math.max(2,
+      Math.round(c.clientHeight * (1 + 2 * REGION_PAD) * RENDER_SCALE)));
+    if (fogCanvas.width !== w || fogCanvas.height !== h) {
+      fogCanvas.width = w;
+      fogCanvas.height = h;
+    }
+  }
+
+  /* Discovered cells at the region's render precision whose bounds
+     touch the region. Coarser precisions are derived from the stored
+     finer cells via prefix, so old discoveries still render zoomed
+     out. */
+  function discoveredInRegion(region) {
     const out = [];
-    if (precision >= 5) {
+    const p = region.precision;
+    const inR = b => {
+      const lngMin = unwrapLng(b.lngMin, region.west);
+      const lngMax = lngMin + (b.lngMax - b.lngMin);
+      return !(lngMax < region.west || lngMin > region.east ||
+               b.latMax < region.south || b.latMin > region.north);
+    };
+    if (p >= 5) {
       for (const h of discovered) {
-        if (h.length !== precision) continue;
-        let b;
-        try { b = geohashBounds(h); } catch (e) { continue; }
-        if (b.lngMax < sw.lng || b.lngMin > ne.lng ||
-            b.latMax < sw.lat || b.latMin > ne.lat) continue;
+        if (h.length !== p) continue;
+        const b = cachedBounds(h);
+        if (!b || !inR(b)) continue;
         out.push(b);
         if (out.length >= MAX_STAMPS) break;
       }
     } else {
       const prefixes = new Set();
       for (const h of discovered) {
-        if (h.length >= precision) prefixes.add(h.slice(0, precision));
+        if (h.length >= p) prefixes.add(h.slice(0, p));
       }
-      for (const p of prefixes) {
-        let b;
-        try { b = geohashBounds(p); } catch (e) { continue; }
-        if (b.lngMax < sw.lng || b.lngMin > ne.lng ||
-            b.latMax < sw.lat || b.latMin > ne.lat) continue;
+      for (const pre of prefixes) {
+        const b = cachedBounds(pre);
+        if (!b || !inR(b)) continue;
         out.push(b);
         if (out.length >= MAX_STAMPS) break;
       }
@@ -266,58 +336,140 @@
     return out;
   }
 
-  function refreshFog() {
-    if (!map || !fogVisible) return;
-    ensureFogCanvas();
-    if (!fogCtx) return;
-    const container = map.getContainer();
-    const w = container.clientWidth, h = container.clientHeight;
-    if (!w || !h) return;
-    const bounds = map.getBounds();
-    if (!bounds) return;
-
-    fogCanvas.width = Math.max(1, Math.round(w * RENDER_SCALE));
-    fogCanvas.height = Math.max(1, Math.round(h * RENDER_SCALE));
-
+  function drawFog(region) {
+    const cw = fogCanvas.width, ch = fogCanvas.height;
     const ctx = fogCtx;
-    ctx.setTransform(RENDER_SCALE, 0, 0, RENDER_SCALE, 0, 0);
     ctx.globalCompositeOperation = 'source-over';
-    ctx.clearRect(0, 0, w, h);
+    ctx.clearRect(0, 0, cw, ch);
 
     const f = fogTheme();
     ctx.fillStyle = hexToRgba(f.fill, f.fillOpacity);
-    ctx.fillRect(0, 0, w, h);
+    ctx.fillRect(0, 0, cw, ch);
 
-    const precision = precisionForZoom(map.getZoom());
-    const cells = discoveredInViewport(precision, bounds);
+    const cells = discoveredInRegion(region);
     if (cells.length === 0) return;
+
+    // Canvas px per metre at the region's mid latitude.
+    const midLat = (region.north + region.south) / 2;
+    const mPerDegLng = 111320 * Math.cos(midLat * Math.PI / 180);
+    const pxPerM = cw / ((region.east - region.west) * mPerDegLng);
+    const lngSpan = region.east - region.west;
+    const latSpan = region.north - region.south;
 
     ctx.globalCompositeOperation = 'destination-out';
     for (const b of cells) {
-      const cx = (b.lngMin + b.lngMax) / 2;
-      const cy = (b.latMin + b.latMax) / 2;
-      let p;
-      try { p = map.project([cx, cy]); } catch (e) { continue; }
-      if (p.x < -200 || p.y < -200 || p.x > w + 200 || p.y > h + 200) continue;
-      let c;
-      try { c = map.project([b.lngMax, b.latMax]); } catch (e) { continue; }
+      const clng = unwrapLng((b.lngMin + b.lngMax) / 2, region.west);
+      const clat = (b.latMin + b.latMax) / 2;
+      const x = (clng - region.west) / lngSpan * cw;
+      const y = (region.north - clat) / latSpan * ch;
+      if (x < -300 || y < -300 || x > cw + 300 || y > ch + 300) continue;
+      const wM = (b.lngMax - b.lngMin) * mPerDegLng;
+      const hM = (b.latMax - b.latMin) * 110540;
       // Half-diagonal of the cell on screen; ×1.35 so neighbouring
       // stamps overlap into one continuous revealed trail.
-      const r = Math.hypot(c.x - p.x, c.y - p.y) * 1.35;
+      const r = Math.hypot(wM, hM) / 2 * pxPerM * 1.35;
       if (r < 1) continue;
-      softStamp(ctx, p.x, p.y, r);
+      softStamp(ctx, x, y, r);
     }
     ctx.globalCompositeOperation = 'source-over';
   }
 
+  function fogCoords() {
+    const r = fogRegion;
+    // [top-left, top-right, bottom-right, bottom-left]
+    return [
+      [r.west, r.north], [r.east, r.north],
+      [r.east, r.south], [r.west, r.south],
+    ];
+  }
+
+  /* Force the CanvasSource to re-upload the mutated canvas exactly
+     once. MapLibre only re-uploads on dimension change or while
+     playing, so: play() flags _playing and triggers a repaint,
+     pause() runs one prepare() (the upload) then stops. */
+  function pushTexture() {
+    if (!map) return;
+    let src = null;
+    try { src = map.getSource(FOG_SOURCE_ID); } catch (e) { /* no style */ }
+    if (!src) return;
+    try {
+      if (typeof src.play === 'function' && typeof src.pause === 'function') {
+        src.play();
+        src.pause();
+      }
+    } catch (e) { /* source mid-load — the idle hook below covers it */ }
+    try { map.triggerRepaint(); } catch (e) {}
+  }
+
+  function ensureFogLayer() {
+    if (!map || !map.isStyleLoaded() || !fogRegion) return false;
+    let src = null;
+    try { src = map.getSource(FOG_SOURCE_ID); } catch (e) { return false; }
+    const coords = fogCoords();
+    if (!src) {
+      try {
+        map.addSource(FOG_SOURCE_ID, {
+          type: 'canvas', canvas: fogCanvas, coordinates: coords, animate: false,
+        });
+      } catch (e) { return false; }
+      try {
+        // Below the route line so a route (if ever shown with fog)
+        // draws over the fog, never under it. raster-fade-duration 0
+        // so the fog never visibly fades in — that would read as lag.
+        const layerSpec = {
+          id: FOG_LAYER_ID, type: 'raster', source: FOG_SOURCE_ID,
+          paint: { 'raster-opacity': 1, 'raster-fade-duration': 0 },
+        };
+        if (map.getLayer('vcn-route-glow')) map.addLayer(layerSpec, 'vcn-route-glow');
+        else map.addLayer(layerSpec);
+      } catch (e) {
+        try { map.removeSource(FOG_SOURCE_ID); } catch (e2) {}
+        return false;
+      }
+      // Cover the window between addSource and the source finishing
+      // load: push once the map goes idle.
+      try { map.once('idle', pushTexture); } catch (e) {}
+    } else {
+      // Same canvas, new geo anchor — just move the quad.
+      try { src.setCoordinates(coords); } catch (e) {}
+    }
+    return true;
+  }
+
+  /* The single repaint entry point. Skips entirely when the region
+     still covers the viewport and nothing changed — during pans the
+     GPU moves the texture, so there is nothing to repaint. */
+  function renderFog() {
+    if (!map || !fogVisible) return;
+    if (!map.isStyleLoaded()) {
+      try {
+        map.once('styledata', () => { if (fogVisible) queueRenderFog(); });
+      } catch (e) {}
+      return;
+    }
+    ensureOffscreenCanvas();
+    const region = computeRegion();
+    const needRegion = !fogRegion ||
+      fogRegion.precision !== region.precision ||
+      !regionCovers(fogRegion);
+    if (!needRegion && !fogDirty) return;
+    fogDirty = false;
+    if (needRegion) {
+      fogRegion = region;
+      sizeCanvas();
+    }
+    drawFog(fogRegion);
+    if (ensureFogLayer()) pushTexture();
+  }
+
   /* Coalesce rapid repaint requests (GPS reveals, resizes) into one
      per animation frame — never a repaint storm. */
-  function queueRefreshFog() {
+  function queueRenderFog() {
     if (refreshQueued || !fogVisible) return;
     refreshQueued = true;
     const run = () => {
       refreshQueued = false;
-      try { refreshFog(); } catch (e) { /* keep the map alive */ }
+      try { renderFog(); } catch (e) { /* keep the map alive */ }
     };
     if (typeof requestAnimationFrame === 'function') {
       requestAnimationFrame(run);
@@ -331,26 +483,33 @@
     init(m) {
       map = m;
       loadPersisted();
-      ensureFogCanvas();
-      map.on('moveend', queueRefreshFog);
-      map.on('zoomend', queueRefreshFog);
+      // No per-move repaint: the geo-anchored texture tracks pans
+      // natively. moveend/zoomend only rebuild the region when the
+      // viewport outgrows the painted canvas.
+      map.on('moveend', queueRenderFog);
+      map.on('zoomend', queueRenderFog);
       if (typeof window !== 'undefined') {
-        window.addEventListener('resize', queueRefreshFog);
+        window.addEventListener('resize', queueRenderFog);
       }
     },
 
-    /* Rebuild map-side fog state after a style change. The canvas is
-       DOM, not a style layer, so it survives setStyle() — this just
-       repaints in case the container was rebuilt. Discovered cells
-       are untouched. */
+    /* Rebuild map-side fog state after a style change. setStyle()
+       destroys style sources/layers, so the fog source+layer are
+       re-added here. Discovered cells are untouched. */
     rehydrate() {
       if (!map) return;
-      ensureFogCanvas();
-      if (fogVisible) queueRefreshFog();
+      fogRegion = null; // force a full rebuild against the new style
+      if (fogVisible) {
+        fogDirty = true;
+        queueRenderFog();
+      }
     },
     /* Re-paint fog for the newly active theme (no style change). The
        theme colour is read fresh at paint time. */
-    applyTheme() { queueRefreshFog(); },
+    applyTheme() {
+      fogDirty = true;
+      queueRenderFog();
+    },
 
     /* Mark the ground around a GPS fix as discovered. The precision-7
        cell plus its 8 neighbours form a ~460 m square — roughly a
@@ -369,21 +528,25 @@
       }
       if (added) {
         schedulePersist();
-        queueRefreshFog(); // live reveal while driving
+        fogDirty = true;
+        queueRenderFog(); // live reveal while driving
       }
     },
 
     setFogVisible(on) {
       fogVisible = !!on;
-      ensureFogCanvas();
-      if (fogCanvas) {
-        fogCanvas.style.display = fogVisible ? 'block' : 'none';
+      if (!map) return;
+      if (!fogVisible) {
+        try { if (map.getLayer(FOG_LAYER_ID)) map.removeLayer(FOG_LAYER_ID); } catch (e) {}
+        try { if (map.getSource(FOG_SOURCE_ID)) map.removeSource(FOG_SOURCE_ID); } catch (e) {}
+        return;
       }
-      if (fogVisible) refreshFog();
+      fogDirty = true;
+      renderFog();
     },
     isFogVisible() { return fogVisible; },
 
-    refreshFog: queueRefreshFog,
+    refreshFog: queueRenderFog,
 
     stats() {
       let n = 0;
@@ -394,9 +557,11 @@
 
     reset() {
       discovered = new Set();
+      boundsCache.clear();
       capLogged = false;
       persistNow();
-      refreshFog();
+      fogDirty = true;
+      renderFog();
     },
   };
 })();
