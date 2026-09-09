@@ -266,6 +266,23 @@ body{
 #recent-list li{display:flex;align-items:center;gap:12px;padding:11px 12px;border-bottom:1px solid rgba(185,103,255,.25);cursor:pointer}
 #recent-list li strong{font-family:var(--vclabel);font-weight:600;font-size:16px;letter-spacing:.5px}
 #recent-list li:active{background:rgba(255,113,206,.12)}
+/* Saved places (drawer) — same language as recents */
+#go-home-btn{width:100%;margin:10px 0 2px;font-size:17px;padding:13px}
+#saved-wrap h4{font-family:var(--vclabel);font-weight:600;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--purple);margin:14px 0 4px}
+#saved-list{list-style:none;margin:0;padding:0;max-height:220px;overflow-y:auto}
+#saved-list li{display:flex;align-items:center;gap:12px;padding:11px 12px;border-bottom:1px solid rgba(185,103,255,.25);cursor:pointer}
+#saved-list li strong{font-family:var(--vclabel);font-weight:600;font-size:16px;letter-spacing:.5px}
+#saved-list li:active{background:rgba(255,113,206,.12)}
+/* Menu Places section */
+.menu-section .btn-row{display:flex;gap:10px;margin:10px 0}
+.menu-section .btn-row .ghost-btn{flex:1}
+.menu-section .subhead{font-family:var(--vclabel);font-weight:600;font-size:13px;letter-spacing:3px;text-transform:uppercase;opacity:.85;margin:16px 0 6px}
+.place-list{list-style:none;margin:0;padding:0;max-height:260px;overflow-y:auto}
+.place-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(128,128,128,.18)}
+.place-name{flex:1;background:none;border:none;color:inherit;font:inherit;text-align:left;cursor:pointer;padding:10px 6px;min-height:48px}
+.place-act{flex:0 0 auto;min-width:48px;min-height:48px;background:none;border:1px solid rgba(128,128,128,.35);border-radius:10px;color:inherit;font-size:18px;cursor:pointer}
+.place-act.danger{color:#ff6b6b;border-color:rgba(255,107,107,.4)}
+#menu-set-home{margin-top:4px}
 #route-card{margin-top:14px;text-align:center}
 .dest-label{font-family:var(--vclabel);font-weight:600;font-size:19px;letter-spacing:.5px;display:block;margin-bottom:8px}
 .route-meta{font-size:16px;margin-bottom:10px;color:var(--yellow);letter-spacing:1px;font-family:var(--vclabel);font-weight:500}

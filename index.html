@@ -57,6 +57,21 @@
   </section>
 
   <section class="menu-section">
+    <h3>Places</h3>
+    <div id="menu-home-status" class="stats">No home set</div>
+    <div class="btn-row">
+      <button id="menu-go-home" class="ghost-btn" hidden>⌂ Navigate home</button>
+      <button id="menu-set-home" class="ghost-btn">Set home here</button>
+    </div>
+    <button id="menu-clear-home" class="ghost-btn" hidden>Clear home</button>
+    <small class="hint">Home is set to your current location, or set it from any place card.</small>
+    <div id="menu-saved-wrap" hidden>
+      <h4 class="subhead">Saved places</h4>
+      <ul id="menu-saved-list" class="place-list"></ul>
+    </div>
+  </section>
+
+  <section class="menu-section">
     <h3>Discovery Map</h3>
     <label class="row"><input type="checkbox" id="discovery-toggle"> Fog of war</label>
     <div id="discovery-stats" class="stats">—</div>
@@ -120,6 +135,11 @@
   <div id="drawer-search">
     <input id="search" type="search" placeholder="Search places…" autocomplete="off" enterkeyhint="search">
     <ul id="results" hidden></ul>
+    <button id="go-home-btn" class="ghost-btn" hidden>⌂ Navigate home</button>
+    <div id="saved-wrap" hidden>
+      <h4>Saved places</h4>
+      <ul id="saved-list"></ul>
+    </div>
     <div id="recent-wrap" hidden>
       <h4>Recent</h4>
       <ul id="recent-list"></ul>
@@ -136,6 +156,8 @@
     </div>
     <button id="poi-drive" class="big-btn">Start navigation</button>
     <button id="poi-go" class="ghost-btn poi-secondary">Set destination</button>
+    <button id="poi-save" class="ghost-btn poi-secondary">Save place</button>
+    <button id="poi-home" class="ghost-btn poi-secondary">Set as home</button>
   </div>
 
   <div id="route-card" hidden>
@@ -245,6 +267,7 @@
 <script src="themes/gta-v/spotify-skin.js"></script>
 <script src="themes/rdr2/spotify-skin.js"></script>
 <script src="discovery.js"></script>
+<script src="saved.js"></script>
 <script src="voice.js"></script>
 <script src="places.js"></script>
 <script src="traffic.js"></script>

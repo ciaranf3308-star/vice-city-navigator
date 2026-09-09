@@ -487,6 +487,36 @@
         label: props.name, lnglat: [props.lng, props.lat], semantic: props.semantic || null,
       });
     };
+    /* Saved places & home — theme-independent, via VCNSaved. */
+    const saveBtn = document.getElementById('poi-save');
+    const homeBtn = document.getElementById('poi-home');
+    const here = [props.lng, props.lat];
+    const refreshPlaceButtons = () => {
+      if (!window.VCNSaved) return;
+      const saved = VCNSaved.findNear(here);
+      if (saveBtn) saveBtn.textContent = saved ? '✓ Saved' : 'Save place';
+      const isHome = VCNSaved.isHome(here);
+      if (homeBtn) {
+        homeBtn.textContent = isHome ? '⌂ Home ✓' : 'Set as home';
+        homeBtn.disabled = isHome;
+      }
+    };
+    refreshPlaceButtons();
+    if (saveBtn) saveBtn.onclick = () => {
+      if (!window.VCNSaved) return;
+      const existing = VCNSaved.findNear(here);
+      if (existing) VCNSaved.removePlace(existing.id);
+      else VCNSaved.savePlace({ label: props.name, lnglat: here, semantic: props.semantic || null });
+      refreshPlaceButtons();
+      if (hooks.refreshSavedLists) hooks.refreshSavedLists();
+    };
+    if (homeBtn) homeBtn.onclick = () => {
+      if (!window.VCNSaved) return;
+      VCNSaved.setHome({ label: props.name, lnglat: here });
+      refreshPlaceButtons();
+      if (hooks.refreshSavedLists) hooks.refreshSavedLists();
+      if (hooks.toast) hooks.toast('Home set: ' + (props.name || 'this place'));
+    };
   }
   /* ---------------- public API ---------------- */
   window.VCNPlaces = {

@@ -252,6 +252,8 @@ async function initMap() {
         setDestination: d => { dest = d; planRoute(); },
         navigateTo: d => { dest = d; showRoutePending(d && d.label); planRoute({ autostart: true }); },
         openPlanning: v => openPlanning(v || 'poi'),
+        refreshSavedLists: () => { renderSavedLists(); },
+        toast: msg => toast(msg),
       });
     } catch (e) { console.error('[vcn] places init failed', e); }
     // Restore the pre-Spotify-OAuth view (the auth redirect reloads the page).
@@ -731,6 +733,132 @@ function renderRecents() {
   }
   wrap.hidden = false;
 }
+/* ---------------- saved places & home ----------------
+   Curated places (auto-saved on drive + manual) and the home
+   location. Rendered in the planning drawer and the menu Places
+   section. */
+function goHome() {
+  if (!window.VCNSaved) return;
+  const home = VCNSaved.getHome();
+  if (!home) { toast('No home set — set it from the menu or a place card.'); return; }
+  dest = { label: home.label, lnglat: home.lnglat.slice(), semantic: null };
+  closeDrawer();
+  showRoutePending(home.label);
+  planRoute({ autostart: true });
+}
+
+function renderSavedLists() {
+  if (!window.VCNSaved) return;
+  const places = VCNSaved.getPlaces();
+  const home = VCNSaved.getHome();
+
+  /* Drawer: home button + saved list. */
+  const goHomeBtn = $('go-home-btn');
+  if (goHomeBtn) goHomeBtn.hidden = !home;
+  const savedWrap = $('saved-wrap'), savedList = $('saved-list');
+  if (savedWrap && savedList) {
+    savedList.innerHTML = '';
+    if (!places.length) { savedWrap.hidden = true; }
+    else {
+      for (const p of places.slice(0, 8)) {
+        const li = document.createElement('li');
+        const img = document.createElement('img');
+        img.className = 'res-blip'; img.alt = ''; img.src = themeBlipUrl(p.semantic);
+        const strong = document.createElement('strong'); strong.textContent = p.label;
+        li.append(img, strong);
+        li.addEventListener('click', () => {
+          dest = { label: p.label, lnglat: p.lnglat.slice(), semantic: p.semantic || null };
+          closeDrawer();
+          showRoutePending(p.label);
+          planRoute({ autostart: true });
+        });
+        savedList.appendChild(li);
+      }
+      savedWrap.hidden = false;
+    }
+  }
+
+  /* Menu: home status + actions + manageable saved list. */
+  const homeStatus = $('menu-home-status');
+  if (homeStatus) homeStatus.textContent = home ? '⌂ ' + home.label : 'No home set';
+  const menuGoHome = $('menu-go-home'), menuClearHome = $('menu-clear-home');
+  if (menuGoHome) menuGoHome.hidden = !home;
+  if (menuClearHome) menuClearHome.hidden = !home;
+  const menuSavedWrap = $('menu-saved-wrap'), menuSavedList = $('menu-saved-list');
+  if (menuSavedWrap && menuSavedList) {
+    menuSavedList.innerHTML = '';
+    if (!places.length) { menuSavedWrap.hidden = true; }
+    else {
+      for (const p of places) {
+        const li = document.createElement('li');
+        li.className = 'place-row';
+        const name = document.createElement('button');
+        name.className = 'place-name';
+        name.textContent = (VCNSaved.isHome(p.lnglat) ? '⌂ ' : '') + p.label;
+        name.title = 'Navigate';
+        name.addEventListener('click', () => {
+          closeMenu();
+          dest = { label: p.label, lnglat: p.lnglat.slice(), semantic: p.semantic || null };
+          showRoutePending(p.label);
+          planRoute({ autostart: true });
+        });
+        const homeBtn = document.createElement('button');
+        homeBtn.className = 'place-act';
+        homeBtn.textContent = '⌂';
+        homeBtn.title = 'Set as home';
+        homeBtn.setAttribute('aria-label', 'Set as home');
+        homeBtn.addEventListener('click', ev => {
+          ev.stopPropagation();
+          VCNSaved.setHome({ label: p.label, lnglat: p.lnglat });
+          toast('Home set: ' + p.label);
+          renderSavedLists();
+        });
+        const delBtn = document.createElement('button');
+        delBtn.className = 'place-act danger';
+        delBtn.textContent = '✕';
+        delBtn.title = 'Remove';
+        delBtn.setAttribute('aria-label', 'Remove saved place');
+        delBtn.addEventListener('click', ev => {
+          ev.stopPropagation();
+          VCNSaved.removePlace(p.id);
+          renderSavedLists();
+        });
+        li.append(name, homeBtn, delBtn);
+        menuSavedList.appendChild(li);
+      }
+      menuSavedWrap.hidden = false;
+    }
+  }
+}
+
+function wireSavedPlaces() {
+  const goHomeBtn = $('go-home-btn');
+  if (goHomeBtn) goHomeBtn.addEventListener('click', goHome);
+  const menuGoHome = $('menu-go-home');
+  if (menuGoHome) menuGoHome.addEventListener('click', () => { closeMenu(); goHome(); });
+  const menuSetHome = $('menu-set-home');
+  if (menuSetHome) menuSetHome.addEventListener('click', async () => {
+    if (!window.VCNSaved) return;
+    let pos = (typeof userPos !== 'undefined') ? userPos : null;
+    if (!pos) {
+      try {
+        pos = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(
+            p => resolve([p.coords.longitude, p.coords.latitude]),
+            reject, { enableHighAccuracy: true, timeout: 9000 });
+        });
+      } catch (e) { toast('Could not get your location.'); return; }
+    }
+    VCNSaved.setHome({ label: 'Home', lnglat: pos });
+    toast('Home set to your current location.');
+    renderSavedLists();
+  });
+  const menuClearHome = $('menu-clear-home');
+  if (menuClearHome) menuClearHome.addEventListener('click', () => {
+    if (window.VCNSaved) VCNSaved.clearHome();
+    renderSavedLists();
+  });
+}
 /* Instant drawer feedback the moment a destination is picked —
    no dead air while the route computes. */
 function showRoutePending(label) {
@@ -923,6 +1051,13 @@ function currentPosOnce() {
 function startNav() {
   if (!steps.length) return;
   navActive = true; stepIdx = 0; arrived = false; offRouteSince = 0;
+  /* Places driven to are saved — the curated list, not just recents. */
+  try {
+    if (window.VCNSaved && dest && dest.label && Array.isArray(dest.lnglat)) {
+      VCNSaved.savePlace({ label: dest.label, lnglat: dest.lnglat, semantic: dest.semantic || null });
+      renderSavedLists();
+    }
+  } catch (e) { /* saved places must never break navigation */ }
   if (discoveryOn) setDiscovery(false); // fog never shows during navigation
   setUiMode('drive');
   setFollow(true);
@@ -1140,6 +1275,7 @@ function openPlanning(view) {
     // Synchronous focus inside the tap gesture so the mobile keyboard
     // opens immediately — a deferred focus won't.
     const s = $('search');
+    renderSavedLists();
     if (s.value.trim().length >= 3) $('recent-wrap').hidden = true;
     else renderRecents();
     if (s) s.focus({ preventScroll: true });
@@ -1151,6 +1287,7 @@ function closeDrawer() {
 function openMenu() {
   $('menu-panel').hidden = false;
   try { syncDiscoveryStats(); } catch (e) { /* menu must always open */ }
+  try { renderSavedLists(); } catch (e) { /* menu must always open */ }
 }
 function closeMenu() { $('menu-panel').hidden = true; }
 
@@ -1927,6 +2064,7 @@ function wireControls() {
 /* ---------------- boot ---------------- */
 initAppMode();
 wireSearch();
+wireSavedPlaces();
 wireControls();
 wireSpotifyMenu();
 initMap();
