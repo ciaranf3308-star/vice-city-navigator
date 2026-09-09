@@ -1715,10 +1715,22 @@ function syncDashPadding() {
   // Dash bars are always visible in dashboard mode (every theme), so
   // keep the camera target clear of them whether driving or exploring.
   const dash = b.contains('dashboard-mode');
-  if (dash && b.contains('theme-vice-city'))
-    map.setPadding({ top: 76, right: 765, bottom: 100, left: 8 });
-  else if (dash)
-    map.setPadding({ top: 76, right: 8, bottom: 88, left: 8 });
+  // The music widget floats on the right of the stage in dashboard mode.
+  // The user asked repeatedly for the recenter target to sit between the
+  // left margin and the START of the music widget, not the raw screen
+  // center — so the right padding clears each theme's authored widget
+  // geometry (px on the 1920-wide stage). The radio tab hides the widget
+  // for a full-bleed map, so no widget padding applies then.
+  const widgetHidden = !dash || b.contains('radio-off');
+  let right = 8;
+  if (!widgetHidden) {
+    if (b.contains('theme-vice-city')) right = 765;       // .vcsp: right:110px, width:687px
+    else if (b.contains('theme-san-andreas')) right = 701; // .sasp: left:1219px, width:701px
+    else if (b.contains('theme-gta-v')) right = 568;      // .gvsp: right:48px, width:520px
+    else if (b.contains('theme-rdr2')) right = 670;       // .rdsp: right:70px, width:600px
+  }
+  if (dash)
+    map.setPadding({ top: 76, right: right, bottom: b.contains('theme-vice-city') ? 100 : 88, left: 8 });
   else map.setPadding({ top: 0, right: 0, bottom: 0, left: 0 });
 }
 
@@ -2173,6 +2185,7 @@ function wireControls() {
       if (t === 'radio') { // toggle the music widget for a full-bleed map
         const off = document.body.classList.toggle('radio-off');
         setDashTab(off ? 'map' : 'radio');
+        try { syncDashPadding(); } catch (e) {}
         return;
       }
       if (t === 'settings') { openMenu(); setDashTab(t); return; }

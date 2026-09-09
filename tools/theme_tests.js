@@ -171,7 +171,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
+ok(swSrc.includes("ws-shell-v60"), 'SW shell cache v55');
 ok(swSrc.includes("ws-theme-v162"), 'SW theme cache v130');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
@@ -383,7 +383,11 @@ ok(appSrc.includes("classList.toggle('radio-off')"), 'RADIO tab toggles the musi
 ok(/body\.dashboard-mode #spotify-stage\{[\s\S]*?left:0;right:0;top:0;bottom:0/.test(cssSrc), 'Spotify stage is a full-canvas layer; every skin widget positions itself');
 ok(cssSrc.includes('#search-bar{right:740px}') && cssSrc.includes('#maneuver-card{right:740px}'), 'HUD chrome clears the larger tilted widgets');
 ok(cssSrc.includes('[data-spotskin="vice-city"] #search-bar{right:900px}'), 'VC chrome clears the wide tilted VC widget');
-ok(appSrc.includes('right: 765'), 'camera padding accounts for the larger VC widget');
+ok(appSrc.includes('right = 765'), 'camera padding accounts for the larger VC widget');
+ok(appSrc.includes("theme-san-andreas')) right = 701"), 'camera padding clears the SA music widget');
+ok(appSrc.includes("theme-gta-v')) right = 568"), 'camera padding clears the GTA V music widget');
+ok(appSrc.includes("theme-rdr2')) right = 670"), 'camera padding clears the RDR2 music widget');
+ok(appSrc.includes("b.contains('radio-off')"), 'camera padding drops widget clearance when the radio tab hides the widget');
 ok(cssSrc.includes('body.dashboard-mode.theme-vice-city #dash-topbar') === true, 'VC bar chrome is always-on in dashboard mode, like the original');
 // dashboard car chrome: every theme gets top/bottom bars, always visible in dashboard mode (driving or exploring)
 for (const id of ['vice-city', 'san-andreas', 'gta-v', 'rdr2']) {
