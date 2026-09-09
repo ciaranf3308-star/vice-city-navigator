@@ -197,6 +197,9 @@ body.dashboard-mode.theme-gta-v #dash-dest{
   font-size:64px;color:#f2f5f2;
   white-space:nowrap;pointer-events:none;line-height:1;
   text-shadow:0 2px 16px rgba(0,0,0,.85), 0 0 28px rgba(44,230,140,.16);
+  /* kill the shared neon plate chrome (cyan border/glow/angled clip) —
+     GTA V's place name floats free like the game's own map script */
+  background:none;border:0;border-radius:0;box-shadow:none;clip-path:none;padding:0;
 }
 body.dashboard-mode.theme-gta-v .dash-dest::before{
   content:'';position:absolute;left:50%;top:calc(50% + 42px);transform:translateX(-50%);
