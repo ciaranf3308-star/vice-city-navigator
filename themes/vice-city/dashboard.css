@@ -453,36 +453,23 @@ body.cluster-mode.theme-vice-city #cluster-mode-exit{display:none}
 
 /* ---- nav card: a built-in instrument, not a map iframe ----
    ~13% less visual mass (500x512 -> 460x486) so the centre breathes.
-   Material: dark navy structure, one thin cyan outer energy edge, one
-   selective pink counter-edge, tiny corner energy ticks, inward shadow
-   falling toward the live map. The map stays the content hero. */
+   Material: neon-tube frame like the hero — a bright pink/cyan tube with
+   real glow, dark navy structure behind it, inward shadow falling toward
+   the live map. The map stays the content hero. */
 body.cluster-mode.theme-vice-city #cluster-minimap{left:24px;top:74px;width:460px;height:486px;z-index:30;
-  border:1px solid rgba(1,205,254,.55);border-radius:18px;
+  border-radius:18px;
   background:linear-gradient(180deg,#0d0819,#070412);
+  border:3px solid transparent;
+  background:
+    linear-gradient(180deg,#0d0819,#070412) padding-box,
+    linear-gradient(135deg,#ff2d95 0%,#ff7ab8 30%,#01cdfe 70%,#5ef2ff 100%) border-box;
   box-shadow:
-    inset 0 0 0 1px rgba(255,45,149,.30),
-    inset 0 16px 32px rgba(0,0,0,.55),
-    inset 0 -16px 32px rgba(0,0,0,.55),
+    inset 0 18px 36px rgba(0,0,0,.55),
+    inset 0 -18px 36px rgba(0,0,0,.55),
     0 18px 44px rgba(0,0,0,.55),
-    0 0 24px rgba(1,205,254,.10)}
-/* corner energy ticks: cyan pair + pink pair, the frame's jewellery */
-body.cluster-mode.theme-vice-city #cluster-minimap::before,
-body.cluster-mode.theme-vice-city #cluster-minimap::after{content:'';position:absolute;inset:6px;z-index:0;
-  pointer-events:none;background-repeat:no-repeat}
-body.cluster-mode.theme-vice-city #cluster-minimap::before{
-  background:
-    linear-gradient(#8ef4ff,#8ef4ff) left top / 20px 2px no-repeat,
-    linear-gradient(#8ef4ff,#8ef4ff) left top / 2px 20px no-repeat,
-    linear-gradient(#8ef4ff,#8ef4ff) right bottom / 20px 2px no-repeat,
-    linear-gradient(#8ef4ff,#8ef4ff) right bottom / 2px 20px no-repeat;
-  filter:drop-shadow(0 0 4px rgba(1,205,254,.8))}
-body.cluster-mode.theme-vice-city #cluster-minimap::after{
-  background:
-    linear-gradient(#ff7ab8,#ff7ab8) right top / 14px 2px no-repeat,
-    linear-gradient(#ff7ab8,#ff7ab8) right top / 2px 14px no-repeat,
-    linear-gradient(#ff7ab8,#ff7ab8) left bottom / 14px 2px no-repeat,
-    linear-gradient(#ff7ab8,#ff7ab8) left bottom / 2px 14px no-repeat;
-  filter:drop-shadow(0 0 4px rgba(255,45,149,.8))}
+    0 0 22px rgba(255,45,149,.45),
+    0 0 60px rgba(255,45,149,.18),
+    0 0 22px rgba(1,205,254,.30)}
 /* the map fills the nav card (14px insets); when a turn is being announced
    the turn header takes the card top and the map drops below it */
 body.cluster-mode.theme-vice-city #map{left:38px;top:88px;width:432px;height:458px;border-radius:8px;z-index:31}
@@ -524,12 +511,12 @@ body.cluster-mode.theme-vice-city #cluster-trip .trip-cyan{color:#01cdfe;text-sh
    restrained cyan separation line, dark grounding — the glow supports
    the glyph, never replaces it. */
 body.cluster-mode.theme-vice-city #cluster-speed{top:38%;left:45.5%}
-body.cluster-mode.theme-vice-city #cluster-speed-num{font-family:'Pricedown Bl',sans-serif;font-weight:400;font-size:224px;
+body.cluster-mode.theme-vice-city #cluster-speed-num{font-family:'Pricedown Bl',sans-serif;font-weight:400;font-size:252px;
   line-height:.95;color:#fff7fa;font-variant-numeric:tabular-nums;
   text-shadow:
     0 2px 0 rgba(24,3,16,.85),
-    0 0 12px rgba(255,113,206,.55),
-    0 0 36px rgba(255,45,149,.30),
+    0 0 16px rgba(255,113,206,.70),
+    0 0 48px rgba(255,45,149,.42),
     1px 0 0 rgba(1,205,254,.22);
   transition:color .6s ease}
 /* Pricedown Bl's hyphen renders as a solid block, so the unavailable
@@ -545,8 +532,8 @@ body.cluster-mode.theme-vice-city #cluster-speed-unit{font-family:'Pricedown Bl'
 body.cluster-mode.theme-vice-city #cluster-speed.over #cluster-speed-num{color:#ff8d8d;
   text-shadow:
     0 2px 0 rgba(24,3,16,.85),
-    0 0 14px rgba(255,110,110,.65),
-    0 0 44px rgba(255,45,80,.38),
+    0 0 18px rgba(255,110,110,.75),
+    0 0 56px rgba(255,45,80,.48),
     1px 0 0 rgba(1,205,254,.18)}
 /* ---- speed limit: the real EU roundel, unthemed ----
    A road-safety symbol, not a neon element — attached to the digit
@@ -557,23 +544,28 @@ body.cluster-mode.theme-vice-city #cluster-limit:not([hidden]){left:45.5%;top:38
 /* ---- drive-force instrument: one object with the speed ----
    A shallow ribbon cradling the digit block from below: REGEN (cyan)
    left, POWER (pink) right, COAST (dim ivory) under the lengthened
-   centre tick. Ticks interpolate toward their state — smooth, calm,
+   centre wedge. Segments interpolate toward their state — smooth, calm,
    never snapping. No needle, no fake kW. */
 body.cluster-mode.theme-vice-city #cluster-gauge{display:block;position:absolute;left:45.5%;top:368px;
   transform:translateX(-50%);width:470px;height:206px;z-index:32}
 body.cluster-mode.theme-vice-city #cluster-gauge-svg{width:100%;height:100%;overflow:visible}
-body.cluster-mode.theme-vice-city .cg-tick{stroke:rgba(235,235,248,.15);stroke-width:5;stroke-linecap:round;
-  transition:stroke .45s ease,filter .45s ease,opacity .45s ease}
-body.cluster-mode.theme-vice-city .cg-tick.cg-mid{stroke:rgba(235,235,248,.32);stroke-width:6}
-body.cluster-mode.theme-vice-city .cg-tick.lit-regen{stroke:#01cdfe;filter:drop-shadow(0 0 5px rgba(1,205,254,.85))}
-body.cluster-mode.theme-vice-city .cg-tick.lit-power{stroke:#ff2d95;filter:drop-shadow(0 0 5px rgba(255,45,149,.85))}
-body.cluster-mode.theme-vice-city .cg-tick.lit-coast{stroke:#e8e8f2;filter:drop-shadow(0 0 5px rgba(232,232,242,.6))}
+body.cluster-mode.theme-vice-city .cg-seg{stroke:rgba(255,255,255,.18);stroke-width:1;
+  transition:fill .45s ease,filter .45s ease,opacity .45s ease}
+body.cluster-mode.theme-vice-city .cg-seg[data-zone="regen"]{fill:rgba(1,205,254,.17)}
+body.cluster-mode.theme-vice-city .cg-seg[data-zone="coast"]{fill:rgba(232,232,242,.13)}
+body.cluster-mode.theme-vice-city .cg-seg[data-zone="power"]{fill:rgba(255,45,149,.17)}
+body.cluster-mode.theme-vice-city .cg-seg.cg-mid{stroke:rgba(255,255,255,.4)}
+body.cluster-mode.theme-vice-city .cg-seg.lit-regen{fill:url(#cg-grad-regen);filter:drop-shadow(0 0 7px rgba(1,205,254,.9))}
+body.cluster-mode.theme-vice-city .cg-seg.lit-power{fill:url(#cg-grad-power);filter:drop-shadow(0 0 7px rgba(255,45,149,.9))}
+body.cluster-mode.theme-vice-city .cg-seg.lit-coast{fill:url(#cg-grad-coast);filter:drop-shadow(0 0 7px rgba(238,240,247,.75))}
 body.cluster-mode.theme-vice-city .cg-label{position:absolute;font-family:'Pricedown Bl',sans-serif;font-size:25px;
   letter-spacing:4px;line-height:1;white-space:nowrap}
-body.cluster-mode.theme-vice-city .cg-regen{left:22px;top:138px;color:#01cdfe;text-shadow:0 0 10px rgba(1,205,254,.7)}
+body.cluster-mode.theme-vice-city .cg-regen{left:26px;top:152px;color:#01cdfe;transform:rotate(-16deg);
+  text-shadow:0 0 10px rgba(1,205,254,.7)}
 body.cluster-mode.theme-vice-city .cg-coast{left:50%;top:180px;transform:translateX(-50%);color:#8f8fa3;font-size:21px;
   letter-spacing:5px}
-body.cluster-mode.theme-vice-city .cg-power{right:22px;top:138px;color:#ff2d95;text-shadow:0 0 10px rgba(255,45,149,.7)}
+body.cluster-mode.theme-vice-city .cg-power{right:26px;top:152px;color:#ff2d95;transform:rotate(16deg);
+  text-shadow:0 0 10px rgba(255,45,149,.7)}
 
 /* ---- the REAL Spotify widget, shared with the dashboard ----
    Cluster shows the same #spotify-pane / #spotify-stage surface — one DOM,

@@ -570,7 +570,7 @@ for (const sel of ['#cluster-header', '#cluster-footer', '#cluster-gauge', '#clu
                    '#cluster-turn-compass']) {
   ok(cssSrc.includes(`body.cluster-mode.theme-vice-city ${sel}`), `VC hero skin styles ${sel}`);
 }
-ok(cssSrc.includes('.cg-tick'), 'VC hero: gauge tick styling present');
+ok(cssSrc.includes('.cg-seg'), 'VC hero: gauge segment styling present');
 // wiring (source-level guards)
 ok(/maybeFetchSpeedLimit\(lat, lon\) \{\s*\n\s*if \(!speedDisplayActive\(\)\)/.test(appSrc),
   'speed limit lookup runs in cluster mode too');

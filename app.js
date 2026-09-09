@@ -272,24 +272,46 @@ function buildClusterGauge() {
   if (!svg || clusterGaugeTicks.length) return;
   if (typeof document.createElementNS !== 'function') return;
   const NS = 'http://www.w3.org/2000/svg';
-  /* Shallow ribbon cradling the speed block from below: REGEN on the
-     left end, POWER on the right, COAST on the lengthened centre tick.
-     i=0 stays the left end so the regen/coast/power zone mapping and
-     the centre-out fill logic below are unchanged. */
-  const N = 25, cx = 235, cy = -300, rx = 362, ry = 470, mid = (N - 1) / 2;
+  /* Chunky wedge segments fanning along a shallow ribbon, like a physical
+     instrument bezel: REGEN on the left end, POWER on the right, COAST on
+     the centre wedges. i=0 stays the left end so the regen/coast/power zone
+     mapping and the centre-out fill logic below are unchanged. */
+  const N = 25, cx = 235, cy = -300, mid = (N - 1) / 2;
+  const ORX = 362, ORY = 470, IRX = 332, IRY = 446, HW = 0.92;
+  const rad = d => d * Math.PI / 180;
+  /* Bevel gradients: lit wedges catch light on their outer edge. */
+  const defs = document.createElementNS(NS, 'defs');
+  const mkGrad = (id, hi, lo) => {
+    const g = document.createElementNS(NS, 'linearGradient');
+    g.setAttribute('id', id);
+    g.setAttribute('x1', '0'); g.setAttribute('y1', '0');
+    g.setAttribute('x2', '0'); g.setAttribute('y2', '1');
+    const s1 = document.createElementNS(NS, 'stop');
+    s1.setAttribute('offset', '0'); s1.setAttribute('stop-color', hi);
+    const s2 = document.createElementNS(NS, 'stop');
+    s2.setAttribute('offset', '1'); s2.setAttribute('stop-color', lo);
+    g.appendChild(s1); g.appendChild(s2);
+    return g;
+  };
+  defs.appendChild(mkGrad('cg-grad-regen', '#b8f6ff', '#01cdfe'));
+  defs.appendChild(mkGrad('cg-grad-power', '#ffa8d2', '#ff2d95'));
+  defs.appendChild(mkGrad('cg-grad-coast', '#ffffff', '#c9c9d8'));
+  svg.appendChild(defs);
   for (let i = 0; i < N; i++) {
-    const a = (118 - (56 * i) / (N - 1)) * Math.PI / 180;
-    const c = Math.cos(a), s = Math.sin(a);
-    const ln = document.createElementNS(NS, 'line');
-    ln.setAttribute('x1', (cx + (rx - 15) * c).toFixed(1));
-    ln.setAttribute('y1', (cy + (ry - 11) * s).toFixed(1));
-    ln.setAttribute('x2', (cx + rx * c).toFixed(1));
-    ln.setAttribute('y2', (cy + ry * s).toFixed(1));
-    ln.setAttribute('class', 'cg-tick' + (i === mid ? ' cg-mid' : ''));
-    ln.dataset.zone = i < mid - 2 ? 'regen' : (i > mid + 2 ? 'power' : 'coast');
-    ln.dataset.slot = String(Math.round(Math.abs(i - mid)));
-    svg.appendChild(ln);
-    clusterGaugeTicks.push(ln);
+    const a = 118 - (56 * i) / (N - 1);
+    const a1 = rad(a - HW), a2 = rad(a + HW);
+    const px = (r, an) => (cx + r * Math.cos(an)).toFixed(1);
+    const py = (r, an) => (cy + r * Math.sin(an)).toFixed(1);
+    const pg = document.createElementNS(NS, 'polygon');
+    pg.setAttribute('points',
+      `${px(IRX, a1)},${py(IRY, a1)} ${px(IRX, a2)},${py(IRY, a2)} ` +
+      `${px(ORX, a2)},${py(ORY, a2)} ${px(ORX, a1)},${py(ORY, a1)}`);
+    const zone = i < mid - 2 ? 'regen' : (i > mid + 2 ? 'power' : 'coast');
+    pg.dataset.zone = zone;
+    pg.dataset.slot = Math.abs(i - mid);
+    pg.setAttribute('class', 'cg-seg' + (i === mid ? ' cg-mid' : ''));
+    svg.appendChild(pg);
+    clusterGaugeTicks.push(pg);
   }
   syncDriveForceGauge();
 }
@@ -1059,8 +1081,9 @@ function onOrientation(e) {
   lastHeading = compassHeading;
   updatePlayerArrow();
   // Keep the map rotated to the direction faced while driving slowly
-  // or standing still (follow mode).
-  if (navActive && followMode && map) {
+  // or standing still (follow mode) — during navigation, and always on
+  // the cluster minimap, which is heading-up like a car instrument.
+  if (followMode && map && (navActive || clusterLayoutActive())) {
     const now = Date.now();
     let d = Math.abs(compassHeading - map.getBearing()) % 360;
     if (d > 180) d = 360 - d;
@@ -1874,6 +1897,17 @@ function onPos(pos) {
   if (heading !== null) lastHeading = heading; // GPS travel heading wins when moving
   else if (!clearlyMoving() && compassHeading !== null) lastHeading = compassHeading; // compass when slow
   updatePlayerArrow();
+  /* Cluster minimap stays heading-up while driving: GPS course owns the
+     bearing when moving (the compass handler above covers slow/stationary).
+     Throttled and yields to manual camera moves, like the nav follow cam. */
+  if (clusterLayoutActive() && !navActive && followMode && map && heading !== null) {
+    let dh = Math.abs(heading - map.getBearing()) % 360;
+    if (dh > 180) dh = 360 - dh;
+    if (now - lastCamMove > 900 && now - lastBearingPush > 500 && dh > 3) {
+      lastBearingPush = now;
+      try { map.easeTo({ bearing: heading, duration: 300 }); } catch (err) {}
+    }
+  }
   updateSpeedo(); // live speed readout (dashboard)
   maybeFetchSpeedLimit(pos.coords.latitude, pos.coords.longitude); // posted limit
   // wanted level: tick heat from the GPS speed
