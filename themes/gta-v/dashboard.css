@@ -427,6 +427,9 @@ body.dashboard-mode.theme-gta-v .menu-section{padding:32px}
    Pale-atlas minimalism: hairline mint rules, Chalet numerals,
    SignPainter script for the spoken-style instruction. */
 body.cluster-mode.theme-gta-v{background:#0d100e}
+/* dashboard bars are VC-cluster-only: never show them here */
+body.cluster-mode.theme-gta-v #dash-topbar,
+body.cluster-mode.theme-gta-v #dash-bottombar{display:none}
 body.cluster-mode.theme-gta-v #cluster-speed-num{font-family:'Chalet London',sans-serif;font-weight:400;color:#f2f5f2;
   text-shadow:0 4px 24px rgba(0,0,0,.6)}
 body.cluster-mode.theme-gta-v #cluster-speed-unit{font-family:'Chalet London',sans-serif;color:#2ce68c;letter-spacing:12px}

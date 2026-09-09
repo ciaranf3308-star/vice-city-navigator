@@ -14,7 +14,7 @@ body.dashboard-mode.theme-vice-city #search-bar{display:none}
    secondary chrome: a segment along the centre notch floor (wings kissing the
    chamfers) plus a short dim kiss on the pocket's left chamfer — pink stays
    dominant. Height unchanged. */
-body.dashboard-mode.theme-vice-city #dash-topbar{
+body.theme-vice-city:is(.dashboard-mode,.cluster-mode) #dash-topbar{
   display:block;position:absolute;left:0;right:0;top:0;height:78px;z-index:25;
   background:
     linear-gradient(90deg,transparent 33%,rgba(1,205,254,.45) 36%,rgba(1,205,254,.9) 39%,rgba(1,205,254,.9) 61%,rgba(1,205,254,.45) 64%,transparent 67%),
@@ -30,7 +30,7 @@ body.dashboard-mode.theme-vice-city #dash-topbar{
 /* inner dark layer: 2px pink crown at top, 3px neon along every stepped edge.
    Finished with a whisper of navy grain (faint, non-repeating at this
    opacity) so the black chrome has material depth, not a digital flat. */
-body.dashboard-mode.theme-vice-city #dash-topbar::before{
+body.theme-vice-city:is(.dashboard-mode,.cluster-mode) #dash-topbar::before{
   content:'';position:absolute;inset:0;z-index:0;
   display:block;
   background:
@@ -45,7 +45,7 @@ body.dashboard-mode.theme-vice-city #dash-topbar::before{
    near the far right, palms, towers rising from the pocket floor); the water
    is cropped away by the header edge. Left edge feathered deep into black —
    no rectangular boundary, no pixel/glitch treatment, natural colours. */
-body.dashboard-mode.theme-vice-city #dash-topbar::after{
+body.theme-vice-city:is(.dashboard-mode,.cluster-mode) #dash-topbar::after{
   content:'';position:absolute;right:0;bottom:0;width:27%;height:78px;pointer-events:none;
   background-image:url('dashboard/skyline-sunset.png');
   background-position:100% 20%;
@@ -55,38 +55,38 @@ body.dashboard-mode.theme-vice-city #dash-topbar::after{
   -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 45%);
   mask-image:linear-gradient(90deg,transparent 0%,#000 45%);
 }
-body.dashboard-mode.theme-vice-city #dash-topbar .dash-chrome{
+body.theme-vice-city:is(.dashboard-mode,.cluster-mode) #dash-topbar .dash-chrome{
   position:absolute;inset:0;display:flex;align-items:center;gap:28px;
   padding:0 32px;background:none;z-index:2;
 }
 /* WayStation logo: neon script, +5% */
-body.dashboard-mode.theme-vice-city .dash-logo{
+body.theme-vice-city:is(.dashboard-mode,.cluster-mode) .dash-logo{
   font-family:'Yellowtail',cursive;font-size:46px;color:#ff71ce;
   text-shadow:0 0 8px rgba(255,113,206,.9),0 0 24px rgba(255,46,136,.7);
   transform:rotate(-3deg);white-space:nowrap;
   background:none!important;margin-left:8px;
 }
-body.dashboard-mode.theme-vice-city .dash-palm{display:inline-block;width:28px;height:38px;vertical-align:-6px;margin-left:6px}
-body.dashboard-mode.theme-vice-city .dash-wx{
+body.theme-vice-city:is(.dashboard-mode,.cluster-mode) .dash-palm{display:inline-block;width:28px;height:38px;vertical-align:-6px;margin-left:6px}
+body.theme-vice-city:is(.dashboard-mode,.cluster-mode) .dash-wx{
   display:flex;align-items:center;gap:10px;
   font-family:var(--vclabel);font-size:28px;font-weight:700;color:var(--cyan);
   text-shadow:0 0 10px rgba(1,205,254,.8);
   margin-left:4px;
 }
-body.dashboard-mode.theme-vice-city .dash-clock{
+body.theme-vice-city:is(.dashboard-mode,.cluster-mode) .dash-clock{
   position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
   display:flex;align-items:baseline;gap:18px;white-space:nowrap;
   font-family:var(--vcfont);margin:0;
 }
-body.dashboard-mode.theme-vice-city #dash-date{
+body.theme-vice-city:is(.dashboard-mode,.cluster-mode) #dash-date{
   font-size:26px;letter-spacing:2px;color:#ff71ce;
   text-shadow:0 0 10px rgba(255,46,136,.8);text-transform:lowercase;
 }
-body.dashboard-mode.theme-vice-city #dash-time{
+body.theme-vice-city:is(.dashboard-mode,.cluster-mode) #dash-time{
   font-size:36px;letter-spacing:3px;color:#ff71ce;
   text-shadow:0 0 12px rgba(255,46,136,.9),0 0 32px rgba(255,46,136,.4);
 }
-body.dashboard-mode.theme-vice-city .dash-tomorrow{display:none}
+body.theme-vice-city:is(.dashboard-mode,.cluster-mode) .dash-tomorrow{display:none}
 
 /* ============ MANEUVER CARD: dark glass, pink neon frame, cyan accent ============
    Active navigation only (hidden when idle). Double-layer clip-path: the card
@@ -181,7 +181,7 @@ body.dashboard-mode.theme-vice-city .vcsp{
    same double-layer clip-path technique as the header. A restrained cyan
    segment glows along the cradle's top edge where the footer joins the map.
    The footer locks into the map instead of floating over it. */
-body.dashboard-mode.theme-vice-city #dash-bottombar{
+body.theme-vice-city:is(.dashboard-mode,.cluster-mode) #dash-bottombar{
   display:block;position:absolute;left:0;right:0;bottom:0;height:100px;z-index:25;
   background:
     linear-gradient(90deg,transparent 34%,rgba(1,205,254,.9) 37.5%,rgba(1,205,254,.9) 62.5%,transparent 66%),
@@ -195,7 +195,7 @@ body.dashboard-mode.theme-vice-city #dash-bottombar{
 }
 /* inner dark navy layer: 3px pink along the stepped top edge, 2px at the base.
    Same whisper of navy grain as the header for material depth. */
-body.dashboard-mode.theme-vice-city #dash-bottombar::before{
+body.theme-vice-city:is(.dashboard-mode,.cluster-mode) #dash-bottombar::before{
   content:'';position:absolute;inset:0;z-index:0;
   display:block;
   background:
@@ -205,7 +205,7 @@ body.dashboard-mode.theme-vice-city #dash-bottombar::before{
   background-repeat:repeat,repeat,repeat;
   clip-path:polygon(30px 19px,34% 19px,37.5% 5px,62.5% 5px,66% 19px,calc(100% - 30px) 19px,100% 43px,100% calc(100% - 2px),0 calc(100% - 2px),0 43px);
 }
-body.dashboard-mode.theme-vice-city #dash-bottombar .dash-chrome{
+body.theme-vice-city:is(.dashboard-mode,.cluster-mode) #dash-bottombar .dash-chrome{
   position:absolute;inset:0;z-index:1;display:flex;align-items:center;
   gap:8px;padding:10px 30px 8px 30px;background:none;
 }
@@ -389,39 +389,40 @@ body.theme-vice-city .menu-section details.advanced summary{color:#eafcff}
    Neon-noir instrument cluster: header bar, nav card, hero speed,
    power arc, music widget, tab footer. Shared DOM only restyled. */
 
-/* ---- backdrop: sunset skyline band over deep violet night ---- */
-body.cluster-mode.theme-vice-city{background:#05020c}
+/* ---- backdrop: the sunset panorama fills the viewport ----
+   Body-level so it also kills the letterbox dead space around the 1920x720
+   stage; the stage itself goes transparent and a scrim keeps the HUD legible. */
+body.cluster-mode.theme-vice-city{background:#05020c url('dashboard/cluster-sunset.jpg') center / cover no-repeat}
+body.cluster-mode.theme-vice-city #cluster-ui{background:transparent}
 body.cluster-mode.theme-vice-city #cluster-backdrop{display:block;position:absolute;inset:0;z-index:30;
   background:
-    linear-gradient(180deg, rgba(5,2,12,.30) 0%, rgba(5,2,12,.48) 26%, rgba(4,2,10,.88) 50%, rgba(3,1,8,.97) 100%),
-    url('dashboard/skyline-sunset.png') top center / 1920px auto no-repeat,
-    radial-gradient(120% 90% at 50% 112%, #2b0a2e 0%, #0b0514 55%, #000 100%)}
+    radial-gradient(55% 44% at 50% 44%, rgba(5,2,12,.66) 0%, rgba(5,2,12,0) 70%),
+    linear-gradient(180deg, rgba(5,2,12,.52) 0%, rgba(5,2,12,0) 24%, rgba(5,2,12,0) 66%, rgba(5,2,12,.62) 100%)}
 
-/* ---- header bar ---- */
-body.cluster-mode.theme-vice-city #cluster-header{display:flex;align-items:center;gap:28px;
-  position:absolute;top:0;left:0;right:0;height:54px;z-index:33;padding:0 28px 0 20px;
-  background:linear-gradient(180deg, rgba(12,4,22,.9), rgba(12,4,22,.55));
-  border-bottom:1px solid rgba(255,45,149,.8);box-shadow:0 1px 12px rgba(255,45,149,.35)}
-body.cluster-mode.theme-vice-city #cluster-logo{background:none;border:none;padding:0;cursor:pointer;display:flex;align-items:center}
-body.cluster-mode.theme-vice-city #cluster-logo img{height:34px;width:auto;filter:drop-shadow(0 0 8px rgba(255,45,149,.7))}
-body.cluster-mode.theme-vice-city #cluster-wx{display:flex;align-items:center;gap:10px;
-  font-family:'Pricedown Bl',sans-serif;font-size:27px;color:#01cdfe;letter-spacing:2px;
-  text-shadow:0 0 12px rgba(1,205,254,.7)}
-body.cluster-mode.theme-vice-city #cluster-clock{position:absolute;left:50%;transform:translateX(-50%);
-  display:flex;align-items:baseline;gap:18px}
-body.cluster-mode.theme-vice-city #cluster-date{font-family:'Pricedown Bl',sans-serif;font-size:21px;color:#ff71ce;letter-spacing:3px}
-body.cluster-mode.theme-vice-city #cluster-time{font-family:'Pricedown Bl',sans-serif;font-size:36px;color:#ff71ce;letter-spacing:3px;
-  text-shadow:0 0 12px rgba(255,45,149,.8)}
-body.cluster-mode.theme-vice-city #cluster-tagline{margin-left:auto;text-align:right;
-  font-family:'Yellowtail',cursive;font-size:19px;line-height:1.15;color:#ff71ce;
-  text-shadow:0 0 10px rgba(255,45,149,.8);transform:rotate(-3deg)}
-body.cluster-mode.theme-vice-city #cluster-tagline span{display:block}
+/* ---- header: the dashboard topbar IS the cluster header ----
+   Same 78px neon chrome (re-scoped above); the cluster-specific header is
+   retired and only brand + temp + clock show. Brand opens the menu. */
+body.cluster-mode.theme-vice-city #cluster-header{display:none}
 body.cluster-mode.theme-vice-city #menu-btn{display:none}
-/* header skyline art at the far right edge */
-body.cluster-mode.theme-vice-city #cluster-header::after{content:"";position:absolute;right:0;top:0;bottom:0;width:420px;
-  background:url('dashboard/topbar-skyline-right.png') right center / auto 100% no-repeat;
-  opacity:.85;pointer-events:none;
-  -webkit-mask-image:linear-gradient(90deg,transparent,#000 45%);mask-image:linear-gradient(90deg,transparent,#000 45%)}
+body.cluster-mode.theme-vice-city #dash-topbar{z-index:34}
+body.cluster-mode.theme-vice-city #dash-bottombar{z-index:32}
+body.cluster-mode.theme-vice-city #dash-topbar .dash-brand{pointer-events:auto;cursor:pointer}
+body.cluster-mode.theme-vice-city #dash-topbar .sa-logo,
+body.cluster-mode.theme-vice-city #dash-topbar .dash-los-santos,
+body.cluster-mode.theme-vice-city #dash-topbar .rdr2-logo{display:none}
+
+/* ---- footer: the dashboard bottombar IS the cluster footer ----
+   Same 100px neon chrome; dashboard-only children hide, and the cluster tab
+   switcher + script logo ride transparently on the bar. */
+body.cluster-mode.theme-vice-city #dash-bottombar .dash-tabs,
+body.cluster-mode.theme-vice-city #dash-bottombar .dash-dest,
+body.cluster-mode.theme-vice-city #dash-bottombar .dash-zoom,
+body.cluster-mode.theme-vice-city #dash-bottombar .dash-trip,
+body.cluster-mode.theme-vice-city #dash-bottombar .dash-tag{display:none}
+body.cluster-mode.theme-vice-city #cluster-footer{display:flex;align-items:center;position:absolute;left:0;right:0;bottom:0;
+  height:100px;z-index:33;padding:0 40px 0 48px;
+  background:none;border:none;box-shadow:none}
+body.cluster-mode.theme-vice-city #cluster-mode-exit{display:none}
 
 /* ---- nav card ---- */
 body.cluster-mode.theme-vice-city #cluster-minimap{left:24px;top:88px;width:500px;height:512px;z-index:30;
@@ -485,14 +486,10 @@ body.cluster-mode.theme-vice-city .cg-power{right:6px;bottom:34px;color:#ff2d95;
    right zone; nothing is cloned or remounted. (phone.css's bottom-sheet
    rules exclude .cluster-mode, so the widget keeps its dashboard design.) */
 /* pane layer comes from the shared cluster stage; only the widget docks per-theme */
-body.cluster-mode.theme-vice-city .vcsp{position:absolute;top:auto;bottom:88px;right:36px;
+body.cluster-mode.theme-vice-city .vcsp{position:absolute;top:auto;bottom:112px;right:36px;
   left:auto;translate:none;width:670px;margin:0}
 
-/* ---- footer: thin presentation switcher, no dead tabs ---- */
-body.cluster-mode.theme-vice-city #cluster-footer{display:flex;align-items:center;position:absolute;left:0;right:0;bottom:0;
-  height:64px;z-index:33;padding:0 40px 0 48px;
-  background:linear-gradient(0deg, rgba(12,4,22,.96), rgba(12,4,22,.8));
-  border-top:2px solid #ff2d95;box-shadow:0 -2px 16px rgba(255,45,149,.5)}
+/* ---- tab switcher + script logo ride on the bottombar (see footer block above) ---- */
 body.cluster-mode.theme-vice-city #cluster-tabs{display:flex;align-items:center;gap:8px}
 body.cluster-mode.theme-vice-city #cluster-tabs button{background:none;border:none;cursor:pointer;
   font-family:'Pricedown Bl',sans-serif;font-size:27px;letter-spacing:4px;color:#01cdfe;padding:8px 20px;
@@ -501,5 +498,4 @@ body.cluster-mode.theme-vice-city #cluster-tabs button.on{color:#ff71ce;text-sha
 body.cluster-mode.theme-vice-city #cluster-tabs button:not(:last-child){border-right:1px solid rgba(1,205,254,.35)}
 body.cluster-mode.theme-vice-city #cluster-footer-logo{margin-left:auto;font-family:'Yellowtail',cursive;font-size:36px;
   color:#ff71ce;transform:rotate(-4deg);text-shadow:0 0 12px rgba(255,45,149,.85)}
-body.cluster-mode.theme-vice-city #cluster-mode-exit{display:none}
 

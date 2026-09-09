@@ -443,6 +443,9 @@ body.theme-rdr2 .menu-section .row input[type="checkbox"]:focus-visible{
    Frontier furniture: RDR Lino numerals, parchment ink, gold double
    rules, Kirsty script for roads and instructions. */
 body.cluster-mode.theme-rdr2{background:radial-gradient(120% 90% at 50% 112%, #251b10 0%, #120d08 60%, #000 100%)}
+/* dashboard bars are VC-cluster-only: never show them here */
+body.cluster-mode.theme-rdr2 #dash-topbar,
+body.cluster-mode.theme-rdr2 #dash-bottombar{display:none}
 body.cluster-mode.theme-rdr2 #cluster-speed-num{font-family:'RDR Lino',serif;color:#f5ead0;
   text-shadow:0 3px 0 #2a1c0d,0 8px 26px rgba(0,0,0,.7)}
 body.cluster-mode.theme-rdr2 #cluster-speed-unit{font-family:'RDR Lino',serif;color:#c9a227;letter-spacing:10px}

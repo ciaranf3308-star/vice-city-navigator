@@ -256,6 +256,9 @@ html body.theme-san-andreas:not(.dashboard-mode) .sasp.is-idle .sasp-main{visibi
 
 /* ---- backdrop: warm desert night, amber horizon glow ---- */
 body.cluster-mode.theme-san-andreas{background:#0a0906}
+/* dashboard bars are VC-cluster-only: never show them here */
+body.cluster-mode.theme-san-andreas #dash-topbar,
+body.cluster-mode.theme-san-andreas #dash-bottombar{display:none}
 body.cluster-mode.theme-san-andreas #cluster-backdrop{display:block;position:absolute;inset:0;z-index:30;
   background:
     radial-gradient(90% 42% at 50% 0%, rgba(232,163,61,.14) 0%, rgba(232,163,61,0) 70%),

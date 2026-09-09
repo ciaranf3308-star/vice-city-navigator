@@ -984,7 +984,9 @@ html body.dashboard-mode.theme-san-andreas #menu-panel{border-radius:0}
    restyle this shared geometry. */
 body.cluster-mode{overflow:hidden;background:#000}
 /* hide exploration / dashboard chrome: cluster is a HUD, not a browser.
-   the menu button stays — it is the way back to themes, Spotify, modes. */
+   the menu button stays — it is the way back to themes, Spotify, modes.
+   (#dash-topbar/#dash-bottombar are reparented into the cluster stage but
+   only the Vice City theme shows them; every other theme hides them.) */
 body.cluster-mode #map-tools,
 body.cluster-mode #search-bar,
 body.cluster-mode #drive-hud,
@@ -992,6 +994,8 @@ body.cluster-mode #speedo,
 body.cluster-mode #wanted,
 body.cluster-mode #fx,
 body.cluster-mode #drawer{display:none!important}
+body.cluster-mode:not(.theme-vice-city) #dash-topbar,
+body.cluster-mode:not(.theme-vice-city) #dash-bottombar{display:none!important}
 /* keep the menu button clickable above the cluster layer */
 body.cluster-mode #menu-btn{position:fixed;top:12px;left:12px;z-index:32}
 

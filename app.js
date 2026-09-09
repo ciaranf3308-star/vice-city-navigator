@@ -193,14 +193,23 @@ const VC_MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sept
 function syncClusterHeader() {
   if (!clusterLayoutActive() || !document.body.classList.contains('theme-vice-city')) return;
   const now = new Date();
+  const dateStr = `${VC_DAYS[now.getDay()]} ${String(now.getDate()).padStart(2, '0')} ${VC_MONTHS[now.getMonth()]}`;
+  const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
   const d = $('cluster-date'), t = $('cluster-time');
-  if (d) d.textContent = `${VC_DAYS[now.getDay()]} ${String(now.getDate()).padStart(2, '0')} ${VC_MONTHS[now.getMonth()]}`;
-  if (t) t.textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  if (d) d.textContent = dateStr;
+  if (t) t.textContent = timeStr;
+  /* The VC cluster reuses the dashboard topbar chrome — keep its
+     date/time/temp live too (same values, same weather cache). */
+  const dd = $('dash-date'), dt = $('dash-time');
+  if (dd) dd.textContent = dateStr;
+  if (dt) dt.textContent = timeStr;
   /* Last-known weather from the same cache the dashboard paints from. */
   try {
     const c = JSON.parse(localStorage.getItem(WX_CACHE_KEY) || 'null');
     const te = $('cluster-temp');
     if (te && c && typeof c.t === 'number') te.textContent = c.t + '°C';
+    const dte = $('dash-temp');
+    if (dte && c && typeof c.t === 'number') dte.textContent = c.t + '°C';
   } catch (e) {}
 }
 let clusterClockT = null;
@@ -308,6 +317,12 @@ function bindClusterTabs() {
   });
   const logo = $('cluster-logo');
   if (logo) logo.addEventListener('click', () => openMenu());
+  /* VC cluster reuses the dashboard topbar as its header — its brand mark
+     takes over the menu-button role (the old #cluster-logo is hidden). */
+  const dashBrand = document.querySelector('#dash-topbar .dash-brand');
+  if (dashBrand) dashBrand.addEventListener('click', () => {
+    if (clusterLayoutActive() && document.body.classList.contains('theme-vice-city')) openMenu();
+  });
 }
 
 /* ---------------- maneuver arrows (original SVG) ---------------- */
@@ -2239,7 +2254,7 @@ function fitDashboardStage() {
    the screen. Children are stage-absolute (see styles.css); JS only zooms
    and centers the canvas, exactly like fitDashboardStage. */
 const CLUSTER_W = 1920, CLUSTER_H = 720;
-const CLUSTER_STAGE_NODES = ['map', 'spotify-pane'];
+const CLUSTER_STAGE_NODES = ['map', 'spotify-pane', 'dash-topbar', 'dash-bottombar'];
 function buildClusterStage() {
   const stage = $('cluster-ui');
   if (!stage) return stage;

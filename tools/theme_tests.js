@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v167"), 'SW theme cache v167');
+ok(swSrc.includes("ws-theme-v168"), 'SW theme cache v168');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -638,11 +638,14 @@ ok(appSrc.includes("theme-san-andreas')) right = 701"), 'camera padding clears t
 ok(appSrc.includes("theme-gta-v')) right = 568"), 'camera padding clears the GTA V music widget');
 ok(appSrc.includes("theme-rdr2')) right = 670"), 'camera padding clears the RDR2 music widget');
 ok(appSrc.includes("b.contains('radio-off')"), 'camera padding drops widget clearance when the radio tab hides the widget');
-ok(cssSrc.includes('body.dashboard-mode.theme-vice-city #dash-topbar') === true, 'VC bar chrome is always-on in dashboard mode, like the original');
+ok(cssSrc.includes('body.theme-vice-city:is(.dashboard-mode,.cluster-mode) #dash-topbar') === true, 'VC bar chrome is shared by dashboard + cluster modes');
 // dashboard car chrome: every theme gets top/bottom bars, always visible in dashboard mode (driving or exploring)
 for (const id of ['vice-city', 'san-andreas', 'gta-v', 'rdr2']) {
-  ok(cssSrc.includes(`body.dashboard-mode.theme-${id} #dash-topbar`), `${id} dashboard top bar chrome`);
-  ok(cssSrc.includes(`body.dashboard-mode.theme-${id} #dash-bottombar`), `${id} dashboard bottom bar chrome`);
+  const barSel = id === 'vice-city'
+    ? `body.theme-vice-city:is(.dashboard-mode,.cluster-mode)`
+    : `body.dashboard-mode.theme-${id}`;
+  ok(cssSrc.includes(`${barSel} #dash-topbar`), `${id} dashboard top bar chrome`);
+  ok(cssSrc.includes(`${barSel} #dash-bottombar`), `${id} dashboard bottom bar chrome`);
 }
 ok(appSrc.includes("classList.toggle('nav-driving'"), 'nav-driving class toggles with drive mode');
 ok(appSrc.includes('nav-driving') && /setUiMode/.test(appSrc), 'drive-mode chrome state lives in setUiMode');
@@ -694,25 +697,26 @@ const barHeights = {
   'rdr2': ['104px', '84px'], // 2026-09-08 redesign: badge header + frontier footer
 };
 for (const [id, [top, bottom]] of Object.entries(barHeights)) {
-  ok(new RegExp(`theme-${id} #dash-topbar\\{[^}]*height:${top}`).test(cssSrc), `${id} top bar is ${top} tall`);
-  ok(new RegExp(`theme-${id} #dash-bottombar\\{[^}]*height:${bottom}`).test(cssSrc), `${id} bottom bar is ${bottom} tall`);
+  const infix = id === 'vice-city' ? '(?::is\\([^)]*\\))? ' : ' ';
+  ok(new RegExp(`theme-${id}${infix}#dash-topbar\\{[^}]*height:${top}`).test(cssSrc), `${id} top bar is ${top} tall`);
+  ok(new RegExp(`theme-${id}${infix}#dash-bottombar\\{[^}]*height:${bottom}`).test(cssSrc), `${id} bottom bar is ${bottom} tall`);
   if (id !== 'vice-city' && id !== 'san-andreas') ok(cssSrc.includes(`body.dashboard-mode.theme-${id}.nav-driving #drive-bar`),
     `${id} drive trip bar clears its own bottom bar height`);
   /* san-andreas: the drive pill is removed entirely in dashboard (pass 4),
      so it has no clearance rule — asserted in the pass 4 block instead */
 }
 ok(cssSrc.includes('#dash-topbar::after'), 'VC top bar wears a neon edge');
-ok(/theme-vice-city #dash-topbar\{[^}]*clip-path:polygon/.test(cssSrc), 'VC top bar is a chamfered hero silhouette');
-ok(/theme-vice-city #dash-bottombar\{[^}]*clip-path:polygon/.test(cssSrc), 'VC bottom bar is a shaped angular footer');
+ok(/theme-vice-city(?::is\([^)]*\))? #dash-topbar\{[^}]*clip-path:polygon/.test(cssSrc), 'VC top bar is a chamfered hero silhouette');
+ok(/theme-vice-city(?::is\([^)]*\))? #dash-bottombar\{[^}]*clip-path:polygon/.test(cssSrc), 'VC bottom bar is a shaped angular footer');
 ok(cssSrc.includes('#dash-eta .eta-time'), 'VC arrival time uses the live eta-time hook');
 /* ---------- pass 3: hero convergence refinements ---------- */
 ok(/theme-vice-city \.vcsp\{[^}]*bottom:118px/.test(cssSrc), 'VC widget bottom-anchored 18px above the footer');
 ok(cssSrc.includes("dashboard/skyline-sunset.png"), 'VC skyline uses the supplied sunset scenery asset');
 ok(!cssSrc.includes("dashboard/topbar-skyline.png"), 'old glitch-strip skyline treatment fully retired');
-ok(/theme-vice-city #dash-topbar\{[^}]*97\.5% 100%/.test(cssSrc), 'VC header has a skyline pocket in its silhouette');
+ok(/theme-vice-city(?::is\([^)]*\))? #dash-topbar\{[^}]*97\.5% 100%/.test(cssSrc), 'VC header has a skyline pocket in its silhouette');
 ok(/theme-vice-city #vc-maneuver::before/.test(cssSrc), 'VC maneuver card uses a double-layer pink neon border');
 ok(/theme-vice-city #vc-maneuver::after/.test(cssSrc), 'VC maneuver card carries a cyan secondary accent');
-ok(/theme-vice-city #dash-bottombar\{[^}]*rgba\(1,205,254/.test(cssSrc), 'VC footer has a cyan cradle accent at the map join');
+ok(/theme-vice-city(?::is\([^)]*\))? #dash-bottombar\{[^}]*rgba\(1,205,254/.test(cssSrc), 'VC footer has a cyan cradle accent at the map join');
 ok(/theme-vice-city \.dash-tag::before/.test(cssSrc), 'VC footer separates arrival and slogan with a divider');
 ok(/theme-vice-city #dash-dest\{[^}]*overflow:visible/.test(cssSrc), 'VC locality plate never truncates');
 ok(!/theme-vice-city \.dash-tabs button\{[^}]*linear-gradient/.test(cssSrc), 'VC tabs are flat neon text, not chunky buttons');
@@ -727,17 +731,17 @@ ok(/theme-rdr2 \.dash-brand\{[^}]*left:50%/.test(cssSrc), 'RDR2 centers its fron
 ok(/theme-rdr2 \.dash-tabs button\.on\{[^}]*selection_box_bg_1a\.png/.test(cssSrc), 'RDR2 active tab uses the authentic selection-box highlight');
 /* ---------- pass 4: narrow hero corrections ---------- */
 // skyline: supplied sunset scenery, left edge feathered, no pixel treatment
-ok(/theme-vice-city #dash-topbar::after\{[^}]*skyline-sunset\.png/.test(cssSrc), 'VC skyline pocket wears the sunset scenery asset');
-ok(/theme-vice-city #dash-topbar::after\{[^}]*mask-image:linear-gradient\(90deg,transparent/.test(cssSrc), 'VC skyline left edge feathers into black');
-ok(!/theme-vice-city #dash-topbar::after\{[^}]*contrast/.test(cssSrc), 'VC skyline keeps natural colours (no glitch treatment)');
+ok(/theme-vice-city(?::is\([^)]*\))? #dash-topbar::after\{[^}]*skyline-sunset\.png/.test(cssSrc), 'VC skyline pocket wears the sunset scenery asset');
+ok(/theme-vice-city(?::is\([^)]*\))? #dash-topbar::after\{[^}]*mask-image:linear-gradient\(90deg,transparent/.test(cssSrc), 'VC skyline left edge feathers into black');
+ok(!/theme-vice-city(?::is\([^)]*\))? \1::after\{[^}]*contrast/.test(cssSrc), 'VC skyline keeps natural colours (no glitch treatment)');
 ok(fs.existsSync(path.join(REPO, 'themes/vice-city/dashboard/skyline-sunset.png')), 'VC sunset skyline asset on disk');
 // header cyan secondary chrome: notch floor + pocket chamfer kiss, pink dominant
-ok(/theme-vice-city #dash-topbar\{[^}]*rgba\(1,205,254,\.9\) 39%/.test(cssSrc), 'VC header keeps the cyan notch-floor segment');
-ok(/theme-vice-city #dash-topbar\{[^}]*rgba\(1,205,254,\.5\) 69\.5%/.test(cssSrc), 'VC header adds a dim cyan kiss on the pocket chamfer');
-ok(/theme-vice-city #dash-topbar\{[^}]*height:78px/.test(cssSrc), 'VC header height frozen at 78px');
+ok(/theme-vice-city(?::is\([^)]*\))? #dash-topbar\{[^}]*rgba\(1,205,254,\.9\) 39%/.test(cssSrc), 'VC header keeps the cyan notch-floor segment');
+ok(/theme-vice-city(?::is\([^)]*\))? #dash-topbar\{[^}]*rgba\(1,205,254,\.5\) 69\.5%/.test(cssSrc), 'VC header adds a dim cyan kiss on the pocket chamfer');
+ok(/theme-vice-city(?::is\([^)]*\))? #dash-topbar\{[^}]*height:78px/.test(cssSrc), 'VC header height frozen at 78px');
 // navy grain on header/footer chrome only
-ok(/theme-vice-city #dash-topbar::before\{[^}]*feTurbulence/.test(cssSrc), 'VC header chrome carries faint navy grain');
-ok(/theme-vice-city #dash-bottombar::before\{[^}]*feTurbulence/.test(cssSrc), 'VC footer chrome carries faint navy grain');
+ok(/theme-vice-city(?::is\([^)]*\))? #dash-topbar::before\{[^}]*feTurbulence/.test(cssSrc), 'VC header chrome carries faint navy grain');
+ok(/theme-vice-city(?::is\([^)]*\))? #dash-bottombar::before\{[^}]*feTurbulence/.test(cssSrc), 'VC footer chrome carries faint navy grain');
 // footer: quieter inactive tabs, brighter plate outline, cyan/pink separator
 ok(/theme-vice-city \.dash-tabs button\{[^}]*rgba\(1,205,254,\.25\)/.test(cssSrc), 'VC inactive tabs glow ~10% quieter');
 ok(/theme-vice-city \.dash-dest\{[^}]*background:#01cdfe/.test(cssSrc), 'VC locality plate outline brighter (dimensions frozen)');
@@ -1834,6 +1838,34 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
 }
   ok(/#cluster-minimap\{[^}]*width:576px[^}]*height:446px/.test(saCluster), 'SA cluster frames the live map in gold');
   ok(saCluster.includes('HERO-locked'), 'SA cluster documents that it avoids the HERO-locked dashboard.css');
+}
+
+// VC cluster reuses the dashboard bars + sunset panorama (2026-09-09)
+{
+  const fs = require('fs');
+  ok(fs.existsSync('themes/vice-city/dashboard/cluster-sunset.jpg'), 'VC cluster sunset panorama asset exists');
+  ok(swSrc.includes('themes/vice-city/dashboard/cluster-sunset.jpg'), 'SW precaches the VC cluster sunset');
+  ok(appSrc.includes("const CLUSTER_STAGE_NODES = ['map', 'spotify-pane', 'dash-topbar', 'dash-bottombar']"),
+    'dash bars reparent into the cluster stage');
+  ok(/body\.cluster-mode\.theme-vice-city\{background:[^}]*cluster-sunset\.jpg/.test(cssSrc),
+    'VC cluster paints the sunset panorama on the viewport');
+  ok(cssSrc.includes('body.cluster-mode.theme-vice-city #cluster-ui{background:transparent}'),
+    'VC cluster stage is transparent over the sunset');
+  ok(cssSrc.includes('body.cluster-mode.theme-vice-city #cluster-header{display:none}'),
+    'VC cluster retires its old header for the dashboard topbar');
+  ok(/body\.cluster-mode\.theme-vice-city #cluster-footer\{[^}]*background:none/.test(cssSrc),
+    'VC cluster footer is a transparent tab strip on the dashboard bottombar');
+  ok(cssSrc.includes('body.theme-vice-city:is(.dashboard-mode,.cluster-mode) #dash-topbar{'),
+    'VC topbar chrome is shared between dashboard and cluster');
+  const syncFn = appSrc.slice(appSrc.indexOf('function syncClusterHeader'));
+  ok(syncFn.includes("$('dash-date')") && syncFn.includes("$('dash-time')") && syncFn.includes("$('dash-temp')"),
+    'VC cluster header sync keeps the reused topbar clock/temp live');
+  ok(appSrc.includes("#dash-topbar .dash-brand"),
+    'VC cluster brand mark keeps menu access (replaces the retired cluster logo)');
+  for (const t of ['san-andreas', 'gta-v', 'rdr2'])
+    ok(cssSrc.includes(`body.cluster-mode.theme-${t} #dash-topbar,`) ||
+       cssSrc.includes(`body.cluster-mode:not(.theme-vice-city) #dash-topbar,`),
+      `${t} cluster never shows the dashboard bars`);
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);
