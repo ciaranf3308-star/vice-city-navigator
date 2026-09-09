@@ -117,8 +117,12 @@
 
   <section class="menu-section">
     <h3>Display</h3>
-    <label class="row"><input type="checkbox" id="dashboard-toggle"> Dashboard Preview</label>
-    <small class="hint">Force the 1920×720 car UI on this device — same layout, Spotify pane and HUD the car uses. Also: ?dashboard=1</small>
+    <div class="row" id="mode-selector" role="radiogroup" aria-label="Presentation mode">
+      <label><input type="radio" name="appmode" value="normal"> Normal</label>
+      <label><input type="radio" name="appmode" value="dashboard"> Dashboard Preview</label>
+      <label><input type="radio" name="appmode" value="cluster"> Cluster Mode</label>
+    </div>
+    <small class="hint">Force the 1920×720 car UI on this device — same layout, Spotify pane and HUD the car uses. Also: ?dashboard=1 — or the minimal driving HUD via ?cluster=1</small>
     <label class="row"><input type="checkbox" id="traffic-toggle"> Live traffic</label>
     <small class="hint" id="traffic-key-hint" hidden>Add your TomTom API key to traffic-config.js — see TRAFFIC_SETUP.md.</small>
     <small class="hint">Traffic flow overlay, incident markers and traffic-aware routing. Needs a free TomTom key.</small>
@@ -302,6 +306,32 @@
 <script src="voice.js"></script>
 <script src="places.js"></script>
 <script src="traffic.js"></script>
+<!-- Cluster Mode shell: a minimal driving HUD. Live regions are wired in
+     app.js; the section stays hidden unless body.cluster-mode is set.
+     NOTE: must sit BEFORE the scripts — app.js touches it at boot. -->
+<section id="cluster-ui" hidden aria-label="Cluster mode">
+  <div id="cluster-minimap" aria-hidden="true"></div>
+  <div id="cluster-turn" hidden>
+    <div id="cluster-turn-arrow" aria-hidden="true"></div>
+    <div id="cluster-turn-distance"></div>
+    <div id="cluster-turn-road"></div>
+    <div id="cluster-turn-instruction"></div>
+  </div>
+  <div id="cluster-speed">
+    <div id="cluster-speed-num">--</div>
+    <div id="cluster-speed-unit">km/h</div>
+  </div>
+  <div id="cluster-limit" hidden>
+    <div id="cluster-limit-num"></div>
+  </div>
+  <div id="cluster-music">
+    <img id="cluster-music-art" alt="">
+    <div id="cluster-music-title"></div>
+    <div id="cluster-music-artist"></div>
+  </div>
+  <button id="cluster-mode-exit" type="button">Exit cluster</button>
+</section>
+
 <script src="car.js"></script>
 <script src="app.js"></script>
 </body>

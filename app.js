@@ -1755,7 +1755,7 @@ function openMenu() {
 }
 function closeMenu() { $('menu-panel').hidden = true; }
 
-/* ---------------- App mode: normal | dashboard ----------------
+/* ---------------- App mode: normal | dashboard | cluster ----------------
    The Spotify player is a DASHBOARD feature. In normal (mobile)
    mode the map is full-screen and Spotify lives only in the menu
    (connect / disconnect). Dashboard mode is an explicit app mode —
@@ -1763,6 +1763,15 @@ function closeMenu() { $('menu-panel').hidden = true; }
    "Dashboard Preview" menu option, ?dashboard=1 (persisted), or
    WayStation.setAppMode('dashboard') so a future Android/Android
    Auto host can flip it directly.
+
+   CLUSTER mode is a third presentation mode: a minimal driving HUD /
+   instrument display (huge speed, limit, next manoeuvre, small minimap,
+   small now-playing) reusing the exact same live state — no second map,
+   no second watchers, no duplicated Spotify polling. Forced with
+   ?cluster=1 (wins over the persisted preference, never persisted
+   itself) or WayStation.setAppMode('cluster'). The car session
+   (?car=1) still forces dashboard and never writes the stored
+   preference, so phone/PWA mode stays independent.
 
    The dashboard is ONE implementation: a fixed 1920×720 automotive
    reference canvas (#dash-stage). On a real car display it renders at
@@ -1777,21 +1786,56 @@ function closeMenu() { $('menu-panel').hidden = true; }
    survive the switch. */
 const APP_MODE_KEY = 'ws.appMode';
 const WX_CACHE_KEY = 'vcn.wx.last'; // last-known dashboard weather
-let appMode = 'normal'; // normal | dashboard
+let appMode = 'normal'; // normal | dashboard | cluster
+
+/* Pure app-mode logic (DOM-free; unit-tested in tools/theme_tests.js).
+   Precedence: car session > ?cluster=1 > ?dashboard= > persisted choice.
+   ?cluster=1 wins over a persisted dashboard/normal and is never treated
+   as a persisted choice itself — callers decide what to persist. */
+function parseAppMode(search, car, stored) {
+  if (car) return 'dashboard';
+  let cluster = null, dash = null;
+  try {
+    const q = new URLSearchParams(search);
+    cluster = q.get('cluster');
+    dash = q.get('dashboard');
+  } catch (e) { /* malformed query: fall through to stored */ }
+  if (cluster === '1') return 'cluster';
+  if (dash === '1') return 'dashboard';
+  if (dash === '0') return 'normal';
+  return stored === 'dashboard' || stored === 'cluster' ? stored : 'normal';
+}
+
+/* Body-class flags for a mode. Dashboard and cluster are mutually
+   exclusive by construction; normal sets neither. */
+function modeBodyFlags(mode) {
+  return { dashboard: mode === 'dashboard', cluster: mode === 'cluster' };
+}
+
+/* True when the driving speed readout should be live: the dashboard
+   speedo or the cluster hero number. One passive GPS watch serves both. */
+function speedDisplayActive() {
+  return appMode === 'dashboard' || appMode === 'cluster';
+}
+
+function clusterLayoutActive() {
+  return appMode === 'cluster';
+}
 
 function initAppMode() {
   try {
     const q = new URLSearchParams(location.search);
-    const param = q.get('dashboard');
-    if (window.__WAYSTATION_CAR) {
-      // Car head-unit session: always the dashboard, never persisted —
-      // the phone/PWA keeps whatever mode the user chose there.
-      appMode = 'dashboard';
-      return;
+    const car = !!window.__WAYSTATION_CAR;
+    let stored = null;
+    try { stored = localStorage.getItem(APP_MODE_KEY); } catch (e) {}
+    appMode = parseAppMode(location.search, car, stored);
+    /* Persist explicit URL choices for dashboard/normal only. ?cluster=1
+       and the car session never write the stored preference. */
+    if (!car && q.get('cluster') !== '1') {
+      const param = q.get('dashboard');
+      if (param === '1') localStorage.setItem(APP_MODE_KEY, 'dashboard');
+      else if (param === '0') localStorage.setItem(APP_MODE_KEY, 'normal');
     }
-    if (param === '1') { appMode = 'dashboard'; localStorage.setItem(APP_MODE_KEY, 'dashboard'); }
-    else if (param === '0') { appMode = 'normal'; localStorage.setItem(APP_MODE_KEY, 'normal'); }
-    else appMode = localStorage.getItem(APP_MODE_KEY) === 'dashboard' ? 'dashboard' : 'normal';
   } catch (e) { appMode = 'normal'; }
 }
 
@@ -1965,18 +2009,23 @@ function syncDashPadding() {
 }
 
 function applyAppMode() {
-  const on = dashboardLayoutActive();
-  document.body.classList.toggle('dashboard-mode', on);
-  if (on) { try { window.scrollTo(0, 0); } catch (e) {}
+  const dash = dashboardLayoutActive();
+  const clu = clusterLayoutActive();
+  const flags = modeBodyFlags(appMode);
+  document.body.classList.toggle('dashboard-mode', flags.dashboard);
+  document.body.classList.toggle('cluster-mode', flags.cluster);
+  if (dash) { try { window.scrollTo(0, 0); } catch (e) {}
     buildDashboardStage(); fitDashboardStage(); }
   else teardownDashboardStage();
+  const cui = $('cluster-ui');
+  if (cui) cui.hidden = !clu;
   layoutDashMenu(); // dock (or undock) the body-level menu panel
   layoutDashDrawer(); // dock (or undock) the planning drawer
   const pane = $('spotify-pane');
-  if (pane) pane.hidden = !on;
-  if (on) mountSpotifySkin(wsThemeId());
+  if (pane) pane.hidden = !dash;
+  if (dash) mountSpotifySkin(wsThemeId());
   else unmountSpotifySkin();
-  if (on) {
+  if (dash) {
     document.body.classList.remove('radio-off');
     setDashTab('map');
     tickDashClock(); refreshDashWeather(); syncDashTrip(); queueDashLocality();
@@ -1997,14 +2046,17 @@ function applyAppMode() {
   if (map && map.resize) { try { map.resize(); } catch (e) {} }
   syncDashPadding();
   try { applyDashboardMapPaint(); } catch (e) {}
-  syncDashboardToggle();
-  return on;
+  syncModeSelector();
+  return dash;
 }
 
 function setAppMode(mode) {
-  const next = mode === 'dashboard' ? 'dashboard' : 'normal';
-  if (next === appMode && document.body.classList.contains('dashboard-mode') === dashboardLayoutActive()) {
-    syncDashboardToggle();
+  const next = mode === 'dashboard' ? 'dashboard' : mode === 'cluster' ? 'cluster' : 'normal';
+  const flags = modeBodyFlags(next);
+  if (next === appMode &&
+      document.body.classList.contains('dashboard-mode') === flags.dashboard &&
+      document.body.classList.contains('cluster-mode') === flags.cluster) {
+    syncModeSelector();
     return dashboardLayoutActive();
   }
   appMode = next;
@@ -2015,6 +2067,7 @@ window.WayStation = window.WayStation || {};
 window.WayStation.setAppMode = setAppMode;
 window.WayStation.getAppMode = () => appMode;
 window.WayStation.dashboardActive = dashboardLayoutActive;
+window.WayStation.clusterActive = clusterLayoutActive;
 
 /* ---------------- car-mode bridge (?car=1) ----------------
    The Android Auto native shell renders this exact dashboard inside a
@@ -2389,15 +2442,17 @@ function syncSpotifyMenu() {
   disconnectBtn.hidden = !connected;
 }
 
-function syncDashboardToggle() {
-  const t = $('dashboard-toggle');
-  if (t) t.checked = appMode === 'dashboard';
+/* Presentation-mode selector (Display section): normal / dashboard / cluster,
+   mutually exclusive. Dashboard Preview is preserved as the dashboard option. */
+function syncModeSelector() {
+  const radios = document.querySelectorAll('input[name="appmode"]');
+  radios.forEach(r => { r.checked = r.value === appMode; });
 }
 
 function wireSpotifyMenu() {
   const connectBtn = $('spotify-connect');
   const disconnectBtn = $('spotify-disconnect');
-  const dashToggle = $('dashboard-toggle');
+  const modeRadios = document.querySelectorAll('input[name="appmode"]');
   if (connectBtn) connectBtn.addEventListener('click', () => {
     if (window.SpotifyCore) SpotifyCore.connect();
   });
@@ -2405,9 +2460,11 @@ function wireSpotifyMenu() {
     if (window.SpotifyCore) SpotifyCore.disconnect();
     syncSpotifyMenu();
   });
-  if (dashToggle) dashToggle.addEventListener('change', () => {
-    setAppMode(dashToggle.checked ? 'dashboard' : 'normal');
-  });
+  modeRadios.forEach(r => r.addEventListener('change', () => {
+    if (r.checked) setAppMode(r.value);
+  }));
+  const clusterExit = $('cluster-mode-exit');
+  if (clusterExit) clusterExit.addEventListener('click', () => setAppMode('normal'));
   let rsT = null;
   window.addEventListener('resize', () => {
     // Refit the 1920×720 dashboard canvas after resizes; debounced and

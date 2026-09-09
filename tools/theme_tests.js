@@ -377,10 +377,68 @@ ok(!appSrc.includes('setSpotifyPane'), 'floating pane logic removed');
 ok(!appSrc.includes('music-btn'), 'music buttons removed from app.js');
 ok(appSrc.includes('spotify.skin'), 'skin resolved from theme config');
 
+// cluster mode (commit 1): pure mode logic + empty DOM shell
+function extractFn(src, name) {
+  const m = src.match(new RegExp('function ' + name + '\\([^)]*\\) \\{[\\s\\S]*?\\n\\}'));
+  if (!m) throw new Error('missing function in app.js: ' + name);
+  return m[0];
+}
+const modeBox = { URLSearchParams };
+vm.createContext(modeBox);
+for (const fn of ['parseAppMode', 'modeBodyFlags', 'speedDisplayActive', 'clusterLayoutActive', 'dashboardLayoutActive']) {
+  vm.runInContext(extractFn(appSrc, fn), modeBox, { filename: 'app.js#' + fn });
+}
+const tParseAppMode = modeBox.parseAppMode, tModeBodyFlags = modeBox.modeBodyFlags;
+// parsing precedence: car session > ?cluster=1 > ?dashboard= > persisted choice
+ok(tParseAppMode('?cluster=1', false, 'dashboard') === 'cluster', 'cluster: ?cluster=1 wins over persisted dashboard');
+ok(tParseAppMode('?cluster=1', false, null) === 'cluster', 'cluster: ?cluster=1 with no stored pref');
+ok(tParseAppMode('?cluster=1&dashboard=1', false, null) === 'cluster', 'cluster: ?cluster=1 wins over ?dashboard=1');
+ok(tParseAppMode('?cluster=0', false, null) === 'normal', 'cluster: only exact ?cluster=1 enables');
+ok(tParseAppMode('?dashboard=1', false, null) === 'dashboard', 'dashboard: ?dashboard=1');
+ok(tParseAppMode('?dashboard=0', false, 'dashboard') === 'normal', 'normal: ?dashboard=0 clears persisted dashboard');
+ok(tParseAppMode('', false, 'dashboard') === 'dashboard', 'dashboard: persisted choice restored');
+ok(tParseAppMode('', false, 'cluster') === 'cluster', 'cluster: persisted explicit choice restored');
+ok(tParseAppMode('', false, 'weird') === 'normal', 'normal: unknown stored value falls back');
+ok(tParseAppMode('', false, null) === 'normal', 'normal: default with nothing stored');
+ok(tParseAppMode('?cluster=1', true, null) === 'dashboard', 'car: session forces dashboard over ?cluster=1');
+ok(tParseAppMode('', true, 'cluster') === 'dashboard', 'car: stored cluster never leaks into the car session');
+// dashboard/cluster body flags are mutually exclusive by construction
+for (const mode of ['normal', 'dashboard', 'cluster']) {
+  const f = tModeBodyFlags(mode);
+  ok(f.dashboard === (mode === 'dashboard') && f.cluster === (mode === 'cluster'),
+    `exclusivity: modeBodyFlags('${mode}')`);
+  ok(!(f.dashboard && f.cluster), `exclusivity: dashboard/cluster never co-occur ('${mode}')`);
+}
+// speedDisplayActive / clusterLayoutActive read the live appMode
+modeBox.appMode = 'cluster';
+ok(modeBox.speedDisplayActive() === true, 'speed readout live in cluster mode');
+ok(modeBox.clusterLayoutActive() === true, 'clusterLayoutActive in cluster mode');
+ok(modeBox.dashboardLayoutActive() === false, 'dashboardLayoutActive false in cluster mode');
+modeBox.appMode = 'dashboard';
+ok(modeBox.speedDisplayActive() === true, 'speed readout live in dashboard mode');
+ok(modeBox.clusterLayoutActive() === false, 'clusterLayoutActive false in dashboard mode');
+modeBox.appMode = 'normal';
+ok(modeBox.speedDisplayActive() === false, 'speed readout idle in normal mode');
+ok(modeBox.clusterLayoutActive() === false, 'clusterLayoutActive false in normal mode');
+// shell wiring (source-level guards)
+ok(appSrc.includes("get('cluster')"), 'cluster URL param read');
+ok(appSrc.includes('clusterLayoutActive()'), 'clusterLayoutActive() exists');
+ok(appSrc.includes("classList.toggle('cluster-mode'"), 'body.cluster-mode toggled');
+ok(appSrc.includes('localStorage.setItem(APP_MODE_KEY, appMode)'), 'explicit mode choice persisted');
+ok((appSrc.match(/new maplibregl\.Map/g) || []).length === 1, 'single MapLibre instance: mode switches never create a map');
+ok(indexSrc.includes('id="cluster-ui"'), 'cluster shell in index.html');
+for (const id of ['cluster-speed', 'cluster-speed-num', 'cluster-speed-unit', 'cluster-limit', 'cluster-limit-num',
+                  'cluster-turn', 'cluster-turn-arrow', 'cluster-turn-distance', 'cluster-turn-road', 'cluster-turn-instruction',
+                  'cluster-minimap', 'cluster-music', 'cluster-music-art', 'cluster-music-title', 'cluster-music-artist',
+                  'cluster-mode-exit']) {
+  ok(indexSrc.includes(`id="${id}"`), `cluster region present: ${id}`);
+}
+
 // index.html: menu-only Spotify in normal mode, dashboard mount point
 ok(!indexSrc.includes('music-btn') && !indexSrc.includes('drive-music-btn'), 'no player buttons in chrome');
 ok(!indexSrc.includes('spotify-close'), 'no close button on pane');
-ok(indexSrc.includes('id="dashboard-toggle"'), 'dashboard toggle in menu');
+ok(indexSrc.includes('name="appmode"'), 'presentation mode selector in menu');
+ok(indexSrc.includes('Cluster Mode'), 'Cluster Mode offered in Display section');
 ok(indexSrc.includes('id="voice-preview"'), 'voice preview button in menu');
 ok(!indexSrc.includes('Gemini free tier'), 'no stale Gemini copy in voice settings');
 ok(indexSrc.includes('id="spotify-connect"') && indexSrc.includes('id="spotify-disconnect"'), 'menu connect/disconnect');
@@ -1365,7 +1423,7 @@ ok(/get\('car'\) === '1'/.test(carJs) && carJs.includes('window.__WAYSTATION_CAR
 ok(html.indexOf('<script src="car.js"></script>') !== -1 &&
    html.indexOf('<script src="car.js"></script>') < html.indexOf('<script src="app.js"></script>'),
   'car: index.html loads car.js before app.js');
-ok(appSrc.includes('if (window.__WAYSTATION_CAR)') && appSrc.includes("appMode = 'dashboard';"),
+ok(appSrc.includes('__WAYSTATION_CAR') && /parseAppMode\(location\.search, car, stored\)/.test(appSrc),
   'car: car mode forces dashboard mode for the session');
 ok(/function installCarBridge\(\)/.test(appSrc) && appSrc.includes('installCarBridge(); // ?car=1'),
   'car: WayStationCar bridge installed at boot');
