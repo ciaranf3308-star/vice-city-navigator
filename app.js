@@ -1936,7 +1936,7 @@ function syncDashTrip(remainSec) {
     eta.style.display = '';
     eta.innerHTML = '<span class="eta-label">Arrive in</span><span class="eta-time">' + mins + ' min</span>';
     const label = (typeof dest !== 'undefined' && dest && dest.label) ? dest.label : '';
-    dst.textContent = (label || 'EN ROUTE').toUpperCase().slice(0, 28);
+    dst.textContent = (label || 'EN ROUTE').slice(0, 28);
   } else {
     /* VC/SA/RDR2 idle: compass only, no arrival placeholder. Other themes keep theirs. */
     const isVC = document.body.classList.contains('theme-vice-city');
@@ -1976,11 +1976,22 @@ async function syncDashLocality() {
   const nearDublin = Math.hypot(c.lat - 53.3498, c.lng - (-6.2603)) < 0.2;
   try {
     const r = await fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' +
-      c.lat.toFixed(5) + '&lon=' + c.lng.toFixed(5) + '&zoom=14');
+      c.lat.toFixed(5) + '&lon=' + c.lng.toFixed(5) + '&zoom=16');
     if (!r.ok) throw new Error('geo ' + r.status);
     const j = await r.json(), a = (j && j.address) || {};
-    const name = a.suburb || a.town || a.city || a.village || a.hamlet || a.county || '';
-    if (name && (typeof navActive === 'undefined' || !navActive)) el.textContent = name.toUpperCase().slice(0, 28);
+    /* Prefer the finest named place: neighbourhood-level first, then the
+       town/village, then city/municipality — county only as a last resort,
+       so the plate names the town you're in, not the county. */
+    const name = (a.suburb || a.neighbourhood || a.quarter || a.town ||
+      a.village || a.hamlet || a.city || a.municipality || a.city_district ||
+      a.county || '')
+      /* Ireland quirk: towns often exist in Nominatim only as "<Town> ED"
+         (electoral division) under city_district — trim the suffix so the
+         plate says CLANE, not CLANE ED. Likewise "County Kildare" -> KILDARE. */
+      .replace(/\s+ED$/i, '').replace(/^county\s+/i, '');
+    /* Natural case here — each theme's CSS owns the casing (GTA V renders
+       this plate in script, which must not be uppercased). */
+    if (name && (typeof navActive === 'undefined' || !navActive)) el.textContent = name.slice(0, 28);
     else if (nearDublin) el.textContent = 'DUBLIN';
   } catch (e) {
     if (nearDublin && el.textContent.trim() === '—') el.textContent = 'DUBLIN';

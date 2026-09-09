@@ -184,8 +184,8 @@ body.dashboard-mode.theme-gta-v .dash-tabs button.on{
 body.dashboard-mode.theme-gta-v .dash-tabs button.on::before{opacity:1;filter:drop-shadow(0 0 8px rgba(44,230,140,.45))}
 body.dashboard-mode.theme-gta-v .dash-tabs button.on::after{background:#2ce68c;box-shadow:0 0 12px rgba(44,230,140,.75)}
 body.dashboard-mode.theme-gta-v .dash-tabs button.on span{color:#f2f5f2}
-/* Center: locality plate — tracked-out Chalet with a mint rule
-   beneath (menu-section treatment), not a bland box.
+/* Center: locality plate — big SignPainter script like the game's own
+   place names, with the mint rule beneath (menu-section treatment).
    Shows the real town name from #dash-dest (reverse-geocoded). */
 body.dashboard-mode.theme-gta-v .dash-dest{
   flex:1;display:flex;align-items:center;justify-content:center;
@@ -193,13 +193,14 @@ body.dashboard-mode.theme-gta-v .dash-dest{
 }
 body.dashboard-mode.theme-gta-v #dash-dest{
   position:relative;
-  font-family:'Chalet Comprime','Arial Narrow',sans-serif;font-weight:700;
-  font-size:24px;letter-spacing:5px;text-transform:uppercase;color:#f2f5f2;
-  white-space:nowrap;pointer-events:none;
+  font-family:'SignPainter','Chalet London',cursive;
+  font-size:64px;color:#f2f5f2;
+  white-space:nowrap;pointer-events:none;line-height:1;
+  text-shadow:0 2px 16px rgba(0,0,0,.85), 0 0 28px rgba(44,230,140,.16);
 }
 body.dashboard-mode.theme-gta-v .dash-dest::before{
-  content:'';position:absolute;left:50%;top:calc(50% + 24px);transform:translateX(-50%);
-  width:76px;height:2px;background:#2ce68c;
+  content:'';position:absolute;left:50%;top:calc(50% + 42px);transform:translateX(-50%);
+  width:120px;height:2px;background:#2ce68c;
   box-shadow:0 0 10px rgba(44,230,140,.65);
 }
 /* Map controls: slim pause-menu circles with hairline rules and a mint
