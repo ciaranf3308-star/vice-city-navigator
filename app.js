@@ -430,6 +430,11 @@ function applyBodyTheme(id) {
   }
   const cur = VCNThemes.get(id);
   if (cur && cur.ui && cur.ui.bodyClass) document.body.classList.add(cur.ui.bodyClass);
+  // Theme geometry changed (widget widths differ per theme) — re-aim the
+  // camera target now that the new body class is on. This also fixes the
+  // first-load ordering: the map 'load' handler syncs padding before the
+  // theme class lands, which used to leave right=8 (raw screen center).
+  try { syncDashPadding(); } catch (e) {}
   layoutDashMenu(); // bar heights changed with the theme — re-dock the menu panel
   layoutDashDrawer(); // and the planning drawer
 }
