@@ -544,7 +544,7 @@ ok(appSrc.includes('layoutDashMenu(); // dock (or undock) the body-level menu pa
    so dashboard users had no visible way to set a route. It now drops
    below the per-theme bar heights, and the planning drawer docks to the
    live stage rect in real pixels like the menu panel. */
-for (const [id, top] of [['gta-v', 132], ['rdr2', 116]]) {
+for (const [id, top] of [['gta-v', 132]]) {
   ok(new RegExp(`body\\.dashboard-mode\\.theme-${id} #search-bar\\{top:calc\\(${top}px`).test(cssSrc),
     `dashboard search bar clears the ${id} top bar (${top}px)`);
 }
@@ -552,6 +552,8 @@ ok(/body\.dashboard-mode\.theme-vice-city #search-bar\{display:none\}/.test(cssS
   'VC dashboard hides the search pill for the hero composition');
 ok(/body\.dashboard-mode\.theme-san-andreas #search-bar\{display:none\}/.test(cssSrc),
   'SA dashboard hides the search pill for the hero composition');
+ok(/body\.dashboard-mode\.theme-rdr2 #search-bar\{display:none\}/.test(cssSrc),
+  'RDR2 dashboard hides the search pill for the hero composition');
 ok(appSrc.includes("openPlanning('search')") && /saDash && !dismissing/.test(appSrc),
   'SA dashboard MAP tab opens planning when there is nothing to dismiss');
 ok(/body\.dashboard-mode #menu-btn\{display:none\}/.test(cssSrc),
