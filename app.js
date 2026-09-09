@@ -1714,7 +1714,12 @@ function fitDashboardStage() {
    margin and the widget — never the raw screen center. The map itself is
    never resized; this only shifts the camera target point. */
 function syncDashPadding() {
-  const m = window.map;
+  /* NOTE: window.map is the #map container DIV (browsers expose id="map" as
+     a named global); the MapLibre instance is the module-scope `map`. The
+     old guard checked window.map and its setPadding test failed on the div,
+     so this function silently early-returned forever and the padding never
+     applied. Check the real instance. */
+  const m = map;
   if (!m || typeof m.setPadding !== 'function') return;
   const b = document.body.classList;
   // Dash bars are always visible in dashboard mode (every theme), so
@@ -1735,8 +1740,8 @@ function syncDashPadding() {
     else if (b.contains('theme-rdr2')) right = 670;       // .rdsp: right:70px, width:600px
   }
   if (dash)
-    map.setPadding({ top: 76, right: right, bottom: b.contains('theme-vice-city') ? 100 : 88, left: 8 });
-  else map.setPadding({ top: 0, right: 0, bottom: 0, left: 0 });
+    m.setPadding({ top: 76, right: right, bottom: b.contains('theme-vice-city') ? 100 : 88, left: 8 });
+  else m.setPadding({ top: 0, right: 0, bottom: 0, left: 0 });
 }
 
 function applyAppMode() {
