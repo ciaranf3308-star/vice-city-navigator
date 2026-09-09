@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace 'com.waystation.auto'
-    compileSdk 34
+    compileSdk 36
 
     defaultConfig {
         applicationId 'com.waystation.auto'
         minSdk 23
-        targetSdk 34
+        targetSdk 36
         // Play uploads (incl. Internal App Sharing) need a unique versionCode
         // per upload: CI run number when available, 2 otherwise.
         versionCode (System.getenv('GITHUB_RUN_NUMBER')?.toInteger() ?: 2)
