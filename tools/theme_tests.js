@@ -124,10 +124,9 @@ for (const id of T.ids()) {
 
 /* ---------- PNG assets on disk ---------- */
 for (const id of T.ids()) {
-  // nominal blip size: 16px shared baseline; themes shipping larger art
-  // (gta-v: 32px) declare pois.blipScale and places.js compensates.
-  const scale = (T.get(id).pois && T.get(id).pois.blipScale) || 1;
-  const nominal = Math.round(16 / scale);
+  // nominal blip size: 16px shared baseline; gta-v ships 32px art but
+  // displays it at the same on-screen size (blipScale 1).
+  const nominal = id === 'gta-v' ? 32 : 16;
   for (const sem of SEMANTICS.concat(['waypoint', 'qmark'])) {
     const url = T.poiIconUrl(sem, id);
     const { w, h } = pngSize(path.join(REPO, url));
@@ -142,7 +141,7 @@ for (const id of T.ids()) {
     ok(ps.w === 32 && ps.h === 32, `${id} player marker 32x32`);
   }
 }
-ok(T.get('gta-v').pois.blipScale === 0.5, 'gta-v declares blipScale 0.5');
+ok(T.get('gta-v').pois.blipScale === 1, 'gta-v declares blipScale 1');
 
 /* ---------- service worker classification ---------- */
 const swSrc = fs.readFileSync(path.join(REPO, 'sw.js'), 'utf8');
@@ -173,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v59"), 'SW shell cache v55');
-ok(swSrc.includes("ws-theme-v133"), 'SW theme cache v130');
+ok(swSrc.includes("ws-theme-v134"), 'SW theme cache v130');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
