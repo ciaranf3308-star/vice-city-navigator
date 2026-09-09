@@ -183,8 +183,8 @@
     const base = (ui.fogFillOpacity != null) ? ui.fogFillOpacity : FOG_FILL_OPACITY;
     return {
       fill: ui.fogFill || FOG_FILL_COLOR,
-      // Proper pea-souper: the fog never goes sheer, in any theme.
-      fillOpacity: Math.max(0.93, base),
+      // Dense but never a blackout: the map whispers through the fog.
+      fillOpacity: Math.max(0.87, Math.min(base, 0.9)),
     };
   }
 
