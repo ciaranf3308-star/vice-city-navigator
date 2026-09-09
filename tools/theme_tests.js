@@ -471,8 +471,9 @@ ok(/theme-vice-city #dash-bottombar\{[^}]*rgba\(1,205,254/.test(cssSrc), 'VC foo
 ok(/theme-vice-city \.dash-tag::before/.test(cssSrc), 'VC footer separates arrival and slogan with a divider');
 ok(/theme-vice-city #dash-dest\{[^}]*overflow:visible/.test(cssSrc), 'VC locality plate never truncates');
 ok(!/theme-vice-city \.dash-tabs button\{[^}]*linear-gradient/.test(cssSrc), 'VC tabs are flat neon text, not chunky buttons');
-ok(/\.dash-tabs button\.on/.test(cssSrc) && /theme-san-andreas \.dash-tabs button\.on\{[^}]*background:rgba\(240,230,200/.test(cssSrc),
-  'SA active tab is the hero cream parallelogram (icon-only), not a chunky tile');
+ok(/\.dash-tabs button\.on/.test(cssSrc) && /theme-san-andreas \.dash-tabs button\.on::before\{[^}]*linear-gradient\(180deg,#e9cd7d/.test(cssSrc) &&
+  /theme-san-andreas \.dash-tabs button\.on::after\{[^}]*data:image\/svg\+xml/.test(cssSrc),
+  'SA active tab is a dark plate with gold chamfer outline + gold diamond marker (2026-09-09 polish), not the cream slab');
 ok(/theme-gta-v \.dash-tabs button\[data-dtab="map"\]::before\{[^}]*tab-map\.png/.test(cssSrc), 'V tabs use generated icons (map)');
 ok(/theme-gta-v \.dash-tabs button\[data-dtab="settings"\]::before\{[^}]*tab-settings\.png/.test(cssSrc), 'V tabs use generated icons (settings)');
 ok(/theme-gta-v \.dash-tag\{display:none/.test(cssSrc), 'V drops the 80s script tagline');
@@ -661,8 +662,16 @@ ok(/theme-san-andreas #dash-bottombar\{[^}]*height:126px/.test(cssSrc),
   'SA footer is 126px, the hero art\'s own height');
 ok(!/theme-san-andreas #dash-bottombar\{[^}]*clip-path/.test(cssSrc),
   'SA footer silhouette comes from the art, not CSS clip-path');
-ok(/theme-san-andreas \.dash-tabs button\.on\{[^}]*background:rgba\(240,230,200/.test(cssSrc),
-  'SA active tab is a cream parallelogram over the art\'s slot, icon-only');
+ok(/theme-san-andreas \.dash-tabs button\.on::before\{[^}]*linear-gradient\(180deg,#e9cd7d/.test(cssSrc),
+  'SA active tab is a dark plate with a gold chamfer outline (2026-09-09 polish), not the solid cream slab');
+ok(/theme-san-andreas \.dash-tabs button\.on::after\{[^}]*data:image\/svg\+xml/.test(cssSrc),
+  'SA active tab carries a gold diamond marker (2026-09-09 polish)');
+ok(/theme-san-andreas \.dash-tabs button:nth-child\(5\)\{[^}]*left:712px/.test(cssSrc),
+  'SA 5th dash tab (settings) is parked as a console coin — no longer overlapping the map tab');
+ok(/theme-san-andreas #menu-panel::before\{[^}]*clip-path:polygon\(26px/.test(cssSrc),
+  'SA dash menu drawer is a gold chamfered console (2026-09-09 polish), not a flat box');
+ok(/theme-san-andreas #menu-panel \.menu-head\{[^}]*grove-panel\.png/.test(cssSrc),
+  'SA dash menu drawer wears the Grove Street hero-art header band');
 ok(/theme-san-andreas \.dash-tabs button span\{display:none/.test(cssSrc),
   'SA footer tabs are icon-only like the hero');
 ok(/theme-san-andreas \.sasp\{[^}]*left:1219px/.test(skinSaSrc),
@@ -675,6 +684,19 @@ ok(/\.sasp-idle::after\{[^}]*left:-22px;top:276px;width:317px/.test(skinSaSrc),
   'SA idle covers the art\'s drawn transport strip (no phantom pause/progress when disconnected)');
 ok(/\.sasp\{[^}]*container-type:size/.test(skinSaSrc),
   'SA widget is a cqw/cqh container (lyrics size against widget, not viewport)');
+/* ---------- SA phone polish (2026-09-09): the dashboard-only skin left
+   the phone widget as raw unstyled DOM. phone.css gives it the hud.png
+   Grove Street console; the gold-pill Start Drive becomes the outlined
+   gold button every other SA phone action uses. */
+const saPhoneSrc = fs.readFileSync(path.join(REPO, 'themes/san-andreas/phone.css'), 'utf8');
+ok(/theme-san-andreas:not\(\.dashboard-mode\) \.sasp\{[^}]*spotify\/hud\.png/.test(saPhoneSrc),
+  'SA phone Spotify widget wears the hud.png console skin (not raw DOM)');
+ok(/theme-san-andreas:not\(\.dashboard-mode\) \.sasp-bezel\{display:none/.test(saPhoneSrc),
+  'SA phone widget hides the dashboard radio bezel img');
+ok(/theme-san-andreas:not\(\.dashboard-mode\) \.sasp-times\{[^}]*display:flex/.test(saPhoneSrc),
+  'SA phone progress times are laid out (no garbled 1:323:59)');
+ok(/theme-san-andreas:not\(\.dashboard-mode\) \.big-btn\{[^}]*border:2px solid #e8a33d/.test(saPhoneSrc),
+  'SA phone Start Drive is an outlined gold button, not the solid gold pill');
 /* ---------- SA hero-match: authored dashboard art set ---------- */
 const saDash = (f) => path.join(REPO, 'themes/san-andreas/dashboard', f);
 for (const f of ['topbar.png', 'bottombar.png', 'maneuver.png', 'grove-panel.png', 'script-tomorrow.png', 'script-music.png', 'sa-logo.png']) {
