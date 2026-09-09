@@ -391,7 +391,7 @@ body.theme-vice-city .menu-section details.advanced summary{color:#eafcff}
 
 /* ---- backdrop: sunset skyline band over deep violet night ---- */
 body.cluster-mode.theme-vice-city{background:#05020c}
-body.cluster-mode.theme-vice-city #cluster-backdrop{display:block;position:fixed;inset:0;z-index:30;
+body.cluster-mode.theme-vice-city #cluster-backdrop{display:block;position:absolute;inset:0;z-index:30;
   background:
     linear-gradient(180deg, rgba(5,2,12,.30) 0%, rgba(5,2,12,.48) 26%, rgba(4,2,10,.88) 50%, rgba(3,1,8,.97) 100%),
     url('dashboard/skyline-sunset.png') top center / 1920px auto no-repeat,
@@ -399,7 +399,7 @@ body.cluster-mode.theme-vice-city #cluster-backdrop{display:block;position:fixed
 
 /* ---- header bar ---- */
 body.cluster-mode.theme-vice-city #cluster-header{display:flex;align-items:center;gap:28px;
-  position:fixed;top:0;left:0;right:0;height:54px;z-index:33;padding:0 28px 0 20px;
+  position:absolute;top:0;left:0;right:0;height:54px;z-index:33;padding:0 28px 0 20px;
   background:linear-gradient(180deg, rgba(12,4,22,.9), rgba(12,4,22,.55));
   border-bottom:1px solid rgba(255,45,149,.8);box-shadow:0 1px 12px rgba(255,45,149,.35)}
 body.cluster-mode.theme-vice-city #cluster-logo{background:none;border:none;padding:0;cursor:pointer;display:flex;align-items:center}
@@ -447,7 +447,7 @@ body.cluster-mode.theme-vice-city #cluster-compass-needle{width:0;height:0;
   border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:14px solid #ff71ce;
   filter:drop-shadow(0 0 6px rgba(255,45,149,.8));transition:transform .3s}
 /* trip strip on the card bottom */
-body.cluster-mode.theme-vice-city #cluster-trip:not([hidden]){display:flex;position:fixed;left:40px;top:548px;width:468px;z-index:32;
+body.cluster-mode.theme-vice-city #cluster-trip:not([hidden]){display:flex;position:absolute;left:40px;top:548px;width:468px;z-index:32;
   align-items:center;justify-content:center;gap:22px;
   font-family:'Pricedown Bl',sans-serif;font-size:34px;letter-spacing:2px;color:#ff71ce;
   text-shadow:0 0 10px rgba(255,45,149,.7)}
@@ -466,7 +466,7 @@ body.cluster-mode.theme-vice-city #cluster-speed.over #cluster-speed-num{color:#
 body.cluster-mode.theme-vice-city #cluster-limit:not([hidden]){left:50%;top:36%;transform:translate(250px,40px)}
 
 /* ---- power arc gauge ---- */
-body.cluster-mode.theme-vice-city #cluster-gauge{display:block;position:fixed;left:50%;top:53%;transform:translateX(-50%);
+body.cluster-mode.theme-vice-city #cluster-gauge{display:block;position:absolute;left:50%;top:53%;transform:translateX(-50%);
   width:420px;height:200px;z-index:32}
 body.cluster-mode.theme-vice-city #cluster-gauge-svg{width:100%;height:100%;overflow:visible}
 body.cluster-mode.theme-vice-city .cg-tick{stroke:rgba(255,255,255,.16);stroke-width:7;stroke-linecap:round;
@@ -484,16 +484,12 @@ body.cluster-mode.theme-vice-city .cg-power{right:6px;bottom:34px;color:#ff2d95;
    one skin, one SpotifyCore session. Cluster only repositions it into the
    right zone; nothing is cloned or remounted. (phone.css's bottom-sheet
    rules exclude .cluster-mode, so the widget keeps its dashboard design.) */
-body.cluster-mode.theme-vice-city #spotify-pane{position:fixed;left:0;top:0;width:100vw;height:100dvh;
-  right:auto;bottom:auto;max-width:none;min-width:0;pointer-events:none;z-index:31;overflow:hidden;
-  container-type:size;padding:0}
-body.cluster-mode.theme-vice-city #spotify-stage{position:absolute;inset:0;pointer-events:none;
-  width:auto;height:auto}
+/* pane layer comes from the shared cluster stage; only the widget docks per-theme */
 body.cluster-mode.theme-vice-city .vcsp{position:absolute;top:auto;bottom:88px;right:36px;
   left:auto;translate:none;width:670px;margin:0}
 
 /* ---- footer: thin presentation switcher, no dead tabs ---- */
-body.cluster-mode.theme-vice-city #cluster-footer{display:flex;align-items:center;position:fixed;left:0;right:0;bottom:0;
+body.cluster-mode.theme-vice-city #cluster-footer{display:flex;align-items:center;position:absolute;left:0;right:0;bottom:0;
   height:64px;z-index:33;padding:0 40px 0 48px;
   background:linear-gradient(0deg, rgba(12,4,22,.96), rgba(12,4,22,.8));
   border-top:2px solid #ff2d95;box-shadow:0 -2px 16px rgba(255,45,149,.5)}

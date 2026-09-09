@@ -595,7 +595,7 @@ ok(appSrc.includes("if (tab === 'map') { WayStation.setAppMode('normal'); return
 ok(cssSrc.includes('body.cluster-mode #map'), 'cluster CSS frames the live map');
 ok(cssSrc.includes('#cluster-speed-num'), 'cluster CSS sizes the hero speed');
 ok(cssSrc.includes('#cluster-turn'), 'cluster CSS positions the turn block');
-ok(cssSrc.includes('body.cluster-mode.theme-vice-city #spotify-pane'), 'VC cluster positions the shared Spotify widget');
+ok(cssSrc.includes('body.cluster-mode #spotify-pane'), 'cluster stage layers the shared Spotify widget');
 ok(cssSrc.includes('body.cluster-mode #drawer'), 'cluster hides the planning drawer');
 ok(cssSrc.includes('body.cluster-mode #search-bar'), 'cluster hides the search pill');
 ok(cssSrc.includes('body.cluster-mode #menu-btn'), 'cluster keeps the menu button reachable');
@@ -1730,18 +1730,16 @@ ok(fs.existsSync(path.join(REPO, 'themes/gta-v/dashboard/wanted-star-hollow.png'
   ok(/\.wstar\{[^}]*wanted-star-hollow\.png/.test(gvCss), 'unearned star uses the hollow asset');
 }
 
-console.log(`\n${pass} passed, ${fail} failed`);
-process.exit(fail ? 1 : 0);
 ok(/function saArrowSvg/.test(appSrc), 'SA has its own block-arrow set (hero font-theme match)');
 ok(/t\.id === 'san-andreas'/.test(appSrc) || /id === "san-andreas"/.test(appSrc), 'SA arrows branch on the san-andreas theme');
 ok(cssSrc.includes('-webkit-text-stroke'), 'SA dash type has the heavy outlined SA treatment');
-ok(/theme-san-andreas \.sa-logo\{[^}]*height:168px/.test(cssSrc),
-  'SA logo is hero-big (112px) overlapping the map, not clipped');
-ok(indexSrc.indexOf('class="sa-logo"') > indexSrc.indexOf('</header>'),
-  'SA logo sits outside the clipped topbar so it can overlap');
-ok(/bottombar-trim\.jpg/.test(cssSrc), 'SA bottom bar has the machined brass top trim');
-ok(/bottombar-palms\.jpg/.test(cssSrc), 'SA bottom bar has the palm sunset panel');
-ok(/\.dash-tabs button\.on\{[^}]*#8fbf7a/.test(cssSrc), 'SA active tab is the hero solid green MAP box');
+ok(/theme-san-andreas #sa-grove-panel/.test(cssSrc),
+  'SA dashboard wears the grove-panel hero band (2026-09-09 polish)');
+ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/grove-panel.png')), 'SA grove-panel art exists');
+ok(!/bottombar-trim\.jpg/.test(cssSrc) && !/bottombar-palms\.jpg/.test(cssSrc),
+  'SA retired the brass-trim/palm-sunset bottom bar (2026-09-09 polish)');
+ok(/theme-san-andreas \.dash-tabs button\.on::before\{[^}]*linear-gradient\(180deg,#e9cd7d/.test(cssSrc),
+  'SA active tab is the dark plate + gold chamfer (2026-09-09 polish), not the green box');
 ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/bottombar-trim.jpg')), 'SA bottom bar trim art exists');
 ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/bottombar-palms.jpg')), 'SA bottom bar palm art exists');
 // Theme lock enforcement: a locked theme's dashboard.css must match its recorded hash.
@@ -1761,3 +1759,82 @@ ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/bottombar-palms.j
 ok(fs.existsSync(path.join(REPO, 'themes/vice-city/dashboard.css')), 'VC dashboard.css exists (factored)');
 ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard.css')), 'SA dashboard.css exists (factored)');
 
+/* ---------- pass 5: cluster stage parity + speed validation + SA overhaul ---------- */
+// cluster is a fixed 1920x720 stage like the dashboard (same aspect ratio)
+ok(/body\.cluster-mode #cluster-ui\{[^}]*width:1920px[^}]*height:720px/.test(cssSrc),
+  'cluster-ui is a fixed 1920x720 stage (dashboard aspect parity)');
+ok(!/body\.cluster-mode #cluster-ui\{[^}]*inset:0/.test(cssSrc),
+  'cluster stage is JS-centered, not viewport-stretched');
+ok(/CLUSTER_STAGE_NODES\s*=\s*\[[^\]]*'map'[^\]]*'spotify-pane'/.test(appSrc),
+  'map + spotify-pane are reparented into the cluster stage');
+ok(appSrc.includes('function buildClusterStage') && appSrc.includes('function teardownClusterStage'),
+  'cluster stage build/teardown restores DOM homes');
+ok(appSrc.includes('function fitClusterStage'), 'fitClusterStage zooms the cluster canvas');
+ok(/fitClusterStage\(\);?\s*\n?\s*}?\s*else teardownClusterStage/.test(appSrc) || appSrc.includes('buildClusterStage(); fitClusterStage();'),
+  'applyAppMode builds + fits the cluster stage on entry');
+ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
+  'resize refits the cluster stage');
+// cluster children are stage-absolute, never viewport-fixed
+{
+  const vcCss = fs.readFileSync(path.join(REPO, 'themes/vice-city/dashboard.css'), 'utf8');
+  const vcCluster = vcCss.slice(vcCss.indexOf('Cluster Mode: Vice City HERO'));
+  ok(!/position:fixed/.test(vcCluster), 'VC cluster: no viewport-fixed survivors in the stage');
+  const saPhone = fs.readFileSync(path.join(REPO, 'themes/san-andreas/phone.css'), 'utf8');
+  const saCluster = saPhone.slice(saPhone.indexOf('Cluster Mode: San Andreas'));
+  ok(!/position:fixed/.test(saCluster), 'SA cluster: no viewport-fixed survivors in the stage');
+}
+// validated GPS speed: wild coords.speed spikes never reach the display
+{
+  const vSrc = appSrc.slice(appSrc.indexOf('let gpsSpeed = null; // m/s, validated'),
+    appSrc.indexOf('/* ---------------- wanted level'));
+  let T = 1000000;
+  const vBox = { Date: { now: () => T } };
+  vm.createContext(vBox);
+  vm.runInContext(vSrc, vBox, { filename: 'speed-validation' });
+  const adv = ms => { T += ms; };
+  const spd = () => vm.runInContext('gpsSpeed', vBox);
+  vBox.setGpsSpeed(182, 0.3, 1); // 657 km/h spike while standing still
+  ok(Math.abs(spd() - 0.3) < 1e-9, 'speed: 182 m/s spike while stationary is refused (falls back to displacement)');
+  adv(1000); vBox.setGpsSpeed(0.2, 0.2, 1);
+  ok(Math.abs(spd() - 0.2) < 1e-9, 'speed: real fixes flow through');
+  for (let i = 1; i <= 10; i++) { adv(1000); vBox.setGpsSpeed(i * 2.5, i * 2.5, 1); }
+  ok(Math.abs(spd() - 25) < 1e-9, 'speed: genuine 2.5 m/s^2 acceleration is accepted');
+  adv(1000); vBox.setGpsSpeed(200, 25, 1); // teleport: impossible
+  ok(Math.abs(spd() - 25) < 1e-9, 'speed: impossible jump is rejected, last good held');
+  adv(11000);
+  ok(vBox.freshGpsSpeed() === null, 'speed: stale fixes read as unknown, never frozen');
+  ok(appSrc.includes('freshGpsSpeed()'), 'displays read the validated fresh speed');
+  ok(!/gpsSpeed\s*=\s*cSpeed/.test(appSrc), 'no raw coords.speed assignment survives');
+}
+// SA cluster overhaul: grove console composition in 720-stage coordinates
+{
+  const saPhone = fs.readFileSync(path.join(REPO, 'themes/san-andreas/phone.css'), 'utf8');
+  const saCluster = saPhone.slice(saPhone.indexOf('Cluster Mode: San Andreas'));
+  ok(/#cluster-header\{[^}]*height:50px/.test(saCluster), 'SA cluster has a console header bar');
+  ok(/#cluster-footer\{[^}]*height:50px/.test(saCluster), 'SA cluster has a console footer');
+  ok(/#cluster-logo::after\{[^}]*SAN ANDREAS/.test(saCluster), 'SA cluster header brands SAN ANDREAS (no VC logo)');
+  ok(/#cluster-limit::before\{[^}]*SPEED LIMIT/.test(saCluster), 'SA cluster uses a US-style limit sign');
+  ok(/\.sasp\{[^}]*width:576px/.test(saCluster), 'SA cluster docks the real Spotify widget right');
+  ok(/#spotify-pane\{[^}]*width:1920px[^}]*height:720px/.test(saCluster),
+    'SA cluster Spotify surface is the 1920x720 stage, not viewport units');
+  ok(!/100dvh|100vw/.test(saCluster), 'SA cluster has no viewport-unit survivors');
+// stage lifecycle: teardown runs before build so a stale home never yanks
+// the shared map/Spotify nodes out of the stage just entered
+{
+  const am = appSrc.slice(appSrc.indexOf('function applyAppMode'));
+  const tC = am.indexOf('teardownClusterStage();');
+  const tD = am.indexOf('teardownDashboardStage();');
+  const bD = am.indexOf('buildDashboardStage();');
+  const bC = am.indexOf('buildClusterStage();');
+  ok(tC !== -1 && tD !== -1 && bD !== -1 && bC !== -1, 'applyAppMode manages both stages');
+  ok(tC < bD && tD < bD && tC < bC && tD < bC,
+    'applyAppMode tears down stages before building (cluster<->dashboard handoff)');
+  ok(/home\.next && home\.next\.parentNode === home\.parent/.test(appSrc),
+    'stage teardowns tolerate a stale home.next (no insertBefore crash)');
+}
+  ok(/#cluster-minimap\{[^}]*width:576px[^}]*height:446px/.test(saCluster), 'SA cluster frames the live map in gold');
+  ok(saCluster.includes('HERO-locked'), 'SA cluster documents that it avoids the HERO-locked dashboard.css');
+}
+
+console.log(`\n${pass} passed, ${fail} failed`);
+process.exit(fail ? 1 : 0);

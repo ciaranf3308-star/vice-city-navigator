@@ -995,19 +995,32 @@ body.cluster-mode #drawer{display:none!important}
 /* keep the menu button clickable above the cluster layer */
 body.cluster-mode #menu-btn{position:fixed;top:12px;left:12px;z-index:32}
 
-body.cluster-mode #cluster-ui{position:fixed;inset:0;z-index:30;pointer-events:none}
+/* ============ Cluster Mode: fixed 1920x720 automotive stage ============
+   Same pattern as the dashboard (#dash-stage): the cluster is authored
+   once at 1920x720 and JS zooms the whole canvas to fit — the internal
+   layout never changes with screen size, so the cluster always keeps the
+   dashboard's aspect ratio. #map and #spotify-pane are reparented into
+   the stage on entry (like DASH_STAGE_NODES) and restored on exit. */
+body.cluster-mode #cluster-ui{position:fixed;left:0;top:0;width:1920px;height:720px;overflow:hidden;
+  z-index:30;pointer-events:none}
 body.cluster-mode #cluster-ui button{pointer-events:auto}
 /* menu + toasts stay above the cluster layer */
 body.cluster-mode #menu-panel{z-index:40}
+/* the shared widget surface, reparented into the stage: full-canvas overlay
+   layer; each theme docks its widget artwork inside it. */
+body.cluster-mode #spotify-pane{position:absolute;left:0;top:0;width:1920px;height:720px;
+  right:auto;bottom:auto;max-width:none;min-width:0;pointer-events:none;z-index:31;overflow:hidden;
+  container-type:size;padding:0}
+body.cluster-mode #spotify-stage{position:absolute;inset:0;pointer-events:none;width:auto;height:auto}
 
 /* minimap: live map cropped into a rect (left) */
-body.cluster-mode #map{position:fixed;left:56px;top:140px;width:440px;height:440px;border-radius:18px}
-body.cluster-mode #cluster-minimap{position:fixed;left:56px;top:140px;width:440px;height:440px;
+body.cluster-mode #map{position:absolute;left:56px;top:140px;width:440px;height:440px;border-radius:18px}
+body.cluster-mode #cluster-minimap{position:absolute;left:56px;top:140px;width:440px;height:440px;
   border-radius:18px;border:3px solid rgba(255,255,255,.28);box-shadow:0 8px 40px rgba(0,0,0,.55);
   pointer-events:none;z-index:31}
 
 /* hero speed (center) */
-body.cluster-mode #cluster-speed{position:fixed;left:50%;top:47%;transform:translate(-50%,-50%);
+body.cluster-mode #cluster-speed{position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);
   text-align:center;z-index:32}
 body.cluster-mode #cluster-speed-num{font-size:300px;line-height:.95;font-weight:800;color:#fff;
   text-shadow:0 6px 34px rgba(0,0,0,.65);font-variant-numeric:tabular-nums}
@@ -1017,13 +1030,13 @@ body.cluster-mode #cluster-speed-unit{font-size:38px;letter-spacing:10px;color:r
 body.cluster-mode #cluster-speed.over #cluster-speed-num{color:#ffd34d}
 
 /* posted limit: European sign language, hidden when unknown */
-body.cluster-mode #cluster-limit:not([hidden]){position:fixed;left:50%;top:47%;transform:translate(235px,118px);
+body.cluster-mode #cluster-limit:not([hidden]){position:absolute;left:50%;top:47%;transform:translate(235px,118px);
   z-index:32;width:104px;height:104px;border-radius:50%;background:#fff;border:10px solid #d8232a;
   display:flex;align-items:center;justify-content:center}
 body.cluster-mode #cluster-limit-num{font-size:44px;font-weight:800;color:#111}
 
 /* next manoeuvre (above the speed) */
-body.cluster-mode #cluster-turn:not([hidden]){position:fixed;left:50%;top:96px;transform:translateX(-50%);
+body.cluster-mode #cluster-turn:not([hidden]){position:absolute;left:50%;top:96px;transform:translateX(-50%);
   display:flex;align-items:center;gap:26px;z-index:32;max-width:900px}
 body.cluster-mode #cluster-turn-arrow{width:104px;height:104px;flex:0 0 auto;
   filter:drop-shadow(0 4px 14px rgba(0,0,0,.6))}
@@ -1035,7 +1048,7 @@ body.cluster-mode #cluster-turn-instruction{font-size:26px;color:rgba(255,255,25
 
 
 /* exit */
-body.cluster-mode #cluster-mode-exit{position:fixed;right:32px;bottom:32px;z-index:33;
+body.cluster-mode #cluster-mode-exit{position:absolute;right:32px;bottom:32px;z-index:33;
   font-size:24px;padding:14px 26px;border-radius:999px;border:1px solid rgba(255,255,255,.25);
   background:rgba(10,10,14,.6);color:#fff;cursor:pointer}
 
