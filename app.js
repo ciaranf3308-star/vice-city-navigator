@@ -123,6 +123,88 @@ const themeBlipUrl = semantic =>
 const destBlipUrl = () =>
   themeBlipUrl(dest && dest.semantic ? dest.semantic : 'waypoint');
 
+/* ---------------- cluster mode: live regions ----------------
+   Every region reuses the existing live state — no parallel variables,
+   no second watchers, no duplicate Spotify polling. */
+
+/* Pure: the next-manoeuvre payload for the cluster turn block, or null
+   when nothing should show. Same arrow/instruction logic as the nav
+   banner and voice. */
+function nextTurnData(next, dMan) {
+  if (!next || dMan === undefined || dMan === null) return null;
+  return {
+    kind: arrowKind(next.maneuver),
+    dist: fmtDist(dMan),
+    road: roadName(next),
+    instruction: instrText(next),
+  };
+}
+
+/* The manoeuvre the cluster should show right now, from live nav state. */
+function currentTurnData() {
+  if (!navActive || !steps.length) return null;
+  const nextIdx = Math.min(stepIdx + 1, steps.length - 1);
+  const next = steps[nextIdx];
+  const dMan = userPos ? haversine(userPos, next.loc) : next.dist;
+  return nextTurnData(next, dMan);
+}
+
+function syncClusterTurn(data) {
+  const t = $('cluster-turn');
+  if (!t) return;
+  const show = clusterLayoutActive() && navActive && !!data;
+  t.hidden = !show;
+  if (!show) return;
+  const ar = $('cluster-turn-arrow');
+  if (ar) ar.innerHTML = arrowSvg(data.kind);
+  const d = $('cluster-turn-distance');
+  if (d && d.textContent !== data.dist) d.textContent = data.dist;
+  const r = $('cluster-turn-road');
+  if (r) { if (r.textContent !== data.road) r.textContent = data.road; r.hidden = !data.road; }
+  const ins = $('cluster-turn-instruction');
+  if (ins && ins.textContent !== data.instruction) ins.textContent = data.instruction;
+}
+
+/* Small now-playing readout. Same SpotifyCore state the dashboard skins
+   use — no second polling loop. Quiet placeholder when disconnected. */
+function syncClusterMusic() {
+  const box = $('cluster-music');
+  if (!box || !clusterLayoutActive()) return;
+  const core = window.SpotifyCore;
+  const s = core && core.getState ? core.getState() : null;
+  const track = s && s.item;
+  const art = $('cluster-music-art'), title = $('cluster-music-title'), artist = $('cluster-music-artist');
+  if (!core || !core.isConnected || !core.isConnected() || !track || !track.id) {
+    box.classList.add('disconnected');
+    box.classList.remove('playing');
+    if (art) art.removeAttribute('src');
+    if (title && title.textContent !== 'Spotify') title.textContent = 'Spotify';
+    if (artist && artist.textContent !== 'Not connected') artist.textContent = 'Not connected';
+    return;
+  }
+  box.classList.remove('disconnected');
+  box.classList.toggle('playing', !!s.is_playing);
+  const imgs = (track.album && track.album.images) || [];
+  const src = (imgs[1] || imgs[0] || {}).url || '';
+  if (art) {
+    if (src && art.getAttribute('src') !== src) art.setAttribute('src', src);
+    else if (!src) art.removeAttribute('src');
+  }
+  const tname = track.name || '';
+  const aname = (track.artists || []).map(a => a.name).filter(Boolean).join(', ');
+  if (title && title.textContent !== tname) title.textContent = tname;
+  if (artist && artist.textContent !== aname) artist.textContent = aname;
+}
+
+/* Push the current live state into every cluster region — called when
+   entering cluster mode so the shell is correct immediately, not just
+   after the next GPS fix, nav update or Spotify poll. */
+function refreshClusterLive() {
+  updateSpeedo();
+  syncClusterTurn(currentTurnData());
+  syncClusterMusic();
+}
+
 /* ---------------- maneuver arrows (original SVG) ---------------- */
 function themeArrowColor() {
   const t = wsTheme();
@@ -689,28 +771,54 @@ function parseMaxspeed(s) {
 }
 /* </test-extract> */
 function updateSpeedo() {
-  if (!document.body.classList.contains('dashboard-mode')) return;
-  const el = $('speedo');
-  if (!el || !userPos) return; // no fix yet: stay hidden
-  el.hidden = false;
+  if (!speedDisplayActive()) return;
   const kmh = (typeof gpsSpeed === 'number' && !isNaN(gpsSpeed) && gpsSpeed >= 0)
     ? Math.round(gpsSpeed * 3.6) : null;
-  const num = $('speedo-num');
-  const txt = kmh === null ? '–' : String(kmh);
-  if (num.textContent !== txt) num.textContent = txt;
-  const lim = $('speedo-limit');
-  if (speedLimitKmh) {
-    lim.hidden = false;
-    const ltxt = String(speedLimitKmh);
-    if ($('speedo-limit-num').textContent !== ltxt) $('speedo-limit-num').textContent = ltxt;
-    el.classList.toggle('over', kmh !== null && kmh > speedLimitKmh);
-  } else {
-    lim.hidden = true;
-    el.classList.remove('over');
+  if (dashboardLayoutActive()) {
+    const el = $('speedo');
+    if (!el || !userPos) return; // no fix yet: stay hidden
+    el.hidden = false;
+    const num = $('speedo-num');
+    const txt = kmh === null ? '–' : String(kmh);
+    if (num.textContent !== txt) num.textContent = txt;
+    const lim = $('speedo-limit');
+    if (speedLimitKmh) {
+      lim.hidden = false;
+      const ltxt = String(speedLimitKmh);
+      if ($('speedo-limit-num').textContent !== ltxt) $('speedo-limit-num').textContent = ltxt;
+      el.classList.toggle('over', kmh !== null && kmh > speedLimitKmh);
+    } else {
+      lim.hidden = true;
+      el.classList.remove('over');
+    }
   }
+  if (clusterLayoutActive()) updateClusterSpeed(kmh);
+}
+
+/* Cluster hero speed. Same gpsSpeed, same speedLimitKmh — no second
+   watcher. '--' when unknown, never a stale value; the limit badge hides
+   cleanly when unknown; overspeed is a subtle state shift, never a
+   flashing alarm. */
+function updateClusterSpeed(kmh) {
+  const num = $('cluster-speed-num');
+  if (num) {
+    const txt = kmh === null ? '--' : String(kmh);
+    if (num.textContent !== txt) num.textContent = txt;
+  }
+  const lim = $('cluster-limit');
+  if (lim) {
+    if (speedLimitKmh) {
+      lim.hidden = false;
+      const ltxt = String(speedLimitKmh);
+      const ln = $('cluster-limit-num');
+      if (ln && ln.textContent !== ltxt) ln.textContent = ltxt;
+    } else lim.hidden = true;
+  }
+  const sp = $('cluster-speed');
+  if (sp) sp.classList.toggle('over', kmh !== null && !!speedLimitKmh && kmh > speedLimitKmh);
 }
 async function maybeFetchSpeedLimit(lat, lon) {
-  if (!document.body.classList.contains('dashboard-mode')) return;
+  if (!speedDisplayActive()) return;
   const key = lat.toFixed(3) + ',' + lon.toFixed(3);
   if (limitCache.has(key)) {
     if (speedLimitKmh !== limitCache.get(key)) { speedLimitKmh = limitCache.get(key); updateSpeedo(); }
@@ -1530,15 +1638,16 @@ function endNav() {
   syncDashTrip();
   try { const vc = $('vc-maneuver'); if (vc) vc.hidden = true; } catch (e) {}
   if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
-  /* Hand the GPS watch back to the passive dashboard feed so the speed
-     cluster keeps working after the route ends. */
-  if (document.body.classList.contains('dashboard-mode') && 'geolocation' in navigator) {
+  /* Hand the GPS watch back to the passive speed feed so the readout keeps
+     working after the route ends (dashboard speedo or cluster hero). */
+  if (speedDisplayActive() && 'geolocation' in navigator) {
     try {
       watchId = navigator.geolocation.watchPosition(onPos, onPosErr,
         { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 });
     } catch (e) {}
   }
   resetWanted(); // drive's over: the heat dies with it
+  syncClusterTurn(null);
   if (window.VCNVoice) VCNVoice.cancel();
   setUiMode('explore');
   if (map) {
@@ -1690,6 +1799,7 @@ function updateBanner(dMan) {
       const va = $('vc-man-arrive'); if (va) va.textContent = etaString(remainDur);
     }
   } catch (e) {}
+  syncClusterTurn(currentTurnData());
 }
 
 function maybeAnnounce(dMan) {
@@ -2019,6 +2129,7 @@ function applyAppMode() {
   else teardownDashboardStage();
   const cui = $('cluster-ui');
   if (cui) cui.hidden = !clu;
+  if (clu) refreshClusterLive();
   layoutDashMenu(); // dock (or undock) the body-level menu panel
   layoutDashDrawer(); // dock (or undock) the planning drawer
   const pane = $('spotify-pane');
@@ -2029,17 +2140,22 @@ function applyAppMode() {
     document.body.classList.remove('radio-off');
     setDashTab('map');
     tickDashClock(); refreshDashWeather(); syncDashTrip(); queueDashLocality();
-    /* Passive GPS watch for the speed cluster (and heading/POIs outside nav).
-       Navigation restarts this same watch with its own options; endNav hands
-       it back here so the speedo keeps living after a route ends. */
+  }
+  /* One passive GPS watch serves the dashboard speedo and the cluster hero
+     number alike (and heading/POIs outside nav). Navigation restarts this
+     same watch with its own options; endNav hands it back here so the speed
+     readout keeps living after a route ends. Never a second watcher. */
+  if (speedDisplayActive()) {
     if (watchId === null && 'geolocation' in navigator) {
       try {
         watchId = navigator.geolocation.watchPosition(onPos, onPosErr,
           { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 });
       } catch (e) {}
     }
-  } else {
-    if (watchId !== null) { try { navigator.geolocation.clearWatch(watchId); } catch (e) {} watchId = null; }
+  } else if (watchId !== null) {
+    try { navigator.geolocation.clearWatch(watchId); } catch (e) {} watchId = null;
+  }
+  if (!dash) {
     const sp = $('speedo'); if (sp) sp.hidden = true;
     resetWanted();
   }
@@ -2417,6 +2533,9 @@ async function initSpotify() {
   syncSpotifyMenu();
   try {
     SpotifyCore.on('auth', syncSpotifyMenu);
+    // Cluster now-playing follows the same polled state — no second loop.
+    SpotifyCore.on('auth', syncClusterMusic);
+    SpotifyCore.on('state', syncClusterMusic);
     // Auth/token failures were completely silent — the menu just sat on
     // "Not connected" with no explanation. Surface them.
     SpotifyCore.on('error', err => {

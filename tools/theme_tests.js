@@ -434,6 +434,120 @@ for (const id of ['cluster-speed', 'cluster-speed-num', 'cluster-speed-unit', 'c
   ok(indexSrc.includes(`id="${id}"`), `cluster region present: ${id}`);
 }
 
+// cluster live regions (commit 2): stub-DOM behavioural tests
+const liveEls = {};
+function stubEl() {
+  const cls = new Set(), attrs = {};
+  return {
+    textContent: '', hidden: false,
+    classList: { toggle(c, f) { f ? cls.add(c) : cls.delete(c); }, contains(c) { return cls.has(c); },
+                 add(c) { cls.add(c); }, remove(c) { cls.delete(c); } },
+    getAttribute(k) { return k in attrs ? attrs[k] : null; },
+    setAttribute(k, v) { attrs[k] = String(v); },
+    removeAttribute(k) { delete attrs[k]; },
+  };
+}
+for (const id of ['cluster-speed', 'cluster-speed-num', 'cluster-limit', 'cluster-limit-num',
+                  'cluster-turn', 'cluster-turn-arrow', 'cluster-turn-distance', 'cluster-turn-road',
+                  'cluster-turn-instruction', 'cluster-music', 'cluster-music-art', 'cluster-music-title',
+                  'cluster-music-artist']) liveEls[id] = stubEl();
+const liveBox = {
+  URLSearchParams,
+  $: (id) => liveEls[id] || null,
+  wsTheme: () => null, // generic arrow branch
+  window: {},
+};
+vm.createContext(liveBox);
+for (const fn of ['clusterLayoutActive', 'updateClusterSpeed', 'syncClusterTurn', 'syncClusterMusic',
+                  'nextTurnData', 'arrowKind', 'arrowSvg', 'themeArrowColor', 'fmtDist', 'roadName', 'instrText']) {
+  vm.runInContext(extractFn(appSrc, fn), liveBox, { filename: 'app.js#' + fn });
+}
+// speed visibility rules
+liveBox.appMode = 'cluster'; liveBox.speedLimitKmh = null;
+liveBox.updateClusterSpeed(null);
+ok(liveEls['cluster-speed-num'].textContent === '--', 'cluster speed: -- when unknown (never stale)');
+liveEls['cluster-speed-num'].textContent = '99'; // stale value must be overwritten
+liveBox.updateClusterSpeed(null);
+ok(liveEls['cluster-speed-num'].textContent === '--', 'cluster speed: stale value replaced by --');
+ok(liveEls['cluster-limit'].hidden === true, 'cluster limit: hidden when unknown');
+liveBox.speedLimitKmh = 80;
+liveBox.updateClusterSpeed(84);
+ok(liveEls['cluster-speed-num'].textContent === '84', 'cluster speed: integer km/h');
+ok(liveEls['cluster-limit'].hidden === false && liveEls['cluster-limit-num'].textContent === '80',
+  'cluster limit: shown when known');
+ok(liveEls['cluster-speed'].classList.contains('over'), 'cluster overspeed: subtle over state');
+liveBox.updateClusterSpeed(70);
+ok(!liveEls['cluster-speed'].classList.contains('over'), 'cluster: no over state under the limit');
+liveBox.speedLimitKmh = null;
+liveBox.updateClusterSpeed(120);
+ok(liveEls['cluster-limit'].hidden === true && !liveEls['cluster-speed'].classList.contains('over'),
+  'cluster: no limit badge and no over state when limit unknown');
+// next-manoeuvre payload (pure)
+const turnStep = { maneuver: { type: 'turn', modifier: 'left' }, ref: 'R403', name: '', loc: [0, 0] };
+const td = liveBox.nextTurnData(turnStep, 350);
+ok(td && td.kind === 'left' && td.dist === '350 m' && td.road === 'R403' && /Turn left/.test(td.instruction),
+  'nextTurnData: arrow kind, distance, road, instruction from live step');
+ok(liveBox.nextTurnData(null, 10) === null, 'nextTurnData: null with no step');
+ok(liveBox.nextTurnData(turnStep, undefined) === null, 'nextTurnData: null with no distance');
+const td2 = liveBox.nextTurnData({ maneuver: { type: 'continue' }, ref: '', name: '', loc: [0, 0] }, 1200);
+ok(td2 && td2.road === '' && td2.dist === '1.2 km', 'nextTurnData: empty road, km formatting');
+// turn block visibility
+liveBox.appMode = 'normal'; liveBox.navActive = true;
+liveBox.syncClusterTurn(td);
+ok(liveEls['cluster-turn'].hidden === true, 'cluster turn: hidden outside cluster mode');
+liveBox.appMode = 'cluster'; liveBox.navActive = false;
+liveBox.syncClusterTurn(td);
+ok(liveEls['cluster-turn'].hidden === true, 'cluster turn: hidden when not navigating');
+liveBox.navActive = true;
+liveBox.syncClusterTurn(td);
+ok(liveEls['cluster-turn'].hidden === false, 'cluster turn: shown when navigating in cluster mode');
+ok(liveEls['cluster-turn-distance'].textContent === '350 m', 'cluster turn: distance rendered');
+ok(liveEls['cluster-turn-road'].textContent === 'R403' && liveEls['cluster-turn-road'].hidden === false,
+  'cluster turn: road rendered');
+ok(/Turn left/.test(liveEls['cluster-turn-instruction'].textContent), 'cluster turn: instruction rendered');
+ok(/<svg/.test(liveEls['cluster-turn-arrow'].textContent || '') === false, 'cluster turn: arrow is markup not text');
+liveBox.syncClusterTurn(td2);
+ok(liveEls['cluster-turn-road'].hidden === true, 'cluster turn: road row hidden when no road');
+liveBox.syncClusterTurn(null);
+ok(liveEls['cluster-turn'].hidden === true, 'cluster turn: hidden when nav ends');
+// music: quiet disconnected state vs live track
+liveBox.appMode = 'cluster';
+liveBox.window.SpotifyCore = null;
+liveBox.syncClusterMusic();
+ok(liveEls['cluster-music'].classList.contains('disconnected'), 'cluster music: disconnected state');
+ok(liveEls['cluster-music-title'].textContent === 'Spotify' &&
+   liveEls['cluster-music-artist'].textContent === 'Not connected',
+  'cluster music: quiet placeholder, no fake track');
+liveBox.window.SpotifyCore = {
+  isConnected: () => true,
+  getState: () => ({ is_playing: true, item: { id: 't1', name: 'Midnight City',
+    artists: [{ name: 'M83' }], album: { images: [{ url: 'big' }, { url: 'mid' }] } } }),
+};
+liveBox.syncClusterMusic();
+ok(!liveEls['cluster-music'].classList.contains('disconnected'), 'cluster music: live state clears placeholder');
+ok(liveEls['cluster-music-title'].textContent === 'Midnight City', 'cluster music: title from Spotify state');
+ok(liveEls['cluster-music-artist'].textContent === 'M83', 'cluster music: artist from Spotify state');
+ok(liveEls['cluster-music-art'].getAttribute('src') === 'mid', 'cluster music: art from Spotify state');
+// wiring (source-level guards)
+ok(/maybeFetchSpeedLimit\(lat, lon\) \{\s*\n\s*if \(!speedDisplayActive\(\)\)/.test(appSrc),
+  'speed limit lookup runs in cluster mode too');
+ok(appSrc.includes('syncClusterTurn(currentTurnData())'), 'nav banner feeds the cluster turn block');
+ok(appSrc.includes("SpotifyCore.on('state', syncClusterMusic)"), 'cluster music follows Spotify state events');
+ok(appSrc.includes('if (clu) refreshClusterLive();'), 'entering cluster mode refreshes every live region');
+ok(/if \(speedDisplayActive\(\)\) \{\s*\n\s*if \(watchId === null/.test(appSrc),
+  'passive speed watch: single shared watchId for dashboard + cluster');
+// no watcher is created inside the per-fix updaters
+for (const fn of ['updateSpeedo', 'updateClusterSpeed', 'maybeFetchSpeedLimit', 'syncClusterTurn', 'syncClusterMusic']) {
+  ok(!/watchPosition/.test(extractFn(appSrc, fn)), `no geolocation watcher inside ${fn}`);
+}
+ok(cssSrc.includes('body.cluster-mode #map'), 'cluster CSS frames the live map');
+ok(cssSrc.includes('#cluster-speed-num'), 'cluster CSS sizes the hero speed');
+ok(cssSrc.includes('#cluster-turn'), 'cluster CSS positions the turn block');
+ok(cssSrc.includes('#cluster-music'), 'cluster CSS sizes the now-playing panel');
+ok(cssSrc.includes('body.cluster-mode #drawer'), 'cluster hides the planning drawer');
+ok(cssSrc.includes('body.cluster-mode #search-bar'), 'cluster hides the search pill');
+ok(cssSrc.includes('body.cluster-mode #menu-btn'), 'cluster keeps the menu button reachable');
+
 // index.html: menu-only Spotify in normal mode, dashboard mount point
 ok(!indexSrc.includes('music-btn') && !indexSrc.includes('drive-music-btn'), 'no player buttons in chrome');
 ok(!indexSrc.includes('spotify-close'), 'no close button on pane');

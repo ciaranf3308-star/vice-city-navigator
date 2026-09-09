@@ -976,3 +976,78 @@ html body.dashboard-mode.theme-san-andreas #menu-panel{border-radius:0}
   .wslyr *,.wslyr *::before,.wslyr *::after{animation:none!important;transition:none!important}
   .wslyr-ghost-run{opacity:.12}
 }
+/* ================= Cluster Mode =================
+   Minimal driving HUD on the 1920x720 canvas language. The SAME #map is
+   framed into the minimap rect with pure CSS — no reparenting, no second
+   MapLibre instance, no recreate on mode switches. Per-theme overrides
+   (font, accent, border language, texture) live in themes/* and only
+   restyle this shared geometry. */
+body.cluster-mode{overflow:hidden;background:#000}
+/* hide exploration / dashboard chrome: cluster is a HUD, not a browser.
+   the menu button stays — it is the way back to themes, Spotify, modes. */
+body.cluster-mode #map-tools,
+body.cluster-mode #search-bar,
+body.cluster-mode #drive-hud,
+body.cluster-mode #speedo,
+body.cluster-mode #wanted,
+body.cluster-mode #fx,
+body.cluster-mode #drawer{display:none!important}
+/* keep the menu button clickable above the cluster layer */
+body.cluster-mode #menu-btn{position:fixed;top:12px;left:12px;z-index:32}
+
+body.cluster-mode #cluster-ui{position:fixed;inset:0;z-index:30;pointer-events:none}
+body.cluster-mode #cluster-ui button{pointer-events:auto}
+/* menu + toasts stay above the cluster layer */
+body.cluster-mode #menu-panel{z-index:40}
+
+/* minimap: live map cropped into a rect (left) */
+body.cluster-mode #map{position:fixed;left:56px;top:140px;width:440px;height:440px;border-radius:18px}
+body.cluster-mode #cluster-minimap{position:fixed;left:56px;top:140px;width:440px;height:440px;
+  border-radius:18px;border:3px solid rgba(255,255,255,.28);box-shadow:0 8px 40px rgba(0,0,0,.55);
+  pointer-events:none;z-index:31}
+
+/* hero speed (center) */
+body.cluster-mode #cluster-speed{position:fixed;left:50%;top:47%;transform:translate(-50%,-50%);
+  text-align:center;z-index:32}
+body.cluster-mode #cluster-speed-num{font-size:300px;line-height:.95;font-weight:800;color:#fff;
+  text-shadow:0 6px 34px rgba(0,0,0,.65);font-variant-numeric:tabular-nums}
+body.cluster-mode #cluster-speed-unit{font-size:38px;letter-spacing:10px;color:rgba(255,255,255,.72);
+  margin-top:6px}
+/* overspeed: subtle state shift only — never flashing */
+body.cluster-mode #cluster-speed.over #cluster-speed-num{color:#ffd34d}
+
+/* posted limit: European sign language, hidden when unknown */
+body.cluster-mode #cluster-limit:not([hidden]){position:fixed;left:50%;top:47%;transform:translate(235px,118px);
+  z-index:32;width:104px;height:104px;border-radius:50%;background:#fff;border:10px solid #d8232a;
+  display:flex;align-items:center;justify-content:center}
+body.cluster-mode #cluster-limit-num{font-size:44px;font-weight:800;color:#111}
+
+/* next manoeuvre (above the speed) */
+body.cluster-mode #cluster-turn:not([hidden]){position:fixed;left:50%;top:96px;transform:translateX(-50%);
+  display:flex;align-items:center;gap:26px;z-index:32;max-width:900px}
+body.cluster-mode #cluster-turn-arrow{width:104px;height:104px;flex:0 0 auto;
+  filter:drop-shadow(0 4px 14px rgba(0,0,0,.6))}
+body.cluster-mode #cluster-turn-arrow svg{width:100%;height:100%}
+body.cluster-mode #cluster-turn-distance{font-size:60px;font-weight:800;color:#fff;line-height:1;
+  text-shadow:0 4px 18px rgba(0,0,0,.6)}
+body.cluster-mode #cluster-turn-road{font-size:34px;font-weight:700;color:#ffd34d;margin-top:6px}
+body.cluster-mode #cluster-turn-instruction{font-size:26px;color:rgba(255,255,255,.85);margin-top:2px}
+
+/* now playing (right) — small, quiet when disconnected */
+body.cluster-mode #cluster-music{position:fixed;right:56px;top:140px;width:400px;z-index:32;
+  display:flex;gap:18px;align-items:center;background:rgba(8,8,12,.55);border:1px solid rgba(255,255,255,.14);
+  border-radius:16px;padding:16px 18px;backdrop-filter:blur(6px)}
+body.cluster-mode #cluster-music-art{width:96px;height:96px;border-radius:12px;object-fit:cover;flex:0 0 auto;
+  background:rgba(255,255,255,.08)}
+body.cluster-mode #cluster-music.disconnected #cluster-music-art{display:none}
+body.cluster-mode #cluster-music-title{font-size:30px;font-weight:700;color:#fff;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;max-width:250px}
+body.cluster-mode #cluster-music-artist{font-size:22px;color:rgba(255,255,255,.65);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;max-width:250px}
+body.cluster-mode #cluster-music.disconnected #cluster-music-title,
+body.cluster-mode #cluster-music.disconnected #cluster-music-artist{color:rgba(255,255,255,.4)}
+
+/* exit */
+body.cluster-mode #cluster-mode-exit{position:fixed;right:32px;bottom:32px;z-index:33;
+  font-size:24px;padding:14px 26px;border-radius:999px;border:1px solid rgba(255,255,255,.25);
+  background:rgba(10,10,14,.6);color:#fff;cursor:pointer}
