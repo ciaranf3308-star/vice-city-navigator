@@ -1929,7 +1929,7 @@ function syncDashCompass() {
 }
 /* Bottom-bar trip readout, fed from the same numbers as the drive HUD. */
 function syncDashTrip(remainSec) {
-  const eta = $('dash-eta'), dst = $('dash-dest');
+  const eta = $('dash-eta'), dst = $('dash-dest'), sub = $('dash-sub');
   if (!eta || !dst) return;
   if (navActive && typeof remainSec === 'number') {
     const mins = Math.max(1, Math.round(remainSec / 60));
@@ -1937,6 +1937,7 @@ function syncDashTrip(remainSec) {
     eta.innerHTML = '<span class="eta-label">Arrive in</span><span class="eta-time">' + mins + ' min</span>';
     const label = (typeof dest !== 'undefined' && dest && dest.label) ? dest.label : '';
     dst.textContent = (label || 'EN ROUTE').slice(0, 28);
+    if (sub) sub.textContent = ''; /* destination owns the plate during nav */
   } else {
     /* VC/SA/RDR2 idle: compass only, no arrival placeholder. Other themes keep theirs. */
     const isVC = document.body.classList.contains('theme-vice-city');
@@ -1946,13 +1947,14 @@ function syncDashTrip(remainSec) {
     eta.innerHTML = compassOnly ? '' : '<span class="eta-label">Arrive in</span><span class="eta-time">—</span>';
     eta.style.display = compassOnly ? 'none' : '';
     /* dst (locality plate) is owned by syncDashLocality when not navigating —
-       don't wipe it here. */
+       don't wipe it here; just restore the county subtitle if nav cleared it. */
+    if (sub && !sub.textContent && dashCounty) sub.textContent = dashCounty;
   }
 }
 
 /* Bottom-bar locality plate: reverse-geocode the map centre (debounced,
    ~100m grid) so the chrome names the current town like the benchmark. */
-let dashLocTimer = null, dashLocKey = '';
+let dashLocTimer = null, dashLocKey = '', dashCounty = '';
 function queueDashLocality() {
   clearTimeout(dashLocTimer);
   dashLocTimer = setTimeout(syncDashLocality, 1200);
@@ -1990,9 +1992,19 @@ async function syncDashLocality() {
          plate says CLANE, not CLANE ED. Likewise "County Kildare" -> KILDARE. */
       .replace(/\s+ED$/i, '').replace(/^county\s+/i, '');
     /* Natural case here — each theme's CSS owns the casing (GTA V renders
-       this plate in script, which must not be uppercased). */
-    if (name && (typeof navActive === 'undefined' || !navActive)) el.textContent = name.slice(0, 28);
-    else if (nearDublin) el.textContent = 'DUBLIN';
+       this plate in script, which must not be uppercased). The county goes
+       to #dash-sub for themes that show a region line (GTA V). */
+    const sub = $('dash-sub');
+    if (name && (typeof navActive === 'undefined' || !navActive)) {
+      el.textContent = name.slice(0, 28);
+      dashCounty = a.county || '';
+      if (sub) sub.textContent = dashCounty;
+    }
+    else if (nearDublin) {
+      el.textContent = 'DUBLIN';
+      dashCounty = 'County Dublin';
+      if (sub) sub.textContent = dashCounty;
+    }
   } catch (e) {
     if (nearDublin && el.textContent.trim() === '—') el.textContent = 'DUBLIN';
   }

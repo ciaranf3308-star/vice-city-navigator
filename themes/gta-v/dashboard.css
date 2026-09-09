@@ -184,27 +184,31 @@ body.dashboard-mode.theme-gta-v .dash-tabs button.on{
 body.dashboard-mode.theme-gta-v .dash-tabs button.on::before{opacity:1;filter:drop-shadow(0 0 8px rgba(44,230,140,.45))}
 body.dashboard-mode.theme-gta-v .dash-tabs button.on::after{background:#2ce68c;box-shadow:0 0 12px rgba(44,230,140,.75)}
 body.dashboard-mode.theme-gta-v .dash-tabs button.on span{color:#f2f5f2}
-/* Center: locality plate — big SignPainter script like the game's own
-   place names, with the mint rule beneath (menu-section treatment).
-   Shows the real town name from #dash-dest (reverse-geocoded). */
+/* Center: locality lockup — the game's own area-intro treatment.
+   Big SignPainter script for the town, a mint hairline, then the county
+   in tracked-out Chalet ("BLAINE COUNTY" energy). Floats free on the bar:
+   no plate, no box, pause-menu minimal. */
 body.dashboard-mode.theme-gta-v .dash-dest{
-  flex:1;display:flex;align-items:center;justify-content:center;
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
   min-width:0;position:relative;
 }
 body.dashboard-mode.theme-gta-v #dash-dest{
   position:relative;
   font-family:'SignPainter','Chalet London',cursive;
-  font-size:64px;color:#f2f5f2;
-  white-space:nowrap;pointer-events:none;line-height:1;
+  font-size:58px;color:#f2f5f2;line-height:1;
   text-shadow:0 2px 16px rgba(0,0,0,.85), 0 0 28px rgba(44,230,140,.16);
-  /* kill the shared neon plate chrome (cyan border/glow/angled clip) —
-     GTA V's place name floats free like the game's own map script */
   background:none;border:0;border-radius:0;box-shadow:none;clip-path:none;padding:0;
+  white-space:nowrap;pointer-events:none;max-width:100%;overflow:hidden;text-overflow:ellipsis;
 }
-body.dashboard-mode.theme-gta-v .dash-dest::before{
-  content:'';position:absolute;left:50%;top:calc(50% + 42px);transform:translateX(-50%);
-  width:120px;height:2px;background:#2ce68c;
-  box-shadow:0 0 10px rgba(44,230,140,.65);
+body.dashboard-mode.theme-gta-v #dash-dest::after{
+  content:'';display:block;width:110px;height:2px;background:#2ce68c;
+  box-shadow:0 0 10px rgba(44,230,140,.65);margin:9px auto 0;
+}
+body.dashboard-mode.theme-gta-v #dash-sub{
+  display:block;margin-top:9px;
+  font-family:'Chalet Comprime','Arial Narrow',sans-serif;font-weight:700;
+  font-size:14px;letter-spacing:6px;text-transform:uppercase;
+  color:rgba(242,245,242,.6);white-space:nowrap;
 }
 /* Map controls: slim pause-menu circles with hairline rules and a mint
    press state — the user asked for these back. */
