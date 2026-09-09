@@ -14,7 +14,11 @@
    - user's WAYSTATION FRONTIER MAPS badge as the header centerpiece
    - dusk scenery feathered at the bar edges, grain for material depth */
 body.theme-rdr2 .dest-pin{ background-image:url('assets/themes/rdr2/blips/waypoint.png'); }
-body.dashboard-mode.theme-rdr2 #search-bar{top:calc(116px + env(safe-area-inset-top))}
+/* search + map zoom tools: hidden in RDR2 dashboard (like VC) —
+   the footer chrome owns zoom, and the purple/blue defaults clash
+   with the frontier palette */
+body.dashboard-mode.theme-rdr2 #search-bar{display:none}
+body.dashboard-mode.theme-rdr2 #map-tools{display:none}
 
 /* ============ HEADER: the frontier title plate ============
    Stepped silhouette — the centre plate drops 14px below the bar,
