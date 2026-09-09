@@ -1,8 +1,12 @@
 package com.waystation.auto
 
 import android.Manifest
+import android.app.AlertDialog
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.webkit.GeolocationPermissions
@@ -33,18 +37,58 @@ class MainActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         refreshLocationState()
-        if (!locationGranted) {
-            requestPermissions(
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                REQ_LOCATION
-            )
-        }
+        // Fresh launch only (not rotation): if location isn't granted, push
+        // for it — every single time, until it's fixed.
+        if (savedInstanceState == null) ensureLocationPermission()
         val wv = WebView(this)
         webView = wv
         configureWebView(wv)
         setContentView(wv)
         if (savedInstanceState != null) wv.restoreState(savedInstanceState)
         else wv.loadUrl(WEB_URL)
+    }
+
+    /**
+     * Every cold start while location is not granted: force the issue.
+     * Android permanently blocks the system permission dialog after two
+     * denials, so in that state we show our own prompt with a one-tap jump
+     * to Settings instead — the closest the OS allows to "ask every time".
+     */
+    private fun ensureLocationPermission() {
+        if (locationGranted) return
+        val prefs = getSharedPreferences(PREFS, MODE_PRIVATE)
+        val asked = prefs.getBoolean(KEY_LOCATION_ASKED, false)
+        if (!asked ||
+            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)
+        ) {
+            prefs.edit().putBoolean(KEY_LOCATION_ASKED, true).apply()
+            requestPermissions(
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                REQ_LOCATION
+            )
+        } else {
+            showLocationSettingsPrompt()
+        }
+    }
+
+    private fun showLocationSettingsPrompt() {
+        AlertDialog.Builder(this)
+            .setTitle("Location is off")
+            .setMessage(
+                "WayStation needs location for the blue dot, the ◎ button " +
+                "and nearby places. Android won't show the permission popup " +
+                "again, but you can switch it on in Settings."
+            )
+            .setPositiveButton("Open Settings") { _, _ ->
+                startActivity(
+                    Intent(
+                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.parse("package:$packageName")
+                    )
+                )
+            }
+            .setNegativeButton("Not now", null)
+            .show()
     }
 
     private fun refreshLocationState() {
@@ -56,7 +100,15 @@ class MainActivity : Activity() {
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<out String>, grantResults: IntArray
     ) {
-        if (requestCode == REQ_LOCATION) refreshLocationState()
+        if (requestCode == REQ_LOCATION) {
+            refreshLocationState()
+            if (locationGranted) {
+                // The page may have requested geolocation while the system
+                // dialog was still up and been denied — reload so it fires
+                // cleanly now that permission exists.
+                webView?.reload()
+            }
+        }
     }
 
     private fun configureWebView(wv: WebView) {
@@ -166,5 +218,7 @@ class MainActivity : Activity() {
         private const val WEB_URL =
             CarWebViewRenderer.WAYSTATION_ORIGIN + "/vice-city-navigator/"
         private const val REQ_LOCATION = 41
+        private const val PREFS = "waystation_prefs"
+        private const val KEY_LOCATION_ASKED = "location_permission_asked"
     }
 }
