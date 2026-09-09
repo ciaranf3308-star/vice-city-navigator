@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v172"), 'SW theme cache v172');
+ok(swSrc.includes("ws-theme-v173"), 'SW theme cache v173');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -1845,13 +1845,13 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
 // VC cluster reuses the dashboard bars + sunset panorama (2026-09-09)
 {
   const fs = require('fs');
-  ok(fs.existsSync('themes/vice-city/dashboard/cluster-sunset.jpg'), 'VC cluster sunset panorama asset exists');
-  ok(swSrc.includes('themes/vice-city/dashboard/cluster-sunset.jpg'), 'SW precaches the VC cluster sunset');
+  ok(fs.existsSync('themes/vice-city/dashboard/cluster-oceandrive.jpg'), 'VC cluster Ocean Drive panorama asset exists');
+  ok(swSrc.includes('themes/vice-city/dashboard/cluster-oceandrive.jpg'), 'SW precaches the VC cluster backdrop');
   ok(appSrc.includes("const CLUSTER_STAGE_NODES = ['map', 'spotify-pane', 'dash-topbar', 'dash-bottombar']"),
     'dash bars reparent into the cluster stage');
-  ok(/body\.cluster-mode\.theme-vice-city #cluster-ui\{[^}]*cluster-sunset\.jpg[^}]*\/ 100% 100%/.test(cssSrc),
-    'VC cluster paints the sunset 1:1 on the stage (no crop: art is 8:3, stage is 8:3)');
-  ok(/body\.cluster-mode\.theme-vice-city::before\{[^}]*cluster-sunset\.jpg[^}]*blur/.test(cssSrc),
+  ok(/body\.cluster-mode\.theme-vice-city #cluster-ui\{[^}]*cluster-oceandrive\.jpg[^}]*\/ 100% 100%/.test(cssSrc),
+    'VC cluster paints the backdrop 1:1 on the stage (no crop: art is 8:3, stage is 8:3)');
+  ok(/body\.cluster-mode\.theme-vice-city::before\{[^}]*cluster-oceandrive\.jpg[^}]*blur/.test(cssSrc),
     'VC cluster letterbox is the same art blurred+dimmed, not a second crop');
   ok(/body\.cluster-mode\.theme-vice-city #map\{[^}]*width:432px;height:458px/.test(cssSrc),
     'VC cluster map fills its nav card frame');

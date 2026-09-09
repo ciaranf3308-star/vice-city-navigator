@@ -389,16 +389,17 @@ body.theme-vice-city .menu-section details.advanced summary{color:#eafcff}
    Neon-noir instrument cluster: header bar, nav card, hero speed,
    power arc, music widget, tab footer. Shared DOM only restyled. */
 
-/* ---- backdrop: the sunset panorama, uncropped ----
+/* ---- backdrop: the Ocean Drive panorama, uncropped ----
    Your art is 2048x768 (8:3) — exactly the stage's aspect ratio — so it
-   paints the 1920x720 stage 1:1 with zero cropping. Outside the stage the
-   same art sits heavily blurred + dimmed as ambient fill, so the letterbox
-   carries its colours instead of a second hard crop or black bars. */
+   paints the 1920x720 stage 1:1 with zero cropping and zero distortion.
+   Outside the stage the same art sits heavily blurred + dimmed as ambient
+   fill, so the letterbox carries its colours instead of a second hard
+   crop or black bars. */
 body.cluster-mode.theme-vice-city{background:#05020c}
 body.cluster-mode.theme-vice-city::before{content:'';position:fixed;inset:-70px;z-index:0;
-  pointer-events:none;background:url('dashboard/cluster-sunset.jpg') center / cover no-repeat;
+  pointer-events:none;background:url('dashboard/cluster-oceandrive.jpg') center / cover no-repeat;
   filter:blur(45px) brightness(.5) saturate(1.25)}
-body.cluster-mode.theme-vice-city #cluster-ui{background:#05020c url('dashboard/cluster-sunset.jpg') center / 100% 100% no-repeat}
+body.cluster-mode.theme-vice-city #cluster-ui{background:#05020c url('dashboard/cluster-oceandrive.jpg') center / 100% 100% no-repeat}
 /* ---- instrument field: the speed cluster emerges from the art ----
    No card, no rectangle — layered falloff only: a deep field behind the
    digits, a faint reflection below, pink/cyan ambience at the flanks,
