@@ -1,16 +1,16 @@
 {
   "build": "polish-2026-09-09",
-  "shell": "ws-shell-v63",
-  "theme": "ws-theme-v163",
+  "shell": "ws-shell-v64",
+  "theme": "ws-theme-v164",
   "assets": {
     "index.html": "2c45d04cf0e135da",
-    "styles.css": "0f9aa0032dd3a018",
-    "app.js": "a259293f28283012",
-    "sw.js": "c31b93b49d49027b",
+    "styles.css": "043f0815c604ab85",
+    "app.js": "2d4a4e9c66c2ebaa",
+    "sw.js": "05a23af1b465567e",
     "themes/vice-city/spotify-skin.css": "541717ee14ca80e5",
     "themes/gta-v/dashboard.css": "62c322d3b4dbe0be",
-    "themes/rdr2/dashboard.css": "46a961457cb08ff9",
-    "themes/rdr2/spotify-skin.css": "62c545312d5309d0",
+    "themes/rdr2/dashboard.css": "8de2772297a83f29",
+    "themes/rdr2/spotify-skin.css": "9eb660c86d5fb48d",
     "themes/san-andreas/spotify-skin.css": "24b24f28ab89043c",
     "themes/san-andreas/phone.css": "352af525d3f26acd",
     "themes/vice-city/dashboard.css": "ebfc063e218bc457"

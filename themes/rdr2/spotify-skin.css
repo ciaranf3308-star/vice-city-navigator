@@ -55,10 +55,14 @@
   pointer-events: none;
 }
 
-/* ---------- lyric stage: on the dark wood ---------- */
+/* ---------- lyric stage: on the dark wood ----------
+   Measured wood band (fractions of the hud): x 0.52-0.90, y 0.50-0.66;
+   parchment starts ~0.67. The stage owns the UPPER wood; the transport
+   coins sit on the LOWER wood just above the torn parchment — composed
+   onto the artwork, never floating on the bare background. */
 .rdsp-lyrics {
   position: absolute; z-index: 3;
-  left: 48%; right: 8%; top: 38%; bottom: 32%;
+  left: 48%; right: 8%; top: 37%; bottom: 45%;
   overflow: hidden;
   display: flex; flex-direction: column; justify-content: center;
   text-align: center; gap: 1cqh;
@@ -142,10 +146,14 @@
   font-size: 2.6cqw; letter-spacing: .05em; color: #5a4632;
 }
 
-/* ---------- transport: brass coins below the parchment ---------- */
+/* ---------- transport: brass coins on the dark wood, below the lyrics -----
+   Measured from the hud: the wood band runs y ~0.50-0.66 at x 0.52-0.90;
+   the row sits centred in it (bottom:34% -> bottom edge at 0.66, just
+   above the torn parchment's top edge ~0.67). Previously bottom:1.5%
+   parked the coins on the transparent zone below the parchment. */
 .rdsp-controls {
   position: absolute; z-index: 3;
-  left: 0; right: 0; bottom: 1.5%;
+  left: 46%; right: 4%; bottom: 34%;
   display: flex; align-items: center; justify-content: center; gap: 4cqw;
 }
 .rdsp-tbtn {
@@ -175,7 +183,7 @@
    keeps the idle note glyph behind it. */
 .rdsp-idle {
   position: absolute; z-index: 4;
-  left: 48%; right: 8%; top: 38%; bottom: 32%;
+  left: 48%; right: 8%; top: 37%; bottom: 45%;
   display: flex; align-items: center; justify-content: center;
   padding: 0 2%;
   pointer-events: none;
@@ -186,15 +194,18 @@
 .rdsp.is-idle .rdsp-lyrics { display: none; }
 .rdsp.is-idle .rdsp-controls { display: none; }
 .rdsp.is-idle .rdsp-progress { display: none; }
+/* Connect CTA: brass-and-leather plaque with a gold rule — never flat
+   modern red. Lives in the lyric stage (dark wood right of the frame). */
 .rdsp-connect-btn {
   pointer-events: auto;
   padding: 1.1cqh 3.5cqw;
   max-width: 100%;
   font-family: 'Kirsty', 'RDR Lino', Georgia, serif;
   font-size: 3.4cqw; letter-spacing: .06em; text-transform: uppercase;
-  color: #ede6d6; background: rgba(184,53,47,.92);
-  border: 2px solid #2a1f16; border-radius: 6px; cursor: pointer;
-  box-shadow: 0 3px 10px rgba(0,0,0,.6);
+  color: #f2e6c8; text-shadow: 0 2px 2px rgba(0,0,0,.8);
+  background: linear-gradient(180deg, #4a3826 0%, #2e2115 60%, #241a10 100%);
+  border: 2px solid #d8b36a; border-radius: 4px; cursor: pointer;
+  box-shadow: 0 3px 10px rgba(0,0,0,.65), inset 0 1px 0 rgba(216,179,106,.4);
   white-space: nowrap; text-align: center;
 }
 .rdsp-connect-btn:active { transform: scale(.96); }

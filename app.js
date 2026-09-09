@@ -1727,6 +1727,7 @@ function closeMenu() { $('menu-panel').hidden = true; }
    Route, markers, POIs, discovery, voice and the Spotify session all
    survive the switch. */
 const APP_MODE_KEY = 'ws.appMode';
+const WX_CACHE_KEY = 'vcn.wx.last'; // last-known dashboard weather
 let appMode = 'normal'; // normal | dashboard
 
 function initAppMode() {
@@ -2086,18 +2087,44 @@ async function refreshDashWeather() {
   try {
     const r = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat.toFixed(3) +
       '&longitude=' + lng.toFixed(3) + '&current=temperature_2m,weather_code&timezone=Europe%2FDublin');
-    if (!r.ok) return;
+    if (!r.ok) throw new Error('wx http ' + r.status);
     const j = await r.json();
     const temp = Math.round(j.current.temperature_2m);
     const key = temp + '|' + j.current.weather_code;
     if (key === dashWxLast) return;
     dashWxLast = key;
-    const t = $('dash-temp'), ic = $('dash-wxicon');
-    if (t) t.textContent = temp + '°C';
-    if (ic) ic.innerHTML = dashWxIcon(j.current.weather_code);
-  } catch (e) { /* weather is decorative: never break the dash */ }
+    paintDashWeather(temp, j.current.weather_code);
+    try { localStorage.setItem(WX_CACHE_KEY, JSON.stringify({ t: temp, code: j.current.weather_code, ts: Date.now() })); } catch (e) {}
+  } catch (e) {
+    /* A failed fetch must not strand the dash on '--°C': show last-known
+       and retry once shortly instead of waiting for the 10-minute tick. */
+    paintDashWeatherCache();
+    scheduleDashWeatherRetry();
+  }
+}
+function paintDashWeather(temp, code) {
+  const t = $('dash-temp'), ic = $('dash-wxicon');
+  if (t) t.textContent = temp + '°C';
+  if (ic) ic.innerHTML = dashWxIcon(code);
+}
+function paintDashWeatherCache() {
+  try {
+    const c = JSON.parse(localStorage.getItem(WX_CACHE_KEY) || 'null');
+    if (c && typeof c.t === 'number') paintDashWeather(c.t, c.code);
+  } catch (e) {}
+}
+let dashWxRetry = null;
+function scheduleDashWeatherRetry() {
+  if (dashWxRetry) return;
+  dashWxRetry = setTimeout(() => { dashWxRetry = null; refreshDashWeather(); }, 30000);
 }
 function initDashWeather() {
+  /* Paint last-known immediately (6h freshness) so a cold boot never
+     shows the '--°C' placeholder while the first fetch is in flight. */
+  try {
+    const c = JSON.parse(localStorage.getItem(WX_CACHE_KEY) || 'null');
+    if (c && typeof c.t === 'number' && Date.now() - c.ts < 6 * 3600 * 1000) paintDashWeather(c.t, c.code);
+  } catch (e) {}
   refreshDashWeather();
   setInterval(refreshDashWeather, 10 * 60 * 1000);
 }
@@ -2430,6 +2457,15 @@ function wireControls() {
   // planning drawer
   $('drawer-close').addEventListener('click', closeDrawer);
   $('drawer-handle').addEventListener('click', closeDrawer);
+
+  // POI card thumbnail: never an empty frame. If the blip art fails to
+  // load (missing/failed asset), hide the <img>; a fresh successful load
+  // shows it again. Shared — every theme benefits.
+  const poiBlip = $('poi-blip');
+  if (poiBlip) {
+    poiBlip.addEventListener('error', () => { poiBlip.style.display = 'none'; });
+    poiBlip.addEventListener('load', () => { poiBlip.style.display = ''; });
+  }
 
   // drive HUD
   $('drive-menu-btn').addEventListener('click', toggleMenu);

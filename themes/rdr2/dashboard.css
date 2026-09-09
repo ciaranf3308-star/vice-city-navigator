@@ -244,7 +244,7 @@ body.theme-rdr2 .vc-title span{ color:#d8b36a; text-shadow:0 2px 0 rgba(0,0,0,.5
 /* ============ RDR2 menu panel: frontier furniture ============
    Dark leather, parchment ink, blood-red accents, gold rules, sharp
    corners, engraved type. */
-body.theme-rdr2{--sw-on:#b8352f}
+body.theme-rdr2{--sw-on:#d8b36a} /* brass, not neon red */
 body.theme-rdr2 #menu-panel{
   background:linear-gradient(170deg,rgba(48,35,24,.98),rgba(28,20,13,.98));
   border-right:2px solid #8a6f4d;border-radius:0;
@@ -332,3 +332,109 @@ body.theme-rdr2 #drive-bar{
   box-shadow:0 4px 16px rgba(0,0,0,.6);
 }
 body.theme-rdr2 #trip-meta{color:#e8c877;text-shadow:0 1px 0 rgba(0,0,0,.7)}
+
+/* ============ frontier sheets: planning drawer / bottom sheet / toast ====
+   The planning drawer, POI card, route card, icon-picker sheet and toast
+   were still wearing Vice-City-era plum + neon. Frontier language:
+   dark leather surfaces, brass/gold rules, bone ink. Layout untouched. */
+body.theme-rdr2 #drawer{
+  background:linear-gradient(170deg,rgba(52,38,26,.98),rgba(30,21,14,.98));
+  border:1px solid #8a6f4d;border-top:2px solid #d8b36a;
+  box-shadow:0 18px 50px rgba(0,0,0,.65), inset 0 0 40px rgba(0,0,0,.45);
+  backdrop-filter:none;-webkit-backdrop-filter:none;
+}
+@media (max-width:700px){
+  body.theme-rdr2 #drawer{border-radius:0;border-bottom:none}
+}
+body.theme-rdr2 #drawer-handle{background:rgba(216,179,106,.75)}
+body.theme-rdr2 #drawer-close{
+  background:radial-gradient(circle at 35% 30%, #2b251b, #131009 75%);
+  border:2px solid rgba(216,179,106,.7);border-radius:50%;color:#e8d9b0;
+  box-shadow:0 2px 8px rgba(0,0,0,.6), inset 0 1px 1px rgba(216,179,106,.25);
+  text-shadow:0 1px 2px rgba(0,0,0,.85);
+}
+body.theme-rdr2 #search{
+  background:rgba(0,0,0,.45);border:1.5px solid #8a6f4d;border-radius:6px;
+  color:#e8d9b0;
+}
+body.theme-rdr2 #search::placeholder{color:rgba(232,217,176,.45)}
+body.theme-rdr2 #search:focus{
+  border-color:#d8b36a;box-shadow:0 0 12px rgba(216,179,106,.3);
+}
+body.theme-rdr2 #results li{border-bottom:1px solid rgba(138,111,77,.35)}
+body.theme-rdr2 #results li small{color:#d8b36a}
+body.theme-rdr2 #results li strong{color:#e8d9b0}
+body.theme-rdr2 #results li:active{background:rgba(216,179,106,.1)}
+body.theme-rdr2 #recent-wrap h4,body.theme-rdr2 #saved-wrap h4{color:#d8b36a}
+body.theme-rdr2 #recent-list li,body.theme-rdr2 #saved-list li{
+  border-bottom:1px solid rgba(138,111,77,.35);
+}
+body.theme-rdr2 #recent-list li strong,body.theme-rdr2 #saved-list li strong{color:#e8d9b0}
+body.theme-rdr2 #recent-list li:active,body.theme-rdr2 #saved-list li:active{
+  background:rgba(216,179,106,.1);
+}
+/* primary action: brass plaque, not neon pink */
+body.theme-rdr2 .big-btn{
+  background:linear-gradient(180deg,#e0bd76 0%,#c39a52 55%,#a67c3e 100%);
+  color:#241a10;border:1px solid #6e4f22;border-radius:6px;
+  box-shadow:0 4px 14px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,240,200,.55);
+  text-shadow:0 1px 0 rgba(255,240,200,.4);
+}
+/* POI card: brass-framed blip thumbnail, brass meta line */
+body.theme-rdr2 .poi-head img{
+  filter:none;border:2px solid #8a6f4d;border-radius:4px;
+  background:rgba(0,0,0,.45);padding:3px;
+  box-shadow:0 2px 6px rgba(0,0,0,.6);
+}
+body.theme-rdr2 .poi-head small{color:#d8b36a}
+body.theme-rdr2 #poi-name{color:#e8d9b0;text-shadow:0 1px 0 rgba(0,0,0,.8)}
+body.theme-rdr2 .route-meta{color:#e8c877}
+body.theme-rdr2 .route-meta span{color:#8a6f4d}
+body.theme-rdr2 #dest-label{color:#e8d9b0}
+/* toast: dark leather + gold rule */
+body.theme-rdr2 #toast{
+  background:linear-gradient(170deg,rgba(52,38,26,.98),rgba(30,21,14,.98));
+  border:1.5px solid #d8b36a;border-radius:8px;color:#e8d9b0;
+  box-shadow:0 8px 28px rgba(0,0,0,.6);
+}
+/* traffic incident card: brass rule */
+body.theme-rdr2 #incident-card{
+  background:linear-gradient(170deg,rgba(52,38,26,.98),rgba(30,21,14,.98));
+  border:1.5px solid #8a6f4d;border-radius:8px;color:#e8d9b0;
+  box-shadow:0 8px 28px rgba(0,0,0,.6);
+}
+body.theme-rdr2 #incident-title{color:#e8c877}
+/* icon-picker sheet: same leather */
+body.theme-rdr2 #marker-sheet{
+  background:rgba(30,21,14,.98);border:1px solid #8a6f4d;border-radius:8px;
+  box-shadow:0 18px 60px rgba(0,0,0,.65);
+}
+body.theme-rdr2 #marker-label{
+  background:rgba(0,0,0,.45);border:1px solid #8a6f4d;border-radius:6px;color:#e8d9b0;
+}
+body.theme-rdr2 .icon-pick.picked{
+  border-color:#d8b36a;background:rgba(216,179,106,.12);
+  box-shadow:0 0 12px rgba(216,179,106,.3);
+}
+/* ============ drive instruction: wrap, never truncate mid-word ========
+   Theme-scoped: other themes keep their single-line ellipsis. */
+body.theme-rdr2 #next-instr{
+  white-space:normal;overflow:visible;text-overflow:clip;
+}
+/* ============ toggles: brass + bone, never grey knobs / neon red ======= */
+body.theme-rdr2 .menu-section .row input[type="checkbox"]{
+  background:rgba(0,0,0,.55);border-color:#8a6f4d;
+}
+body.theme-rdr2 .menu-section .row input[type="checkbox"]::after{
+  background:#d8cba6;opacity:.85;box-shadow:0 1px 3px rgba(0,0,0,.7);
+}
+body.theme-rdr2 .menu-section .row input[type="checkbox"]:checked{
+  background:rgba(216,179,106,.28);border-color:#d8b36a;
+  box-shadow:0 0 12px rgba(216,179,106,.35);
+}
+body.theme-rdr2 .menu-section .row input[type="checkbox"]:checked::after{
+  background:#e8c877;opacity:1;box-shadow:0 0 10px rgba(216,179,106,.8);
+}
+body.theme-rdr2 .menu-section .row input[type="checkbox"]:focus-visible{
+  outline-color:#d8b36a;
+}

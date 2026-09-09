@@ -58,6 +58,10 @@
   font-weight:400;font-style:normal;font-display:swap;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+/* The hidden attribute must beat component display rules (e.g. .ghost-btn
+   sets display:block, which otherwise resurrects hidden buttons — the menu
+   showed Connect AND Disconnect Spotify at once). Applies to every theme. */
+[hidden]{display:none!important}
 html,body{height:100%;margin:0;overscroll-behavior:none}
 body{
   font-family:'Outfit',system-ui,-apple-system,sans-serif;
@@ -173,11 +177,13 @@ body.theme-gta-v #search-bar{
   font-family:'Chalet London',system-ui,sans-serif;letter-spacing:.5px;
 }
 body.theme-gta-v #search-bar span{opacity:.6}
-/* RDR2: frontier furniture — dark wood, gold rules */
+/* RDR2: frontier coin — dark leather radial, aged-gold ring, bone glyph.
+   One chrome for the menu button in every mode (explore + drive). */
 body.theme-rdr2 #menu-btn{
-  background:rgba(42,31,22,.96);color:#e8d9b0;
-  border:2px solid #d8b36a;border-radius:6px;
-  box-shadow:0 0 0 1px rgba(20,12,6,.9),0 4px 12px rgba(0,0,0,.55);
+  background:radial-gradient(circle at 35% 30%, #2b251b, #131009 75%);
+  border:2px solid rgba(216,179,106,.55);border-radius:50%;color:#e8d9b0;
+  box-shadow:0 2px 8px rgba(0,0,0,.6), inset 0 1px 1px rgba(216,179,106,.2);
+  text-shadow:0 1px 2px rgba(0,0,0,.85);
 }
 body.theme-rdr2 #search-bar{
   background:rgba(42,31,22,.96);color:#e8d9b0;
