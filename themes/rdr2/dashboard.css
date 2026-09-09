@@ -203,7 +203,7 @@ body.dashboard-mode.theme-rdr2 .dash-tabs button.on{
 /* trip + zoom: grouped right — zoom snug against the trip cluster,
    tabs stay centered, placename plate owns the left */
 body.dashboard-mode.theme-rdr2 .dash-zoom{
-  position:absolute;right:170px;top:0;bottom:0;z-index:2;
+  position:absolute;right:170px;top:5px;bottom:0;z-index:2;
   display:flex;align-items:center;gap:10px;padding:10px 8px;
 }
 body.dashboard-mode.theme-rdr2 .dash-zoom button{
