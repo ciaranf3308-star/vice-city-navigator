@@ -68,7 +68,7 @@
 /* ---------- track info on the dark panel under the album ---------- */
 .vcsp-track {
   position: absolute; z-index: 3;
-  left: 6%; right: 64%; top: 71%;
+  left: 6%; right: 64%; top: 72%;
   text-align: left;
 }
 .vcsp-title {
@@ -89,7 +89,7 @@
 /* ---------- progress on the dark panel ---------- */
 .vcsp-progress {
   position: absolute; z-index: 3;
-  left: 6%; right: 64%; top: 80.5%;
+  left: 6%; right: 64%; top: 81.5%;
 }
 .vcsp-bar { position: relative; height: 2.2cqh; cursor: pointer; touch-action: none; }
 .vcsp-bar::before {
@@ -117,7 +117,7 @@
 /* ---------- transport on the dark panel ---------- */
 .vcsp-controls {
   position: absolute; z-index: 3;
-  left: 6%; right: 64%; top: 87%; bottom: 2%;
+  left: 6%; right: 64%; top: 85%; bottom: 6%;
   display: flex; align-items: center; justify-content: center; gap: 2.5cqw;
   background: none; padding: 0;
 }
