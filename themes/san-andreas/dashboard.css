@@ -120,28 +120,11 @@ body.dashboard-mode.theme-san-andreas .dash-tabs button.on::after{
 body.dashboard-mode.theme-san-andreas .dash-tabs button.on svg{
   filter:none;width:26px;height:26px;
 }
-/* 5th tab (settings): the art has only 4 slots, so the unpositioned
-   button was rendering on top of the map tab (pre-existing collision,
-   visible in the v2 audit before-shots). Park it as a gold console coin
-   on the black stretch between the 4th slot and the star plate. It is
-   the only way to open the menu in dash mode, so it must stay reachable. */
-body.dashboard-mode.theme-san-andreas .dash-tabs button:nth-child(5){
-  left:712px;top:6px;width:46px;height:46px;border-radius:50%;
-  background:radial-gradient(circle at 35% 30%,#1c2614,#0b0e07 78%);
-  border:2px solid rgba(216,169,78,.85);color:#f0e6c8;
-  box-shadow:0 2px 8px rgba(0,0,0,.6), inset 0 1px 1px rgba(216,169,78,.25);
-}
-body.dashboard-mode.theme-san-andreas .dash-tabs button:nth-child(5) svg{
-  width:24px;height:24px;
-}
-body.dashboard-mode.theme-san-andreas .dash-tabs button:nth-child(5).on{
-  color:#e8c56a;border-color:#e8c56a;
-  box-shadow:0 0 14px rgba(232,163,61,.5), inset 0 1px 1px rgba(232,163,61,.3);
-}
-body.dashboard-mode.theme-san-andreas .dash-tabs button:nth-child(5).on::before,
-body.dashboard-mode.theme-san-andreas .dash-tabs button:nth-child(5).on::after{
-  display:none;
-}
+/* 4 tabs for the art's 4 slots (map / radio / phone / settings):
+   the dead vehicle tab was removed 2026-09-09, so settings takes the
+   4th slot with the standard gold-chamfer active treatment — the
+   parked console coin is retired. Settings stays reachable: it is
+   the only way to open the menu in dash mode. */
 /* generic web-map zoom/locate cluster: REMOVED, not recolored */
 body.dashboard-mode.theme-san-andreas .dash-zoom{display:none}
 /* locality: plain cream text in the art's star plate (x770-1135, y62-109) */

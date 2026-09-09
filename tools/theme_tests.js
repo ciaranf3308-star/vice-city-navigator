@@ -171,8 +171,8 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v64"), 'SW shell cache v63');
-ok(swSrc.includes("ws-theme-v164"), 'SW theme cache v163');
+ok(swSrc.includes("ws-shell-v65"), 'SW shell cache v65');
+ok(swSrc.includes("ws-theme-v165"), 'SW theme cache v165');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -319,6 +319,24 @@ ok(/\.vcsp-controls\s*\{[^}]*bottom:\s*([0-9.]+)%/.test(vcSkinCssCode) &&
 ok(vcSkinCssCode.includes('.vcsp-idle') && !vcSkinCssCode.includes('vcsp-connect-pill'), 'VC idle/connect lives inside the widget, no generic card');
 ok(vcSkinJs.includes('vcsp-idle') && !vcSkinJsCode.includes('vcsp-connect\'') && !vcSkinJsCode.includes('vcsp-connect"'), 'VC skin JS renders the in-widget idle state');
 
+/* ---------- VC phone polish (2026-09-09): the dashboard-only skin left
+   the phone widget catastrophically oversized (giant neon panel,
+   truncated text). phone.css docks it as a compact bottom sheet that
+   reuses the hud.png openings at phone width. */
+const vcPhoneSrc = fs.readFileSync(path.join(REPO, 'themes/vice-city/phone.css'), 'utf8');
+ok(/theme-vice-city:not\(\.dashboard-mode\) #spotify-pane\{[^}]*bottom:0/.test(vcPhoneSrc),
+  'VC phone Spotify pane docks as a bottom sheet (map stays visible)');
+ok(/theme-vice-city:not\(\.dashboard-mode\) \.vcsp\{[^}]*max-width:430px/.test(vcPhoneSrc),
+  'VC phone widget is compact (not the 670px dashboard object)');
+ok(!/background-size:\s*cover/.test(vcPhoneSrc), 'VC phone skin never crops the concept art');
+
+/* ---------- dead vehicle tab (2026-09-09): removed from the bar markup;
+   SA's explicit nth-child slots renumber — settings takes the 4th slot
+   and the parked console coin is retired. */
+const saDashCss = fs.readFileSync(path.join(REPO, 'themes/san-andreas/dashboard.css'), 'utf8');
+ok(!/\.dash-tabs button:nth-child\(5\)/.test(saDashCss), 'SA: no 5th-tab rules remain after vehicle removal');
+ok(/\.dash-tabs button:nth-child\(4\)\{left:555px\}/.test(saDashCss), 'SA: settings takes the 4th art slot');
+
 /* ---------- GTA V Spotify skin: the supplied art IS the widget ---------- */
 const gvSkinJs = fs.readFileSync(path.join(REPO, 'themes/gta-v/spotify-skin.js'), 'utf8');
 const gvSkinCss = fs.readFileSync(path.join(REPO, 'themes/gta-v/spotify-skin.css'), 'utf8');
@@ -379,6 +397,8 @@ ok(appSrc.includes('body.dataset.spotskin'), 'mount exposes the skin on <body> f
 ok(indexSrc.includes('id="dash-topbar"'), 'dashboard top status bar exists');
 ok(indexSrc.includes('id="dash-bottombar"'), 'dashboard bottom menu bar exists');
 ok(indexSrc.includes('data-dtab="phone"'), 'bottom bar has a PHONE tab');
+ok(!indexSrc.includes('data-dtab="vehicle"'), 'dead VEHICLE tab removed from the bottom bar (no handler ever existed)');
+ok(indexSrc.includes('themes/vice-city/phone.css'), 'VC phone chrome stylesheet linked');
 ok(indexSrc.includes('id="dash-temp"') && indexSrc.includes('id="dash-time"'), 'top bar has weather + clock slots');
 ok(indexSrc.includes('id="dash-zoom-in"') && indexSrc.includes('id="dash-zoom-out"') && indexSrc.includes('id="dash-locate"'), 'bottom bar carries zoom + locate');
 ok(appSrc.includes("'dash-topbar', 'dash-bottombar'"), 'bars are reparented into the dashboard stage');
@@ -667,8 +687,10 @@ ok(/theme-san-andreas \.dash-tabs button\.on::before\{[^}]*linear-gradient\(180d
   'SA active tab is a dark plate with a gold chamfer outline (2026-09-09 polish), not the solid cream slab');
 ok(/theme-san-andreas \.dash-tabs button\.on::after\{[^}]*data:image\/svg\+xml/.test(cssSrc),
   'SA active tab carries a gold diamond marker (2026-09-09 polish)');
-ok(/theme-san-andreas \.dash-tabs button:nth-child\(5\)\{[^}]*left:712px/.test(cssSrc),
-  'SA 5th dash tab (settings) is parked as a console coin — no longer overlapping the map tab');
+ok(!/theme-san-andreas \.dash-tabs button:nth-child\(5\)/.test(cssSrc),
+  'SA has 4 dash tabs after the dead vehicle tab removal (no 5th-tab rules)');
+ok(/theme-san-andreas \.dash-tabs button:nth-child\(4\)\{left:555px\}/.test(cssSrc),
+  'SA settings takes the 4th art slot (the parked console coin is retired)');
 ok(/theme-san-andreas #menu-panel::before\{[^}]*clip-path:polygon\(26px/.test(cssSrc),
   'SA dash menu drawer is a gold chamfered console (2026-09-09 polish), not a flat box');
 ok(/theme-san-andreas #menu-panel \.menu-head\{[^}]*grove-panel\.png/.test(cssSrc),

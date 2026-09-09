@@ -166,7 +166,6 @@ body.dashboard-mode.theme-gta-v .dash-tabs button::before{
 body.dashboard-mode.theme-gta-v .dash-tabs button[data-dtab="map"]::before{background-image:url('dashboard/tab-map.png')}
 body.dashboard-mode.theme-gta-v .dash-tabs button[data-dtab="radio"]::before{background-image:url('dashboard/tab-radio.png')}
 body.dashboard-mode.theme-gta-v .dash-tabs button[data-dtab="phone"]::before{background-image:url('dashboard/tab-phone.png')}
-body.dashboard-mode.theme-gta-v .dash-tabs button[data-dtab="vehicle"]::before{background-image:url('dashboard/tab-vehicle.png')}
 body.dashboard-mode.theme-gta-v .dash-tabs button[data-dtab="settings"]::before{background-image:url('dashboard/tab-settings.png')}
 body.dashboard-mode.theme-gta-v .dash-tabs button span{
   font-family:'Chalet Comprime','Arial Narrow',sans-serif;font-weight:600;

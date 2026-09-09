@@ -1,0 +1,65 @@
+/* ============================================================
+   Vice City phone chrome (2026-09-09 polish audit, item 1).
+
+   The dashboard Spotify skin (.vcsp, themes/vice-city/spotify-skin.css)
+   is authored at 670px for the car canvas — on a phone viewport it
+   rendered catastrophically oversized (giant neon panel, truncated
+   text). These phone-only rules reuse the SAME hud.png art
+   (1448x1086, transparent album cut-out) at phone width: the DOM
+   keeps its measured fractional openings, the widget docks as a
+   compact bottom sheet, and the transport buttons grow to touch
+   size. The map stays visible above the sheet.
+
+   Measured art geometry (fractions of hud.png, verified 2026-09-09):
+   - album cut-out interior : x 0.075-0.394, y 0.343-0.695
+   - dark panel (track/progress/transport): x 0.06-0.36, y 0.715-0.928
+   - bottom neon chrome starts y ~0.933 — keep DOM above 0.928
+   - lyric stage (sunset)   : x 0.41-0.95,  y 0.33-0.92
+
+   The panel is 21.3% of the widget height: the phone stack is
+   tightened vs dashboard (slightly smaller type, uniform transport
+   coins) so track + progress + transport all clear the chrome.
+   ============================================================ */
+
+/* bottom sheet: full-width dock, map interactive above it */
+html body.theme-vice-city:not(.dashboard-mode) #spotify-pane{
+  position:fixed;left:0;right:0;top:auto;bottom:0;width:auto;height:auto;
+  max-width:none;min-width:0;z-index:30;overflow:visible;
+  pointer-events:none;
+  /* size containment would collapse the auto height to zero and push
+     the widget off-screen — the sheet must size from its content */
+  container-type:normal;
+  padding:0 12px calc(10px + env(safe-area-inset-bottom));
+}
+html body.theme-vice-city:not(.dashboard-mode) #spotify-stage{
+  position:relative;left:auto;right:auto;top:auto;bottom:auto;
+  width:auto;height:auto;pointer-events:none;
+}
+/* compact widget: same art, same fractional openings, phone width */
+html body.theme-vice-city:not(.dashboard-mode) .vcsp{
+  position:relative;right:auto;top:auto;translate:none;
+  width:100%;max-width:430px;margin:0 auto;
+}
+/* dark-panel stack, tightened to clear the bottom chrome.
+   Measured budget (fractions of the 1448x1086 art): the album frame's
+   inner bottom edge is y 0.70, the bottom neon chrome starts y 0.933 —
+   track + progress + transport must live in 0.708-0.925. */
+html body.theme-vice-city:not(.dashboard-mode) .vcsp-track{top:70.8%}
+html body.theme-vice-city:not(.dashboard-mode) .vcsp-title{font-size:2.7cqw;line-height:1}
+html body.theme-vice-city:not(.dashboard-mode) .vcsp-artist{font-size:2cqw;margin-top:.4cqw}
+html body.theme-vice-city:not(.dashboard-mode) .vcsp-progress{top:79.4%}
+html body.theme-vice-city:not(.dashboard-mode) .vcsp-bar{height:1.6cqh}
+html body.theme-vice-city:not(.dashboard-mode) .vcsp-controls{top:82.6%;bottom:9.2%}
+/* transport: uniform touch coins (the dashboard's oversized middle
+   coin can't fit the phone panel next to the progress bar) */
+html body.theme-vice-city:not(.dashboard-mode) .vcsp-tbtn{
+  width:8cqw;height:8cqw;min-width:29px;min-height:29px;
+}
+html body.theme-vice-city:not(.dashboard-mode) .vcsp-tbtn.big{
+  width:8cqw;height:8cqw;min-width:29px;min-height:29px;
+}
+/* idle/connect lives in the lyric stage, as on dashboard — type
+   sized so the kicker + CTA + hint fit the phone stage */
+html body.theme-vice-city:not(.dashboard-mode) .vcsp-idle-kicker{font-size:4.6cqw}
+html body.theme-vice-city:not(.dashboard-mode) .vcsp-connect-btn{font-size:4.2cqw}
+html body.theme-vice-city:not(.dashboard-mode) .vcsp-idle-hint{font-size:2.9cqw}
