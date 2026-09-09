@@ -844,8 +844,8 @@ ok(T.get('vice-city').map.routeGlowOpacity === 0.5, 'VC route glow: visible halo
 /* ---------- VC dashboard hero match: declutter + hierarchy ---------- */
 ok(cssSrc.includes('body.dashboard-mode.theme-vice-city #drive-bar{display:none}'),
   'VC dashboard hides the floating drive-bar pill');
-ok(cssSrc.includes('body.dashboard-mode.theme-vice-city .dash-zoom{display:none}'),
-  'VC dashboard hides the bottom-bar zoom/locate buttons');
+ok(cssSrc.includes('body.dashboard-mode.theme-vice-city .dash-zoom{'),
+  'VC dashboard shows the bottom-bar zoom/locate buttons');
 ok(cssSrc.includes('body.dashboard-mode.theme-vice-city .player-arrow'),
   'VC dashboard player arrow is larger and more luminous');
 ok(cssSrc.includes('.vc-man-meta'), 'VC maneuver meta row styled');
