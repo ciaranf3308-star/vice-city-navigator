@@ -180,6 +180,8 @@ function refreshClusterLive() {
   buildClusterGauge();
   bindClusterTabs();
   startClusterClock();
+  /* Seat the radar N on the live bearing immediately. */
+  try { syncRadarNorth(map ? map.getBearing() : 0, 1); } catch (e) {}
 }
 
 /* ============ Vice City cluster hero ============
@@ -1090,7 +1092,30 @@ function onOrientation(e) {
     if (now - lastBearingPush > 500 && d > 3) {
       lastBearingPush = now;
       try { map.easeTo({ bearing: compassHeading, duration: 300 }); } catch (err) {}
+      syncRadarNorth(compassHeading, 300);
     }
+  }
+}
+/* Vice City cluster radar north cue: a small bezel N orbiting the rim.
+   The map is heading-up, so the N sits at the live bearing reversed from
+   top — always marking true north, never faked. Shortest-path rotation so
+   the bezel never does a full spin crossing 0/360. */
+let lastRadarNorth = 0;
+function syncRadarNorth(bearing, durationMs) {
+  if (!clusterLayoutActive() || !document.body.classList.contains('theme-vice-city')) return;
+  const ring = document.getElementById('cluster-radar-north');
+  if (!ring) return;
+  const b = ((bearing % 360) + 360) % 360;
+  let d = b - lastRadarNorth;
+  if (d > 180) d -= 360; else if (d < -180) d += 360;
+  lastRadarNorth += d;
+  const ms = Math.max(1, durationMs | 0);
+  ring.style.transition = `transform ${ms}ms ease`;
+  ring.style.transform = `rotate(${-lastRadarNorth}deg)`;
+  const s = ring.firstElementChild;
+  if (s) {
+    s.style.transition = `transform ${ms}ms ease`;
+    s.style.transform = `translateX(-50%) rotate(${lastRadarNorth}deg)`;
   }
 }
 /* iOS requires compass permission from inside a user gesture — startNav's
@@ -1906,6 +1931,7 @@ function onPos(pos) {
     if (now - lastCamMove > 900 && now - lastBearingPush > 500 && dh > 3) {
       lastBearingPush = now;
       try { map.easeTo({ bearing: heading, duration: 300 }); } catch (err) {}
+      syncRadarNorth(heading, 300);
     }
   }
   updateSpeedo(); // live speed readout (dashboard)
@@ -1920,8 +1946,12 @@ function onPos(pos) {
   // camera follow
   if (followMode && now - lastCamMove > 900 && map) {
     lastCamMove = now;
-    map.easeTo({ center: p, zoom: 16.5, pitch: 55,
-      bearing: bestBearing(heading), duration: 900 });
+    const camBearing = bestBearing(heading);
+    /* The VC cluster radar loses the rectangle's corners, so it rides a
+       touch wider than the dashboard follow cam. Dashboard untouched. */
+    map.easeTo({ center: p, zoom: clusterLayoutActive() ? 16.2 : 16.5, pitch: 55,
+      bearing: camBearing, duration: 900 });
+    syncRadarNorth(camBearing, 900);
   }
 
   // off-route detection

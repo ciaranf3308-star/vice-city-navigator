@@ -452,53 +452,73 @@ body.cluster-mode.theme-vice-city #cluster-footer{display:flex;align-items:cente
   background:none;border:none;box-shadow:none}
 body.cluster-mode.theme-vice-city #cluster-mode-exit{display:none}
 
-/* ---- nav card: a built-in instrument, not a map iframe ----
-   ~13% less visual mass (500x512 -> 460x486) so the centre breathes.
-   Material: neon-tube frame like the hero — a bright pink/cyan tube with
-   real glow, dark navy structure behind it, inward shadow falling toward
-   the live map. The map stays the content hero. */
-body.cluster-mode.theme-vice-city #cluster-minimap{left:24px;top:74px;width:460px;height:486px;z-index:30;
-  border-radius:18px;
-  background:linear-gradient(180deg,#0d0819,#070412);
-  border:3px solid transparent;
-  background:
-    linear-gradient(180deg,#0d0819,#070412) padding-box,
-    linear-gradient(135deg,#ff2d95 0%,#ff7ab8 30%,#01cdfe 70%,#5ef2ff 100%) border-box;
+/* ---- ROUND RADAR: Vice City's signature minimap ----
+   The SAME live MapLibre instance keeps square 440px geometry and is masked
+   into a true circle. The frame is a restrained layered ring — thin hot-pink
+   outer edge, fine cyan accent, dark navy separation — with a soft inward
+   shadow so the map feels physically inside the radar. The map stays the
+   content; the rings stay jewellery. */
+body.cluster-mode.theme-vice-city #cluster-minimap{left:14px;top:124px;width:460px;height:460px;z-index:30;
+  border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle at 50% 42%,#0e0a1c 0%,#06030e 72%);
+  border:2px solid rgba(255,45,149,.85);
   box-shadow:
-    inset 0 18px 36px rgba(0,0,0,.55),
-    inset 0 -18px 36px rgba(0,0,0,.55),
+    0 0 0 6px rgba(6,3,14,1),
+    0 0 0 7px rgba(1,205,254,.45),
     0 18px 44px rgba(0,0,0,.55),
-    0 0 22px rgba(255,45,149,.45),
-    0 0 60px rgba(255,45,149,.18),
-    0 0 22px rgba(1,205,254,.30)}
-/* the map fills the nav card (14px insets); when a turn is being announced
-   the turn header takes the card top and the map drops below it */
-body.cluster-mode.theme-vice-city #map{left:38px;top:88px;width:432px;height:458px;border-radius:8px;z-index:31}
-body.cluster-mode.theme-vice-city #cluster-ui:has(#cluster-turn:not([hidden])) #map{top:210px;height:336px}
-/* attribution: legally retained, visually a whisper on the map's edge */
+    0 0 20px rgba(255,45,149,.32),
+    0 0 64px rgba(255,45,149,.13)}
+/* the live map: square geometry, circular clip — no second map, no screenshots */
+body.cluster-mode.theme-vice-city #map{left:24px;top:134px;width:440px;height:440px;z-index:31;
+  border-radius:50%;overflow:hidden}
+/* inset assembly above the tiles: dark navy inner ring + soft map-edge falloff */
+body.cluster-mode.theme-vice-city #map::after{content:'';position:absolute;inset:0;border-radius:50%;
+  z-index:2;pointer-events:none;
+  box-shadow:
+    inset 0 0 0 9px rgba(4,2,10,.94),
+    inset 0 0 46px rgba(0,0,0,.50)}
+/* attribution: legally retained, tucked at the lower inside edge above the
+   inset shadow — the square corners are outside the circular clip */
+body.cluster-mode.theme-vice-city #map .maplibregl-ctrl-bottom-right{bottom:12px!important;right:50%!important;
+  transform:translateX(50%);z-index:3}
 body.cluster-mode.theme-vice-city #map .maplibregl-ctrl-attrib{font-size:9px!important;line-height:1.5;
   background:rgba(5,2,12,.55)!important;color:rgba(220,220,235,.50)!important;
-  padding:2px 8px;border-radius:6px 0 0 0}
+  padding:2px 8px;border-radius:6px}
 body.cluster-mode.theme-vice-city #map .maplibregl-ctrl-attrib a{color:rgba(220,220,235,.55)!important}
-/* turn header lives on the card top, visually attached to the minimap */
-body.cluster-mode.theme-vice-city #cluster-turn:not([hidden]){left:38px;top:88px;transform:none;z-index:32;
-  width:432px;max-width:none;display:flex;align-items:center;gap:16px}
-body.cluster-mode.theme-vice-city #cluster-turn-arrow{width:64px;height:64px;flex:0 0 auto}
+/* north cue: a small bezel N orbiting the rim — JS rotates it with the live
+   bearing so it always marks true north on the heading-up radar */
+body.cluster-mode.theme-vice-city #cluster-radar-north{display:block;position:absolute;left:14px;top:124px;
+  width:460px;height:460px;z-index:32;pointer-events:none}
+body.cluster-mode.theme-vice-city #cluster-radar-north span{position:absolute;top:15px;left:50%;
+  transform:translateX(-50%);
+  width:36px;height:36px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Pricedown Bl',sans-serif;font-size:26px;color:#ff71ce;
+  background:rgba(6,3,14,.78);border:1px solid rgba(255,45,149,.55);
+  text-shadow:0 0 8px rgba(255,45,149,.8);
+  box-shadow:0 0 10px rgba(255,45,149,.35)}
+/* turn tab: compact pill attached to the ring's upper-left — arrow, distance,
+   road. The compass moved onto the radar bezel; the instruction line stays
+   hidden. It never covers useful map area and vanishes cleanly off-nav. */
+body.cluster-mode.theme-vice-city #cluster-turn:not([hidden]){left:44px;top:66px;transform:none;z-index:32;
+  display:flex;align-items:center;gap:14px;width:auto;max-width:430px;
+  padding:8px 22px 8px 14px;
+  background:rgba(6,3,14,.86);
+  border:1px solid rgba(255,45,149,.55);border-radius:999px;
+  box-shadow:0 10px 26px rgba(0,0,0,.55),0 0 18px rgba(255,45,149,.28)}
+body.cluster-mode.theme-vice-city #cluster-turn-arrow{width:44px;height:44px;flex:0 0 auto;
+  filter:drop-shadow(0 0 10px rgba(255,45,149,.8))}
 body.cluster-mode.theme-vice-city #cluster-turn-arrow svg{width:100%;height:100%;stroke:#ff71ce}
-body.cluster-mode.theme-vice-city #cluster-turn-arrow{filter:drop-shadow(0 0 10px rgba(255,45,149,.8))}
-body.cluster-mode.theme-vice-city #cluster-turn-main{gap:2px}
-body.cluster-mode.theme-vice-city #cluster-turn-distance{font-family:'Pricedown Bl',sans-serif;font-size:56px;line-height:1;
+body.cluster-mode.theme-vice-city #cluster-turn-main{display:flex;flex-direction:column;gap:0}
+body.cluster-mode.theme-vice-city #cluster-turn-distance{font-family:'Pricedown Bl',sans-serif;font-size:42px;line-height:1;
   color:#ff71ce;letter-spacing:2px;text-shadow:0 0 14px rgba(255,45,149,.75)}
-body.cluster-mode.theme-vice-city #cluster-turn-road{font-family:'Pricedown Bl',sans-serif;font-size:32px;color:#01cdfe;
-  letter-spacing:3px;text-shadow:0 0 10px rgba(1,205,254,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:300px}
+body.cluster-mode.theme-vice-city #cluster-turn-road{font-family:'Pricedown Bl',sans-serif;font-size:25px;color:#01cdfe;
+  letter-spacing:3px;text-shadow:0 0 10px rgba(1,205,254,.7);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;max-width:290px}
+body.cluster-mode.theme-vice-city #cluster-turn-compass{display:none}
 body.cluster-mode.theme-vice-city #cluster-turn-instruction{display:none}
-body.cluster-mode.theme-vice-city #cluster-turn-compass{display:flex;flex-direction:column;align-items:center;gap:2px;
-  margin-left:auto;color:#ff71ce;font-family:'Pricedown Bl',sans-serif;font-size:28px}
-body.cluster-mode.theme-vice-city #cluster-compass-needle{width:0;height:0;
-  border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:14px solid #ff71ce;
-  filter:drop-shadow(0 0 6px rgba(255,45,149,.8));transition:transform .3s}
-/* trip strip floats over the card bottom */
-body.cluster-mode.theme-vice-city #cluster-trip:not([hidden]){display:flex;position:absolute;left:38px;top:502px;width:432px;z-index:32;
+/* trip strip rides under the radar, clear of the ring */
+body.cluster-mode.theme-vice-city #cluster-trip:not([hidden]){display:flex;position:absolute;left:24px;top:594px;width:440px;z-index:32;
   align-items:center;justify-content:center;gap:20px;
   font-family:'Pricedown Bl',sans-serif;font-size:30px;letter-spacing:2px;color:#ff71ce;
   text-shadow:0 0 10px rgba(255,45,149,.7)}

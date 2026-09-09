@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v173"), 'SW theme cache v173');
+ok(swSrc.includes("ws-theme-v174"), 'SW theme cache v174');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -1853,10 +1853,26 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
     'VC cluster paints the backdrop 1:1 on the stage (no crop: art is 8:3, stage is 8:3)');
   ok(/body\.cluster-mode\.theme-vice-city::before\{[^}]*cluster-oceandrive\.jpg[^}]*blur/.test(cssSrc),
     'VC cluster letterbox is the same art blurred+dimmed, not a second crop');
-  ok(/body\.cluster-mode\.theme-vice-city #map\{[^}]*width:432px;height:458px/.test(cssSrc),
-    'VC cluster map fills its nav card frame');
-  ok(cssSrc.includes('#cluster-ui:has(#cluster-turn:not([hidden])) #map'),
-    'VC cluster map yields the card top to the turn header while navigating');
+  ok(/body\.cluster-mode\.theme-vice-city #map\{[^}]*width:440px;height:440px[^}]*border-radius:50%/.test(cssSrc),
+    'VC cluster radar is a true circle: square 440 map masked round');
+  ok(/body\.cluster-mode\.theme-vice-city #map\{[^}]*overflow:hidden/.test(cssSrc),
+    'VC cluster radar clips the live map to the circle');
+  ok(!cssSrc.includes('#cluster-ui:has(#cluster-turn:not([hidden])) #map'),
+    'VC cluster turn tab never shrinks the radar map');
+  ok(/body\.cluster-mode\.theme-vice-city #cluster-minimap\{[^}]*border-radius:50%/.test(cssSrc),
+    'VC cluster radar frame is a circular ring assembly');
+  ok(/body\.cluster-mode\.theme-vice-city #cluster-minimap\{[^}]*255,45,149/.test(cssSrc) && /body\.cluster-mode\.theme-vice-city #cluster-minimap\{[^}]*1,205,254/.test(cssSrc),
+    'VC cluster radar ring: hot-pink edge with cyan accent');
+  ok(cssSrc.includes('#cluster-radar-north') && indexSrc.includes('id="cluster-radar-north"'),
+    'VC cluster radar carries a north cue on the bezel');
+  ok(appSrc.includes('function syncRadarNorth'),
+    'radar N tracks the live map bearing (never faked)');
+  ok(cssSrc.includes('body.cluster-mode.theme-vice-city #map::after'),
+    'VC cluster radar has an inset ring above the tiles');
+  ok(/body\.cluster-mode\.theme-vice-city #map \.maplibregl-ctrl-bottom-right/.test(cssSrc),
+    'VC cluster attribution is tucked inside the circular clip');
+  ok(/body\.cluster-mode\.theme-vice-city #cluster-turn:not\(\[hidden\]\)/.test(cssSrc),
+    'VC cluster turn information is a compact tab, not a card');
   ok(/body\.cluster-mode\.theme-vice-city \.vcsp\{[^}]*filter:\s*drop-shadow/.test(cssSrc),
     'VC cluster music widget wears a drop shadow');
   ok(cssSrc.includes('body.cluster-mode.theme-vice-city #cluster-header{display:none}'),

@@ -1042,6 +1042,8 @@ body.cluster-mode #cluster-limit-num{font-size:44px;font-weight:800;color:#111}
 /* next manoeuvre (above the speed) */
 body.cluster-mode #cluster-turn:not([hidden]){position:absolute;left:50%;top:96px;transform:translateX(-50%);
   display:flex;align-items:center;gap:26px;z-index:32;max-width:900px}
+/* radar north cue: hidden unless the Vice City cluster skin shows it */
+#cluster-radar-north{display:none}
 body.cluster-mode #cluster-turn-arrow{width:104px;height:104px;flex:0 0 auto;
   filter:drop-shadow(0 4px 14px rgba(0,0,0,.6))}
 body.cluster-mode #cluster-turn-arrow svg{width:100%;height:100%}
