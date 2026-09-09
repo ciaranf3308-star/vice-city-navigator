@@ -295,12 +295,18 @@ body.dashboard-mode.theme-gta-v .gvsp::after{
   font-family:'Chalet Comprime','Arial Narrow',sans-serif;font-weight:700;
   font-size:11px;letter-spacing:4px;color:#2ce68c;
 }
-/* Album art: ~40% of panel width, centered */
+/* Album art: centered square, top of the stack.
+   position:static on the wrap re-anchors the art to the panel itself —
+   the base .gvsp-artwrap is position:relative, which would pin the art to
+   the in-flow card row instead of centering it on the panel. right/bottom
+   reset the base inset:0 so the explicit width/height win. */
+body.dashboard-mode.theme-gta-v .gvsp-artwrap{position:static;width:0;height:0;background:none}
+body.dashboard-mode.theme-gta-v .gvsp-header{display:none}
 body.dashboard-mode.theme-gta-v .gvsp-art,
 body.dashboard-mode.theme-gta-v .gvsp-art-idle{
   position:absolute;z-index:2;
-  left:50%;transform:translateX(-50%);top:24px;
-  width:184px;height:184px;
+  left:50%;transform:translateX(-50%);top:20px;right:auto;bottom:auto;
+  width:148px;height:148px;
   border:1px solid rgba(242,245,242,.14);
   box-shadow:0 0 0 1px rgba(44,230,140,.22), 0 10px 30px rgba(0,0,0,.6);
 }
@@ -311,9 +317,10 @@ body.dashboard-mode.theme-gta-v .gvsp-art-idle{
 body.dashboard-mode.theme-gta-v .gvsp-art-idle svg{
   width:34%;height:auto;fill:#2ce68c;opacity:.5;filter:none;
 }
-/* Track: centered, real hierarchy, breathing room */
+/* Track: centered, real hierarchy, breathing room (padding:0 resets the
+   base card's padding-top so the 176px top is exact) */
 body.dashboard-mode.theme-gta-v .gvsp-track{
-  position:absolute;z-index:3;left:24px;right:24px;top:218px;text-align:center;
+  position:absolute;z-index:3;left:24px;right:24px;top:176px;text-align:center;padding:0;
 }
 body.dashboard-mode.theme-gta-v .gvsp-title{
   font-family:'Chalet Comprime','Arial Narrow',sans-serif;font-weight:700;
@@ -326,9 +333,10 @@ body.dashboard-mode.theme-gta-v .gvsp-artist{
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:none;
 }
 body.dashboard-mode.theme-gta-v .gvsp-artist.gvsp-status{color:#2ce68c}
-/* Progress: 6px mint bar */
+/* Progress: 6px mint bar (padding:0 resets the base card padding — the
+   dashboard positions this absolutely, so base flow padding just offsets it) */
 body.dashboard-mode.theme-gta-v .gvsp-progress{
-  position:absolute;z-index:3;left:24px;right:24px;top:292px;
+  position:absolute;z-index:3;left:24px;right:24px;top:240px;padding:0;
 }
 body.dashboard-mode.theme-gta-v .gvsp-bar{
   position:relative;height:16px;cursor:pointer;touch-action:none;
@@ -351,36 +359,56 @@ body.dashboard-mode.theme-gta-v .gvsp-times{
   letter-spacing:.05em;color:#9aa3a8;font-variant-numeric:tabular-nums;
   text-shadow:none;
 }
-/* Transport: circular mint-accent buttons (user's music-panel language) */
+/* Transport: circular mint-accent buttons (user's music-panel language).
+   padding:0 resets the base 14px/16px card padding — with it the row was
+   93px tall and overlapped the lyrics stage. */
 body.dashboard-mode.theme-gta-v .gvsp-controls{
-  position:absolute;z-index:3;left:0;right:0;top:336px;
+  position:absolute;z-index:3;left:0;right:0;top:285px;padding:0;
   display:flex;align-items:center;justify-content:center;gap:24px;
 }
 body.dashboard-mode.theme-gta-v .gvsp-tbtn{
-  width:56px;height:56px;min-width:56px;min-height:56px;border-radius:50%;
+  width:52px;height:52px;min-width:52px;min-height:52px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;cursor:pointer;
   color:#f2f5f2;background:transparent;
   border:1px solid rgba(242,245,242,.28);box-shadow:none;
   -webkit-tap-highlight-color:transparent;
 }
 body.dashboard-mode.theme-gta-v .gvsp-tbtn.big{
-  width:68px;height:68px;min-width:68px;min-height:68px;
+  width:62px;height:62px;min-width:62px;min-height:62px;
   border-color:#2ce68c;color:#2ce68c;
 }
 body.dashboard-mode.theme-gta-v .gvsp-tbtn:active{transform:scale(.94)}
 body.dashboard-mode.theme-gta-v .gvsp-tbtn svg{
   width:46%;height:46%;fill:currentColor;filter:none;
 }
-/* Lyrics: quiet stage with the Los Santos night skyline faint behind it */
+/* Lyrics: quiet stage with the Los Santos night skyline faint behind it.
+   The panel is 440px tall (1920x720 canvas); the stack above ends at 347px,
+   so the stage gets top:353/bottom:12 = 75px — room for the engine's
+   prev+hero+next composition with nothing clipped. */
 body.dashboard-mode.theme-gta-v .gvsp-lyrics{
-  position:absolute;z-index:3;left:20px;right:20px;top:418px;bottom:14px;
+  position:absolute;z-index:3;left:20px;right:20px;top:353px;bottom:12px;
+  min-height:0; /* reset the base 140px card min-height — it would stretch
+                   the 75px stage past the panel's overflow:hidden */
   overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;gap:6px;padding:10px 14px;pointer-events:none;
+  text-align:center;gap:6px;padding:8px 14px;pointer-events:none;
   background:
     linear-gradient(rgba(11,11,11,.9),rgba(11,11,11,.9)),
     url('dashboard/skyline-divider.png') 50% 100%/cover no-repeat;
   border:1px solid rgba(242,245,242,.07);
 }
+/* Ambient fallback (connected, no lyrics yet): same stage slot as lyrics —
+   without this it falls back to the base in-flow 140px box and paints over
+   the album art. */
+body.dashboard-mode.theme-gta-v .gvsp-ambient{
+  position:absolute;z-index:3;left:20px;right:20px;top:353px;bottom:12px;
+  height:auto;overflow:hidden;
+  background:
+    linear-gradient(rgba(11,11,11,.9),rgba(11,11,11,.9)),
+    url('dashboard/skyline-divider.png') 50% 100%/cover no-repeat;
+  border:1px solid rgba(242,245,242,.07);
+  border-top:1px solid rgba(242,245,242,.07);
+}
+body.dashboard-mode.theme-gta-v .gvsp-ambient[hidden]{display:none}
 body.dashboard-mode.theme-gta-v .gv-lyric-line{
   font-family:'Chalet London',system-ui,sans-serif;
   font-size:16px;line-height:1.4;color:#9aa3a8;opacity:.55;text-shadow:none;
@@ -391,12 +419,25 @@ body.dashboard-mode.theme-gta-v .gv-lyric-line.next{opacity:.7}
 body.dashboard-mode.theme-gta-v .gv-lyric-line.active{
   opacity:1;font-size:18px;color:#f2f5f2;
 }
-/* Disconnected: connect CTA owns the panel */
+/* Disconnected: connect CTA owns the panel.
+   min-height:0 overrides the base 320px card min-height — without it the
+   absolutely-positioned box (top:218/bottom:40 = 182px) stretches to 320px,
+   overflows the panel's overflow:hidden and the hint text clips. */
 body.dashboard-mode.theme-gta-v .gvsp-idle{
   position:absolute;z-index:4;left:24px;right:24px;top:218px;bottom:40px;
+  min-height:0;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;gap:14px;pointer-events:none;
 }
+/* Idle hiding, dashboard-scoped: the base `.gvsp.is-idle …` rules lose to
+   the dashboard absolute-position rules on specificity, so without these
+   the progress bar and transport buttons paint through behind the CTA. */
+body.dashboard-mode.theme-gta-v .gvsp.is-idle .gvsp-header,
+body.dashboard-mode.theme-gta-v .gvsp.is-idle .gvsp-main,
+body.dashboard-mode.theme-gta-v .gvsp.is-idle .gvsp-progress,
+body.dashboard-mode.theme-gta-v .gvsp.is-idle .gvsp-controls,
+body.dashboard-mode.theme-gta-v .gvsp.is-idle .gvsp-lyrics,
+body.dashboard-mode.theme-gta-v .gvsp.is-idle .gvsp-ambient{display:none}
 body.dashboard-mode.theme-gta-v .gvsp-idle-kicker{
   font-family:'Chalet Comprime','Arial Narrow',sans-serif;font-weight:700;
   font-size:28px;letter-spacing:1px;color:#f2f5f2;text-shadow:none;

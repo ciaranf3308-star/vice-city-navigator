@@ -114,10 +114,19 @@
   display: none;
 }
 
-/* ---------- transport on the dark panel ---------- */
+/* ---------- transport on the dark panel ----------
+   Measured hud.png geometry (button column x ~14-26%): the dark panel
+   ends and the neon chrome border starts at y = 94.5% of the art; the
+   art goes fully transparent at 97.5%. The transport row must stay
+   entirely above the 94.5% chrome line — earlier placements anchored
+   the band at bottom:2-2.5% (button bottom ~95.5-97%) and the buttons
+   sat ON / hung OFF the chrome, which read as "clipped off the
+   bottom". bottom:7% puts the big button's bottom edge at ~92.5%,
+   ~2% (~22px canvas) clear of the chrome. Do not lower this band
+   without re-measuring the art. */
 .vcsp-controls {
   position: absolute; z-index: 3;
-  left: 6%; right: 64%; top: 85%; bottom: 6%;
+  left: 6%; right: 64%; top: 85%; bottom: 7%;
   display: flex; align-items: center; justify-content: center; gap: 2.5cqw;
   background: none; padding: 0;
 }

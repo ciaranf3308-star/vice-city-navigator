@@ -39,10 +39,12 @@ body.dashboard-mode.theme-san-andreas .sasp-main{
   position:absolute;inset:0;z-index:1;pointer-events:none;
   font-family:'Bank Gothic','Arial Narrow',sans-serif;
 }
-/* LEFT panel: album art, inside the art's cream border,
-   chamfered top corners like the panel */
+/* LEFT panel: album art, measured against radio-hero7-r2.png
+   (2026-09-09 audit). Drawn panel interior is x 89-313, y ~166-351;
+   the artwrap sits INSIDE the cream double border so no cream edge
+   is covered. Chamfered top corners like the panel. */
 body.dashboard-mode.theme-san-andreas .sasp-artwrap{
-  position:absolute;left:73px;top:157px;width:257px;height:224px;
+  position:absolute;left:89px;top:166px;width:224px;height:185px;
   background:#000;overflow:hidden;pointer-events:none;
   clip-path:polygon(12px 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%,0 12px);
 }
@@ -56,9 +58,11 @@ body.dashboard-mode.theme-san-andreas .sasp-art{
 }
 body.dashboard-mode.theme-san-andreas .sasp-art.on{opacity:1}
 /* RIGHT panel: opaque black backing (no map bleed), track meta up top,
-   lyrics fill the rest */
+   lyrics fill the rest. Measured against radio-hero7-r2.png
+   (2026-09-09 audit): drawn right panel interior is x 365-644,
+   y ~172-425; the side panel sits INSIDE the cream border. */
 body.dashboard-mode.theme-san-andreas .sasp-side{
-  position:absolute;left:359px;top:158px;width:290px;height:287px;
+  position:absolute;left:365px;top:172px;width:279px;height:253px;
   display:flex;flex-direction:column;min-height:0;min-width:0;pointer-events:none;
   background:#0b0a07;
 }
@@ -76,9 +80,11 @@ body.dashboard-mode.theme-san-andreas .sasp-lyrics{
   flex:1;min-height:0;overflow:hidden;position:relative;
   border-top:1px solid rgba(216,169,78,.3);padding-top:6px;
 }
-/* progress: live bar drawn exactly over the art's bar */
+/* progress: live bar drawn exactly over the art's bar. Measured
+   (2026-09-09 audit): drawn track x 79-340, y 441-445. The 8px live
+   bar is centered on it (439-447) so the drawn track is fully covered. */
 body.dashboard-mode.theme-san-andreas .sasp-progress{
-  position:absolute;left:80px;top:441px;width:220px;pointer-events:auto;
+  position:absolute;left:79px;top:439px;width:261px;pointer-events:auto;
 }
 body.dashboard-mode.theme-san-andreas .sasp-bar{
   position:relative;height:8px;background:rgba(240,230,200,.16);
@@ -96,24 +102,29 @@ body.dashboard-mode.theme-san-andreas .sasp-times{
   display:flex;justify-content:space-between;margin-top:3px;
   font-size:9px;letter-spacing:1px;color:#8f8468;
 }
-/* transport: live buttons over the art's drawn prev/play/next icons.
-   Opaque dark backing covers the art's static glyphs; cream icons
-   match the art 1:1. Shuffle/repeat stay as drawn art. */
+/* transport: measured against radio-hero7-r2.png (2026-09-09 audit).
+   The art draws ONLY the pause/play in a cream ring (x 172-230,
+   y 458-516); prev/next are bare cream glyphs (prev x 132-150,
+   next x 248-266, y 478-498). The live toggle keeps its filled
+   circle matched to the drawn ring; prev/next are transparent hit
+   areas whose cream glyphs sit exactly over the drawn glyphs, so no
+   extra circles appear that the art doesn't have. Shuffle/repeat
+   stay as drawn art. */
 body.dashboard-mode.theme-san-andreas .sasp-controls{
   position:absolute;inset:0;pointer-events:none;
 }
 body.dashboard-mode.theme-san-andreas .sasp-tbtn{
   position:absolute;width:46px;height:46px;border-radius:50%;cursor:pointer;
-  background:#0e0a05;border:0;color:#f0e6c8;
+  background:transparent;border:0;color:#f0e6c8;
   display:flex;align-items:center;justify-content:center;
   pointer-events:auto;padding:0;
 }
-body.dashboard-mode.theme-san-andreas .sasp-tbtn svg{width:22px;height:22px;fill:currentColor;
+body.dashboard-mode.theme-san-andreas .sasp-tbtn svg{width:30px;height:30px;fill:currentColor;
   filter:drop-shadow(0 2px 2px rgba(0,0,0,.8))}
-body.dashboard-mode.theme-san-andreas .sasp-tbtn[data-act="prev"]{left:120px;top:458px}
-body.dashboard-mode.theme-san-andreas .sasp-tbtn[data-act="next"]{left:242px;top:458px}
+body.dashboard-mode.theme-san-andreas .sasp-tbtn[data-act="prev"]{left:118px;top:465px}
+body.dashboard-mode.theme-san-andreas .sasp-tbtn[data-act="next"]{left:234px;top:465px}
 body.dashboard-mode.theme-san-andreas .sasp-tbtn[data-act="toggle"]{
-  left:172px;top:452px;width:56px;height:56px;
+  left:172px;top:458px;width:58px;height:58px;
   background:#0e0a05;border:2px solid #f0e6c8;
   box-shadow:0 0 0 1px rgba(0,0,0,.6);
 }
@@ -130,12 +141,16 @@ body.dashboard-mode.theme-san-andreas .sasp-idle{
   padding:6%;box-sizing:border-box;pointer-events:auto;
 }
 body.dashboard-mode.theme-san-andreas .sasp-idle[hidden]{display:none}
-/* Idle also covers the art's drawn transport strip (baked-in pause glyph +
-   30% progress) so the disconnected state never implies something is playing.
+/* Idle also covers the art's drawn transport strip (baked-in glyphs)
+   so the disconnected state never implies something is playing.
+   Measured 2026-09-09: the dimmed backdrop must cover widget x 48-345,
+   y 430-542 (idle box sits at 70,154), hiding the drawn logo and the
+   full transport row. The drawn progress bar above it stays visible.
    The lowrider stays visible. */
 body.dashboard-mode.theme-san-andreas .sasp-idle::after{
-  content:"";position:absolute;left:5px;top:280px;width:260px;height:82px;
-  background:rgba(13,15,10,.94);box-shadow:inset 0 0 26px rgba(0,0,0,.9);
+  content:"";position:absolute;left:-22px;top:276px;width:317px;height:118px;
+  background:linear-gradient(90deg,rgba(13,15,10,.97) 88%,rgba(13,15,10,0));
+  box-shadow:inset 0 26px 26px -26px rgba(0,0,0,.9);
   pointer-events:none;
 }
 body.dashboard-mode.theme-san-andreas .sasp-idle-kicker{

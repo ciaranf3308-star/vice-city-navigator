@@ -290,3 +290,45 @@ body.theme-rdr2 .ghost-btn:hover{background:rgba(184,53,47,.26)}
 body.theme-rdr2 .attrib{color:rgba(216,179,106,.5)}
 body.theme-rdr2 .menu-section details.advanced{border:1px dashed #8a6f4d;border-radius:0}
 body.dashboard-mode.theme-rdr2 #menu-panel{border-radius:0}
+
+/* ============ phone-mode chrome: frontier coins, not neon ============
+   The menu button + search pill are skinned in styles.css; the floating
+   zoom/locate coins and the drive HUD keep the VC cyan/purple defaults
+   unless themed here. Dark leather radial, aged-gold ring, bone glyphs —
+   the same coin language as the dashboard footer zoom. */
+body.theme-rdr2 #map-tools .ctl,
+body.theme-rdr2 #drive-bar .ctl,
+body.theme-rdr2 #drive-menu-btn{
+  background:radial-gradient(circle at 35% 30%, #2b251b, #131009 75%);
+  border:2px solid rgba(216,179,106,.55);color:#e8d9b0;
+  box-shadow:0 2px 8px rgba(0,0,0,.6), inset 0 1px 1px rgba(216,179,106,.2);
+  text-shadow:0 1px 2px rgba(0,0,0,.85);
+}
+body.theme-rdr2 #map-tools .ctl.on,
+body.theme-rdr2 #drive-bar .ctl.on{
+  background:rgba(216,179,106,.22);border-color:#d8b36a;color:#f2ead2;
+  box-shadow:0 0 14px rgba(216,179,106,.4);
+}
+body.theme-rdr2 .ctl.danger{
+  color:#e8a49a;border-color:#b8352f;
+  box-shadow:0 0 14px rgba(184,53,47,.45);
+}
+/* ============ drive HUD: frontier furniture (phone + dashboard) ============
+   Layout untouched — only the neon is replaced: dark leather plates,
+   gold rules, Kirsty distance, bone instruction text. */
+body.theme-rdr2 #maneuver-card{
+  background:linear-gradient(170deg,rgba(48,35,24,.97),rgba(28,20,13,.97));
+  border:2px solid #d8b36a;border-radius:6px;
+  box-shadow:0 4px 16px rgba(0,0,0,.6), inset 0 0 24px rgba(0,0,0,.5);
+}
+body.theme-rdr2 #next-dist{
+  color:#e8c877;text-shadow:0 2px 0 rgba(0,0,0,.7);
+  font-family:'Kirsty',Georgia,serif;
+}
+body.theme-rdr2 #next-instr{color:#e8d9b0;text-shadow:0 1px 0 rgba(0,0,0,.8)}
+body.theme-rdr2 #drive-bar{
+  background:linear-gradient(170deg,rgba(48,35,24,.97),rgba(28,20,13,.97));
+  border:2px solid #d8b36a;border-radius:14px;
+  box-shadow:0 4px 16px rgba(0,0,0,.6);
+}
+body.theme-rdr2 #trip-meta{color:#e8c877;text-shadow:0 1px 0 rgba(0,0,0,.7)}

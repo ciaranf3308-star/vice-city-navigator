@@ -83,23 +83,27 @@
   text-shadow: 0 2px 8px rgba(0,0,0,.9), 0 0 2px rgba(0,0,0,.9);
 } /* guarantee contrast on dark wood */
 
-/* ---------- track on the parchment ---------- */
+/* ---------- track on the parchment ----------
+   The stack (title / artist / progress / times) must sit fully ON the
+   parchment strip (measured y 0.662-0.825, torn bottom edge) — the times
+   used to hang off onto the dark wood below, unreadable. Sized tight so
+   the digit glyphs end before the torn edge. */
 .rdsp-track {
   position: absolute; z-index: 3;
-  left: 28%; right: 9%; top: 69.5%;
+  left: 34%; right: 9%; top: 67.5%;
   text-align: center;
 }
 .rdsp-title {
   font-family: 'Kirsty', 'RDR Lino', Georgia, serif;
-  font-size: 5.4cqw; letter-spacing: .04em; line-height: 1.15;
+  font-size: 4.4cqw; letter-spacing: .04em; line-height: 1.15;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   color: #2a1f16;
   text-shadow: 0 1px 0 rgba(232,217,176,.3);
 }
 .rdsp-artist {
-  margin-top: .5cqh;
+  margin-top: .3cqh;
   font-family: 'RDR Lino', Georgia, serif;
-  font-size: 3.8cqw; letter-spacing: .08em; text-transform: uppercase;
+  font-size: 3.2cqw; letter-spacing: .08em; text-transform: uppercase;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   color: #7a2a24;
 }
@@ -108,9 +112,9 @@
 /* ---------- progress on the parchment ---------- */
 .rdsp-progress {
   position: absolute; z-index: 3;
-  left: 30%; right: 12%; top: 80.5%;
+  left: 36.5%; right: 12%; top: 77.2%;
 }
-.rdsp-bar { position: relative; height: 2.6cqh; cursor: pointer; touch-action: none; }
+.rdsp-bar { position: relative; height: 2cqh; cursor: pointer; touch-action: none; }
 .rdsp-bar::before {
   content: ''; position: absolute; left: 0; right: 0; top: 50%;
   height: 5px; margin-top: -2.5px; border-radius: 3px;
@@ -132,8 +136,10 @@
   box-shadow: 0 1px 4px rgba(0,0,0,.5);
 }
 .rdsp-times {
-  display: flex; justify-content: space-between; margin-top: .4cqh;
-  font-size: 3.1cqw; letter-spacing: .05em; color: #5a4632;
+  display: flex; justify-content: space-between; margin-top: .25cqh;
+  /* inset the elapsed time past the windmill grass at the parchment's left */
+  padding: 0 0 0 5.5%;
+  font-size: 2.6cqw; letter-spacing: .05em; color: #5a4632;
 }
 
 /* ---------- transport: brass coins below the parchment ---------- */
@@ -164,12 +170,14 @@
 }
 
 /* ---------- themed idle / connect: just the button, no DOM text ----------
-   The hud art already carries "Frontier Radio" baked in — the DOM only
-   adds the connect button, centered in the album opening. */
+   The connect CTA lives in the lyric stage (the dark wood right of the
+   frame) — never slapped across the album frame. The frame's opening
+   keeps the idle note glyph behind it. */
 .rdsp-idle {
   position: absolute; z-index: 4;
-  left: 15.55%; top: 27.91%; width: 29.11%; height: 28.71%;
+  left: 48%; right: 8%; top: 38%; bottom: 32%;
   display: flex; align-items: center; justify-content: center;
+  padding: 0 2%;
   pointer-events: none;
 }
 .rdsp-idle[hidden], .rdsp-idle.is-hidden { display: none !important; }
@@ -180,12 +188,13 @@
 .rdsp.is-idle .rdsp-progress { display: none; }
 .rdsp-connect-btn {
   pointer-events: auto;
-  padding: 1.2cqh 5cqw;
+  padding: 1.1cqh 3.5cqw;
+  max-width: 100%;
   font-family: 'Kirsty', 'RDR Lino', Georgia, serif;
-  font-size: 4.2cqw; letter-spacing: .08em; text-transform: uppercase;
+  font-size: 3.4cqw; letter-spacing: .06em; text-transform: uppercase;
   color: #ede6d6; background: rgba(184,53,47,.92);
   border: 2px solid #2a1f16; border-radius: 6px; cursor: pointer;
   box-shadow: 0 3px 10px rgba(0,0,0,.6);
-  white-space: nowrap;
+  white-space: nowrap; text-align: center;
 }
 .rdsp-connect-btn:active { transform: scale(.96); }
