@@ -383,3 +383,21 @@ body.theme-vice-city .ghost-btn:hover{background:rgba(1,205,254,.16)}
 body.theme-vice-city .attrib{color:rgba(1,205,254,.55)}
 body.theme-vice-city .menu-section details.advanced{border-color:rgba(1,205,254,.35)}
 body.theme-vice-city .menu-section details.advanced summary{color:#eafcff}
+
+/* ================= Cluster Mode: Vice City =================
+   Neon-noir HUD: Pricedown numerals, pink/cyan neon tube language.
+   Geometry comes from styles.css — this only restyles. */
+body.cluster-mode.theme-vice-city{background:radial-gradient(120% 90% at 50% 112%, #2b0a2e 0%, #0b0514 55%, #000 100%)}
+body.cluster-mode.theme-vice-city #cluster-speed-num{font-family:'Pricedown Bl',sans-serif;font-weight:400;color:#fff;
+  text-shadow:0 0 18px rgba(255,113,206,.55),0 0 64px rgba(255,113,206,.25),0 6px 30px rgba(0,0,0,.7)}
+body.cluster-mode.theme-vice-city #cluster-speed-unit{font-family:'Pricedown Bl',sans-serif;color:#01cdfe;letter-spacing:14px}
+body.cluster-mode.theme-vice-city #cluster-speed.over #cluster-speed-num{color:#ffd34d;
+  text-shadow:0 0 22px rgba(255,211,77,.6),0 6px 30px rgba(0,0,0,.7)}
+body.cluster-mode.theme-vice-city #cluster-minimap{border:3px solid #01cdfe;
+  box-shadow:0 0 0 3px #ff71ce,0 0 28px rgba(255,113,206,.5),0 8px 40px rgba(0,0,0,.6)}
+body.cluster-mode.theme-vice-city #cluster-turn-distance{font-family:'Pricedown Bl',sans-serif;letter-spacing:2px}
+body.cluster-mode.theme-vice-city #cluster-turn-road{color:#01cdfe;font-family:'Pricedown Bl',sans-serif;letter-spacing:3px}
+body.cluster-mode.theme-vice-city #cluster-turn-arrow{filter:drop-shadow(0 0 12px rgba(255,251,150,.55))}
+body.cluster-mode.theme-vice-city #cluster-music{border:1px solid rgba(1,205,254,.45);box-shadow:0 0 18px rgba(1,205,254,.22)}
+body.cluster-mode.theme-vice-city #cluster-music-title{font-family:'Pricedown Bl',sans-serif;letter-spacing:2px}
+body.cluster-mode.theme-vice-city #cluster-mode-exit{border-color:#ff71ce;color:#ff71ce}
