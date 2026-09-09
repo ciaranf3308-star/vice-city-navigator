@@ -68,19 +68,19 @@
 /* ---------- track info on the dark panel under the album ---------- */
 .vcsp-track {
   position: absolute; z-index: 3;
-  left: 6%; right: 64%; top: 71.5%;
+  left: 6%; right: 64%; top: 70%;
   text-align: left;
 }
 .vcsp-title {
   font-family: 'Pricedown Bl', Oswald, sans-serif;
-  font-size: 3.9cqw; letter-spacing: .05em; line-height: 1.15;
+  font-size: 3.2cqw; letter-spacing: .05em; line-height: 1.05;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   color: #fff;
   text-shadow: 0 0 10px rgba(255,47,179,.85), 0 2px 4px #000;
 }
 .vcsp-artist {
-  margin-top: .6cqh;
-  font-size: 2.9cqw; color: #ffd7f2;
+  margin-top: .4cqh;
+  font-size: 2.4cqw; color: #ffd7f2;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   text-shadow: 0 1px 3px #000;
 }
@@ -89,7 +89,7 @@
 /* ---------- progress on the dark panel ---------- */
 .vcsp-progress {
   position: absolute; z-index: 3;
-  left: 6%; right: 64%; top: 82.5%;
+  left: 6%; right: 64%; top: 80%;
 }
 .vcsp-bar { position: relative; height: 2.2cqh; cursor: pointer; touch-action: none; }
 .vcsp-bar::before {
@@ -118,7 +118,7 @@
 /* ---------- transport on the dark panel ---------- */
 .vcsp-controls {
   position: absolute; z-index: 3;
-  left: 6%; right: 64%; top: 89.5%; bottom: 2.5%;
+  left: 6%; right: 64%; top: 86%; bottom: 2%;
   display: flex; align-items: center; justify-content: center; gap: 2.5cqw;
   background: none; padding: 0;
 }
