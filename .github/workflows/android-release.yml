@@ -1,0 +1,52 @@
+name: Android release AAB (Play Internal App Sharing)
+
+# Manual trigger only: builds the UNIFIED WayStation app (phone launcher +
+# Android Auto car service, one APK/AAB) as a Play-ready signed release
+# bundle for upload to Play Console > Internal App Sharing. That gives the
+# install a trusted (Play) source, which is what Android Auto requires for
+# Car App Library apps on real head units — sideloaded APKs are filtered
+# out of the car launcher regardless of the Unknown Sources toggle.
+#
+# One-time repo setup (done): WAYSTATION_KEYSTORE_B64 / WAYSTATION_KEY_ALIAS /
+# WAYSTATION_STORE_PASSWORD / WAYSTATION_KEY_PASSWORD secrets hold the
+# dedicated upload key for com.waystation.auto (backup in the agent's
+# workspace, NOT in the repo).
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-release-aab:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install SDK packages
+        run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Restore upload keystore
+        run: |
+          echo "${{ secrets.WAYSTATION_KEYSTORE_B64 }}" | base64 -d > "$RUNNER_TEMP/waystation-upload.keystore"
+
+      - name: Build signed release AAB
+        env:
+          WAYSTATION_KEYSTORE_PATH: ${{ runner.temp }}/waystation-upload.keystore
+          WAYSTATION_STORE_PASSWORD: ${{ secrets.WAYSTATION_STORE_PASSWORD }}
+          WAYSTATION_KEY_ALIAS: ${{ secrets.WAYSTATION_KEY_ALIAS }}
+          WAYSTATION_KEY_PASSWORD: ${{ secrets.WAYSTATION_KEY_PASSWORD }}
+        run: cd android && ./gradlew :app:bundleRelease --no-daemon --stacktrace
+
+      - name: Upload release AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: waystation-release-aab
+          path: android/app/build/outputs/bundle/release/app-release.aab
