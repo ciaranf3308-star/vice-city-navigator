@@ -214,7 +214,7 @@ body.dashboard-mode.theme-gta-v #dash-sub{
    Sits above the speed cluster, bottom-left — all the driving
    feedback in one column. Hollow = unearned, filled = heat. */
 body.dashboard-mode.theme-gta-v #wanted{
-  display:flex;position:absolute;left:20px;bottom:252px;z-index:30;
+  display:flex;position:absolute;left:20px;bottom:304px;z-index:30;
   gap:8px;pointer-events:none;
   filter:drop-shadow(0 2px 8px rgba(0,0,0,.6));
 }

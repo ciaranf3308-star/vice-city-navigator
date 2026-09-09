@@ -583,6 +583,24 @@ body.dashboard-mode.theme-rdr2 #speedo{bottom:94px}
 }
 body.dashboard-mode #speedo-limit[hidden]{display:none}
 #speedo-limit-num{font:700 27px/1 Arial,Helvetica,sans-serif;color:#141414;letter-spacing:-.5px}
+/* Speedo typefaces: each theme's own game font on the current-speed pill
+   (the posted-limit roundel stays a universal EU road sign). VC's own
+   dashboard.css is locked, so these overrides live here, scoped by theme. */
+body.dashboard-mode.theme-vice-city #speedo-num{font-family:'Pricedown Bl','Arial Black',sans-serif;letter-spacing:1px}
+body.dashboard-mode.theme-vice-city #speedo-unit{font-family:'Pricedown Bl','Arial Black',sans-serif;font-size:19px;letter-spacing:2px}
+body.dashboard-mode.theme-san-andreas #speedo-num{font-family:'Bank Gothic','Arial Narrow',sans-serif;letter-spacing:1px}
+body.dashboard-mode.theme-san-andreas #speedo-unit{font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:17px;letter-spacing:2px}
+body.dashboard-mode.theme-gta-v #speedo-num{font-family:'Chalet London',system-ui,sans-serif;letter-spacing:0}
+body.dashboard-mode.theme-gta-v #speedo-unit{font-family:'Chalet London',system-ui,sans-serif;font-size:17px;letter-spacing:3px}
+body.dashboard-mode.theme-rdr2 #speedo-num{font-family:'RDR Lino',serif;letter-spacing:1px}
+body.dashboard-mode.theme-rdr2 #speedo-unit{font-family:'RDR Lino',serif;font-size:18px;letter-spacing:2px}
+/* Speedo placement: clear of each theme's own bottom-bar height
+   (VC 100px / SA 126px / GTA V 120px / RDR2 84px) + a 24px breathing gap,
+   so the cluster never clips into the bar. */
+body.dashboard-mode.theme-vice-city #speedo{bottom:124px}
+body.dashboard-mode.theme-san-andreas #speedo{bottom:150px}
+body.dashboard-mode.theme-gta-v #speedo{bottom:144px}
+body.dashboard-mode.theme-rdr2 #speedo{bottom:108px}
 /* current speed pill */
 #speedo-cur{
   display:flex;align-items:baseline;gap:7px;
