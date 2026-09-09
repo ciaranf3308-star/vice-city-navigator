@@ -2312,6 +2312,27 @@ async function initSpotify() {
     try { sessionStorage.removeItem(SPOTIFY_PREAUTH); } catch (e) {}
     if (s) pendingSpotifyView = s; // applied once the map finishes loading
   }
+  /* DEV ONLY ?spmock=1 — screenshot/QA hook. Stubs a connected Spotify
+     session with a fake now-playing track so skins render their connected
+     state without OAuth. The query param is the only trigger; remove this
+     block after the screenshot pass. */
+  try {
+    if (new URLSearchParams(location.search).has('spmock')) {
+      const fake = {
+        is_playing: true, progress_ms: 62000,
+        item: {
+          id: 'spmock1', name: 'Midnight City',
+          artists: [{ name: 'M83' }],
+          album: { images: [{ url: 'themes/vice-city/spotify/album.png' }] },
+          duration_ms: 243000,
+        },
+      };
+      SpotifyCore.isConnected = () => true;
+      SpotifyCore.getState = () => fake;
+      SpotifyCore.getPosition = () => fake.progress_ms;
+      try { unmountSpotifySkin(); } catch (e) {} // force remount below
+    }
+  } catch (e) {}
   syncSpotifyMenu();
   try {
     SpotifyCore.on('auth', syncSpotifyMenu);
