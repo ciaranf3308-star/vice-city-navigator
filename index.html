@@ -69,6 +69,11 @@
       <h4 class="subhead">Saved places</h4>
       <ul id="menu-saved-list" class="place-list"></ul>
     </div>
+    <div id="menu-markers-wrap" hidden>
+      <h4 class="subhead">My markers</h4>
+      <ul id="menu-markers-list" class="place-list"></ul>
+    </div>
+    <small class="hint">Long-press the map to drop a custom marker.</small>
   </section>
 
   <section class="menu-section">
@@ -168,6 +173,17 @@
     <button id="start-btn" class="big-btn">Start Drive</button>
   </div>
 </aside>
+
+<!-- ============ CUSTOM MARKER: icon picker sheet ============ -->
+<div id="marker-sheet" hidden aria-label="Choose marker icon">
+  <div class="sheet-head">
+    <strong id="marker-sheet-title">Drop a marker</strong>
+    <button id="marker-sheet-close" class="ctl" aria-label="Close">✕</button>
+  </div>
+  <input id="marker-label" type="text" placeholder="Label (optional)" maxlength="60" autocomplete="off">
+  <div id="marker-icon-grid" role="listbox" aria-label="Marker icons"></div>
+  <button id="marker-save" class="big-btn">Place marker</button>
+</div>
 
 <!-- ============ DRIVE HUD: compact, full-screen map ============ -->
 <section id="drive-hud" hidden aria-label="Navigation">

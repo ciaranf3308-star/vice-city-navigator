@@ -104,5 +104,7 @@
     },
     /* Namespaced MapLibre image id for a theme's blip stem. */
     poiImageId(id, stem) { return 'poi-' + id + '-' + stem; },
+    /* All choosable icon keys for the custom-marker picker. */
+    iconKeys() { return [...KNOWN_SEMANTICS]; },
   };
 })();

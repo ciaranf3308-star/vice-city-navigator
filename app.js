@@ -256,6 +256,8 @@ async function initMap() {
         toast: msg => toast(msg),
       });
     } catch (e) { console.error('[vcn] places init failed', e); }
+    try { wireLongPress(); } catch (e) { console.error('[vcn] long-press init failed', e); }
+    try { renderCustomMarkers(); } catch (e) { console.error('[vcn] custom markers init failed', e); }
     // Restore the pre-Spotify-OAuth view (the auth redirect reloads the page).
     const rv = pendingSpotifyView;
     pendingSpotifyView = null;
@@ -466,6 +468,7 @@ async function applyTheme(id) {
     try { if (window.VCNVoice) VCNVoice.onThemeChanged(); } catch (e) {}
     applyBodyTheme(id);
     try { mountSpotifySkin(id); } catch (e) { console.error('[ws] spotify skin swap failed', e); }
+    try { renderCustomMarkers(); } catch (e) {}
     syncThemeSelector();
     toast(themeNoMap.name + ' theme active.');
     return;
@@ -537,6 +540,7 @@ async function applyTheme(id) {
   try { if (window.VCNPlaces) VCNPlaces.rehydrate(); } catch (e) { console.error('[ws] POI rehydrate failed', e); }
   try { if (window.VCNDiscovery) VCNDiscovery.rehydrate(); } catch (e) { console.error('[ws] fog rehydrate failed', e); }
   try { if (window.VCNTraffic) VCNTraffic.rehydrate(); } catch (e) { console.error('[ws] traffic rehydrate failed', e); }
+  try { renderCustomMarkers(); } catch (e) { console.error('[ws] marker rehydrate failed', e); }
   try { refreshPlayerMarkerArt(); } catch (e) { console.error('[ws] marker rehydrate failed', e); }
   try { mountSpotifySkin(id); } catch (e) { console.error('[ws] spotify skin swap failed', e); }
   try { syncDashPadding(); } catch (e) {}
@@ -829,6 +833,58 @@ function renderSavedLists() {
       menuSavedWrap.hidden = false;
     }
   }
+
+  /* Menu: custom markers with edit / delete. */
+  const menuMarkersWrap = $('menu-markers-wrap'), menuMarkersList = $('menu-markers-list');
+  if (menuMarkersWrap && menuMarkersList) {
+    const markers = VCNSaved.getMarkers();
+    menuMarkersList.innerHTML = '';
+    if (!markers.length) { menuMarkersWrap.hidden = true; }
+    else {
+      for (const m of markers) {
+        const li = document.createElement('li');
+        li.className = 'place-row';
+        const icon = document.createElement('img');
+        icon.className = 'place-icon';
+        icon.alt = '';
+        icon.src = markerIconUrl(m.icon);
+        const name = document.createElement('button');
+        name.className = 'place-name';
+        name.textContent = m.label;
+        name.title = 'Navigate';
+        name.addEventListener('click', () => {
+          closeMenu();
+          dest = { label: m.label, lnglat: m.lnglat.slice(), semantic: null };
+          showRoutePending(m.label);
+          planRoute({ autostart: true });
+        });
+        const editBtn = document.createElement('button');
+        editBtn.className = 'place-act';
+        editBtn.textContent = '✎';
+        editBtn.title = 'Edit icon / label';
+        editBtn.setAttribute('aria-label', 'Edit marker');
+        editBtn.addEventListener('click', ev => {
+          ev.stopPropagation();
+          closeMenu();
+          openMarkerSheet(m.lnglat, m.id);
+        });
+        const delBtn = document.createElement('button');
+        delBtn.className = 'place-act danger';
+        delBtn.textContent = '✕';
+        delBtn.title = 'Remove';
+        delBtn.setAttribute('aria-label', 'Remove marker');
+        delBtn.addEventListener('click', ev => {
+          ev.stopPropagation();
+          VCNSaved.removeMarker(m.id);
+          renderCustomMarkers();
+          renderSavedLists();
+        });
+        li.append(icon, name, editBtn, delBtn);
+        menuMarkersList.appendChild(li);
+      }
+      menuMarkersWrap.hidden = false;
+    }
+  }
 }
 
 function wireSavedPlaces() {
@@ -858,6 +914,195 @@ function wireSavedPlaces() {
     if (window.VCNSaved) VCNSaved.clearHome();
     renderSavedLists();
   });
+}
+/* ---------------- custom markers ----------------
+   Long-press the map to drop a pin, pick an icon from the current
+   theme's blip pack, optionally label it. Markers are DOM
+   maplibregl.Marker pins so they use the theme's PNG art; the icon
+   is stored as a semantic key and re-resolved on theme switch. */
+const customMarkers = new Map(); // id -> maplibregl.Marker
+let pendingPin = null;           // { lnglat } while the picker is open
+let editingMarkerId = null;
+let pickedIcon = 'waypoint';
+
+function markerIconUrl(iconKey) {
+  try {
+    return window.VCNThemes
+      ? VCNThemes.poiIconUrl(iconKey, VCNThemes.currentId())
+      : '';
+  } catch (e) { return ''; }
+}
+
+function renderCustomMarkers() {
+  if (!window.VCNSaved || !map) return;
+  // Drop stale markers.
+  const live = new Set(VCNSaved.getMarkers().map(m => m.id));
+  for (const [id, mk] of customMarkers) {
+    if (!live.has(id)) { try { mk.remove(); } catch (e) {} customMarkers.delete(id); }
+  }
+  // Add / refresh.
+  for (const m of VCNSaved.getMarkers()) {
+    let mk = customMarkers.get(m.id);
+    const url = markerIconUrl(m.icon);
+    if (!mk) {
+      const el = document.createElement('img');
+      el.className = 'custom-marker';
+      el.alt = m.label || 'Marker';
+      el.src = url;
+      el.addEventListener('click', ev => {
+        ev.stopPropagation();
+        openMarkerDetail(m.id);
+      });
+      mk = new maplibregl.Marker({ element: el, anchor: 'bottom' });
+      mk.setLngLat(m.lnglat).addTo(map);
+      customMarkers.set(m.id, mk);
+    } else {
+      const el = mk.getElement();
+      if (el && el.src !== url) el.src = url;
+      try { mk.setLngLat(m.lnglat); } catch (e) {}
+    }
+  }
+}
+
+function openMarkerDetail(id) {
+  if (!window.VCNSaved) return;
+  const m = VCNSaved.getMarkers().find(x => x.id === id);
+  if (!m) return;
+  // Reuse the POI detail card.
+  $('poi-blip').src = markerIconUrl(m.icon);
+  $('poi-name').textContent = m.label || 'Marker';
+  $('poi-type').textContent = 'Custom marker';
+  $('poi-dist').textContent = '';
+  openPlanning('poi');
+  $('poi-drive').onclick = () => {
+    dest = { label: m.label, lnglat: m.lnglat.slice(), semantic: null };
+    showRoutePending(m.label); planRoute({ autostart: true });
+  };
+  $('poi-go').onclick = () => {
+    dest = { label: m.label, lnglat: m.lnglat.slice(), semantic: null };
+    showRoutePending(m.label); planRoute();
+  };
+  const saveBtn = $('poi-save'), homeBtn = $('poi-home');
+  if (saveBtn) { saveBtn.textContent = 'Change icon'; saveBtn.onclick = () => openMarkerSheet(m.lnglat, m.id); }
+  if (homeBtn) { homeBtn.textContent = 'Delete marker'; homeBtn.disabled = false; homeBtn.onclick = () => {
+    VCNSaved.removeMarker(m.id);
+    renderCustomMarkers(); renderSavedLists();
+    closeDrawer();
+    toast('Marker removed.');
+  }; }
+}
+
+/* Icon picker sheet. When markerId is set we are editing that
+   marker's icon/label instead of placing a new pin. */
+function openMarkerSheet(lnglat, markerId) {
+  pendingPin = lnglat ? { lnglat: lnglat.slice() } : null;
+  editingMarkerId = markerId || null;
+  pickedIcon = 'waypoint';
+  const sheet = $('marker-sheet');
+  const grid = $('marker-icon-grid');
+  const labelInput = $('marker-label');
+  if (!sheet || !grid) return;
+  let existing = null;
+  if (editingMarkerId && window.VCNSaved) {
+    existing = VCNSaved.getMarkers().find(x => x.id === editingMarkerId);
+    if (existing) pickedIcon = existing.icon || 'waypoint';
+  }
+  if (labelInput) labelInput.value = existing ? (existing.label || '') : '';
+  $('marker-sheet-title').textContent = editingMarkerId ? 'Edit marker' : 'Drop a marker';
+  $('marker-save').textContent = editingMarkerId ? 'Save changes' : 'Place marker';
+  // Build the icon grid from the current theme's pack.
+  grid.innerHTML = '';
+  let keys = [];
+  try { keys = window.VCNThemes ? VCNThemes.iconKeys() : []; } catch (e) {}
+  for (const key of keys) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'icon-pick' + (key === pickedIcon ? ' picked' : '');
+    b.setAttribute('role', 'option');
+    b.setAttribute('aria-selected', key === pickedIcon ? 'true' : 'false');
+    b.title = key.replace(/_/g, ' ');
+    const img = document.createElement('img');
+    img.src = markerIconUrl(key);
+    img.alt = key;
+    b.appendChild(img);
+    b.addEventListener('click', () => {
+      pickedIcon = key;
+      grid.querySelectorAll('.icon-pick').forEach(x => {
+        const on = x === b;
+        x.classList.toggle('picked', on);
+        x.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+    });
+    grid.appendChild(b);
+  }
+  sheet.hidden = false;
+}
+
+function closeMarkerSheet() {
+  const sheet = $('marker-sheet');
+  if (sheet) sheet.hidden = true;
+  pendingPin = null;
+  editingMarkerId = null;
+}
+
+function wireMarkerSheet() {
+  const closeBtn = $('marker-sheet-close');
+  if (closeBtn) closeBtn.addEventListener('click', closeMarkerSheet);
+  const saveBtn = $('marker-save');
+  if (saveBtn) saveBtn.addEventListener('click', () => {
+    if (!window.VCNSaved) { closeMarkerSheet(); return; }
+    const label = ($('marker-label').value || '').trim() || 'Marker';
+    if (editingMarkerId) {
+      VCNSaved.updateMarker(editingMarkerId, { label, icon: pickedIcon });
+      toast('Marker updated.');
+    } else if (pendingPin) {
+      VCNSaved.addMarker({ label, lnglat: pendingPin.lnglat, icon: pickedIcon });
+      toast('Marker placed.');
+    }
+    closeMarkerSheet();
+    renderCustomMarkers();
+    renderSavedLists();
+  });
+}
+
+/* Long-press (touch & mouse) on the map drops a pending pin and
+   opens the icon picker. Movement beyond a small slop cancels. */
+function wireLongPress() {
+  if (!map) return;
+  const container = map.getContainer();
+  let timer = null, startX = 0, startY = 0;
+  const SLOPPX = 12, HOLDTIME = 600;
+  const cancel = () => { if (timer) { clearTimeout(timer); timer = null; } };
+  const begin = (x, y) => {
+    cancel();
+    startX = x; startY = y;
+    timer = setTimeout(() => {
+      timer = null;
+      if (navActive) return; // never interrupt navigation
+      try {
+        const rect = container.getBoundingClientRect();
+        const lnglat = map.unproject([x - rect.left, y - rect.top]);
+        openMarkerSheet([lnglat.lng, lnglat.lat], null);
+      } catch (e) {}
+    }, HOLDTIME);
+  };
+  container.addEventListener('touchstart', e => {
+    if (e.touches.length !== 1) { cancel(); return; }
+    begin(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
+  container.addEventListener('touchmove', e => {
+    if (!timer) return;
+    const t = e.touches[0];
+    if (Math.hypot(t.clientX - startX, t.clientY - startY) > SLOPPX) cancel();
+  }, { passive: true });
+  container.addEventListener('touchend', cancel, { passive: true });
+  container.addEventListener('touchcancel', cancel, { passive: true });
+  container.addEventListener('mousedown', e => { if (e.button === 0) begin(e.clientX, e.clientY); });
+  container.addEventListener('mousemove', e => {
+    if (!timer) return;
+    if (Math.hypot(e.clientX - startX, e.clientY - startY) > SLOPPX) cancel();
+  });
+  container.addEventListener('mouseup', cancel);
 }
 /* Instant drawer feedback the moment a destination is picked —
    no dead air while the route computes. */
@@ -2065,6 +2310,7 @@ function wireControls() {
 initAppMode();
 wireSearch();
 wireSavedPlaces();
+wireMarkerSheet();
 wireControls();
 wireSpotifyMenu();
 initMap();
