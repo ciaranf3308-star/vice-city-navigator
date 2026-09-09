@@ -127,6 +127,60 @@ body{
   display:flex;flex-direction:column;gap:10px;
 }
 
+/* ---------- explore chrome per-theme skins ----------
+   The menu button + "Where to?" pill wear each theme's own design
+   language in phone/map mode. (SA's skin lives here — its
+   dashboard.css is locked — via elevated-specificity overrides.) */
+/* Vice City: pink/cyan neon-noir */
+body.theme-vice-city #menu-btn{
+  background:var(--panel);color:var(--cyan);
+  border:2px solid var(--cyan);border-radius:50%;
+  box-shadow:0 0 14px rgba(1,205,254,.35);
+}
+body.theme-vice-city #search-bar{
+  background:var(--panel);color:var(--ink);
+  border:2px solid var(--purple);border-radius:999px;
+  box-shadow:0 0 18px rgba(185,103,255,.35);
+}
+body.theme-vice-city #search-bar span{opacity:.75}
+/* San Andreas: Grove Street green + gold chamfer */
+html body.theme-san-andreas #menu-btn{
+  background:rgba(14,13,10,.94);color:#7ec850;
+  border:2px solid #e8a33d;border-radius:10px;
+  box-shadow:0 0 14px rgba(232,163,61,.35),inset 0 0 8px rgba(126,200,80,.12);
+}
+html body.theme-san-andreas #search-bar{
+  background:rgba(14,13,10,.94);color:#f0e6c8;
+  border:2px solid #e8a33d;border-radius:10px;
+  box-shadow:0 0 14px rgba(232,163,61,.3);
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;letter-spacing:2px;
+}
+html body.theme-san-andreas #search-bar span{color:#7ec850;opacity:1}
+/* GTA V: slim minimal, hairline green rules */
+body.theme-gta-v #menu-btn{
+  background:rgba(8,8,8,.94);color:#e8ece8;
+  border:1px solid rgba(168,224,107,.65);border-radius:8px;box-shadow:none;
+}
+body.theme-gta-v #search-bar{
+  background:rgba(8,8,8,.94);color:#f4f4f4;
+  border:1px solid rgba(168,224,107,.55);border-radius:8px;box-shadow:none;
+  font-family:'Chalet London',system-ui,sans-serif;letter-spacing:.5px;
+}
+body.theme-gta-v #search-bar span{opacity:.6}
+/* RDR2: frontier furniture — dark wood, gold rules */
+body.theme-rdr2 #menu-btn{
+  background:rgba(42,31,22,.96);color:#e8d9b0;
+  border:2px solid #d8b36a;border-radius:6px;
+  box-shadow:0 0 0 1px rgba(20,12,6,.9),0 4px 12px rgba(0,0,0,.55);
+}
+body.theme-rdr2 #search-bar{
+  background:rgba(42,31,22,.96);color:#e8d9b0;
+  border:2px solid #d8b36a;border-radius:6px;
+  box-shadow:inset 0 0 0 1px rgba(216,179,106,.35),0 4px 14px rgba(0,0,0,.5);
+  font-family:'RDR Lino',Georgia,serif;letter-spacing:1px;
+}
+body.theme-rdr2 #search-bar span{opacity:.85}
+
 /* ---------- menu panel: GTA-styled settings ----------
    Section cards, custom toggle switches, big touch targets. Per-theme
    skins live in the theme files (SA's skin is here — its dashboard.css
