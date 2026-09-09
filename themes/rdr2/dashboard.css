@@ -24,6 +24,14 @@ body.dashboard-mode.theme-rdr2 #search-bar{top:calc(116px + env(safe-area-inset-
    left/right edges behind the content; SVG grain for material. */
 body.dashboard-mode.theme-rdr2 #dash-topbar{
   display:block;position:absolute;left:0;right:0;top:0;height:104px;z-index:25;
+  /* No clip-path on the container: the stepped silhouette lives on the
+     background layers below, so the badge can overhang onto the map. */
+  filter:drop-shadow(0 4px 18px rgba(0,0,0,.65));
+  pointer-events:none;
+}
+/* gold edge: the stepped silhouette, as a background layer */
+body.dashboard-mode.theme-rdr2 #dash-topbar::before{
+  content:'';position:absolute;inset:0;z-index:0;display:block;
   background:linear-gradient(180deg,#c8a45e 0%,#8a6f3a 100%);
   clip-path:polygon(
     0 0, 100% 0,
@@ -31,14 +39,12 @@ body.dashboard-mode.theme-rdr2 #dash-topbar{
     63% calc(100% - 14px), 61.5% 100%, 38.5% 100%, 37% calc(100% - 14px),
     0 calc(100% - 14px)
   );
-  filter:drop-shadow(0 4px 18px rgba(0,0,0,.65));
-  pointer-events:none;
 }
 /* dark inset: 2px gold crown revealed at top, 2px gold along the step */
-body.dashboard-mode.theme-rdr2 #dash-topbar::before{
-  content:'';position:absolute;inset:0;z-index:0;display:block;
+body.dashboard-mode.theme-rdr2 #dash-topbar::after{
+  content:'';position:absolute;inset:0;z-index:0;display:block;pointer-events:none;
   background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.85 0 0 0 0 0.78 0 0 0 0 0.62 0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.85 0 0 0 0 0.78 0 0 0 0 0.62 0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E"),
     linear-gradient(180deg,rgba(20,21,14,.88) 0%,rgba(16,17,11,.94) 55%,rgba(11,12,8,.97) 100%);
   background-repeat:repeat,no-repeat;
   clip-path:polygon(
@@ -49,19 +55,14 @@ body.dashboard-mode.theme-rdr2 #dash-topbar::before{
   );
 }
 /* dusk scenery: feathered into the bar at the left and right edges,
-   GTA V mask technique — atmosphere, not decoration */
-body.dashboard-mode.theme-rdr2 #dash-topbar::after{
+   GTA V mask technique — atmosphere, not decoration.
+   Lives on .dash-chrome (unclipped) so it never clips the badge. */
+body.dashboard-mode.theme-rdr2 #dash-topbar .dash-chrome::before{
   content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
   background:url('assets/themes/rdr2/dashboard/header-dusk.png') 50% 100%/cover no-repeat;
   opacity:.4;
   -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 18%,#000 82%,transparent 100%);
   mask-image:linear-gradient(90deg,transparent 0%,#000 18%,#000 82%,transparent 100%);
-  clip-path:polygon(
-    0 2px, 100% 2px,
-    100% calc(100% - 16px),
-    63% calc(100% - 16px), 61.5% calc(100% - 2px), 38.5% calc(100% - 2px), 37% calc(100% - 16px),
-    0 calc(100% - 16px)
-  );
 }
 body.dashboard-mode.theme-rdr2 #dash-topbar .dash-chrome{
   position:absolute;inset:0;z-index:2;
