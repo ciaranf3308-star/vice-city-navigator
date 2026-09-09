@@ -348,6 +348,14 @@ body.dashboard-mode.radio-off #spotify-pane{display:none}
 #dash-topbar .dash-chrome,#dash-bottombar .dash-chrome{
   position:absolute;display:flex;align-items:center;overflow:hidden;
 }
+/* VC footer: the locked theme's clip-path stops 2px short of the bar's
+   bottom edge, leaking a 2px sliver of map underneath. Fill it with the
+   footer's base tone. (themes/vice-city/dashboard.css is locked; this
+   compensates from shared CSS without touching it.) */
+body.dashboard-mode.theme-vice-city #dash-bottombar::after{
+  content:'';position:absolute;left:0;right:0;bottom:0;height:2px;
+  background:#030208;z-index:2;pointer-events:none;
+}
 /* neon palm beside the wordmark + compass "N": VC dashboard only */
 .dash-palm,.dash-north{display:none}
 /* Dash chrome owns the top/bottom of the canvas: keep the drive HUD
