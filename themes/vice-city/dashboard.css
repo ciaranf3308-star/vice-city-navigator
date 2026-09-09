@@ -575,7 +575,11 @@ body.cluster-mode.theme-vice-city .cg-power{right:26px;top:152px;color:#ff2d95;t
 /* pane layer comes from the shared cluster stage; only the widget docks per-theme */
 body.cluster-mode.theme-vice-city .vcsp{position:absolute;top:auto;bottom:112px;right:36px;
   left:auto;translate:none;width:670px;margin:0;
-  filter:drop-shadow(0 24px 32px rgba(0,0,0,.6)) drop-shadow(0 0 26px rgba(255,45,149,.28))}
+  filter:
+    drop-shadow(0 16px 24px rgba(0,0,0,.62))
+    drop-shadow(0 0 55px rgba(2,0,10,.50))
+    drop-shadow(0 0 120px rgba(2,0,10,.35))
+    drop-shadow(0 0 30px rgba(255,45,149,.30))}
 
 /* ---- tab switcher + script logo ride on the bottombar (see footer block above) ----
    Flat game-menu navigation, not touchscreen tiles: the active tab is
