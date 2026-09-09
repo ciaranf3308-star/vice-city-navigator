@@ -244,3 +244,20 @@ html body.theme-san-andreas:not(.dashboard-mode) .sasp-idle-hint{
   text-transform:uppercase;margin:0;
 }
 html body.theme-san-andreas:not(.dashboard-mode) .sasp.is-idle .sasp-main{visibility:hidden}
+
+/* ================= Cluster Mode: San Andreas =================
+   NOTE: lives here, not dashboard.css — that file is HERO-locked
+   (themes/LOCKED.json). Strictly cluster-scoped, no phone impact.
+   Grove Street console: Bank Gothic numerals, gold chamfer, green accents. */
+body.cluster-mode.theme-san-andreas{background:radial-gradient(120% 90% at 50% 112%, #18230f 0%, #0b0e07 60%, #000 100%)}
+body.cluster-mode.theme-san-andreas #cluster-speed-num{font-family:'Bank Gothic',sans-serif;color:#f6efdb;
+  text-shadow:0 4px 0 #111,0 8px 30px rgba(0,0,0,.7)}
+body.cluster-mode.theme-san-andreas #cluster-speed-unit{font-family:'Bank Gothic',sans-serif;color:#7ec850;letter-spacing:12px}
+body.cluster-mode.theme-san-andreas #cluster-speed.over #cluster-speed-num{color:#ffd34d}
+body.cluster-mode.theme-san-andreas #cluster-minimap{border:4px solid #e8a33d;border-radius:10px;
+  box-shadow:0 0 0 2px #111,0 0 24px rgba(232,163,61,.35),inset 0 0 0 2px rgba(126,200,80,.22)}
+body.cluster-mode.theme-san-andreas #cluster-turn-distance{font-family:'Bank Gothic',sans-serif;letter-spacing:2px}
+body.cluster-mode.theme-san-andreas #cluster-turn-road{color:#e8a33d;font-family:'Bank Gothic',sans-serif;letter-spacing:2px}
+body.cluster-mode.theme-san-andreas #cluster-music{border:2px solid #e8a33d;border-radius:10px;background:rgba(14,13,10,.82)}
+body.cluster-mode.theme-san-andreas #cluster-music-title{font-family:'Bank Gothic',sans-serif;color:#f6efdb}
+body.cluster-mode.theme-san-andreas #cluster-mode-exit{border-color:#7ec850;color:#7ec850;border-radius:10px}

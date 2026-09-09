@@ -438,3 +438,20 @@ body.theme-rdr2 .menu-section .row input[type="checkbox"]:checked::after{
 body.theme-rdr2 .menu-section .row input[type="checkbox"]:focus-visible{
   outline-color:#d8b36a;
 }
+
+/* ================= Cluster Mode: RDR2 =================
+   Frontier furniture: RDR Lino numerals, parchment ink, gold double
+   rules, Kirsty script for roads and instructions. */
+body.cluster-mode.theme-rdr2{background:radial-gradient(120% 90% at 50% 112%, #251b10 0%, #120d08 60%, #000 100%)}
+body.cluster-mode.theme-rdr2 #cluster-speed-num{font-family:'RDR Lino',serif;color:#f5ead0;
+  text-shadow:0 3px 0 #2a1c0d,0 8px 26px rgba(0,0,0,.7)}
+body.cluster-mode.theme-rdr2 #cluster-speed-unit{font-family:'RDR Lino',serif;color:#c9a227;letter-spacing:10px}
+body.cluster-mode.theme-rdr2 #cluster-speed.over #cluster-speed-num{color:#e0b13e}
+body.cluster-mode.theme-rdr2 #cluster-minimap{border:3px double #c9a227;border-radius:4px;
+  box-shadow:0 0 0 3px #2a1c0d,0 8px 30px rgba(0,0,0,.65)}
+body.cluster-mode.theme-rdr2 #cluster-turn-distance{font-family:'RDR Lino',serif;letter-spacing:1px}
+body.cluster-mode.theme-rdr2 #cluster-turn-road{color:#c9a227;font-family:'Kirsty',serif;font-size:38px}
+body.cluster-mode.theme-rdr2 #cluster-turn-instruction{font-family:'Kirsty',serif;font-size:30px}
+body.cluster-mode.theme-rdr2 #cluster-music{border:1px solid #c9a227;border-radius:4px;background:rgba(24,17,10,.78)}
+body.cluster-mode.theme-rdr2 #cluster-music-title{font-family:'RDR Lino',serif;color:#f5ead0}
+body.cluster-mode.theme-rdr2 #cluster-mode-exit{border-color:#c9a227;color:#c9a227;border-radius:4px}

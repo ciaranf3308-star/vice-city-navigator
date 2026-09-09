@@ -22,7 +22,7 @@
    ============================================================ */
 
 /* bottom sheet: full-width dock, map interactive above it */
-html body.theme-vice-city:not(.dashboard-mode) #spotify-pane{
+html body.theme-vice-city:not(.dashboard-mode):not(.cluster-mode) #spotify-pane{
   position:fixed;left:0;right:0;top:auto;bottom:0;width:auto;height:auto;
   max-width:none;min-width:0;z-index:30;overflow:visible;
   pointer-events:none;
@@ -31,12 +31,12 @@ html body.theme-vice-city:not(.dashboard-mode) #spotify-pane{
   container-type:normal;
   padding:0 12px calc(10px + env(safe-area-inset-bottom));
 }
-html body.theme-vice-city:not(.dashboard-mode) #spotify-stage{
+html body.theme-vice-city:not(.dashboard-mode):not(.cluster-mode) #spotify-stage{
   position:relative;left:auto;right:auto;top:auto;bottom:auto;
   width:auto;height:auto;pointer-events:none;
 }
 /* compact widget: same art, same fractional openings, phone width */
-html body.theme-vice-city:not(.dashboard-mode) .vcsp{
+html body.theme-vice-city:not(.dashboard-mode):not(.cluster-mode) .vcsp{
   position:relative;right:auto;top:auto;translate:none;
   width:100%;max-width:430px;margin:0 auto;
 }
@@ -44,22 +44,22 @@ html body.theme-vice-city:not(.dashboard-mode) .vcsp{
    Measured budget (fractions of the 1448x1086 art): the album frame's
    inner bottom edge is y 0.70, the bottom neon chrome starts y 0.933 —
    track + progress + transport must live in 0.708-0.925. */
-html body.theme-vice-city:not(.dashboard-mode) .vcsp-track{top:70.8%}
-html body.theme-vice-city:not(.dashboard-mode) .vcsp-title{font-size:2.7cqw;line-height:1}
-html body.theme-vice-city:not(.dashboard-mode) .vcsp-artist{font-size:2cqw;margin-top:.4cqw}
-html body.theme-vice-city:not(.dashboard-mode) .vcsp-progress{top:79.4%}
-html body.theme-vice-city:not(.dashboard-mode) .vcsp-bar{height:1.6cqh}
-html body.theme-vice-city:not(.dashboard-mode) .vcsp-controls{top:82.6%;bottom:9.2%}
+html body.theme-vice-city:not(.dashboard-mode):not(.cluster-mode) .vcsp-track{top:70.8%}
+html body.theme-vice-city:not(.dashboard-mode):not(.cluster-mode) .vcsp-title{font-size:2.7cqw;line-height:1}
+html body.theme-vice-city:not(.dashboard-mode):not(.cluster-mode) .vcsp-artist{font-size:2cqw;margin-top:.4cqw}
+html body.theme-vice-city:not(.dashboard-mode):not(.cluster-mode) .vcsp-progress{top:79.4%}
+html body.theme-vice-city:not(.dashboard-mode):not(.cluster-mode) .vcsp-bar{height:1.6cqh}
+html body.theme-vice-city:not(.dashboard-mode):not(.cluster-mode) .vcsp-controls{top:82.6%;bottom:9.2%}
 /* transport: uniform touch coins (the dashboard's oversized middle
    coin can't fit the phone panel next to the progress bar) */
-html body.theme-vice-city:not(.dashboard-mode) .vcsp-tbtn{
+html body.theme-vice-city:not(.dashboard-mode):not(.cluster-mode) .vcsp-tbtn{
   width:8cqw;height:8cqw;min-width:29px;min-height:29px;
 }
-html body.theme-vice-city:not(.dashboard-mode) .vcsp-tbtn.big{
+html body.theme-vice-city:not(.dashboard-mode):not(.cluster-mode) .vcsp-tbtn.big{
   width:8cqw;height:8cqw;min-width:29px;min-height:29px;
 }
 /* idle/connect lives in the lyric stage, as on dashboard — type
    sized so the kicker + CTA + hint fit the phone stage */
-html body.theme-vice-city:not(.dashboard-mode) .vcsp-idle-kicker{font-size:4.6cqw}
-html body.theme-vice-city:not(.dashboard-mode) .vcsp-connect-btn{font-size:4.2cqw}
-html body.theme-vice-city:not(.dashboard-mode) .vcsp-idle-hint{font-size:2.9cqw}
+html body.theme-vice-city:not(.dashboard-mode):not(.cluster-mode) .vcsp-idle-kicker{font-size:4.6cqw}
+html body.theme-vice-city:not(.dashboard-mode):not(.cluster-mode) .vcsp-connect-btn{font-size:4.2cqw}
+html body.theme-vice-city:not(.dashboard-mode):not(.cluster-mode) .vcsp-idle-hint{font-size:2.9cqw}

@@ -422,3 +422,20 @@ body.theme-gta-v .ghost-btn:hover{background:rgba(44,230,140,.08)}
 body.theme-gta-v .attrib{color:rgba(154,163,168,.5)}
 body.theme-gta-v .menu-section details.advanced{border:1px dashed rgba(242,245,242,.2);border-radius:4px}
 body.dashboard-mode.theme-gta-v .menu-section{padding:32px}
+
+/* ================= Cluster Mode: GTA V =================
+   Pale-atlas minimalism: hairline mint rules, Chalet numerals,
+   SignPainter script for the spoken-style instruction. */
+body.cluster-mode.theme-gta-v{background:#0d100e}
+body.cluster-mode.theme-gta-v #cluster-speed-num{font-family:'Chalet London',sans-serif;font-weight:400;color:#f2f5f2;
+  text-shadow:0 4px 24px rgba(0,0,0,.6)}
+body.cluster-mode.theme-gta-v #cluster-speed-unit{font-family:'Chalet London',sans-serif;color:#2ce68c;letter-spacing:12px}
+body.cluster-mode.theme-gta-v #cluster-speed.over #cluster-speed-num{color:#ffd34d}
+body.cluster-mode.theme-gta-v #cluster-minimap{border:1px solid rgba(44,230,140,.55);border-radius:6px;
+  box-shadow:0 4px 24px rgba(0,0,0,.5)}
+body.cluster-mode.theme-gta-v #cluster-turn-distance{font-family:'Chalet London',sans-serif;letter-spacing:1px}
+body.cluster-mode.theme-gta-v #cluster-turn-road{color:#2ce68c;font-family:'Chalet London',sans-serif}
+body.cluster-mode.theme-gta-v #cluster-turn-instruction{font-family:'SignPainter',cursive;font-size:36px;color:#e8ece8}
+body.cluster-mode.theme-gta-v #cluster-music{border:none;border-top:1px solid #2ce68c;border-radius:0;background:rgba(10,14,12,.62)}
+body.cluster-mode.theme-gta-v #cluster-music-title{font-family:'Chalet London',sans-serif}
+body.cluster-mode.theme-gta-v #cluster-mode-exit{border-color:#2ce68c;color:#2ce68c}

@@ -383,3 +383,127 @@ body.theme-vice-city .ghost-btn:hover{background:rgba(1,205,254,.16)}
 body.theme-vice-city .attrib{color:rgba(1,205,254,.55)}
 body.theme-vice-city .menu-section details.advanced{border-color:rgba(1,205,254,.35)}
 body.theme-vice-city .menu-section details.advanced summary{color:#eafcff}
+
+/* ================= Cluster Mode: Vice City HERO =================
+   Pixel-matched to themes/vice-city/cluster/hero.png (2048x768).
+   Neon-noir instrument cluster: header bar, nav card, hero speed,
+   power arc, music widget, tab footer. Shared DOM only restyled. */
+
+/* ---- backdrop: sunset skyline band over deep violet night ---- */
+body.cluster-mode.theme-vice-city{background:#05020c}
+body.cluster-mode.theme-vice-city #cluster-backdrop{display:block;position:fixed;inset:0;z-index:30;
+  background:
+    linear-gradient(180deg, rgba(5,2,12,.30) 0%, rgba(5,2,12,.48) 26%, rgba(4,2,10,.88) 50%, rgba(3,1,8,.97) 100%),
+    url('dashboard/skyline-sunset.png') top center / 1920px auto no-repeat,
+    radial-gradient(120% 90% at 50% 112%, #2b0a2e 0%, #0b0514 55%, #000 100%)}
+
+/* ---- header bar ---- */
+body.cluster-mode.theme-vice-city #cluster-header{display:flex;align-items:center;gap:28px;
+  position:fixed;top:0;left:0;right:0;height:54px;z-index:33;padding:0 28px 0 20px;
+  background:linear-gradient(180deg, rgba(12,4,22,.9), rgba(12,4,22,.55));
+  border-bottom:1px solid rgba(255,45,149,.8);box-shadow:0 1px 12px rgba(255,45,149,.35)}
+body.cluster-mode.theme-vice-city #cluster-logo{background:none;border:none;padding:0;cursor:pointer;display:flex;align-items:center}
+body.cluster-mode.theme-vice-city #cluster-logo img{height:34px;width:auto;filter:drop-shadow(0 0 8px rgba(255,45,149,.7))}
+body.cluster-mode.theme-vice-city #cluster-wx{display:flex;align-items:center;gap:10px;
+  font-family:'Pricedown Bl',sans-serif;font-size:27px;color:#01cdfe;letter-spacing:2px;
+  text-shadow:0 0 12px rgba(1,205,254,.7)}
+body.cluster-mode.theme-vice-city #cluster-clock{position:absolute;left:50%;transform:translateX(-50%);
+  display:flex;align-items:baseline;gap:18px}
+body.cluster-mode.theme-vice-city #cluster-date{font-family:'Pricedown Bl',sans-serif;font-size:21px;color:#ff71ce;letter-spacing:3px}
+body.cluster-mode.theme-vice-city #cluster-time{font-family:'Pricedown Bl',sans-serif;font-size:36px;color:#ff71ce;letter-spacing:3px;
+  text-shadow:0 0 12px rgba(255,45,149,.8)}
+body.cluster-mode.theme-vice-city #cluster-tagline{margin-left:auto;text-align:right;
+  font-family:'Yellowtail',cursive;font-size:19px;line-height:1.15;color:#ff71ce;
+  text-shadow:0 0 10px rgba(255,45,149,.8);transform:rotate(-3deg)}
+body.cluster-mode.theme-vice-city #cluster-tagline span{display:block}
+body.cluster-mode.theme-vice-city #menu-btn{display:none}
+/* header skyline art at the far right edge */
+body.cluster-mode.theme-vice-city #cluster-header::after{content:"";position:absolute;right:0;top:0;bottom:0;width:420px;
+  background:url('dashboard/topbar-skyline-right.png') right center / auto 100% no-repeat;
+  opacity:.85;pointer-events:none;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 45%);mask-image:linear-gradient(90deg,transparent,#000 45%)}
+
+/* ---- nav card ---- */
+body.cluster-mode.theme-vice-city #cluster-minimap{left:24px;top:88px;width:500px;height:512px;z-index:30;
+  border:3px solid #ff2d95;border-radius:26px;background:rgba(9,5,20,.94);
+  box-shadow:inset 0 0 0 2px rgba(1,205,254,.85),0 0 30px rgba(255,45,149,.55),0 10px 44px rgba(0,0,0,.6)}
+body.cluster-mode.theme-vice-city #map{left:40px;top:216px;width:468px;height:320px;border-radius:10px;z-index:31}
+/* turn header lives on the card top */
+body.cluster-mode.theme-vice-city #cluster-turn:not([hidden]){left:40px;top:104px;transform:none;z-index:32;
+  width:468px;max-width:none;display:flex;align-items:center;gap:18px}
+body.cluster-mode.theme-vice-city #cluster-turn-arrow{width:72px;height:72px;flex:0 0 auto}
+body.cluster-mode.theme-vice-city #cluster-turn-arrow svg{width:100%;height:100%}
+body.cluster-mode.theme-vice-city #cluster-turn-arrow svg path{fill:#ff71ce}
+body.cluster-mode.theme-vice-city #cluster-turn-arrow{filter:drop-shadow(0 0 10px rgba(255,45,149,.8))}
+body.cluster-mode.theme-vice-city #cluster-turn-main{gap:2px}
+body.cluster-mode.theme-vice-city #cluster-turn-distance{font-family:'Pricedown Bl',sans-serif;font-size:62px;line-height:1;
+  color:#ff71ce;letter-spacing:2px;text-shadow:0 0 14px rgba(255,45,149,.75)}
+body.cluster-mode.theme-vice-city #cluster-turn-road{font-family:'Pricedown Bl',sans-serif;font-size:36px;color:#01cdfe;
+  letter-spacing:3px;text-shadow:0 0 10px rgba(1,205,254,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:330px}
+body.cluster-mode.theme-vice-city #cluster-turn-instruction{display:none}
+body.cluster-mode.theme-vice-city #cluster-turn-compass{display:flex;flex-direction:column;align-items:center;gap:2px;
+  margin-left:auto;color:#ff71ce;font-family:'Pricedown Bl',sans-serif;font-size:30px}
+body.cluster-mode.theme-vice-city #cluster-compass-needle{width:0;height:0;
+  border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:14px solid #ff71ce;
+  filter:drop-shadow(0 0 6px rgba(255,45,149,.8));transition:transform .3s}
+/* trip strip on the card bottom */
+body.cluster-mode.theme-vice-city #cluster-trip:not([hidden]){display:flex;position:fixed;left:40px;top:548px;width:468px;z-index:32;
+  align-items:center;justify-content:center;gap:22px;
+  font-family:'Pricedown Bl',sans-serif;font-size:34px;letter-spacing:2px;color:#ff71ce;
+  text-shadow:0 0 10px rgba(255,45,149,.7)}
+body.cluster-mode.theme-vice-city #cluster-trip .trip-sep{color:#01cdfe;text-shadow:0 0 10px rgba(1,205,254,.7)}
+body.cluster-mode.theme-vice-city #cluster-trip .trip-cyan{color:#01cdfe;text-shadow:0 0 10px rgba(1,205,254,.7)}
+
+/* ---- hero speed ---- */
+body.cluster-mode.theme-vice-city #cluster-speed{top:36%}
+body.cluster-mode.theme-vice-city #cluster-speed-num{font-family:'Pricedown Bl',sans-serif;font-weight:400;font-size:212px;
+  line-height:.95;color:#fff;font-variant-numeric:tabular-nums;
+  text-shadow:0 0 16px rgba(255,113,206,.9),0 0 70px rgba(255,45,149,.5),0 8px 30px rgba(0,0,0,.7)}
+body.cluster-mode.theme-vice-city #cluster-speed-unit{font-family:'Pricedown Bl',sans-serif;font-size:44px;color:#ff71ce;
+  letter-spacing:16px;margin-top:2px;text-shadow:0 0 12px rgba(255,45,149,.7)}
+body.cluster-mode.theme-vice-city #cluster-speed.over #cluster-speed-num{color:#ffd34d;
+  text-shadow:0 0 20px rgba(255,211,77,.8),0 8px 30px rgba(0,0,0,.7)}
+body.cluster-mode.theme-vice-city #cluster-limit:not([hidden]){left:50%;top:36%;transform:translate(250px,40px)}
+
+/* ---- power arc gauge ---- */
+body.cluster-mode.theme-vice-city #cluster-gauge{display:block;position:fixed;left:50%;top:53%;transform:translateX(-50%);
+  width:420px;height:200px;z-index:32}
+body.cluster-mode.theme-vice-city #cluster-gauge-svg{width:100%;height:100%;overflow:visible}
+body.cluster-mode.theme-vice-city .cg-tick{stroke:rgba(255,255,255,.16);stroke-width:7;stroke-linecap:round;
+  transition:stroke .45s ease,filter .45s ease,opacity .45s ease}
+body.cluster-mode.theme-vice-city .cg-tick.lit-regen{stroke:#01cdfe;filter:drop-shadow(0 0 6px rgba(1,205,254,.9))}
+body.cluster-mode.theme-vice-city .cg-tick.lit-power{stroke:#ff2d95;filter:drop-shadow(0 0 6px rgba(255,45,149,.9))}
+body.cluster-mode.theme-vice-city .cg-tick.lit-coast{stroke:#e8e8f2;filter:drop-shadow(0 0 6px rgba(232,232,242,.7))}
+body.cluster-mode.theme-vice-city .cg-label{position:absolute;font-family:'Pricedown Bl',sans-serif;font-size:30px;letter-spacing:3px}
+body.cluster-mode.theme-vice-city .cg-regen{left:6px;bottom:34px;color:#01cdfe;text-shadow:0 0 10px rgba(1,205,254,.7);transform:rotate(-24deg)}
+body.cluster-mode.theme-vice-city .cg-coast{left:50%;bottom:0;transform:translateX(-50%);color:#8f8fa3}
+body.cluster-mode.theme-vice-city .cg-power{right:6px;bottom:34px;color:#ff2d95;text-shadow:0 0 10px rgba(255,45,149,.7);transform:rotate(24deg)}
+
+/* ---- the REAL Spotify widget, shared with the dashboard ----
+   Cluster shows the same #spotify-pane / #spotify-stage surface — one DOM,
+   one skin, one SpotifyCore session. Cluster only repositions it into the
+   right zone; nothing is cloned or remounted. (phone.css's bottom-sheet
+   rules exclude .cluster-mode, so the widget keeps its dashboard design.) */
+body.cluster-mode.theme-vice-city #spotify-pane{position:fixed;left:0;top:0;width:100vw;height:100dvh;
+  right:auto;bottom:auto;max-width:none;min-width:0;pointer-events:none;z-index:31;overflow:hidden;
+  container-type:size;padding:0}
+body.cluster-mode.theme-vice-city #spotify-stage{position:absolute;inset:0;pointer-events:none;
+  width:auto;height:auto}
+body.cluster-mode.theme-vice-city .vcsp{position:absolute;top:auto;bottom:88px;right:36px;
+  left:auto;translate:none;width:670px;margin:0}
+
+/* ---- footer: thin presentation switcher, no dead tabs ---- */
+body.cluster-mode.theme-vice-city #cluster-footer{display:flex;align-items:center;position:fixed;left:0;right:0;bottom:0;
+  height:64px;z-index:33;padding:0 40px 0 48px;
+  background:linear-gradient(0deg, rgba(12,4,22,.96), rgba(12,4,22,.8));
+  border-top:2px solid #ff2d95;box-shadow:0 -2px 16px rgba(255,45,149,.5)}
+body.cluster-mode.theme-vice-city #cluster-tabs{display:flex;align-items:center;gap:8px}
+body.cluster-mode.theme-vice-city #cluster-tabs button{background:none;border:none;cursor:pointer;
+  font-family:'Pricedown Bl',sans-serif;font-size:27px;letter-spacing:4px;color:#01cdfe;padding:8px 20px;
+  text-shadow:0 0 10px rgba(1,205,254,.6)}
+body.cluster-mode.theme-vice-city #cluster-tabs button.on{color:#ff71ce;text-shadow:0 0 14px rgba(255,45,149,.9)}
+body.cluster-mode.theme-vice-city #cluster-tabs button:not(:last-child){border-right:1px solid rgba(1,205,254,.35)}
+body.cluster-mode.theme-vice-city #cluster-footer-logo{margin-left:auto;font-family:'Yellowtail',cursive;font-size:36px;
+  color:#ff71ce;transform:rotate(-4deg);text-shadow:0 0 12px rgba(255,45,149,.85)}
+body.cluster-mode.theme-vice-city #cluster-mode-exit{display:none}
+
