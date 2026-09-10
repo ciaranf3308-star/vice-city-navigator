@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v211"), 'SW theme cache v211');
+ok(swSrc.includes("ws-theme-v212"), 'SW theme cache v212');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -2116,6 +2116,28 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
   ok(gvSkin.includes('#76b900'), 'GTA V toggle uses minimal green marker');
   const rdrSkin = fs.readFileSync(path.join(REPO, 'themes/rdr2/mode-toggle.css'), 'utf8');
   ok(rdrSkin.includes('RDR Lino'), 'RDR2 toggle uses frontier type');
+}
+
+/* GTA V cluster live placename (2026-09-10, v212): the topbar ships with
+   the hero branding (LOS SANTOS / CALIFORNIA), but once a real GPS fix is
+   held the plate must name the actual town — it sits next to live coords,
+   clock and weather, so a hardcoded city reads as a location bug. */
+{
+  const gvClusterJs = fs.readFileSync(path.join(REPO, 'themes/gta-v/cluster.js'), 'utf8');
+  ok(gvClusterJs.includes('syncPlace') && gvClusterJs.includes('queuePlace'),
+    'GTA V cluster has a debounced live-placename sync');
+  ok(/\.gv-place b/.test(gvClusterJs) && /nominatim\.openstreetmap\.org\/reverse/.test(gvClusterJs),
+    'GTA V cluster placename reverse-geocodes into .gv-place');
+  ok(/replace\(\/\\s\+ED\$\/i/.test(gvClusterJs),
+    'GTA V cluster placename trims the Irish "ED" suffix (CLANE, not CLANE ED)');
+  ok(gvClusterJs.includes("'CO. ' + county.toUpperCase()"),
+    'GTA V cluster placename shows the county as CO. KILDARE style region');
+  ok(/toFixed\(3\)/.test(gvClusterJs) && gvClusterJs.includes('gvPlaceKey'),
+    'GTA V cluster placename is keyed on a ~100m grid (no Nominatim hammering)');
+  ok(/tick\(\)[\s\S]{0,200}queuePlace\(\)/.test(gvClusterJs),
+    'GTA V cluster tick queues the placename sync');
+  ok(!/LOS SANTOS/.test(gvClusterJs),
+    'GTA V cluster JS never hardcodes a city name (hero branding stays in HTML only)');
 }
 
 /* Location permission + initial-fix reliability (2026-09-10, v211).

@@ -39,6 +39,55 @@
     } catch (e) {}
   }
 
+  /* ---------- live placename (town + county, reverse-geocoded) ---------- */
+  /* The topbar ships with the hero city branding baked into the HTML; once
+     we hold a real GPS fix the plate names the actual town, like the
+     dashboard locality plate does. Debounced on a ~100m grid so we don't
+     hammer Nominatim. */
+  let gvPlaceKey = '', gvPlaceTimer = null;
+  function queuePlace() {
+    clearTimeout(gvPlaceTimer);
+    gvPlaceTimer = setTimeout(() => { gvPlaceTimer = null; syncPlace(); }, 1200);
+  }
+  async function syncPlace() {
+    if (!inGvCluster()) return;
+    let p = null;
+    try { p = (typeof userPos !== 'undefined') ? userPos : null; } catch (e) {}
+    if (!p) return;
+    const key = p[1].toFixed(3) + ',' + p[0].toFixed(3);
+    if (key === gvPlaceKey) return;
+    gvPlaceKey = key;
+    const nameEl = document.querySelector('#gv-topbar .gv-place b');
+    const subEl = document.querySelector('#gv-topbar .gv-place span');
+    if (!nameEl) return;
+    const nearDublin = Math.hypot(p[1] - 53.3498, p[0] - (-6.2603)) < 0.2;
+    try {
+      const r = await fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' +
+        p[1].toFixed(5) + '&lon=' + p[0].toFixed(5) + '&zoom=16');
+      if (!r.ok) throw new Error('geo ' + r.status);
+      const j = await r.json(), a = (j && j.address) || {};
+      /* Same town-preference order + Ireland quirks as the dashboard
+         locality plate: CLANE, not CLANE ED. */
+      let name = (a.suburb || a.neighbourhood || a.quarter || a.town ||
+        a.village || a.hamlet || a.city || a.municipality || a.city_district || '')
+        .replace(/\s+ED$/i, '');
+      const county = (a.county || '').replace(/^county\s+/i, '');
+      if (!name) name = county;
+      if (name) {
+        nameEl.textContent = name.toUpperCase().slice(0, 28);
+        if (subEl && county) subEl.textContent = 'CO. ' + county.toUpperCase();
+      } else if (nearDublin) {
+        nameEl.textContent = 'DUBLIN';
+        if (subEl) subEl.textContent = 'CO. DUBLIN';
+      }
+    } catch (e) {
+      if (nearDublin) {
+        nameEl.textContent = 'DUBLIN';
+        if (subEl) subEl.textContent = 'CO. DUBLIN';
+      }
+    }
+  }
+
   /* ---------- weather (same cache as the dashboard) ---------- */
   function wxLabel(code) {
     const c = Number(code);
@@ -103,6 +152,7 @@
   function tick() {
     if (!inGvCluster()) return;
     paintClock(); paintCoords(); paintWeather(); paintPower(); paintBattery();
+    queuePlace();
     applyMapTweaks();
   }
 
