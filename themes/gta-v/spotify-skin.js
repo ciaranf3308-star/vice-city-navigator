@@ -1,12 +1,13 @@
 /* ============================================================
    WayStation — GTA V Spotify skin.
    ------------------------------------------------------------
-   The supplied hud.png (themes/gta-v/spotify/hud.png, 1155x1362)
-   IS the widget: overlaid directly as one unified skin/chrome
-   layer, live HTML positioned into its measured openings
-   (album cut-out / dark track panel / palm-skyline lyric stage).
-   The art dictates the DOM placement — never cropped apart,
-   recomposed, or reinterpreted.
+   v214: the old hud.png-as-the-widget architecture is RETIRED
+   from production (asset kept in repo for provenance/rollback).
+   The skin now builds a restrained Los Santos media slab in live
+   CSS/HTML (see spotify-skin.css): near-black angular panel,
+   album art, strong track type, thin progress, clean transport,
+   dark lyric stage — emerging from the map through a soft
+   atmospheric field. Same SpotifyCore session, same class hooks.
 
    LYRICS: owned by the shared kinetic karaoke engine (lyrics.js,
      LRCLIB provider) mounted into [data-lyrics-stage] via
@@ -18,8 +19,6 @@
 'use strict';
 
 (function () {
-  const ART = 'themes/gta-v/spotify/';
-
   const SVG = {
     play: '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',
     pause: '<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>',
@@ -51,20 +50,26 @@
     let statusTimer = null;
     let lyricsRenderer = null;
 
-    /* ---------- dom: hud.png is the skin; live HTML goes in its openings ---------- */
+    /* ---------- dom: live CSS slab (v214) — no hud.png ---------- */
     function build() {
       root = el('div', 'gvsp');
       root.innerHTML =
-        '<img class="gvsp-hud" src="' + ART + 'hud.png" alt="" aria-hidden="true">' +
-        '<div class="gvsp-artwrap">' +
-          '<div class="gvsp-art-idle">' + SVG.note + '</div>' +
-          '<img class="gvsp-art a" alt="">' +
-          '<img class="gvsp-art b" alt="">' +
+        '<div class="gvsp-atmo" aria-hidden="true"></div>' +
+        '<div class="gvsp-slab">' +
+        '<div class="gvsp-kicker">' +
+          '<span class="gvsp-kicker-label">Now Playing</span>' +
+          '<span class="gvsp-device" data-device></span>' +
         '</div>' +
-        '<div class="gvsp-track">' +
-          '<div class="gvsp-title">Los Santos Radio</div>' +
-          '<div class="gvsp-artist">Connect Spotify to play</div>' +
-          '<div class="gvsp-device" data-device></div>' +
+        '<div class="gvsp-main">' +
+          '<div class="gvsp-artwrap">' +
+            '<div class="gvsp-art-idle">' + SVG.note + '</div>' +
+            '<img class="gvsp-art a" alt="">' +
+            '<img class="gvsp-art b" alt="">' +
+          '</div>' +
+          '<div class="gvsp-track">' +
+            '<div class="gvsp-title">Waystation Radio</div>' +
+            '<div class="gvsp-artist">Connect Spotify to play</div>' +
+          '</div>' +
         '</div>' +
         '<div class="gvsp-progress">' +
           '<div class="gvsp-bar" role="slider" aria-label="Seek" tabindex="0" aria-valuemin="0" aria-valuemax="100">' +
@@ -81,13 +86,11 @@
           '<button class="gvsp-tbtn" data-act="repeat" aria-label="Repeat">' + SVG.repeat + '</button>' +
         '</div>' +
         '<div class="gvsp-lyrics" data-lyrics-stage="1"></div>' +
-        '<div class="gvsp-ambient">' +
-          '<div class="gvsp-ambient-label">Waystation Radio &mdash; Los Santos</div>' +
-        '</div>' +
+        '<div class="gvsp-ambient"></div>' +
         '<div class="gvsp-idle">' +
-          '<div class="gvsp-idle-kicker">Los Santos Radio</div>' +
           '<button class="gvsp-connect-btn" type="button">Connect Spotify</button>' +
           '<p class="gvsp-idle-hint">Music plays on your phone or car.<br>WayStation controls it.</p>' +
+        '</div>' +
         '</div>';
       return root;
     }
@@ -129,13 +132,15 @@
       root.classList.toggle('is-connected', connected);
       const title = q('.gvsp-title'), artist = q('.gvsp-artist');
       const deviceEl = q('[data-device]');
+      const kickerLabel = q('.gvsp-kicker-label');
       const toggle = q('.gvsp-tbtn[data-act="toggle"]');
       const shuffleBtn = q('.gvsp-tbtn[data-act="shuffle"]');
       const repeatBtn = q('.gvsp-tbtn[data-act="repeat"]');
+      if (kickerLabel) kickerLabel.textContent = connected ? 'Now Playing' : 'Waystation Radio';
       if (!connected) {
         // Disconnected: show idle, hide all playback UI
         stopTick();
-        title.textContent = 'Los Santos Radio';
+        title.textContent = 'Waystation Radio';
         artist.textContent = 'Connect Spotify to play';
         artist.classList.remove('gvsp-status');
         if (deviceEl) deviceEl.textContent = '';
@@ -194,7 +199,7 @@
     /* Lyrics stage: owned by the shared kinetic karaoke engine
        (lyrics.js, LRCLIB). A custom lyricsRenderer set via the mount
        api still overrides the engine. Never fake words.
-       The ambient skyline shows when WSLyrics has no lyrics
+       The quiet ambient field shows when WSLyrics has no lyrics
        (no 'has-lyrics' class) — watched via MutationObserver
        since the lyric fetch is async. */
     let lyricsObserver = null;

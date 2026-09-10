@@ -2737,6 +2737,15 @@ function tickDashClock() {
       .replace(/,/g, '').toUpperCase();
     if (timeEl) timeEl.textContent = new Date().toLocaleTimeString('en-IE',
       { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Dublin' });
+    /* v214: the GTA V dashboard header coords readout follows the GPS fix. */
+    const pc = $('dash-coords');
+    if (pc) {
+      const up = (typeof userPos !== 'undefined' && userPos) ? userPos : null;
+      pc.textContent = up
+        ? Math.abs(up[1]).toFixed(4) + '°' + (up[1] >= 0 ? 'N' : 'S') + '  ' +
+          Math.abs(up[0]).toFixed(4) + '°' + (up[0] >= 0 ? 'E' : 'W')
+        : 'ACQUIRING SIGNAL';
+    }
   } catch (e) {}
 }
 function initDashClock() {
@@ -2890,22 +2899,29 @@ async function syncDashLocality() {
          (electoral division) under city_district — trim the suffix so the
          plate says CLANE, not CLANE ED. Likewise "County Kildare" -> KILDARE. */
       .replace(/\s+ED$/i, '').replace(/^county\s+/i, '');
-    /* Natural case here — each theme's CSS owns the casing (GTA V renders
-       this plate in script, which must not be uppercased). The county goes
+    /* Natural case here — each theme's CSS owns the casing. The county goes
        to #dash-sub for themes that show a region line (GTA V). */
     const sub = $('dash-sub');
+    /* v214: the GTA V dashboard header carries its own locality readout
+       (#dash-plocal / #dash-psub), fed by the same lookup. */
+    const pLoc = $('dash-plocal'), pSub = $('dash-psub');
+    const paint = (n, county) => {
+      el.textContent = n.slice(0, 28);
+      dashCounty = county;
+      if (sub) sub.textContent = county;
+      if (pLoc) pLoc.textContent = n.slice(0, 28);
+      if (pSub) pSub.textContent = county;
+    };
     if (name && (typeof navActive === 'undefined' || !navActive)) {
-      el.textContent = name.slice(0, 28);
-      dashCounty = a.county || '';
-      if (sub) sub.textContent = dashCounty;
+      paint(name, a.county || '');
     }
     else if (nearDublin) {
-      el.textContent = 'DUBLIN';
-      dashCounty = 'County Dublin';
-      if (sub) sub.textContent = dashCounty;
+      paint('DUBLIN', 'County Dublin');
     }
   } catch (e) {
     if (nearDublin && el.textContent.trim() === '—') el.textContent = 'DUBLIN';
+    const pLoc = $('dash-plocal');
+    if (nearDublin && pLoc && pLoc.textContent.trim() === '—') pLoc.textContent = 'DUBLIN';
   }
 }
 

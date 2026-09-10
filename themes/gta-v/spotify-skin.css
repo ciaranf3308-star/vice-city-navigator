@@ -1,26 +1,13 @@
 /* ============================================================
-   GTA V Spotify skin — the supplied hud.png IS the widget.
+   GTA V Spotify skin — a restrained Los Santos media slab (v214).
    ------------------------------------------------------------
-   themes/gta-v/spotify/hud.png (1155x1362, user-supplied) is
-   overlaid directly as one unified skin/chrome layer; live HTML
-   is positioned into its measured openings. Never cropped apart,
-   recomposed, or reinterpreted.
-
-   Measured openings (fractions of the hud):
-   - album cut-out : x 0.065-0.405, y 0.303-0.594  (inset rounded
-                     frame, top-left; art sits ABOVE the hud here —
-                     the frame interior is opaque dark in the art)
-   - track panel   : x ~0.42-0.95, y 0.28-0.585   (dark panel in
-                     the art: title / artist / source / progress /
-                     transport live over it)
-   - lyric stage   : x 0.13-0.88, y 0.59-0.90      (palm-skyline
-                     scene; LOS SANTOS label strip lives at x
-                     0.05-0.13, palm badge at the right edge)
-   - top chrome    : palms + skyline + the Los Santos highway sign
-                     (pure art, no DOM over it)
-
-   Z-order: hud art < album art < track / progress / transport /
-   lyrics / idle. The map shows through transparent pixels.
+   The old hud.png-as-the-widget architecture is RETIRED from
+   production (asset kept in repo for provenance/rollback).
+   This skin builds the whole visual shell in live CSS/HTML:
+   near-black angular panel, album art, strong track type,
+   thin progress, clean transport, dark lyric stage — emerging
+   from the map through a soft atmospheric field. No palms, no
+   highway sign, no skyline roof, no neon, no glass.
 
    LYRICS: owned by the shared kinetic karaoke engine (lyrics.js,
      LRCLIB provider) mounted into [data-lyrics-stage] via
@@ -28,34 +15,92 @@
      skin.clearLyrics() remain as an override hook. Never invent
      lyric text, never scrape, never fake FFT from Spotify audio
      (the Web API exposes none).
+
+   DOM (built by spotify-skin.js, classes are logic hooks — keep):
+     .gvsp > .gvsp-atmo + .gvsp-slab >
+       .gvsp-kicker (.gvsp-kicker-label + .gvsp-device[data-device])
+       .gvsp-main > .gvsp-artwrap (.gvsp-art-idle + .gvsp-art.a/b)
+                   + .gvsp-track (.gvsp-title + .gvsp-artist)
+       .gvsp-progress (.gvsp-bar > fill + knob, .gvsp-times)
+       .gvsp-controls (5 .gvsp-tbtn[data-act])
+       .gvsp-lyrics[data-lyrics-stage]
+       .gvsp-ambient
+       .gvsp-idle (.gvsp-connect-btn + .gvsp-idle-hint)
    ============================================================ */
 
 .gvsp {
-  position: absolute; left: auto; right: 48px; top: 50%; translate: 0 -50%;
-  width: 520px; aspect-ratio: 1155 / 1362;
-  container-type: inline-size;
+  /* Placement is owned by the host context (the dashboard docks it as a
+     right column); the skin only defines the widget's own box. */
+  position: relative;
+  width: 480px;
   font-family: 'Chalet London', 'Helvetica Neue', Arial, sans-serif;
   color: #e8f0e8;
   user-select: none; -webkit-user-select: none;
-  pointer-events: auto;
-  filter: drop-shadow(0 18px 44px rgba(0,0,0,.6));
+  pointer-events: none;
 }
 .gvsp img { display: block; }
 
-/* ---------- the hud itself: one unified skin layer ---------- */
-.gvsp-hud {
-  position: absolute; inset: 0; z-index: 1;
-  width: 100%; height: 100%;
+/* ---------- atmospheric field: the slab emerges from the map ----------
+   Soft dark falloff ~180px left of the panel; map detail gradually
+   disappears beneath the widget. No blur, no frosted glass, no
+   hard edge — the seam must not be traceable. */
+.gvsp-atmo {
+  position: absolute; z-index: 0;
+  left: -180px; right: -10px; top: -70px; bottom: -70px;
   pointer-events: none;
+  background: linear-gradient(90deg,
+    rgba(5,7,7,0) 0%, rgba(5,7,7,.55) 55%,
+    rgba(5,7,7,.85) 82%, rgba(5,7,7,.94) 100%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 78%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 78%, transparent 100%);
 }
 
-/* ---------- album art: lives in the frame opening, above the art ---------- */
+/* ---------- the slab: near-black, angular left edge ---------- */
+.gvsp-slab {
+  position: relative; z-index: 1;
+  pointer-events: auto;
+  background:
+    linear-gradient(115deg, rgba(255,255,255,.028) 0%, rgba(255,255,255,0) 42%),
+    linear-gradient(180deg, #0c0f10 0%, #090b0c 100%);
+  clip-path: polygon(30px 0, 100% 0, 100% 100%, 0 100%, 0 20px);
+  padding: 20px 26px 22px 30px;
+}
+
+/* ---------- kicker: NOW PLAYING / source ---------- */
+.gvsp-kicker {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px; margin-bottom: 16px;
+}
+.gvsp-kicker-label {
+  font-family: 'Chalet Comprime', 'Arial Narrow', sans-serif;
+  font-size: 11px; font-weight: 600; letter-spacing: 3.5px; text-transform: uppercase;
+  color: #7d8888; white-space: nowrap;
+}
+/* themed source line — never a bare "ON <DEVICE>" debug label */
+.gvsp-device {
+  font-family: 'Chalet Comprime', 'Arial Narrow', sans-serif;
+  font-size: 11px; font-weight: 600; letter-spacing: 2.5px; text-transform: uppercase;
+  color: #2ce68c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.gvsp-device:empty { display: none; }
+.gvsp-device::before {
+  content: ''; display: inline-block;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #2ce68c; margin-right: 7px; vertical-align: 1px;
+}
+
+/* ---------- main row: album art + track ---------- */
+.gvsp-main {
+  display: flex; align-items: flex-start; gap: 20px;
+  margin-bottom: 16px;
+}
 .gvsp-artwrap {
-  position: absolute; z-index: 2;
-  left: 6.8%; top: 30.6%; width: 33.4%; aspect-ratio: 1 / 1;
-  border-radius: 9%;
-  overflow: hidden;
+  position: relative; flex: none;
+  width: 160px; height: 160px;
+  border-radius: 3px; overflow: hidden;
   background: #05070a;
+  outline: 1px solid rgba(242,245,242,.1);
+  outline-offset: -1px;
 }
 .gvsp-art {
   position: absolute; inset: 0;
@@ -66,208 +111,144 @@
 .gvsp-art-idle {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(70% 70% at 50% 40%, #10161c 0%, #05070a 75%);
+  background: linear-gradient(160deg, #10141a 0%, #05070a 70%);
 }
 .gvsp-art-idle svg {
-  width: 30%; height: auto; fill: #2ce68c; opacity: .45;
+  width: 30%; height: auto; fill: #3a4444; opacity: .8;
 }
-
-/* ---------- track: title / artist / source in the dark panel ---------- */
-.gvsp-track {
-  position: absolute; z-index: 3;
-  left: 43.5%; right: 6.5%; top: 30.5%;
-}
+.gvsp-track { flex: 1; min-width: 0; padding-top: 6px; }
 .gvsp-title {
   font-family: 'Chalet Comprime', 'Arial Narrow', sans-serif;
-  font-size: 20px; font-weight: 700; line-height: 1.15; letter-spacing: .5px;
+  font-size: 29px; font-weight: 700; line-height: 1.12; letter-spacing: .5px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  color: #f2f5f2;
-  text-shadow: 0 2px 10px rgba(0,0,0,.85);
-  margin-bottom: 3px;
+  color: #f2f5f2; margin-bottom: 6px;
 }
 .gvsp-artist {
-  font-size: 13px; letter-spacing: .5px;
+  font-size: 18px; letter-spacing: .4px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   color: #9aa3a8;
-  text-shadow: 0 1px 6px rgba(0,0,0,.85);
-  margin-bottom: 2px;
 }
 .gvsp-artist.gvsp-status { color: #2ce68c; }
-/* themed source line — never a bare "ON <DEVICE>" debug label */
-.gvsp-device {
-  font-family: 'Chalet Comprime', 'Arial Narrow', sans-serif;
-  font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
-  color: #2ce68c;
-  text-shadow: 0 1px 6px rgba(0,0,0,.9);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.gvsp-device:empty { display: none; }
-.gvsp-device::before {
-  content: ''; display: inline-block;
-  width: 5px; height: 5px; border-radius: 50%;
-  background: #2ce68c; margin-right: 7px; vertical-align: 1px;
-  box-shadow: 0 0 6px rgba(44,230,140,.8);
-}
 
-/* ---------- progress ---------- */
-.gvsp-progress {
-  position: absolute; z-index: 3;
-  left: 43.5%; right: 6.5%; top: 43.5%;
-}
+/* ---------- progress: thin neutral rail, restrained fill ---------- */
+.gvsp-progress { margin-bottom: 12px; }
 .gvsp-bar {
-  position: relative; height: 18px; cursor: pointer; touch-action: none;
+  position: relative; height: 20px; cursor: pointer; touch-action: none;
 }
 .gvsp-bar::before {
   content: ''; position: absolute; left: 0; right: 0; top: 50%;
-  height: 4px; margin-top: -2px; border-radius: 2px;
-  background: rgba(255,255,255,.14);
-  box-shadow: inset 0 1px 2px rgba(0,0,0,.7);
+  height: 3px; margin-top: -1.5px; border-radius: 2px;
+  background: rgba(255,255,255,.13);
 }
 .gvsp-bar-fill {
-  position: absolute; left: 0; top: 50%; height: 4px; margin-top: -2px;
+  position: absolute; left: 0; top: 50%; height: 3px; margin-top: -1.5px;
   width: 0%; border-radius: 2px;
   background: #2ce68c;
-  box-shadow: 0 0 8px rgba(44,230,140,.5);
 }
 .gvsp-bar-knob {
   position: absolute; top: 50%;
-  width: 12px; height: 12px; margin: -6px 0 0 -6px;
-  border-radius: 50%;
-  background: #eaffea; border: 2px solid #2ce68c;
-  box-shadow: 0 0 8px rgba(44,230,140,.6);
+  width: 11px; height: 11px; margin: -5.5px 0 0 -5.5px;
+  border-radius: 50%; background: #f2f5f2;
   opacity: 0; transition: opacity .2s;
 }
-.gvsp-bar:hover .gvsp-bar-knob { opacity: 1; }
+.gvsp-bar:hover .gvsp-bar-knob,
+.gvsp-bar:active .gvsp-bar-knob { opacity: 1; }
 .gvsp-times {
   display: flex; justify-content: space-between;
   font-size: 11px; letter-spacing: 1px; color: #7a8287;
   font-variant-numeric: tabular-nums;
-  text-shadow: 0 1px 4px rgba(0,0,0,.9);
 }
 
-/* ---------- transport: along the bottom of the dark panel ---------- */
+/* ---------- transport: quiet icon buttons, no gaming pucks ---------- */
 .gvsp-controls {
-  position: absolute; z-index: 3;
-  left: 43.5%; right: 6.5%; top: 51%;
-  display: flex; align-items: center; justify-content: center; gap: 7px;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  margin-bottom: 16px;
 }
 .gvsp-tbtn {
-  width: 34px; height: 34px; flex: none;
+  width: 40px; height: 40px; flex: none;
   border-radius: 50%; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  color: #c9d2d6; background: rgba(8,10,8,.55);
-  border: 1px solid rgba(242,245,242,.28);
-  box-shadow: 0 2px 8px rgba(0,0,0,.5);
+  color: #c9d2d6; background: transparent; border: 1px solid transparent;
   -webkit-tap-highlight-color: transparent;
-  transition: all .15s ease;
+  transition: color .15s ease, border-color .15s ease, transform .12s ease;
 }
-.gvsp-tbtn:hover { color: #f2f5f2; border-color: rgba(44,230,140,.55); }
+.gvsp-tbtn:hover { color: #f2f5f2; }
 .gvsp-tbtn:active { transform: scale(.93); }
 .gvsp-tbtn.big {
-  width: 40px; height: 40px;
-  color: #0b0b0b; background: #2ce68c;
-  border: 1px solid #2ce68c;
-  box-shadow: 0 0 16px rgba(44,230,140,.35), 0 4px 10px rgba(0,0,0,.5);
+  width: 48px; height: 48px;
+  color: #f2f5f2; background: transparent;
+  border: 1px solid rgba(242,245,242,.3);
 }
-.gvsp-tbtn.big:hover { background: #4df09e; color: #0b0b0b; }
-.gvsp-tbtn.active {
-  color: #2ce68c; border-color: #2ce68c;
-  box-shadow: 0 0 10px rgba(44,230,140,.35), inset 0 0 6px rgba(44,230,140,.12);
-}
-.gvsp-tbtn svg {
-  width: 46%; height: 46%; fill: currentColor;
-}
-.gvsp-tbtn.big svg { width: 52%; height: 52%; }
+.gvsp-tbtn.big:hover { border-color: #2ce68c; color: #2ce68c; }
+.gvsp-tbtn.active { color: #2ce68c; }
+.gvsp-tbtn svg { width: 44%; height: 44%; fill: currentColor; }
+.gvsp-tbtn.big svg { width: 46%; height: 46%; }
 
-/* ---------- lyrics stage: the palm-skyline scene ---------- */
+/* ---------- lyrics stage: dark tonal field, kinetic engine owns the words ---------- */
 .gvsp-lyrics {
-  position: absolute; z-index: 3;
-  left: 14%; right: 9%; top: 60.5%; bottom: 10.5%;
-  container-type: inline-size;
+  position: relative;
+  height: 188px;
   overflow: hidden;
   pointer-events: none;
-  /* keep words readable over the scene without hiding it */
-  background: linear-gradient(180deg, rgba(5,7,5,.55) 0%, rgba(5,7,5,.25) 60%, rgba(5,7,5,.55) 100%);
-  border-radius: 8px;
+  background: rgba(0,0,0,.38);
+  border-top: 1px solid rgba(242,245,242,.08);
 }
 .gvsp-lyrics.has-lyrics { pointer-events: auto; }
 /* WSLyrics builds .wslyr with absolute slots — contain them here */
-.gvsp-lyrics .wslyr {
-  position: absolute; inset: 0;
-}
-/* Override the old overlay font sizes (cqw was tuned for the hud) */
-.gvsp-lyrics .wslyr-hero.s-xl { font-size: 26px; }
-.gvsp-lyrics .wslyr-hero.s-lg { font-size: 21px; }
+.gvsp-lyrics .wslyr { position: absolute; inset: 0; }
+.gvsp-lyrics .wslyr-hero.s-xl { font-size: 25px; }
+.gvsp-lyrics .wslyr-hero.s-lg { font-size: 20px; }
 .gvsp-lyrics .wslyr-hero.s-md { font-size: 18px; }
-.gvsp-lyrics .wslyr-hero.s-sm { font-size: 17px; } /* never tiny */
+.gvsp-lyrics .wslyr-hero.s-sm { font-size: 16px; } /* never tiny */
 .gvsp-lyrics .wslyr-prev { font-size: 14px; }
 .gvsp-lyrics .wslyr-next { font-size: 13px; }
-.gvsp-lyrics .wslyr-state .wslyr-wait { font-size: 30px; }
+.gvsp-lyrics .wslyr-state .wslyr-wait { font-size: 28px; }
 .gvsp-lyrics .wslyr-state .wslyr-cap { font-size: 12px; }
-/* Clamp lyric composition extremes: keep the variation, lose the
-   tiny / lost-in-corner / washed-out outliers. */
-.gvsp-lyrics .wslyr-hero.v-up { top: 18%; max-height: 68%; }
-.gvsp-lyrics .wslyr-hero.v-low { top: 38%; max-height: 54%; }
-.gvsp-lyrics .wslyr-hero { left: 8%; right: 8%; } /* keep inside the panel */
+.gvsp-lyrics .wslyr-hero.v-up { top: 16%; max-height: 70%; }
+.gvsp-lyrics .wslyr-hero.v-low { top: 36%; max-height: 56%; }
+.gvsp-lyrics .wslyr-hero { left: 7%; right: 7%; }
 .gvsp-lyrics .wslyr-prev,
-.gvsp-lyrics .wslyr-next { opacity: .55; } /* never wash out */
+.gvsp-lyrics .wslyr-next { opacity: .55; }
 .gvsp-lyrics .wslyr-hero .wslyr-w {
   text-shadow: 0 2px 8px rgba(0,0,0,.9), 0 0 2px rgba(0,0,0,.9);
-} /* guarantee contrast on any panel tone */
+}
 
-/* ---------- ambient: the art's own skyline is the backdrop ---------- */
+/* ---------- ambient: the quiet dark field when lyrics are absent ---------- */
 .gvsp-ambient {
-  position: absolute; z-index: 3;
-  left: 14%; right: 9%; top: 60.5%; bottom: 10.5%;
+  position: relative;
+  height: 188px;
   overflow: hidden;
-  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.38) 0%, rgba(0,0,0,.22) 100%);
+  border-top: 1px solid rgba(242,245,242,.08);
 }
 .gvsp-ambient[hidden] { display: none; }
-.gvsp-ambient-label {
-  position: absolute; left: 0; right: 0; bottom: 8px;
-  text-align: center;
-  font-family: 'Chalet Comprime', 'Arial Narrow', sans-serif;
-  font-size: 12px; letter-spacing: 4px; text-transform: uppercase;
-  color: rgba(242,245,242,.55);
-  text-shadow: 0 1px 6px rgba(0,0,0,.9);
-}
 
-/* ---------- idle / disconnected: the Connect state lives in the stage ---------- */
+/* ---------- idle / disconnected: graceful, never an error page ---------- */
 .gvsp-idle {
-  position: absolute; z-index: 4;
-  left: 14%; right: 9%; top: 60.5%; bottom: 10.5%;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; gap: 10px;
-  padding: 12px;
-  background: linear-gradient(180deg, rgba(5,7,5,.6) 0%, rgba(5,7,5,.3) 100%);
-  border-radius: 8px;
+  text-align: center; gap: 14px;
+  padding: 44px 20px;
 }
 .gvsp-idle[hidden], .gvsp-idle.is-hidden { display: none !important; }
-/* Disconnected: hide ALL playback UI — no overlap */
+/* Disconnected: hide ALL playback UI — no overlap, no dead furniture */
+.gvsp.is-idle .gvsp-main,
 .gvsp.is-idle .gvsp-progress,
 .gvsp.is-idle .gvsp-controls,
 .gvsp.is-idle .gvsp-lyrics,
 .gvsp.is-idle .gvsp-ambient { display: none; }
-.gvsp-idle-kicker {
-  font-family: 'SignPainter', 'Chalet London', cursive;
-  font-size: 30px;
-  color: #f2f5f2;
-  text-shadow: 0 2px 12px rgba(0,0,0,.85);
-}
 .gvsp-connect-btn {
-  padding: 12px 34px;
+  padding: 13px 38px;
   font-family: 'Chalet Comprime', 'Arial Narrow', sans-serif;
   font-size: 16px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
   color: #0b0b0b; background: #2ce68c;
-  border: none; border-radius: 4px; cursor: pointer;
-  box-shadow: 0 4px 16px rgba(44,230,140,.3);
-  transition: all .15s ease;
+  border: none; border-radius: 2px; cursor: pointer;
+  transition: background .15s ease, transform .12s ease;
   pointer-events: auto;
+  white-space: nowrap;
 }
 .gvsp-connect-btn:hover { background: #4df09e; }
 .gvsp-connect-btn:active { transform: scale(.96); }
 .gvsp-idle-hint {
-  font-size: 13px; line-height: 1.5;
-  color: #9aa3a8;
-  text-shadow: 0 1px 6px rgba(0,0,0,.9);
+  font-size: 13.5px; line-height: 1.55; color: #9aa3a8;
 }

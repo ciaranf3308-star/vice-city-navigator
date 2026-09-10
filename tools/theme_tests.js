@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v213"), 'SW theme cache v213');
+ok(swSrc.includes("ws-theme-v214"), 'SW theme cache v214');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -350,17 +350,23 @@ ok(!fs.existsSync(path.join(REPO, 'themes/gta-v/spotify/header.png')), 'GV chopp
 ok(gvSkinJs.includes("register('gta-v'"), 'GV skin registers as gta-v');
 ok(gvSkinJs.includes('data-lyrics-stage'), 'GV lyric stage hook present');
 ok(gvSkinJs.includes('setLyricsRenderer') && gvSkinJs.includes('clearLyrics'), 'GV lyric renderer hooks present');
-ok(/\.gvsp-artwrap\s*\{[^}]*left:\s*6\.8%[^}]*width:\s*33\.4%/.test(gvSkinCss),
-  'GV art rect sits in the hud frame opening (measured fractions)');
-ok(gvSkinJs.includes('hud.png'), 'GV skin overlays the supplied hud art directly');
 const gvSkinJsCode = stripComments(gvSkinJs), gvSkinCssCode = stripComments(gvSkinCss);
+ok(/\.gvsp-artwrap\s*\{[^}]*width:\s*160px/.test(gvSkinCss),
+  'GV slab album art is a fixed 160px square (no hud frame opening)');
+ok(!/hud\.png/.test(gvSkinJsCode) && !/hud\.png/.test(gvSkinCssCode),
+  'GV skin has no hud.png production dependency (retired, asset kept in repo)');
+ok(!/gvsp-hud/.test(gvSkinJsCode) && !/\.gvsp-hud\s*\{/.test(gvSkinCssCode),
+  'GV skin has no hud layer element at all');
 for (const banned of ['miniviz', 'stagepeek', 'fullstage', 'gvsp-viz', 'spectrum', 'spotify-close', 'background-size: cover', 'vcsp-']) {
   ok(!gvSkinJsCode.includes(banned) && !gvSkinCssCode.includes(banned), `GV skin has no ${banned}`);
 }
 ok(gvSkinJsCode.includes('gvsp-') && gvSkinCssCode.includes('.gvsp'), 'GV skin uses gvsp- prefix');
-ok(/\.gvsp-hud\s*\{[^}]*inset:\s*0/.test(gvSkinCssCode), 'GV hud is one full-bleed skin layer');
+ok(/\.gvsp-slab\s*\{/.test(gvSkinCssCode), 'GV slab is the live-CSS widget shell');
+ok(/\.gvsp-atmo\s*\{/.test(gvSkinCssCode), 'GV slab emerges through a soft atmospheric field');
+ok(!/backdrop-filter/.test(gvSkinCssCode), 'GV slab uses no backdrop blur (tonal geometry, not glass)');
 ok(gvSkinCssCode.includes('#2ce68c') && gvSkinCssCode.includes('#0b0b0b'), 'GV skin muted mint on charcoal console');
-ok(gvSkinCssCode.includes("'SignPainter'") && gvSkinCssCode.includes("'Chalet London'"), 'GV skin SignPainter script + Chalet London');
+ok(gvSkinCssCode.includes("'Chalet Comprime'") && !gvSkinCssCode.includes('SignPainter'),
+  'GV slab type is Chalet only (no script in media UI)');
 ok(!/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(gvSkinJsCode) && !/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(gvSkinCssCode), 'GV skin has no emojis');
 
 // app mode system
@@ -660,8 +666,8 @@ ok(!/tbar-night/.test(indexSrc) && !/tbar-sunset/.test(indexSrc),
   'SA top bar has no split-panel divs');
 ok(!/theme-san-andreas #dash-topbar\{[^}]*radial-gradient\(120px 120px at 62%/.test(cssSrc),
   'SA top bar no longer uses the CSS-painted sun disc');
-ok(/theme-gta-v #dash-topbar\{[^}]*background:#0b0b0b/.test(cssSrc), 'GTA V top bar is flat pause-menu black (researched)');
-ok(/theme-gta-v #dash-bottombar\{[^}]*background:#0b0b0b/.test(cssSrc), 'GTA V bottom bar is flat pause-menu black (researched)');
+ok(/theme-gta-v #dash-topbar\{[^}]*background:#0a0d0f/.test(cssSrc), 'GTA V top bar is flat near-black (v214, no green edge)');
+ok(/theme-gta-v #dash-bottombar\{[^}]*background:#0a0d0f/.test(cssSrc), 'GTA V bottom bar is flat near-black (v214, no green edge)');
 ok(/theme-rdr2 #dash-topbar::before\{[^}]*clip-path:polygon/.test(cssSrc), 'RDR2 header has a stepped plate silhouette');
 ok(!/theme-rdr2 #dash-(topbar|bottombar)\{[^}]*#ff71ce/.test(cssSrc), 'RDR2 bar shells carry no neon pink');
 // VC hero: neon 80s chrome per the benchmark image
@@ -803,10 +809,10 @@ ok(appSrc.includes('layoutDashMenu(); // dock (or undock) the body-level menu pa
    so dashboard users had no visible way to set a route. It now drops
    below the per-theme bar heights, and the planning drawer docks to the
    live stage rect in real pixels like the menu panel. */
-for (const [id, top] of [['gta-v', 132]]) {
-  ok(new RegExp(`body\\.dashboard-mode\\.theme-${id} #search-bar\\{top:calc\\(${top}px`).test(cssSrc),
-    `dashboard search bar clears the ${id} top bar (${top}px)`);
-}
+/* v214: the GTA V dashboard hides the explore search bar for the hero
+   map composition (like VC/SA/RDR2) — no 132px drop rule anymore. */
+ok(/theme-gta-v #search-bar,[\s\S]{0,120}?display:none/.test(cssSrc),
+  'GTA V dashboard hides the search bar for the hero map composition');
 ok(/body\.dashboard-mode\.theme-vice-city #search-bar\{display:none\}/.test(cssSrc),
   'VC dashboard hides the search pill for the hero composition');
 ok(/body\.dashboard-mode\.theme-san-andreas #search-bar\{display:none\}/.test(cssSrc),
@@ -1041,16 +1047,17 @@ ok(saLayer('sa-label-road-minor').minzoom >= 16, 'SA minor road labels start at 
 ok(saLayer('sa-buildings').minzoom === 15, 'SA buildings appear at zoom 15 (less tiny clutter)');
 ok(saLayer('sa-label-road-major').minzoom === 10, 'SA major road labels start at zoom 10');
 ok(!/theme-san-andreas #map::after/.test(cssSrc), 'SA map has no vignette overlay (clean hero map)');
-ok(/theme-gta-v #dash-topbar\{[^}]*background:#0b0b0b/.test(cssSrc), 'V top bar is flat pause-menu black (researched)');
-ok(/theme-gta-v #dash-bottombar\{[^}]*background:#0b0b0b/.test(cssSrc), 'V bottom bar is flat pause-menu black (researched)');
-ok(/theme-gta-v \.gvsp\{[^}]*aspect-ratio:\s*1155\s*\/\s*1362/.test(cssSrc), 'V music panel is the hud art at its own proportions');
+ok(/theme-gta-v #dash-topbar\{[^}]*background:#0a0d0f/.test(cssSrc), 'V top bar is flat near-black (v214, no green edge)');
+ok(/theme-gta-v #dash-bottombar\{[^}]*background:#0a0d0f/.test(cssSrc), 'V bottom bar is flat near-black (v214, no green edge)');
+ok(/theme-gta-v \.gvsp\{[^}]*width:\s*480px/.test(cssSrc), 'V music panel is the live-CSS slab at 480px (hud art retired)');
+ok(!/theme-gta-v \.gvsp\{[^}]*aspect-ratio:\s*1155\s*\/\s*1362/.test(cssSrc), 'V music panel no longer pins the hud art proportions');
 ok(/theme-gta-v \.dash-tabs button\{[^}]*background:transparent/.test(cssSrc), 'V tabs are transparent icon+text buttons');
 ok(/theme-rdr2 #dash-dest\{[^}]*border-image-source:url\('assets\/themes\/rdr2\/dashboard\/menu_header_1a\.png'\)/.test(cssSrc),
    'RDR2 destination plate uses the ornate menu-header frame');
 ok(cssSrc.includes("theme-rdr2 #dash-topbar::after") && cssSrc.includes('header-dusk.png'), 'RDR2 header feathers dusk scenery at the edges');
 ok(/theme-rdr2 \.dash-dest::before/.test(cssSrc) && cssSrc.includes('title_divider.png'), 'RDR2 destination plate is flanked by divider ornaments');
 ok(/theme-gta-v \.dash-logo\{[^}]*'Chalet Comprime'/.test(cssSrc), 'V wordmark uses Chalet (hero typography)');
-ok(/theme-gta-v #dash-dest\{[^}]*'SignPainter'/.test(cssSrc), 'V destination uses SignPainter script (user-requested footer treatment)');
+ok(/theme-gta-v #dash-dest\{[^}]*'Chalet Comprime'/.test(cssSrc), 'V destination uses Chalet caps (SignPainter script retired)');
 ok(/theme-gta-v #dash-sub\{[^}]*display:block/.test(cssSrc), 'V locality lockup shows the county subtitle');
 ok(/theme-gta-v \.dash-tabs button span\{[^}]*text-transform:uppercase/.test(cssSrc), 'V tabs carry uppercase text labels under the icons');
 ok(/theme-rdr2 #dash-bottombar\{[^}]*clip-path:polygon/.test(cssSrc), 'RDR2 footer has a stepped console silhouette');
@@ -1066,7 +1073,7 @@ ok(!vcSkinSrc.includes('rotate(6deg)'), 'VC widget is straight (hero has no tilt
 // every theme widget: explicit larger size, ~6-7 degree tilt (except VC hero-match), no-overlap idle states
 // (san-andreas pass 4: straight Radio Los Santos bezel, asserted in the pass 4 block)
 const skinSpecs = [
-  ['gta-v', 'gvsp', 'aspect-ratio: 1155 / 1362', 'width: 520px'],
+  ['gta-v', 'gvsp', 'clip-path: polygon', 'width: 480px'],
   ['rdr2', 'rdsp', 'rotate(-6.5deg)', 'width: 600px'],
 ];
 for (const [theme, cls, shape, size] of skinSpecs) {

@@ -529,6 +529,9 @@ body.dashboard-mode.radio-off #spotify-pane{display:none}
 #dash-topbar,#dash-bottombar{display:none}
 /* theme-specific topbar art is hidden unless its theme shows it */
 #dash-topbar .dash-los-santos{display:none}
+/* v214 header additions: hidden unless a theme's dashboard shows them */
+#dash-topbar .dash-wmark,#dash-topbar .dash-div,#dash-topbar .dash-plocal,
+#dash-topbar #dash-coords,#dash-topbar .dash-pspacer,#dash-topbar .dash-ptag{display:none}
 /* inner layer: same silhouette inset by the neon edge width, so the pink
    outer layer reads as a continuous neon tube */
 #dash-topbar .dash-chrome,#dash-bottombar .dash-chrome{
