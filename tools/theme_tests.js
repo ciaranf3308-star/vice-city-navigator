@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v178"), 'SW theme cache v178');
+ok(swSrc.includes("ws-theme-v179"), 'SW theme cache v179');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -377,7 +377,6 @@ ok(!appSrc.includes('setSpotifyPane'), 'floating pane logic removed');
 ok(!appSrc.includes('music-btn'), 'music buttons removed from app.js');
 ok(appSrc.includes('spotify.skin'), 'skin resolved from theme config');
 
-// cluster mode (commit 1): pure mode logic + empty DOM shell
 function extractFn(src, name) {
   const m = src.match(new RegExp('function ' + name + '\\([^)]*\\) \\{[\\s\\S]*?\\n\\}'));
   if (!m) throw new Error('missing function in app.js: ' + name);
@@ -1817,8 +1816,8 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
   const saPhone = fs.readFileSync(path.join(REPO, 'themes/san-andreas/phone.css'), 'utf8');
   const saCluster = saPhone.slice(saPhone.indexOf('Cluster Mode: San Andreas'));
   ok(saCluster.includes('cluster-overlay.png'), 'SA cluster paints the user-supplied overlay art as the stage');
-  ok(/body\.cluster-mode\.theme-san-andreas #map\{[^}]*left:38px[^}]*top:221px[^}]*width:593px[^}]*height:352px/.test(saCluster),
-    'SA cluster map container overshoots the window 40px per side (same center) so the attribution hides behind the art');
+  ok(/body\.cluster-mode\.theme-san-andreas #map\{[^}]*left:54px[^}]*top:237px[^}]*width:561px[^}]*height:320px/.test(saCluster),
+    'SA cluster map container overshoots the window 26px per side (same center) so the attribution hides behind the art');
   ok(!/body\.cluster-mode\.theme-san-andreas #map\{[^}]*left:78px[^}]*top:261px[^}]*width:513px[^}]*height:272px/.test(saCluster),
     'SA cluster map is no longer exactly the window size (attribution bar used to show inside it)');
   ok(/body\.cluster-mode\.theme-san-andreas #cluster-header,/.test(saCluster) &&
