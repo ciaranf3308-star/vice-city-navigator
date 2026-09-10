@@ -261,11 +261,13 @@ body.cluster-mode.theme-san-andreas #dash-bottombar{display:none}
    (its gold frame bezels the map edges), below every live readout. */
 body.cluster-mode.theme-san-andreas #cluster-backdrop{display:block;position:absolute;inset:0;z-index:30;
   background:url('dashboard/cluster-overlay.png') 0 0 / 100% 100% no-repeat;pointer-events:none}
-/* live map underlaid in the window — the container is 2x the window size
-   (stage px -175,128 1019x536, same center 334.5,397 as the window) so it
-   clips invisibly behind the overlay's opaque art: no edge gaps possible
-   and the attribution bar is buried far outside the visible window. */
-body.cluster-mode.theme-san-andreas #map{left:-175px;top:128px;width:1019px;height:536px;border-radius:0;z-index:20}
+/* live map underlaid BEHIND the cutout — the map is an oversized layer
+   (130% of the window: stage px 4,223 662x348, same center 334.5,397 as the
+   transparent opening) centered under the overlay art. The overlay's opaque
+   frame clips it invisibly on all sides (40px+ overshoot) so the map reads
+   as continuing beyond the window edges, never as a widget fitted to them.
+   The attribution bar stays buried behind the opaque art. */
+body.cluster-mode.theme-san-andreas #map{left:4px;top:223px;width:662px;height:348px;border-radius:0;z-index:20}
 /* the overlay paints header/footer/frames/dial: hide the console chrome */
 body.cluster-mode.theme-san-andreas #cluster-header,
 body.cluster-mode.theme-san-andreas #cluster-footer,

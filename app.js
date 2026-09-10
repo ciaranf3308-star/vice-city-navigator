@@ -2474,7 +2474,7 @@ function applyAppMode() {
   teardownDashboardStage();
   if (dash) { try { window.scrollTo(0, 0); } catch (e) {}
     buildDashboardStage(); fitDashboardStage(); }
-  if (clu) { buildClusterStage(); fitClusterStage(); }
+  if (clu) { buildClusterStage(); fitClusterStage(); if (map && map.resize) { try { map.resize(); } catch (e) {} } }
   const cui = $('cluster-ui');
   if (cui) cui.hidden = !clu;
   if (clu) refreshClusterLive();
@@ -2963,6 +2963,7 @@ function wireSpotifyMenu() {
         if (map && map.resize) { try { map.resize(); } catch (e) {} }
       } else if (appMode === 'cluster') {
         fitClusterStage();
+        if (map && map.resize) { try { map.resize(); } catch (e) {} }
       }
     }, 150);
   });
