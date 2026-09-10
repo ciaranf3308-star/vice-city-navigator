@@ -267,7 +267,7 @@ body.cluster-mode.theme-san-andreas #cluster-backdrop{display:block;position:abs
    frame clips it on all sides (25px horizontal / 14px vertical bleed) so the
    map reads as continuing beyond the window edges, never as a widget fitted
    to them. The attribution bar stays buried behind the opaque art. */
-body.cluster-mode.theme-san-andreas #map{left:55px;top:250px;width:560px;height:295px;border-radius:0;z-index:20}
+body.cluster-mode.theme-san-andreas #map{left:76px;top:264px;width:565px;height:290px;border-radius:0;z-index:20}
 /* SA cluster: compact legal attribution (small info badge, not the full white
    bar). The control is created with compact:true; this enforces the compact
    visual in cluster mode. Attribution remains visible and expandable. */

@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v187"), 'SW theme cache v187');
+ok(swSrc.includes("ws-theme-v188"), 'SW theme cache v188');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -1823,8 +1823,8 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
   const saPhone = fs.readFileSync(path.join(REPO, 'themes/san-andreas/phone.css'), 'utf8');
   const saCluster = saPhone.slice(saPhone.indexOf('Cluster Mode: San Andreas'));
   ok(saCluster.includes('cluster-overlay.png'), 'SA cluster paints the user-supplied overlay art as the stage');
-  ok(/body\.cluster-mode\.theme-san-andreas #map\{[^}]*left:55px[^}]*top:250px[^}]*width:560px[^}]*height:295px/.test(saCluster),
-    'SA cluster map is a subtle underlay (110% of window, same center), bleeding under the bezel');
+  ok(/body\.cluster-mode\.theme-san-andreas #map\{[^}]*left:76px[^}]*top:264px[^}]*width:565px[^}]*height:290px/.test(saCluster),
+    'SA cluster map is a subtle underlay (549x281 aperture + 3% overscan), bleeding under the bezel');
   const appSrc = fs.readFileSync(path.join(REPO, 'app.js'), 'utf8');
   ok(/SA_CLUSTER_OVERVIEW_ZOOM\s*=\s*13\.0/.test(appSrc),
     'SA cluster defines a fixed overview zoom (13.0), not derived from nav zoom');
