@@ -2005,8 +2005,15 @@ function onPos(pos) {
     const camBearing = bestBearing(heading);
     /* The VC cluster radar loses the rectangle's corners, so it rides a
        touch wider than the dashboard follow cam. Dashboard untouched. */
-    map.easeTo({ center: p, zoom: clusterLayoutActive() ? saClusterZoom(16.2) : 16.5, pitch: 55,
-      bearing: camBearing, duration: 900 });
+    /* SA cluster is an overview radar: wide fixed zoom, flat pitch. Other
+       clusters keep their driving camera. */
+    if (isSaCluster()) {
+      map.easeTo({ center: p, zoom: SA_CLUSTER_OVERVIEW_ZOOM, pitch: 0,
+        bearing: camBearing, duration: 900 });
+    } else {
+      map.easeTo({ center: p, zoom: clusterLayoutActive() ? 16.2 : 16.5, pitch: 55,
+        bearing: camBearing, duration: 900 });
+    }
     syncRadarNorth(camBearing, 900);
   }
 
@@ -2388,15 +2395,13 @@ function fitDashboardStage() {
    and centers the canvas, exactly like fitDashboardStage. */
 const CLUSTER_W = 1920, CLUSTER_H = 720;
 const CLUSTER_STAGE_NODES = ['map', 'spotify-pane', 'dash-topbar', 'dash-bottombar'];
-/* SA cluster map underlay: the live map is 110% of the 509x268 aperture so it
-   bleeds under the bezel. Zoom out by -log2(1.10) so the geographic scale seen
-   through the aperture matches the pre-underlay framing (bleed must not read
-   as magnification). Cluster-only; dashboard/phone/nav elsewhere untouched. */
-const SA_CLUSTER_BLEED = 1.10;
-const SA_CLUSTER_ZOOM_ADJ = -Math.log2(SA_CLUSTER_BLEED);
-function saClusterZoom(base) {
+/* SA cluster is a GTA-style overview radar, not street-level nav: fixed wide
+   zoom showing several km of geography (multiple districts at once).
+   Cluster-only; dashboard/phone/other themes/nav zoom untouched. */
+const SA_CLUSTER_OVERVIEW_ZOOM = 13.0;
+function isSaCluster() {
   return document.body.classList.contains('theme-san-andreas') &&
-    document.body.classList.contains('cluster-mode') ? base + SA_CLUSTER_ZOOM_ADJ : base;
+    document.body.classList.contains('cluster-mode');
 }
 function buildClusterStage() {
   const stage = $('cluster-ui');
@@ -2492,7 +2497,7 @@ function applyAppMode() {
   teardownDashboardStage();
   if (dash) { try { window.scrollTo(0, 0); } catch (e) {}
     buildDashboardStage(); fitDashboardStage(); }
-  if (clu) { buildClusterStage(); fitClusterStage(); if (map && map.resize) { try { map.resize(); } catch (e) {} requestAnimationFrame(() => { try { map.resize(); } catch (e) {} }); } /* SA cluster: restore useful framing on entry (non-nav); nav cam handles itself */ if (!navActive && document.body.classList.contains('theme-san-andreas') && userPos) { try { map.easeTo({ center: userPos, zoom: saClusterZoom(16.2), duration: 600 }); } catch (e) {} } }
+  if (clu) { buildClusterStage(); fitClusterStage(); if (map && map.resize) { try { map.resize(); } catch (e) {} requestAnimationFrame(() => { try { map.resize(); } catch (e) {} }); } /* SA cluster: overview radar framing on entry (non-nav); nav cam handles itself */ if (!navActive && isSaCluster() && userPos) { try { map.easeTo({ center: userPos, zoom: SA_CLUSTER_OVERVIEW_ZOOM, pitch: 0, duration: 600 }); } catch (e) {} } }
   const cui = $('cluster-ui');
   if (cui) cui.hidden = !clu;
   if (clu) refreshClusterLive();
