@@ -39,10 +39,27 @@ class MainActivity : Activity() {
     private var retryCount = 0
     private var retryRunnable: Runnable? = null
     private var loadFailed = false
+    // Pending WebView geolocation callbacks. While the Android runtime
+    // permission request is still in flight, the page may already ask for
+    // geolocation. Answering "no" at that moment poisons the WebView's
+    // origin permission state — the later grant never takes effect and the
+    // page keeps reporting PERMISSION_DENIED forever. So we HOLD the
+    // callback and answer it once the real permission result is known.
+    private val pendingGeoCallbacks =
+        mutableListOf<Pair<String, GeolocationPermissions.Callback>>()
+    private var locationRequestInFlight = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         refreshLocationState()
+        // Nuke any stale geolocation denial cached for our origin by a
+        // previous run — a fresh process must never inherit a "no".
+        try {
+            GeolocationPermissions.getInstance()
+                .clear(CarWebViewRenderer.WAYSTATION_ORIGIN)
+        } catch (e: Exception) {
+            Log.w(TAG, "clear geolocation state failed", e)
+        }
         // Fresh launch only (not rotation): if location isn't granted, push
         // for it — every single time, until it's fixed.
         if (savedInstanceState == null) ensureLocationPermission()
@@ -77,6 +94,9 @@ class MainActivity : Activity() {
             shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION)
         ) {
             prefs.edit().putBoolean(KEY_LOCATION_ASKED, true).apply()
+            // The system dialog is now in flight: any WebView geolocation
+            // prompt that fires before the result must be HELD, not denied.
+            locationRequestInFlight = true
             requestPermissions(
                 arrayOf(
                     Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -146,6 +166,7 @@ class MainActivity : Activity() {
             Log.i(TAG, "location granted via Settings " +
                 "(coarse=$coarseLocationGranted fine=$fineLocationGranted); " +
                 "reloading for clean geolocation")
+            flushPendingGeoCallbacks()
             webView?.reload()
         }
     }
@@ -154,16 +175,56 @@ class MainActivity : Activity() {
         requestCode: Int, permissions: Array<out String>, grantResults: IntArray
     ) {
         if (requestCode == REQ_LOCATION) {
+            locationRequestInFlight = false
             refreshLocationState()
+            // Answer any WebView geolocation prompt we held while the
+            // system dialog was up — with the REAL result, not a stale "no".
+            flushPendingGeoCallbacks()
             if (anyLocationGranted) {
-                // The page may have requested geolocation while the system
-                // dialog was still up and been denied — reload so it fires
-                // cleanly now that permission exists.
+                // Reload for a clean page state: covers the case where the
+                // page's request timed out while the dialog was open.
                 webView?.reload()
                 if (coarseLocationGranted && !fineLocationGranted) {
                     maybeSuggestPreciseLocation()
                 }
             }
+        }
+    }
+
+    /**
+     * Answer every held WebView geolocation callback with the current live
+     * permission state. Called as soon as the permission result is known.
+     */
+    private fun flushPendingGeoCallbacks() {
+        if (pendingGeoCallbacks.isEmpty()) return
+        refreshLocationState()
+        val allow = anyLocationGranted
+        val pending = pendingGeoCallbacks.toList()
+        pendingGeoCallbacks.clear()
+        for ((origin, cb) in pending) {
+            try {
+                if (allow) {
+                    try {
+                        GeolocationPermissions.getInstance().clear(origin)
+                    } catch (e: Exception) { /* best effort */
+                    }
+                }
+                cb.invoke(origin, allow, false)
+            } catch (e: Exception) {
+                Log.w(TAG, "flushPendingGeoCallbacks failed", e)
+            }
+        }
+        Log.i(TAG, "flushed ${pending.size} pending geolocation callbacks allow=$allow")
+    }
+
+    /** Our origin, tolerant of trivial formatting differences. */
+    private fun isWaystationOrigin(origin: String): Boolean {
+        if (origin == CarWebViewRenderer.WAYSTATION_ORIGIN) return true
+        return try {
+            val uri = Uri.parse(origin)
+            uri.scheme == "https" && uri.host == "ciaranf3308-star.github.io"
+        } catch (e: Exception) {
+            false
         }
     }
 
@@ -191,15 +252,43 @@ class MainActivity : Activity() {
                 origin: String,
                 callback: GeolocationPermissions.Callback
             ) {
-                // Approximate location is sufficient to initialise the map
-                // and obtain a position — never deny just because precise
-                // location is off.
-                val allow = origin == CarWebViewRenderer.WAYSTATION_ORIGIN &&
-                    anyLocationGranted
+                // Foreign origins never get location.
+                if (!isWaystationOrigin(origin)) {
+                    Log.w(TAG, "geolocation prompt for foreign origin=$origin denied")
+                    callback.invoke(origin, false, false)
+                    return
+                }
+                // Live read — the cached field may predate the user's
+                // answer on the system dialog.
+                refreshLocationState()
+                if (anyLocationGranted) {
+                    // Approximate location is sufficient to initialise the
+                    // map and obtain a position — never deny just because
+                    // precise location is off.
+                    try {
+                        GeolocationPermissions.getInstance().clear(origin)
+                    } catch (e: Exception) { /* best effort */
+                    }
+                    Log.i(TAG, "phone geolocation prompt origin=$origin " +
+                        "coarse=$coarseLocationGranted fine=$fineLocationGranted " +
+                        "allow=true")
+                    callback.invoke(origin, true, false)
+                    return
+                }
+                if (locationRequestInFlight) {
+                    // The system permission dialog is still up — the user
+                    // hasn't answered yet. HOLD the callback; answering
+                    // "no" now would poison the origin state and the later
+                    // grant would never take effect.
+                    Log.i(TAG, "phone geolocation prompt origin=$origin " +
+                        "queued until permission resolves")
+                    pendingGeoCallbacks.add(origin to callback)
+                    return
+                }
                 Log.i(TAG, "phone geolocation prompt origin=$origin " +
                     "coarse=$coarseLocationGranted fine=$fineLocationGranted " +
-                    "allow=$allow")
-                callback.invoke(origin, allow, false)
+                    "allow=false")
+                callback.invoke(origin, false, false)
             }
         }
         wv.webViewClient = object : WebViewClient() {
@@ -269,6 +358,7 @@ class MainActivity : Activity() {
     override fun onDestroy() {
         retryRunnable?.let { webView?.removeCallbacks(it) }
         retryRunnable = null
+        pendingGeoCallbacks.clear()
         webView?.destroy()
         webView = null
         super.onDestroy()
