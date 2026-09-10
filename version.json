@@ -1,7 +1,7 @@
 {
-  "build": "location-diagnostic-2026-09-10",
+  "build": "gta-v-cluster-pass-a-2026-09-10",
   "shell": "ws-shell-v68",
-  "theme": "ws-theme-v202",
+  "theme": "ws-theme-v203",
   "assets": {
     "index.html": "45890e8390be33ff",
     "styles.css": "4495188db9dc7867",
