@@ -1,12 +1,12 @@
 {
-  "build": "voice-search-2026-09-09",
+  "build": "gta-v-cluster-2026-09-10",
   "shell": "ws-shell-v68",
-  "theme": "ws-theme-v181",
+  "theme": "ws-theme-v182",
   "assets": {
-    "index.html": "b2d24a020c0a24f3",
+    "index.html": "45890e8390be33ff",
     "styles.css": "4495188db9dc7867",
-    "app.js": "00e11c2c6a5da668",
-    "sw.js": "b908b3ad01a37e0c",
+    "app.js": "bc30c54f03e2a847",
+    "sw.js": "fb2b7452f9667d2d",
     "themes/vice-city/spotify-skin.css": "541717ee14ca80e5",
     "themes/vice-city/phone.css": "87909b9d4538ba87",
     "themes/gta-v/dashboard.css": "d7248b9f49c87080",
@@ -17,6 +17,10 @@
     "themes/san-andreas/phone.css": "8c971b7224b96c8a",
     "themes/vice-city/dashboard.css": "504f1c1cc1be106f",
     "themes/san-andreas/spotify-cluster.js": "d5149c5970670033",
-    "themes/san-andreas/spotify-cluster.css": "6b1f174cf9d9901a"
+    "themes/san-andreas/spotify-cluster.css": "6b1f174cf9d9901a",
+    "themes/gta-v/cluster.css": "7e2a78a2d4b42db9",
+    "themes/gta-v/cluster.js": "c5e4b06d38de998d",
+    "themes/gta-v/spotify-cluster.css": "5c636bfff8a353fd",
+    "themes/gta-v/spotify-cluster.js": "702d2d15f7077d59"
   }
 }
