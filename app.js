@@ -2840,12 +2840,6 @@ function mountSpotifySkin(themeId) {
       SpotifySkins.get('san-andreas-cluster')) {
     want = 'san-andreas-cluster';
   }
-  /* GTA V cluster uses its own console music-card widget — the
-     dashboard keeps the full .gvsp skin. */
-  if (clusterLayoutActive() && themeId === 'gta-v' &&
-      SpotifySkins.get('gta-v-cluster')) {
-    want = 'gta-v-cluster';
-  }
   if (want === spotifySkinId) return;
   unmountSpotifySkin();
   const skin = SpotifySkins.get(want);

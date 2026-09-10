@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v182"), 'SW theme cache v182');
+ok(swSrc.includes("ws-theme-v181"), 'SW theme cache v181');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -1853,51 +1853,6 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
   ok(saCluster.includes('HERO-locked'), 'SA cluster documents that it avoids the HERO-locked dashboard.css');
   ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/cluster-overlay.png')),
     'SA cluster overlay asset exists on disk');
-}
-// GTA V cluster console view (2026-09-10): DOM/CSS-built dark console per
-// the user's concept render — parallelogram live map, glass maneuver +
-// music cards overlapping the map's right edge, thin speed digits.
-{
-  const gvCss = fs.readFileSync(path.join(REPO, 'themes/gta-v/cluster.css'), 'utf8');
-  ok(/body\.cluster-mode\.theme-gta-v #map\{[^}]*clip-path:polygon\(/.test(gvCss),
-    'GTA V cluster clips the live map to the concept parallelogram');
-  ok(gvCss.includes('#gv-topbar') && gvCss.includes('#gv-powerbar') &&
-     gvCss.includes('#gv-turn-card') && gvCss.includes('#gv-bottombar'),
-    'GTA V cluster styles the top bar, power bar, maneuver card and bottom bar');
-  ok(gvCss.includes('#gv-skyline') && gvCss.includes('skyline.png'),
-    'GTA V cluster paints the skyline silhouette behind the speed cluster');
-  ok(/body\.cluster-mode\.theme-gta-v #(cluster-header|cluster-footer|cluster-gauge)[\s\S]{0,400}display:none/.test(gvCss),
-    'GTA V cluster hides the generic cluster chrome');
-  ok(indexSrc.includes('id="gv-topbar"') && indexSrc.includes('id="gv-turn-card"') &&
-     indexSrc.includes('id="gv-powerbar"') && indexSrc.includes('id="gv-bottombar"') &&
-     indexSrc.includes('id="gv-skyline"'),
-    'index.html carries the GTA V cluster DOM');
-  ok(indexSrc.includes('id="cluster-turn"') && indexSrc.includes('id="cluster-trip"') &&
-     indexSrc.includes('id="cluster-speed-num"') && indexSrc.includes('id="cluster-limit-num"'),
-    'GTA V cluster reuses the shared live-region IDs (nav/speed/limit/trip)');
-  const ids = (indexSrc.match(/id="([^"]+)"/g) || []).map(s => s.slice(4, -1));
-  ok(new Set(ids).size === ids.length, 'index.html has no duplicate IDs after the GTA V cluster DOM');
-  ok(indexSrc.includes('themes/gta-v/cluster.css') && indexSrc.includes('themes/gta-v/cluster.js'),
-    'index.html loads the GTA V cluster CSS and live wiring');
-  const gvJs = fs.readFileSync(path.join(REPO, 'themes/gta-v/cluster.js'), 'utf8');
-  ok(gvJs.includes('gv-time') && gvJs.includes('gv-coords') && gvJs.includes('gv-powerbar') &&
-     gvJs.includes('driveForceState'),
-    'GTA V cluster JS wires clock, coords and the GPS-derived power bar');
-  ok(gvJs.includes('v-label-place') && gvJs.includes('text-letter-spacing'),
-    'GTA V cluster dims/tracks the map labels while up and restores them after');
-  const gvclCss = fs.readFileSync(path.join(REPO, 'themes/gta-v/spotify-cluster.css'), 'utf8');
-  ok(/\.gvcl\{/.test(gvclCss) && gvclCss.includes('.gvcl-tag') && gvclCss.includes('.gvcl-artwrap'),
-    'GTA V cluster .gvcl music-card skin styles exist');
-  const gvclJs = fs.readFileSync(path.join(REPO, 'themes/gta-v/spotify-cluster.js'), 'utf8');
-  ok(gvclJs.includes("register('gta-v-cluster'"),
-    'GTA V cluster Spotify skin is registered as gta-v-cluster');
-  ok(gvclJs.includes('MUSIC MOVES DIFFERENT HERE'),
-    'GTA V cluster music card carries the concept tagline');
-  ok(appSrc.includes("SpotifySkins.get('gta-v-cluster')"),
-    'app.js selects the gta-v-cluster skin in GTA V cluster mode');
-  ok(fs.existsSync(path.join(REPO, 'themes/gta-v/cluster/skyline.png')),
-    'GTA V cluster skyline asset exists on disk');
-  ok(!/100dvh|100vw/.test(gvCss), 'GTA V cluster CSS has no viewport-unit survivors');
 }
 // one attribution control only: the constructor's compact control — the
 // extra bottom-left addControl rendered the bar twice
