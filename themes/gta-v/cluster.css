@@ -105,13 +105,16 @@ body.cluster-mode.theme-gta-v #cluster-speed{
 /* Broad soft dark field behind the instrument: suppresses skyline detail,
    merges scenic darkness into the map transition. Huge radius, no boundary.
    Local contrast control, not a vignette. Paints above the plate/veil
-   (inside the speed's stacking context) but below the digits. */
+   (inside the speed's stacking context) but below the digits. Tuned as one
+   continuous luminance landscape with the veil's speed-shadow field: the
+   core here is ~15-25% darker than the skyline around it so the instrument
+   reads isolated, while far-left city stays rich. */
 body.cluster-mode.theme-gta-v #cluster-speed::before{
   content:"";position:absolute;inset:-170px -200px;z-index:-1;
   pointer-events:none;
-  background:radial-gradient(ellipse 380px 300px at 50% 45%,
-    rgba(10,13,15,.78) 0%,rgba(10,13,15,.52) 35%,
-    rgba(10,13,15,.20) 65%,transparent 100%)}
+  background:radial-gradient(ellipse 420px 330px at 50% 46%,
+    rgba(10,13,15,.90) 0%,rgba(10,13,15,.64) 35%,
+    rgba(10,13,15,.28) 65%,transparent 100%)}
 body.cluster-mode.theme-gta-v #cluster-speed-num{
   font-family:'Helvetica Neue',Helvetica,'Inter',system-ui,sans-serif;
   font-weight:100;font-size:210px;line-height:.95;color:#f2f4f4;
@@ -278,18 +281,33 @@ body.cluster-mode.theme-gta-v #gv-map-atmo{
   display:block;position:absolute;
   left:760px;top:94px;width:720px;height:534px;
   z-index:22;pointer-events:none;
-  /* Atmospheric veil, NOT a visible gradient: opaque before the map's
-     physical edge (x=900), transparent across a wide region. If its end
-     can be pointed at, it is too short. */
+  /* ATMOSPHERIC FIELDS, not a gradient ramp: three huge overlapping dark
+     fields that shape light in 2D. TOP emerges first, CENTRE (behind the
+     speed) last, BOTTOM-CENTRE softly, RIGHT fully readable. Every field
+     ends 100% transparent on a huge radius — no circumferences, no bands.
+     Same ink (#0a0d0f) everywhere, so field order is irrelevant. */
   background:
-    linear-gradient(108deg,
-      #0a0d0f 0%,#0a0d0f 15%,
-      rgba(10,13,15,.96) 25%,rgba(10,13,15,.82) 36%,
-      rgba(10,13,15,.58) 48%,rgba(10,13,15,.30) 60%,
-      rgba(10,13,15,.10) 70%,transparent 80%),
-    linear-gradient(to bottom,
-      rgba(10,13,15,.22) 0%,transparent 14%,
-      transparent 73%,rgba(10,13,15,.35) 88%,rgba(10,13,15,.75) 100%)}
+    /* A — SPEED SHADOW: vast soft elliptical dark field centred behind
+       the instrument. The veil starts at x760 and the speed sits at
+       x~660, so the local centre is -14% 44%. Buries skyline + early map
+       geometry around the dials; the visible part is all falloff. */
+    radial-gradient(ellipse 520px 400px at -14% 44%,
+      rgba(10,13,15,.92) 0%,rgba(10,13,15,.70) 30%,
+      rgba(10,13,15,.34) 58%,rgba(10,13,15,.09) 78%,
+      transparent 100%),
+    /* B — DIAGONAL SCENE/MAP VEIL: a whisper now. Gives the transition
+       direction and buries MapLibre's physical left edge; it must NOT
+       read as the transition itself — the emergence edge is shaped by
+       the two elliptical fields, never by this line. */
+    linear-gradient(115deg,
+      rgba(10,13,15,.30) 0%,rgba(10,13,15,.18) 25%,
+      rgba(10,13,15,.07) 45%,transparent 65%),
+    /* C — LOWER ATMOSPHERE: broad elliptical field rising from below
+       the bar. Merges city lights, roads and map detail into the footer
+       with a curved falloff — never a straight horizontal fade line. */
+    radial-gradient(ellipse 700px 380px at 55% 115%,
+      rgba(10,13,15,.80) 0%,rgba(10,13,15,.45) 35%,
+      rgba(10,13,15,.16) 60%,transparent 85%)}
 
 /* ---------- left branding ---------- */
 #gv-brand-left{display:none}

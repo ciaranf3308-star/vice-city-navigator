@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v209"), 'SW theme cache v209');
+ok(swSrc.includes("ws-theme-v210"), 'SW theme cache v210');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -1910,8 +1910,31 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
     'GTA V cluster styles the top bar, power bar, maneuver card and bottom bar');
   ok(gvCss.includes('#gv-skyline'),
     'GTA V cluster paints the skyline silhouette behind the speed cluster');
+  /* Atmospheric fields (2026-09-10, v210): the scene->speed->map transition
+     is shaped by THREE huge overlapping dark fields (speed shadow, weak
+     diagonal, lower atmosphere) — never by one dominant linear ramp. Every
+     field ends 100% transparent on a huge radius: no bands, no circles. */
+  const atmoRule = (gvCss.match(
+    /body\.cluster-mode\.theme-gta-v #gv-map-atmo\{[^}]*\}/) || [''])[0];
+  const atmoGradients = (atmoRule.match(/(radial-gradient|linear-gradient)\(/g) || []).length;
+  ok(atmoGradients === 3,
+    'GTA V atmosphere: veil is three overlapping fields, not one ramp (found ' + atmoGradients + ')');
+  ok(!/linear-gradient\(108deg/.test(gvCss),
+    'GTA V atmosphere: the old dominant 108deg veil ramp is gone');
+  ok(/radial-gradient\(ellipse 520px 400px at -14% 44%/.test(atmoRule),
+    'GTA V atmosphere: speed-shadow field sits behind the instrument (veil-local -14% 44%)');
+  ok(/radial-gradient\(ellipse 700px 380px at 55% 115%/.test(atmoRule),
+    'GTA V atmosphere: lower-atmosphere field rises from below the bar');
+  ok(/linear-gradient\(115deg,[\s\S]*?rgba\(10,13,15,\.30\) 0%/.test(atmoRule),
+    'GTA V atmosphere: diagonal veil is a whisper (0.30), never the transition itself');
+  ok(/transparent 100%/.test(atmoRule) && /transparent 65%/.test(atmoRule) && /transparent 85%/.test(atmoRule),
+    'GTA V atmosphere: every field ends fully transparent — no visible circumferences');
+  ok(/#cluster-speed::before\{[\s\S]{0,500}rgba\(10,13,15,\.90\) 0%/.test(gvCss),
+    'GTA V atmosphere: speed local field darkened for instrument isolation');
+  ok(!/blur\(/.test(atmoRule) && !/backdrop-filter/.test(atmoRule),
+    'GTA V atmosphere: no blur — alpha/luminance compositing only');
   /* Crossfade architecture (2026-09-10): the scene/map transition is carried
-     by overlapping alpha ramps, never by a hard scenic-image|map seam. */
+     by overlapping alpha fields, never by a hard scenic-image|map seam. */
   ok(/body\.cluster-mode\.theme-gta-v #gv-skyline[\s\S]{0,600}width:1250px/.test(gvCss),
     'GTA V crossfade: scenic plate spans 1250px (350px overlap with the map)');
   ok(/#gv-skyline[\s\S]{0,1200}mask-image:linear-gradient\(to right,[\s\S]*?transparent 100%\)/.test(gvCss),
