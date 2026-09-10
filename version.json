@@ -1,7 +1,7 @@
 {
-  "build": "gta-v-cluster-pass1-2026-09-10",
+  "build": "gta-v-cluster-maskfix-2026-09-10",
   "shell": "ws-shell-v68",
-  "theme": "ws-theme-v193",
+  "theme": "ws-theme-v194",
   "assets": {
     "index.html": "45890e8390be33ff",
     "styles.css": "4495188db9dc7867",
