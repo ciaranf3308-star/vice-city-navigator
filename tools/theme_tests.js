@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v174"), 'SW theme cache v174');
+ok(swSrc.includes("ws-theme-v175"), 'SW theme cache v175');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -1812,18 +1812,28 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
   ok(appSrc.includes('freshGpsSpeed()'), 'displays read the validated fresh speed');
   ok(!/gpsSpeed\s*=\s*cSpeed/.test(appSrc), 'no raw coords.speed assignment survives');
 }
-// SA cluster overhaul: grove console composition in 720-stage coordinates
+// SA cluster overlay redesign (2026-09-10): the user's perfect cluster art IS the stage
 {
   const saPhone = fs.readFileSync(path.join(REPO, 'themes/san-andreas/phone.css'), 'utf8');
   const saCluster = saPhone.slice(saPhone.indexOf('Cluster Mode: San Andreas'));
-  ok(/#cluster-header\{[^}]*height:50px/.test(saCluster), 'SA cluster has a console header bar');
-  ok(/#cluster-footer\{[^}]*height:50px/.test(saCluster), 'SA cluster has a console footer');
-  ok(/#cluster-logo::after\{[^}]*SAN ANDREAS/.test(saCluster), 'SA cluster header brands SAN ANDREAS (no VC logo)');
-  ok(/#cluster-limit::before\{[^}]*SPEED LIMIT/.test(saCluster), 'SA cluster uses a US-style limit sign');
-  ok(/\.sasp\{[^}]*width:576px/.test(saCluster), 'SA cluster docks the real Spotify widget right');
+  ok(saCluster.includes('cluster-overlay.png'), 'SA cluster paints the user-supplied overlay art as the stage');
+  ok(/body\.cluster-mode\.theme-san-andreas #map\{[^}]*left:78px[^}]*top:261px[^}]*width:513px[^}]*height:272px/.test(saCluster),
+    'SA cluster underlays the live map in the overlay\'s transparent window');
+  ok(/body\.cluster-mode\.theme-san-andreas #cluster-header,/.test(saCluster) &&
+     /#cluster-gauge,/.test(saCluster) && /#cluster-limit,/.test(saCluster),
+    'SA cluster hides the console chrome the overlay art already paints');
+  ok(/body\.cluster-mode\.theme-san-andreas #cluster-speed\{[^}]*left:961px[^}]*top:315px/.test(saCluster),
+    'SA cluster hero speed sits in the overlay\'s dial');
+  ok(/\.sasp\{[^}]*left:1322px[^}]*top:285px[^}]*transform:scale\(\.745\)/.test(saCluster),
+    'SA cluster docks the real Spotify widget into the overlay\'s music frame');
   ok(/#spotify-pane\{[^}]*width:1920px[^}]*height:720px/.test(saCluster),
     'SA cluster Spotify surface is the 1920x720 stage, not viewport units');
   ok(!/100dvh|100vw/.test(saCluster), 'SA cluster has no viewport-unit survivors');
+  ok(saCluster.includes('#sa-cluster-menu'), 'SA cluster keeps a real menu tap target over the painted logo');
+  ok(saCluster.includes('HERO-locked'), 'SA cluster documents that it avoids the HERO-locked dashboard.css');
+  ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/cluster-overlay.png')),
+    'SA cluster overlay asset exists on disk');
+}
 // stage lifecycle: teardown runs before build so a stale home never yanks
 // the shared map/Spotify nodes out of the stage just entered
 {
@@ -1837,9 +1847,6 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
     'applyAppMode tears down stages before building (cluster<->dashboard handoff)');
   ok(/home\.next && home\.next\.parentNode === home\.parent/.test(appSrc),
     'stage teardowns tolerate a stale home.next (no insertBefore crash)');
-}
-  ok(/#cluster-minimap\{[^}]*width:576px[^}]*height:446px/.test(saCluster), 'SA cluster frames the live map in gold');
-  ok(saCluster.includes('HERO-locked'), 'SA cluster documents that it avoids the HERO-locked dashboard.css');
 }
 
 // VC cluster reuses the dashboard bars + sunset panorama (2026-09-09)

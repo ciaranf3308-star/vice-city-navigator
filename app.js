@@ -355,6 +355,12 @@ function bindClusterTabs() {
   if (dashBrand) dashBrand.addEventListener('click', () => {
     if (clusterLayoutActive() && document.body.classList.contains('theme-vice-city')) openMenu();
   });
+  /* SA cluster: transparent tap target over the overlay's WayStation logo
+     (its console header/menu button are painted into the overlay art). */
+  const saMenu = document.getElementById('sa-cluster-menu');
+  if (saMenu) saMenu.addEventListener('click', () => {
+    if (clusterLayoutActive() && document.body.classList.contains('theme-san-andreas')) openMenu();
+  });
 }
 
 /* ---------------- maneuver arrows (original SVG) ---------------- */
