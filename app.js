@@ -3057,7 +3057,7 @@ function bindModeToggle() {
    geometry outside cluster mode (dashboard placement is pure CSS). */
 const CLUSTER_TOGGLE_POS = {
   'san-andreas': { right: 40, top: 64 },   /* gold plate over the sky, clear of the exit sign */
-  'gta-v':       { left: 560, top: 104 },  /* below the topbar, above the speed readout */
+  'gta-v':       { footer: '#gv-bottombar' }, /* centered in the footer bar, footer typography */
   'rdr2':        { right: 40, top: 24 },   /* free black space, top-right */
 };
 function layoutModeToggle() {
@@ -3074,6 +3074,23 @@ function layoutModeToggle() {
   const s = r.width / 1920; // live stage zoom
   const a = CLUSTER_TOGGLE_POS[wsThemeId()] || { right: 40, top: 24 };
   t.style.bottom = '';
+  if (a.footer) {
+    /* dock centered inside a footer bar (GTA V): measure the live bar rect
+       so the toggle tracks stage scale/letterboxing like everything else */
+    const fb = document.querySelector(a.footer);
+    const fr = fb && fb.getBoundingClientRect();
+    if (fr && fr.width > 0 && fr.height > 0) {
+      t.style.top = (fr.top + (fr.height - t.offsetHeight) / 2) + 'px';
+      t.style.left = (fr.left + (fr.width - t.offsetWidth) / 2) + 'px';
+      t.style.right = 'auto';
+      return;
+    }
+    /* footer not laid out yet: bottom-center of the stage as a transient */
+    t.style.top = (r.top + r.height - t.offsetHeight - 20 * s) + 'px';
+    t.style.left = (r.left + (r.width - t.offsetWidth) / 2) + 'px';
+    t.style.right = 'auto';
+    return;
+  }
   t.style.top = (r.top + a.top * s) + 'px';
   if (a.left != null) {
     t.style.right = 'auto';

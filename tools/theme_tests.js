@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v207"), 'SW theme cache v207');
+ok(swSrc.includes("ws-theme-v209"), 'SW theme cache v209');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -2070,6 +2070,14 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
     'view toggle hides on the VC cluster (it has its own footer tabs)');
   ok(appAll.includes('function layoutModeToggle') && appAll.includes('CLUSTER_TOGGLE_POS'),
     'cluster toggle docks against the live stage rect per theme');
+  ok(/'gta-v':\s*{\s*footer:\s*'#gv-bottombar'/.test(appAll),
+    'GTA V cluster toggle docks centered in the footer bar');
+  const gvClusterCss = fs.readFileSync(path.join(REPO, 'themes/gta-v/cluster.css'), 'utf8');
+  ok(/body\.cluster-mode\.theme-gta-v #gv-to-dash{display:none}/.test(gvClusterCss),
+    'GTA V cluster hides the lone footer DASH button (toggle takes over)');
+  const gvToggleCss = fs.readFileSync(path.join(REPO, 'themes/gta-v/mode-toggle.css'), 'utf8');
+  ok(/body\.cluster-mode\.theme-gta-v #mode-toggle[\s\S]{0,200}background:none/.test(gvToggleCss),
+    'GTA V cluster toggle drops the floating pill for footer typography');
   for (const t of ['vice-city', 'san-andreas', 'gta-v', 'rdr2']) {
     const skin = fs.readFileSync(path.join(REPO, `themes/${t}/mode-toggle.css`), 'utf8');
     ok(skin.includes(`body.theme-${t} #mode-toggle`),

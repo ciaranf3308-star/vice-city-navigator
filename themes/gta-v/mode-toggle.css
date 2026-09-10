@@ -23,3 +23,22 @@ body.theme-gta-v #mode-toggle button.on{
   box-shadow:inset 0 -2px 0 #76b900;
 }
 body.theme-gta-v #mode-toggle button:not(.on):hover{color:#c9d1c9}
+
+/* cluster mode: the toggle lives IN the footer, so it drops the floating
+   pill and speaks footer typography — plain Chalet caps with a hairline
+   divider, green active marker matching the footer accents. */
+body.cluster-mode.theme-gta-v #mode-toggle{
+  background:none;border:0;border-radius:0;overflow:visible;
+  backdrop-filter:none;-webkit-backdrop-filter:none;
+}
+body.cluster-mode.theme-gta-v #mode-toggle button{
+  min-height:0;padding:16px 22px;
+  font-size:14px;letter-spacing:.3em;color:#6d7878;
+}
+body.cluster-mode.theme-gta-v #mode-toggle button+button{
+  border-left:1px solid rgba(255,255,255,.14);
+}
+body.cluster-mode.theme-gta-v #mode-toggle button.on{
+  color:#eef2f2;background:none;box-shadow:inset 0 -2px 0 #46e08c;
+}
+body.cluster-mode.theme-gta-v #mode-toggle button:not(.on):hover{color:#c9d1c9}

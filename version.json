@@ -1,12 +1,12 @@
 {
-  "build": "gv-crossfade-v208-2026-09-10",
+  "build": "gv-footer-toggle-v209-2026-09-10",
   "shell": "ws-shell-v68",
-  "theme": "ws-theme-v208",
+  "theme": "ws-theme-v209",
   "assets": {
     "index.html": "3f08b0137907f648",
     "styles.css": "1e26f996f3ff3e21",
-    "app.js": "20245b26af4bbe5c",
-    "sw.js": "622b27eae76fee30",
+    "app.js": "da9007648d16f3ca",
+    "sw.js": "9d6cf25dafdb0553",
     "themes/vice-city/spotify-skin.css": "541717ee14ca80e5",
     "themes/vice-city/phone.css": "87909b9d4538ba87",
     "themes/gta-v/dashboard.css": "6442ff007f760e2b",
@@ -18,14 +18,14 @@
     "themes/vice-city/dashboard.css": "504f1c1cc1be106f",
     "themes/san-andreas/spotify-cluster.js": "d5149c5970670033",
     "themes/san-andreas/spotify-cluster.css": "6b1f174cf9d9901a",
-    "themes/gta-v/cluster.css": "4637de0b5a395421",
+    "themes/gta-v/cluster.css": "5f1de3094e74f590",
     "themes/gta-v/cluster.js": "abfc64396532f446",
     "themes/gta-v/spotify-cluster.css": "e3255f29261e2dd6",
     "themes/gta-v/spotify-cluster.js": "702d2d15f7077d59",
     "themes/gta-v/cluster/skyline.png": "58d2e73081c07277",
     "themes/vice-city/mode-toggle.css": "6db82b08f0ff7928",
     "themes/san-andreas/mode-toggle.css": "ff975c9b6c9f494e",
-    "themes/gta-v/mode-toggle.css": "a364f25fae4be038",
+    "themes/gta-v/mode-toggle.css": "2405293069842007",
     "themes/rdr2/mode-toggle.css": "66fe59b7aef0a0ad"
   }
 }

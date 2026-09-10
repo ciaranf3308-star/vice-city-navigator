@@ -235,6 +235,8 @@ body.cluster-mode.theme-gta-v #gv-bottombar{
   font-family:'Chalet London',sans-serif;font-size:14px;
   letter-spacing:.3em;color:#6d7878;padding:12px 8px}
 #gv-to-dash:hover{color:#46e08c}
+/* the footer view toggle (CLUSTER|DASH) replaces the lone DASH button */
+body.cluster-mode.theme-gta-v #gv-to-dash{display:none}
 .gv-btag{display:flex;align-items:center;gap:12px}
 .gv-btag svg{width:30px;height:30px;fill:#3f4a4a}
 .gv-btag>div{display:flex;flex-direction:column;gap:4px;text-align:right}
