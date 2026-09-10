@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { margin: 0; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; }
+  #stage { position: relative; width: 1920px; height: 720px; transform: scale(0.6); transform-origin: center; }
+  #magenta { position: absolute; left: 76px; top: 264px; width: 565px; height: 290px; background: #FF00FF; z-index: 20; }
+  #overlay { position: absolute; inset: 0; z-index: 30; background: url('themes/san-andreas/dashboard/cluster-overlay.png') 0 0 / 100% 100% no-repeat; pointer-events: none; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="magenta"></div>
+  <div id="overlay"></div>
+</div>
+</body>
+</html>
