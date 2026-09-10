@@ -1087,12 +1087,16 @@ body.cluster-mode #cluster-trip,
 body.cluster-mode #cluster-turn-compass{display:none}
 body.cluster-mode #cluster-turn-main{display:flex;flex-direction:column;min-width:0}
 
-/* ============ VIEW toggle: console <-> dash (per-theme skins) ============
-   One floating two-button segmented control, visible in normal and
-   dashboard modes (cluster has its own tabs). Body-level so it floats
-   above the scaled dashboard stage in real pixels — car-scale touch
-   targets. Each theme's mode-toggle.css owns the visual design;
-   this block owns structure, placement and mode visibility only. */
+/* ============ VIEW toggle: cluster <-> dash (per-theme skins) ============
+   One floating two-button segmented control for the two car views.
+   Visible in dashboard mode and (except Vice City, whose cluster has its
+   own footer tabs) in cluster mode; never on the phone map view. The
+   toggle is body-level so it never shrinks with the stage zoom — in
+   cluster mode layoutModeToggle() docks it against the live #cluster-ui
+   rect (same pattern as layoutDashMenu). Each theme's mode-toggle.css
+   owns the visual design; this block owns structure and mode visibility
+   only. Dashboard placement is fixed; cluster placement is set inline
+   by layoutModeToggle() and cleared on exit. */
 #mode-toggle{
   position:fixed;z-index:70;display:flex;pointer-events:auto;
   margin:0;padding:0;border:0;background:none;
@@ -1103,13 +1107,13 @@ body.cluster-mode #cluster-turn-main{display:flex;flex-direction:column;min-widt
   min-height:56px;min-width:88px;
   display:flex;align-items:center;justify-content:center;
 }
-/* normal (console) mode: below the search bar, top-right over the map */
-body:not(.dashboard-mode):not(.cluster-mode) #mode-toggle{
-  top:calc(76px + env(safe-area-inset-top));right:12px;
-}
+/* phone map view: no toggle — this is a car-views control */
+body:not(.dashboard-mode):not(.cluster-mode) #mode-toggle{display:none}
 /* dashboard mode: below the tallest topbar, top-right over the map */
 body.dashboard-mode #mode-toggle{
   top:140px;right:24px;
 }
-/* cluster mode has its own tab bar — no floating toggle */
-body.cluster-mode #mode-toggle{display:none}
+/* Vice City cluster has its own CLUSTER|DASHBOARD|MAP footer tabs */
+body.cluster-mode.theme-vice-city #mode-toggle{display:none}
+/* other clusters: JS docks this against the live stage rect; fallback top-left */
+body.cluster-mode:not(.theme-vice-city) #mode-toggle{top:24px;left:24px}

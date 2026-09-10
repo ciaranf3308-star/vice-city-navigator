@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v206"), 'SW theme cache v206');
+ok(swSrc.includes("ws-theme-v207"), 'SW theme cache v207');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -2031,12 +2031,12 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
       `${t} cluster never shows the dashboard bars`);
 }
 
-/* ============ view toggle: console <-> dash (per-theme skins) ============ */
+/* ============ view toggle: cluster <-> dash (per-theme skins) ============ */
 {
   const htmlAll = fs.readFileSync(path.join(REPO, 'index.html'), 'utf8');
   ok(htmlAll.includes('id="mode-toggle"'), 'view toggle element exists in index.html');
-  ok(htmlAll.includes('data-view="console"') && htmlAll.includes('data-view="dash"'),
-    'view toggle has console + dash buttons');
+  ok(htmlAll.includes('data-view="cluster"') && htmlAll.includes('data-view="dash"'),
+    'view toggle has cluster + dash buttons');
   for (const t of ['vice-city', 'san-andreas', 'gta-v', 'rdr2']) {
     ok(htmlAll.includes(`themes/${t}/mode-toggle.css`),
       `${t} mode-toggle.css is linked in index.html`);
@@ -2048,12 +2048,16 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
     'mode toggle bind + sync functions exist');
   ok(/data-view.{0,40}setAppMode\('dashboard'\)/.test(appAll) || appAll.includes("setAppMode('dashboard')"),
     'dash button routes to dashboard mode');
-  ok(/data-view.{0,40}setAppMode\('normal'\)/.test(appAll) || appAll.includes("setAppMode('normal')"),
-    'console button routes to normal mode');
+  ok(/data-view.{0,40}setAppMode\('cluster'\)/.test(appAll) || appAll.includes("setAppMode('cluster')"),
+    'cluster button routes to cluster mode');
   ok(appAll.includes('syncModeToggle()') && /function syncModeSelector\(\)[\s\S]{0,300}syncModeToggle\(\)/.test(appAll),
     'toggle active state syncs on every mode change');
-  ok(cssSrc.includes('body.cluster-mode #mode-toggle{display:none}'),
-    'view toggle hides in cluster mode (cluster has its own tabs)');
+  ok(cssSrc.includes('body:not(.dashboard-mode):not(.cluster-mode) #mode-toggle{display:none}'),
+    'view toggle stays off the phone map view (car views only)');
+  ok(cssSrc.includes('body.cluster-mode.theme-vice-city #mode-toggle{display:none}'),
+    'view toggle hides on the VC cluster (it has its own footer tabs)');
+  ok(appAll.includes('function layoutModeToggle') && appAll.includes('CLUSTER_TOGGLE_POS'),
+    'cluster toggle docks against the live stage rect per theme');
   for (const t of ['vice-city', 'san-andreas', 'gta-v', 'rdr2']) {
     const skin = fs.readFileSync(path.join(REPO, `themes/${t}/mode-toggle.css`), 'utf8');
     ok(skin.includes(`body.theme-${t} #mode-toggle`),

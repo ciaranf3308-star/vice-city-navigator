@@ -21,7 +21,7 @@ body.theme-vice-city #mode-toggle button.on[data-view="dash"]{
   background:linear-gradient(180deg,#ff8fd4,#e054b0);
   color:#12060f;box-shadow:0 0 16px rgba(255,113,206,.85);
 }
-body.theme-vice-city #mode-toggle button.on[data-view="console"]{
+body.theme-vice-city #mode-toggle button.on[data-view="cluster"]{
   background:linear-gradient(180deg,#4fe3ff,#00a8d8);
   color:#061014;box-shadow:0 0 16px rgba(1,205,254,.85);
 }

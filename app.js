@@ -719,6 +719,7 @@ function applyBodyTheme(id) {
   try { syncDashPadding(); } catch (e) {}
   layoutDashMenu(); // bar heights changed with the theme — re-dock the menu panel
   layoutDashDrawer(); // and the planning drawer
+  layoutModeToggle(); // and the cluster-anchored view toggle
 }
 async function fetchThemeStyle(theme) {
   const res = await fetch(theme.map.styleUrl, { cache: 'no-cache' });
@@ -2483,6 +2484,7 @@ function fitClusterStage() {
   }
   ui.style.left = ((vw - CLUSTER_W * s) / 2) + 'px';
   ui.style.top = ((vh - CLUSTER_H * s) / 2) + 'px';
+  layoutModeToggle(); // re-dock the body-level view toggle to the new stage rect
 }
 
 /* The Vice City widget floats over the right of the map, so the camera's
@@ -2547,6 +2549,7 @@ function applyAppMode() {
   else stopClusterClock();
   layoutDashMenu(); // dock (or undock) the body-level menu panel
   layoutDashDrawer(); // dock (or undock) the planning drawer
+  layoutModeToggle(); // dock (or undock) the body-level view toggle
   const pane = $('spotify-pane');
   /* One SpotifyCore session; the skin is per layout — SA cluster mounts
      its own compact widget into the background's boxes. */
@@ -3018,15 +3021,16 @@ function syncModeSelector() {
   syncModeToggle();
 }
 
-/* Floating console/dash toggle: the active segment follows the live mode.
-   Hidden by CSS in cluster mode (which has its own tabs). */
+/* Floating cluster/dash toggle: the active segment follows the live mode.
+   Car views only — hidden by CSS on the phone map view and on the Vice
+   City cluster (which has its own footer tabs). */
 function syncModeToggle() {
   const t = $('mode-toggle');
   if (!t || typeof t.querySelectorAll !== 'function') return;
   t.querySelectorAll('button[data-view]').forEach(b => {
     b.classList.toggle('on',
       (b.dataset.view === 'dash' && appMode === 'dashboard') ||
-      (b.dataset.view === 'console' && appMode === 'normal'));
+      (b.dataset.view === 'cluster' && appMode === 'cluster'));
   });
 }
 
@@ -3038,10 +3042,46 @@ function bindModeToggle() {
   t.querySelectorAll('button[data-view]').forEach(b => {
     b.addEventListener('click', () => {
       if (b.dataset.view === 'dash') WayStation.setAppMode('dashboard');
-      else if (b.dataset.view === 'console') WayStation.setAppMode('normal');
+      else if (b.dataset.view === 'cluster') WayStation.setAppMode('cluster');
     });
   });
   syncModeToggle();
+}
+
+/* Dock the body-level view toggle against the LIVE cluster stage rect.
+   Fixed stage-coordinate CSS can't place it: on any window where the
+   stage is letterboxed or zoomed below 1, stage offsets land on top of
+   cluster art or off the visible canvas. Per-theme stage anchors keep it
+   clear of each cluster's composition (same pattern as layoutDashMenu).
+   Runs on stage fit, theme commit and mode switch; clears its inline
+   geometry outside cluster mode (dashboard placement is pure CSS). */
+const CLUSTER_TOGGLE_POS = {
+  'san-andreas': { right: 40, top: 64 },   /* gold plate over the sky, clear of the exit sign */
+  'gta-v':       { left: 560, top: 104 },  /* below the topbar, above the speed readout */
+  'rdr2':        { right: 40, top: 24 },   /* free black space, top-right */
+};
+function layoutModeToggle() {
+  const t = $('mode-toggle');
+  if (!t) return;
+  if (!clusterLayoutActive() || document.body.classList.contains('theme-vice-city')) {
+    t.style.left = ''; t.style.top = ''; t.style.right = ''; t.style.bottom = '';
+    return;
+  }
+  const stage = $('cluster-ui');
+  let r = null;
+  try { r = stage && stage.getBoundingClientRect(); } catch (e) {}
+  if (!r || !r.width) return; // stage not built yet; CSS fallback applies
+  const s = r.width / 1920; // live stage zoom
+  const a = CLUSTER_TOGGLE_POS[wsThemeId()] || { right: 40, top: 24 };
+  t.style.bottom = '';
+  t.style.top = (r.top + a.top * s) + 'px';
+  if (a.left != null) {
+    t.style.right = 'auto';
+    t.style.left = (r.left + a.left * s) + 'px';
+  } else {
+    t.style.left = 'auto';
+    t.style.right = Math.max(0, window.innerWidth - (r.left + (1920 - a.right) * s)) + 'px';
+  }
 }
 
 function wireSpotifyMenu() {
