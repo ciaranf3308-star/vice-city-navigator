@@ -289,6 +289,11 @@ body.cluster-mode.theme-san-andreas #menu-btn{display:none!important}
 #sa-cluster-menu{display:none}
 body.cluster-mode.theme-san-andreas #sa-cluster-menu{display:block;position:absolute;left:815px;top:20px;
   width:180px;height:75px;z-index:33;background:transparent;border:none;cursor:pointer}
+/* SA cluster exit: gold home button, bottom bar, back to dashboard */
+#sa-cluster-exit{display:none}
+body.cluster-mode.theme-san-andreas #sa-cluster-exit{display:block;position:absolute;left:700px;top:628px;width:64px;height:64px;z-index:60;background:url('dashboard/cluster-exit-btn.png') 0 0 / 100% 100% no-repeat;border:0;border-radius:50%;cursor:pointer;opacity:.92}
+body.cluster-mode.theme-san-andreas #sa-cluster-exit:hover{opacity:1}
+body.cluster-mode.theme-san-andreas #sa-cluster-exit:active{transform:scale(.94)}
 /* hero speed in the dial */
 body.cluster-mode.theme-san-andreas #cluster-speed{left:961px;top:315px;z-index:32}
 body.cluster-mode.theme-san-andreas #cluster-speed-num{font-family:'Bank Gothic',sans-serif;font-weight:400;

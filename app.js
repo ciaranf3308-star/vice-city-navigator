@@ -2975,6 +2975,9 @@ function wireSpotifyMenu() {
   }));
   const clusterExit = $('cluster-mode-exit');
   if (clusterExit) clusterExit.addEventListener('click', () => setAppMode('normal'));
+  /* SA cluster: gold home button returns to dashboard view */
+  const saClusterExit = $('sa-cluster-exit');
+  if (saClusterExit) saClusterExit.addEventListener('click', () => setAppMode('dashboard'));
   let rsT = null;
   window.addEventListener('resize', () => {
     // Refit the 1920×720 dashboard canvas after resizes; debounced and
