@@ -919,12 +919,17 @@ let gpsRejectSince = 0; // when the current rejection streak started (0 = none)
    (e.g. 182 m/s while sitting still). Displaying it raw puts "657 km/h"
    on the cluster. Every candidate is validated before it becomes
    gpsSpeed — never invented, only physically-impossible jumps refused:
-   - non-finite / negative candidates are dropped
+   - non-finite / negative candidates are dropped; BOTH sources are
+     capped at 100 m/s — a jumping fix (coarse location can hop ~km
+     between updates) makes d/dt just as wild as a glitching receiver
+     (664 m/s of pure teleport once read "2390 km/h")
    - displacement cross-check: fix-to-fix travel is ground truth. If the
      phone barely moved but the candidate claims speed, the fix is bogus —
      fall back to the displacement-derived speed
    - acceleration gate: vs the last accepted speed, |dv| must fit within
-     12 m/s^2 (emergency braking is ~10; 12 is generous)
+     12 m/s^2 (emergency braking is ~10; 12 is generous). The
+     receiver-gave-nothing path goes through the SAME gate — displacement
+     anchors, never teleports
    - re-anchor: if candidates keep failing for > 5 s, trust displacement
      so one bad anchor can't freeze the readout forever
    Staleness: readers use freshGpsSpeed() — anything older than 10 s is
@@ -932,7 +937,8 @@ let gpsRejectSince = 0; // when the current rejection streak started (0 = none)
 function setGpsSpeed(candidate, fixMs, dtSec) {
   const now = Date.now();
   const dt = (typeof dtSec === 'number' && dtSec > 0) ? dtSec : 1;
-  const fix = (typeof fixMs === 'number' && isFinite(fixMs) && fixMs >= 0) ? fixMs : 0;
+  const fixRaw = (typeof fixMs === 'number' && isFinite(fixMs) && fixMs >= 0) ? fixMs : 0;
+  const fix = Math.min(fixRaw, 100); // physical cap applies to displacement too
   let v = (typeof candidate === 'number' && isFinite(candidate) && candidate >= 0) ? candidate : NaN;
   // Absolute physical sanity: no road vehicle does 100 m/s (360 km/h). A
   // wilder coords.speed on a bad fix (e.g. 747 m/s while sitting still) is a
@@ -946,9 +952,9 @@ function setGpsSpeed(candidate, fixMs, dtSec) {
   // jumping fix is not speed — trust the displacement instead.
   if (!isNaN(v) && gpsSpeed === null && Math.abs(v - fix) > 30) v = fix;
   if (isNaN(v)) {
-    // receiver gave nothing usable; displacement is still truth
-    if (gpsSpeed === null || now - gpsRejectSince > 5000) { gpsSpeed = fix; gpsSpeedAt = now; gpsRejectSince = 0; }
-    return;
+    // receiver gave nothing usable; displacement is still truth, but it
+    // takes the same acceleration gate below — never around it.
+    v = fix;
   }
   if (gpsSpeed !== null) {
     if (Math.abs(v - gpsSpeed) > 12 * dt + 3) {

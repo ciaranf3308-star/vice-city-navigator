@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v212"), 'SW theme cache v212');
+ok(swSrc.includes("ws-theme-v212"), 'SW theme cache v213');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -1808,6 +1808,24 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
   const spd2 = () => vm.runInContext('gpsSpeed', vBox2);
   vBox2.setGpsSpeed(747, 50, 1); // 2692 km/h glitch, null history, 50 m/s jump
   ok(spd2() < 100, 'speed: 747 m/s wild fix is never accepted (absolute cap)');
+  // 2390 km/h cluster bug (2026-09-10): wild receiver AND jumping fix —
+  // the displacement-derived speed bypassed the cap and the gate
+  const vBox3 = { Date: { now: () => T } };
+  vm.createContext(vBox3);
+  vm.runInContext(vSrc, vBox3, { filename: 'speed-validation-3' });
+  const spd3 = () => vm.runInContext('gpsSpeed', vBox3);
+  vBox3.setGpsSpeed(664, 664, 1); // teleport jump, no history
+  ok(spd3() <= 100, 'speed: jumping displacement never exceeds the 100 m/s physical cap');
+  vBox3.setGpsSpeed(NaN, 664, 1); // receiver silent, fix still teleporting
+  ok(spd3() <= 100, 'speed: silent receiver + wild fix still capped');
+  // ...but with history, a teleporting fix must not move the needle at all
+  const vBox4 = { Date: { now: () => T } };
+  vm.createContext(vBox4);
+  vm.runInContext(vSrc, vBox4, { filename: 'speed-validation-4' });
+  const spd4 = () => vm.runInContext('gpsSpeed', vBox4);
+  vBox4.setGpsSpeed(13.9, 13.9, 1); // steady 50 km/h
+  vBox4.setGpsSpeed(NaN, 664, 1); // next fix teleports ~2 km
+  ok(Math.abs(spd4() - 13.9) < 1e-9, 'speed: teleporting fix with history holds last good (no 2390)');
   adv(1000); vBox.setGpsSpeed(0.2, 0.2, 1);
   ok(Math.abs(spd() - 0.2) < 1e-9, 'speed: real fixes flow through');
   for (let i = 1; i <= 10; i++) { adv(1000); vBox.setGpsSpeed(i * 2.5, i * 2.5, 1); }
