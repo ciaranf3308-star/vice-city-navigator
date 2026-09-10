@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v204"), 'SW theme cache v204');
+ok(swSrc.includes("ws-theme-v205"), 'SW theme cache v205');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -388,15 +388,16 @@ for (const fn of ['parseAppMode', 'modeBodyFlags', 'speedDisplayActive', 'cluste
   vm.runInContext(extractFn(appSrc, fn), modeBox, { filename: 'app.js#' + fn });
 }
 const tParseAppMode = modeBox.parseAppMode, tModeBodyFlags = modeBox.modeBodyFlags;
-// parsing precedence: car session > ?cluster=1 > ?dashboard= > persisted choice
-ok(tParseAppMode('?cluster=1', false, 'dashboard') === 'cluster', 'cluster: ?cluster=1 wins over persisted dashboard');
+// parsing precedence: car session > ?cluster=1 > ?dashboard= > normal.
+// stored car modes never leak into phone/desktop sessions.
+ok(tParseAppMode('?cluster=1', false, 'dashboard') === 'cluster', 'cluster: ?cluster=1 wins over stored dashboard');
 ok(tParseAppMode('?cluster=1', false, null) === 'cluster', 'cluster: ?cluster=1 with no stored pref');
 ok(tParseAppMode('?cluster=1&dashboard=1', false, null) === 'cluster', 'cluster: ?cluster=1 wins over ?dashboard=1');
 ok(tParseAppMode('?cluster=0', false, null) === 'normal', 'cluster: only exact ?cluster=1 enables');
 ok(tParseAppMode('?dashboard=1', false, null) === 'dashboard', 'dashboard: ?dashboard=1');
 ok(tParseAppMode('?dashboard=0', false, 'dashboard') === 'normal', 'normal: ?dashboard=0 clears persisted dashboard');
-ok(tParseAppMode('', false, 'dashboard') === 'dashboard', 'dashboard: persisted choice restored');
-ok(tParseAppMode('', false, 'cluster') === 'cluster', 'cluster: persisted explicit choice restored');
+ok(tParseAppMode('', false, 'dashboard') === 'normal', 'normal: stored dashboard never hijacks a phone session');
+ok(tParseAppMode('', false, 'cluster') === 'normal', 'normal: stored cluster never hijacks a phone session');
 ok(tParseAppMode('', false, 'weird') === 'normal', 'normal: unknown stored value falls back');
 ok(tParseAppMode('', false, null) === 'normal', 'normal: default with nothing stored');
 ok(tParseAppMode('?cluster=1', true, null) === 'dashboard', 'car: session forces dashboard over ?cluster=1');

@@ -2261,7 +2261,12 @@ function parseAppMode(search, car, stored) {
   if (cluster === '1') return 'cluster';
   if (dash === '1') return 'dashboard';
   if (dash === '0') return 'normal';
-  return stored === 'dashboard' || stored === 'cluster' ? stored : 'normal';
+  /* Phone/desktop sessions never auto-restore the car layouts: 'dashboard'
+     is the Android Auto view, 'cluster' the 1920x720 car view. A stored car
+     mode (leaked from a car session, an old ?dashboard=1 visit, or the
+     in-app menu) must not hijack the phone's normal view on next launch.
+     Explicit URL params above still work for testing. */
+  return 'normal';
 }
 
 /* Body-class flags for a mode. Dashboard and cluster are mutually
