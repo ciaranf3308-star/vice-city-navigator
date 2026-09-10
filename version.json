@@ -1,7 +1,7 @@
 {
-  "build": "sa-cluster-map-resize-fix-2026-09-10",
+  "build": "sa-cluster-110pct-zoom-comp-2026-09-10",
   "shell": "ws-shell-v68",
-  "theme": "ws-theme-v184",
+  "theme": "ws-theme-v185",
   "assets": {
     "index.html": "45890e8390be33ff",
     "styles.css": "4495188db9dc7867",

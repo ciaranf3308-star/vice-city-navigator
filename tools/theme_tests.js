@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v184"), 'SW theme cache v184');
+ok(swSrc.includes("ws-theme-v185"), 'SW theme cache v185');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -1816,8 +1816,11 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
   const saPhone = fs.readFileSync(path.join(REPO, 'themes/san-andreas/phone.css'), 'utf8');
   const saCluster = saPhone.slice(saPhone.indexOf('Cluster Mode: San Andreas'));
   ok(saCluster.includes('cluster-overlay.png'), 'SA cluster paints the user-supplied overlay art as the stage');
-  ok(/body\.cluster-mode\.theme-san-andreas #map\{[^}]*left:4px[^}]*top:223px[^}]*width:662px[^}]*height:348px/.test(saCluster),
-    'SA cluster map is an oversized underlay (130% of window, same center), clipping behind the art');
+  ok(/body\.cluster-mode\.theme-san-andreas #map\{[^}]*left:55px[^}]*top:250px[^}]*width:560px[^}]*height:295px/.test(saCluster),
+    'SA cluster map is a subtle underlay (110% of window, same center), bleeding under the bezel');
+  const appSrc = fs.readFileSync(path.join(REPO, 'app.js'), 'utf8');
+  ok(/SA_CLUSTER_BLEED\s*=\s*1\.10/.test(appSrc) && /SA_CLUSTER_ZOOM_ADJ\s*=\s*-Math\.log2\(SA_CLUSTER_BLEED\)/.test(appSrc),
+    'SA cluster defines 110% bleed with -log2 zoom compensation');
   ok(!/body\.cluster-mode\.theme-san-andreas #map\{[^}]*left:78px[^}]*top:261px[^}]*width:513px[^}]*height:272px/.test(saCluster),
     'SA cluster map is no longer exactly the window size (attribution bar used to show inside it)');
   ok(/body\.cluster-mode\.theme-san-andreas #cluster-header,/.test(saCluster) &&

@@ -262,12 +262,12 @@ body.cluster-mode.theme-san-andreas #dash-bottombar{display:none}
 body.cluster-mode.theme-san-andreas #cluster-backdrop{display:block;position:absolute;inset:0;z-index:30;
   background:url('dashboard/cluster-overlay.png') 0 0 / 100% 100% no-repeat;pointer-events:none}
 /* live map underlaid BEHIND the cutout — the map is an oversized layer
-   (130% of the window: stage px 4,223 662x348, same center 334.5,397 as the
+   (110% of the window: stage px 55,250 560x295, same center 334.5,397 as the
    transparent opening) centered under the overlay art. The overlay's opaque
-   frame clips it invisibly on all sides (40px+ overshoot) so the map reads
-   as continuing beyond the window edges, never as a widget fitted to them.
-   The attribution bar stays buried behind the opaque art. */
-body.cluster-mode.theme-san-andreas #map{left:4px;top:223px;width:662px;height:348px;border-radius:0;z-index:20}
+   frame clips it on all sides (25px horizontal / 14px vertical bleed) so the
+   map reads as continuing beyond the window edges, never as a widget fitted
+   to them. The attribution bar stays buried behind the opaque art. */
+body.cluster-mode.theme-san-andreas #map{left:55px;top:250px;width:560px;height:295px;border-radius:0;z-index:20}
 /* the overlay paints header/footer/frames/dial: hide the console chrome */
 body.cluster-mode.theme-san-andreas #cluster-header,
 body.cluster-mode.theme-san-andreas #cluster-footer,
