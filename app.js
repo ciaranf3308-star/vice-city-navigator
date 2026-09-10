@@ -2328,12 +2328,11 @@ function layoutDashMenu() {
   if (!r || !r.width) return; // stage not built yet; CSS fallback applies
   const s = r.width / DASH_W; // live stage zoom (zoom or transform scale)
   const bars = DASH_BAR_HEIGHTS[wsThemeId()] || DASH_BAR_HEIGHTS['vice-city'];
-  const pad = 12;
-  panel.style.left = Math.max(0, r.left + pad) + 'px';
-  panel.style.top = (r.top + (bars.top + pad) * s) + 'px';
-  panel.style.width = Math.max(300, Math.min(540, r.width - pad * 2)) + 'px';
-  const bottomClear = (bars.bottom + pad) * s;
-  panel.style.bottom = Math.max(0, window.innerHeight - (r.bottom - bottomClear)) + 'px';
+  // Full-stage settings page: matches the dash canvas, clear of the bars
+  panel.style.left = r.left + 'px';
+  panel.style.top = (r.top + bars.top * s) + 'px';
+  panel.style.width = r.width + 'px';
+  panel.style.bottom = Math.max(0, window.innerHeight - (r.bottom - bars.bottom * s)) + 'px';
 }
 
 /* Dock the body-level planning drawer (search / results / route preview)

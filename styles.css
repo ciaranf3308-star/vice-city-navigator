@@ -685,8 +685,8 @@ body.dashboard-mode.theme-rdr2 #speedo{bottom:108px}
 body.dashboard-mode #menu-panel{
   z-index:60;
   /* full-stage settings page: same 1920x720 canvas as the dash */
-  top:94px;bottom:92px;left:0;right:0;
-  width:auto;max-width:none;
+  top:94px;left:0;
+  width:1920px;height:534px;
   padding:40px 80px;
   border-radius:0;
   overflow-y:auto;
