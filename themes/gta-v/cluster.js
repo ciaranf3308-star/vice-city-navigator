@@ -111,13 +111,13 @@
     { layer: 'v-label-place', paint: { 'text-color': '#7d8686', 'text-opacity': 0.45 }, layout: { 'text-letter-spacing': 0.18 } },
     { layer: 'v-label-road-major', paint: { 'text-color': '#6d7878', 'text-opacity': 0.35 } },
     { layer: 'v-label-road-minor', paint: { 'text-color': '#5f6a6a', 'text-opacity': 0.24 } },
-    /* cluster-only: thinner, dimmer roads (atlas, not street map) */
-    { layer: 'v-road-minor', paint: { 'line-width': 0.7, 'line-opacity': 0.7 } },
-    { layer: 'v-road-minor-casing', paint: { 'line-width': 1.0, 'line-opacity': 0.5 } },
-    { layer: 'v-road-primary', paint: { 'line-width': 1.2, 'line-opacity': 0.75 } },
-    { layer: 'v-road-primary-casing', paint: { 'line-width': 1.8, 'line-opacity': 0.5 } },
-    { layer: 'v-road-motorway', paint: { 'line-width': 1.8, 'line-opacity': 0.8 } },
-    { layer: 'v-road-motorway-casing', paint: { 'line-width': 2.5, 'line-opacity': 0.5 } },
+    /* cluster-only: scale authored widths (preserve zoom interpolation) */
+    { layer: 'v-road-minor', scaleWidth: 0.82, paint: { 'line-opacity': 0.85 } },
+    { layer: 'v-road-minor-casing', scaleWidth: 0.82, paint: { 'line-opacity': 0.6 } },
+    { layer: 'v-road-primary', scaleWidth: 0.85, paint: { 'line-opacity': 0.9 } },
+    { layer: 'v-road-primary-casing', scaleWidth: 0.85, paint: { 'line-opacity': 0.6 } },
+    { layer: 'v-road-motorway', scaleWidth: 0.88, paint: { 'line-opacity': 0.95 } },
+    { layer: 'v-road-motorway-casing', scaleWidth: 0.88, paint: { 'line-opacity': 0.6 } },
   ];
   let tweaksOn = false;
   const saved = {};
@@ -133,6 +133,19 @@
       for (const t of TWEAKS) {
         if (!m.getLayer(t.layer)) continue;
         saved[t.layer] = saved[t.layer] || {};
+        /* scaleWidth: preserve authored zoom interpolation, scale proportionally */
+        if (t.scaleWidth) {
+          if (!('line-width' in saved[t.layer])) {
+            saved[t.layer]['line-width'] = m.getPaintProperty(t.layer, 'line-width');
+          }
+          const orig = saved[t.layer]['line-width'];
+          if (orig !== undefined && orig !== null) {
+            const scaled = Array.isArray(orig)
+              ? ['*', orig, t.scaleWidth]
+              : orig * t.scaleWidth;
+            m.setPaintProperty(t.layer, 'line-width', scaled);
+          }
+        }
         for (const k of Object.keys(t.paint || {})) {
           if (!(k in saved[t.layer])) saved[t.layer][k] = m.getPaintProperty(t.layer, k);
           m.setPaintProperty(t.layer, k, t.paint[k]);

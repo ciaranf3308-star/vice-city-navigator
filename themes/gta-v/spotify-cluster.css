@@ -1,59 +1,77 @@
 /* ============================================================
    WayStation — GTA V Spotify skin, CLUSTER mode only (.gvcl).
-   The music card lives at stage (1350,366) 534x281, overlapping
-   the map panel's right edge like the console concept: art left,
-   title/artist + progress + transport right, tagline along the
-   bottom. One shared SpotifyCore session; dashboard keeps .gvsp.
+   Grid rebuild: art | info / controls / tagline. No overlap.
    ============================================================ */
-html body.theme-gta-v.cluster-mode #spotify-pane{position:absolute;left:1460px;top:365px;
+html body.theme-gta-v.cluster-mode #spotify-pane{
+  position:absolute;left:1465px;top:365px;
   width:450px;height:245px;z-index:30;display:block!important;
   visibility:visible!important;opacity:1!important;pointer-events:none;
   clip-path:polygon(7.5% 0,100% 0,100% 100%,0 100%);
-  background:radial-gradient(ellipse 85% 90% at 35% 25%,rgba(20,25,28,.93),rgba(10,13,15,.91));}
-html body.theme-gta-v.cluster-mode .gvcl{display:flex!important;width:100%;height:100%;
-  margin:0;pointer-events:auto;align-items:center;gap:28px;padding:30px 36px 30px 62px;
-  font-family:'Chalet London',sans-serif;box-sizing:border-box;position:relative}
-.gvcl-artwrap{position:relative;width:138px;height:138px;flex:none;
-  overflow:hidden;background:#14181b;border:1px solid rgba(255,255,255,.08)}
-.gvcl-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;
-  transition:opacity .4s}
+  background:
+    radial-gradient(ellipse 80% 60% at 60% 40%,rgba(255,255,255,.025),transparent 70%),
+    #0b0e10}
+html body.theme-gta-v.cluster-mode .gvcl{
+  display:grid!important;
+  grid-template-columns:120px minmax(0,1fr);
+  grid-template-rows:minmax(0,1fr) auto;
+  column-gap:18px;row-gap:12px;
+  width:100%;height:100%;margin:0;pointer-events:auto;
+  padding:22px 20px 14px 48px;
+  font-family:'Chalet London',sans-serif;box-sizing:border-box}
+.gvcl-artwrap{
+  grid-column:1;grid-row:1;
+  position:relative;width:120px;height:120px;
+  overflow:hidden;background:#14181b;
+  border:1px solid rgba(255,255,255,.08)}
+.gvcl-art{position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;opacity:0;transition:opacity .4s}
 .gvcl-art.on{opacity:1}
-.gvcl-art-idle{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+.gvcl-art-idle{position:absolute;inset:0;display:flex;
+  align-items:center;justify-content:center;
   color:#2a3232;background:linear-gradient(135deg,#14181b,#0f1316)}
-.gvcl-art-idle svg{width:56px;height:56px;fill:currentColor}
-.gvcl-info{flex:1;min-width:0;display:flex;flex-direction:column}
-.gvcl-title{font-size:26px;color:#f0f3f3;letter-spacing:.04em;white-space:nowrap;
-  overflow:hidden;text-overflow:ellipsis;line-height:1.25;max-width:100%}
-.gvcl-artist{font-size:19px;color:#8b9595;letter-spacing:.08em;margin-top:4px;
+.gvcl-art-idle svg{width:48px;height:48px;fill:currentColor}
+.gvcl-info{
+  grid-column:2;grid-row:1;min-width:0;
+  display:flex;flex-direction:column;justify-content:center}
+.gvcl-title{
+  font-size:22px;color:#f0f3f3;letter-spacing:.04em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  line-height:1.25}
+.gvcl-artist{
+  font-size:16px;color:#8b9595;letter-spacing:.08em;margin-top:4px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
 .gvcl-artist.gvcl-status{color:#e8a33d;font-style:italic}
-.gvcl-progress{margin-top:18px}
-.gvcl-bar{position:relative;height:6px;border-radius:3px;background:rgba(255,255,255,.14);
-  cursor:pointer}
-.gvcl-bar-fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:3px;
-  background:#e8ecec}
-.gvcl-bar-knob{position:absolute;top:50%;width:14px;height:14px;border-radius:50%;
-  background:#e8ecec;transform:translate(-50%,-50%)}
-.gvcl-times{display:flex;justify-content:space-between;margin-top:8px;font-size:19px;
-  color:#8b9595;letter-spacing:.1em}
-.gvcl-controls{display:flex;align-items:center;gap:30px;margin-top:14px}
-.gvcl-tbtn{background:none;border:0;padding:0;cursor:pointer;color:#dfe4e4;
-  display:flex;align-items:center}
-.gvcl-tbtn svg{width:34px;height:34px;fill:currentColor}
-.gvcl-tbtn.big svg{width:64px;height:64px}
-.gvcl-tbtn.big{border:1px solid rgba(255,255,255,.35);border-radius:50%;
-  width:56px;height:56px;justify-content:center;transition:border-color .2s}
+.gvcl-progress{margin-top:14px}
+.gvcl-bar{position:relative;height:4px;background:rgba(255,255,255,.14)}
+.gvcl-bar-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:#e8ecec}
+.gvcl-bar-knob{position:absolute;top:50%;width:9px;height:9px;
+  border-radius:50%;background:#e8ecec;transform:translate(-50%,-50%)}
+.gvcl-times{display:flex;justify-content:space-between;
+  margin-top:6px;font-size:14px;color:#8b9595;letter-spacing:.1em}
+.gvcl-controls{display:flex;align-items:center;gap:24px;margin-top:10px}
+.gvcl-tbtn{background:none;border:0;padding:0;cursor:pointer;
+  color:#dfe4e4;display:flex;align-items:center}
+.gvcl-tbtn svg{width:26px;height:26px;fill:currentColor}
+.gvcl-tbtn.big{
+  border:1px solid rgba(255,255,255,.35);border-radius:50%;
+  width:54px;height:54px;justify-content:center;transition:border-color .2s}
 .gvcl-tbtn.big:hover{border-color:#46e08c}
-.gvcl-tbtn.big svg{width:30px;height:30px}
-.gvcl-tag{position:absolute;left:62px;bottom:22px;right:36px;font-size:14px;
-  letter-spacing:.42em;color:#5f6a6a}
-.gvcl-idle{position:absolute;inset:0;display:flex;flex-direction:column;gap:14px;
-  align-items:center;justify-content:center;background:rgba(10,13,15,.72)}
-.gvcl-idle[hidden]{display:none}
-.gvcl-idle-kicker{font-size:17px;letter-spacing:.4em;color:#8b9595}
-.gvcl-connect-btn{font-family:'Chalet London',sans-serif;font-size:19px;
-  letter-spacing:.24em;color:#0a0d0f;background:#e8ecec;border:0;border-radius:24px;
-  padding:14px 34px;cursor:pointer}
+.gvcl-tbtn.big svg{width:24px;height:24px}
 .gvcl-like{margin-left:auto}
-.gvcl-like svg{fill:none;stroke:currentColor;stroke-width:2}
+.gvcl-like svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:2}
 .gvcl-like.liked svg{fill:#e8ecec;stroke:#e8ecec}
+.gvcl-tag{
+  grid-column:1 / -1;grid-row:2;
+  font-size:11px;letter-spacing:.38em;color:#5f6a6a;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gvcl-idle{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  gap:12px;align-items:center;justify-content:center;
+  background:rgba(10,13,15,.72);padding:20px;text-align:center}
+.gvcl-idle[hidden]{display:none}
+.gvcl-idle-kicker{font-size:15px;letter-spacing:.36em;color:#8b9595}
+.gvcl-idle-sub{font-size:13px;letter-spacing:.2em;color:#5f6a6a}
+.gvcl-connect-btn{
+  font-family:'Chalet London',sans-serif;font-size:16px;
+  letter-spacing:.22em;color:#0a0d0f;background:#e8ecec;border:0;
+  border-radius:20px;padding:12px 28px;cursor:pointer}

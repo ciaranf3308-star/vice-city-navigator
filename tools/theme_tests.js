@@ -1877,7 +1877,7 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
 // music cards overlapping the map's right edge, thin speed digits.
 {
   const gvCss = fs.readFileSync(path.join(REPO, 'themes/gta-v/cluster.css'), 'utf8');
-  ok(gvCss.includes('#gv-map-atmo') && /linear-gradient.*rgba\(10,13,15/.test(gvCss),
+  ok(gvCss.includes('#gv-map-atmo') && /linear-gradient[\s\S]*?rgba\(8,10,12/.test(gvCss),
     'GTA V cluster dissolves map edges via atmospheric gradient overlay');
 
   /* REGRESSION: CSS must parse cleanly — rules at END of file must be in CSSOM.
@@ -1907,7 +1907,7 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
   ok(gvCss.includes('#gv-topbar') && gvCss.includes('#gv-powerbar') &&
      gvCss.includes('#gv-turn-card') && gvCss.includes('#gv-bottombar'),
     'GTA V cluster styles the top bar, power bar, maneuver card and bottom bar');
-  ok(gvCss.includes('#gv-skyline') && gvCss.includes('skyline.png'),
+  ok(gvCss.includes('#gv-skyline'),
     'GTA V cluster paints the skyline silhouette behind the speed cluster');
   ok(/body\.cluster-mode\.theme-gta-v #(cluster-header|cluster-footer|cluster-gauge)[\s\S]{0,400}display:none/.test(gvCss),
     'GTA V cluster hides the generic cluster chrome');

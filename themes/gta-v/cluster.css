@@ -1,10 +1,7 @@
 /* ============================================================
    WayStation — GTA V CLUSTER console view.
-   Scope: body.cluster-mode.theme-gta-v ONLY. Phone + dashboard
-   + other themes untouched. Stage is 1920x720.
-   Concept: dark EV-console — tracked-out Chalet caps, giant thin
-   speed digits, parallelogram live map with violet route, glass
-   maneuver + music cards overlapping the map's right edge.
+   Scope: body.cluster-mode.theme-gta-v ONLY.
+   Stage: 1920x720. Hero: 2048x768 (scale 0.9375).
    ============================================================ */
 
 /* ---------- stage + chrome reset ---------- */
@@ -20,47 +17,51 @@ body.cluster-mode.theme-gta-v #cluster-backdrop,
 body.cluster-mode.theme-gta-v #cluster-turn-compass,
 body.cluster-mode.theme-gta-v #menu-btn{display:none!important}
 
-/* ---------- live map: parallelogram panel ---------- */
-body.cluster-mode.theme-gta-v #map{left:900px;top:100px;width:680px;height:520px;
+/* ---------- live map ---------- */
+body.cluster-mode.theme-gta-v #map{
+  left:900px;top:100px;width:680px;height:520px;
   border-radius:0;z-index:20;
-  /* DIRECT dissolve: long diagonal left fade, crisp core, short right fade */
   -webkit-mask-image:linear-gradient(106deg,
     transparent 0%,rgba(0,0,0,.10) 7%,rgba(0,0,0,.45) 15%,
-    #000 28%,#000 84%,rgba(0,0,0,.55) 94%,transparent 100%);
+    #000 28%,#000 88%,rgba(0,0,0,.55) 95%,transparent 100%);
   mask-image:linear-gradient(106deg,
     transparent 0%,rgba(0,0,0,.10) 7%,rgba(0,0,0,.45) 15%,
-    #000 28%,#000 84%,rgba(0,0,0,.55) 94%,transparent 100%)}
-/* 1px panel edge following the parallelogram */
-/* gv-map-edge removed: no hard edge to trace */
-/* vignette: map melts into the dark UI at the panel borders */
-/* gv-map-vignette removed: SVG mask now provides the soft dissolve */
-/* fade where the map runs under the right cards */
-#gv-card-fade{display:none}
-body.cluster-mode.theme-gta-v #gv-card-fade{display:block;position:absolute;
-  left:1288px;top:103px;width:130px;height:544px;z-index:23;pointer-events:none;
-  background:linear-gradient(to right,transparent,rgba(8,11,13,.88))}
+    #000 28%,#000 88%,rgba(0,0,0,.55) 95%,transparent 100%)}
 
-/* ---------- skyline backdrop ---------- */
+/* ---------- scenic plate ---------- */
 #gv-skyline{display:none}
-body.cluster-mode.theme-gta-v #gv-skyline{display:block;position:absolute;
-  left:0;top:135px;width:680px;height:275px;z-index:24;pointer-events:none;
-  /* no stretch: crop naturally, strong on left, gone before map */
-  background:url('cluster/skyline.png') left center/auto 100% no-repeat;opacity:.34;
-  -webkit-mask-image:linear-gradient(to right,#000 0%,#000 55%,rgba(0,0,0,.4) 75%,transparent 100%);
-  mask-image:linear-gradient(to right,#000 0%,#000 55%,rgba(0,0,0,.4) 75%,transparent 100%)}
+body.cluster-mode.theme-gta-v #gv-skyline{
+  display:block;position:absolute;
+  left:0;top:94px;width:1000px;height:520px;
+  z-index:24;pointer-events:none;overflow:hidden}
+#gv-skyline img{
+  width:100%;height:100%;object-fit:cover;object-position:left center;
+  filter:grayscale(.92) brightness(.62) contrast(1.08) sepia(.08)}
+#gv-skyline::after{
+  content:"";position:absolute;inset:0;
+  background:
+    linear-gradient(to right,
+      transparent 0%,transparent 45%,
+      rgba(10,13,15,.25) 62%,rgba(10,13,15,.75) 82%,#0a0d0f 100%),
+    linear-gradient(to bottom,
+      #0a0d0f 0%,transparent 15%,
+      transparent 68%,rgba(10,13,15,.55) 84%,#0a0d0f 100%)}
 
 /* ---------- top bar ---------- */
 #gv-topbar{display:none}
-body.cluster-mode.theme-gta-v #gv-topbar{display:flex;position:absolute;
-  left:0;top:0;width:1920px;height:94px;z-index:32;align-items:center;
-  padding:0 44px;gap:34px;background:#0a0d0f;
-  border-bottom:1px solid rgba(255,255,255,.10);
+body.cluster-mode.theme-gta-v #gv-topbar{
+  display:grid;position:absolute;
+  left:0;top:0;width:1920px;height:94px;z-index:32;
+  grid-template-columns:auto auto 1fr auto auto auto auto auto auto;
+  align-items:center;gap:28px;padding:0 44px;
+  background:#0a0d0f;border-bottom:1px solid rgba(255,255,255,.10);
   font-family:'Chalet London','Chalet Comprime',sans-serif}
 #gv-cluster-menu{background:none;border:0;padding:6px;cursor:pointer}
 #gv-cluster-menu svg{display:block;width:52px;height:30px}
 #gv-cluster-menu path{stroke:#e8ecec;stroke-width:4.5;fill:none;stroke-linecap:square}
-.gv-brand{font-family:'Chalet Comprime','Arial Narrow',sans-serif;font-size:23px;
-  letter-spacing:.42em;color:#e8ecec;white-space:nowrap}
+.gv-brand{font-family:'Chalet Comprime','Arial Narrow',sans-serif;
+  font-size:23px;letter-spacing:.42em;color:#e8ecec;white-space:nowrap}
+.gv-hairline{width:195px;height:1px;background:rgba(255,255,255,.14);flex:none}
 .gv-div{width:1px;height:44px;background:rgba(255,255,255,.14);flex:none}
 .gv-place{display:flex;flex-direction:column;gap:5px}
 .gv-place b{font-size:21px;letter-spacing:.34em;color:#eef1f1;font-weight:400}
@@ -69,7 +70,6 @@ body.cluster-mode.theme-gta-v #gv-topbar{display:flex;position:absolute;
 .gv-tag{display:flex;flex-direction:column;gap:5px;text-align:right}
 .gv-tag b{font-size:19px;letter-spacing:.3em;color:#dfe4e4;font-weight:400}
 .gv-tag span{font-size:12px;letter-spacing:.3em;color:#6d7878}
-.gv-sp{flex:1}
 .gv-time{font-size:30px;letter-spacing:.14em;color:#f0f3f3;white-space:nowrap;font-weight:400}
 .gv-wx{display:flex;align-items:center;gap:14px}
 .gv-wx svg{width:44px;height:44px;stroke:#cfd6d6;fill:none;stroke-width:2}
@@ -78,49 +78,58 @@ body.cluster-mode.theme-gta-v #gv-topbar{display:flex;position:absolute;
 .gv-wx span{font-size:12px;letter-spacing:.3em;color:#7d8888}
 
 /* ---------- speed cluster ---------- */
-body.cluster-mode.theme-gta-v #cluster-speed{position:absolute;left:430px;top:165px;
-  width:460px;z-index:32;text-align:center;transform:none;
-  /* NO card: radial atmosphere only, speed floats as the dominant instrument */
+body.cluster-mode.theme-gta-v #cluster-speed{
+  position:absolute;left:430px;top:165px;width:460px;z-index:32;
+  text-align:center;
   background:
-    radial-gradient(ellipse 45% 50% at 50% 48%,rgba(0,0,0,.72),rgba(0,0,0,.30) 52%,transparent 75%),
-    radial-gradient(ellipse 85% 70% at 50% 48%,rgba(0,0,0,.28),transparent 78%);
+    radial-gradient(ellipse 45% 50% at 50% 48%,rgba(0,0,0,.78),rgba(0,0,0,.35) 52%,transparent 75%),
+    radial-gradient(ellipse 85% 70% at 50% 48%,rgba(0,0,0,.32),transparent 78%);
   padding:28px 0 24px}
 body.cluster-mode.theme-gta-v #cluster-speed-num{
   font-family:'Helvetica Neue',Helvetica,'Inter',system-ui,sans-serif;
-  font-weight:100;font-size:210px;line-height:.95;color:#f2f4f4;letter-spacing:-.02em;
-  /* placeholder dashes get the same massive treatment */
+  font-weight:100;font-size:210px;line-height:.95;color:#f2f4f4;
+  letter-spacing:-.02em;font-variant-numeric:tabular-nums;
   min-height:200px;display:flex;align-items:center;justify-content:center}
-body.cluster-mode.theme-gta-v #cluster-speed.na #cluster-speed-num{font-weight:200}
-body.cluster-mode.theme-gta-v #cluster-speed-unit{font-family:'Chalet London',sans-serif;
-  font-size:22px;letter-spacing:.42em;color:#6d7878;margin-top:2px;
-  /* tuck it close to the number, not floating */}
-/* limit badge: red ring */
-body.cluster-mode.theme-gta-v #cluster-limit{position:absolute;left:831px;top:218px;
-  width:68px;height:68px;z-index:32;border:5px solid #ff3b30;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;background:rgba(10,13,15,.6);
-  transform:none}
+body.cluster-mode.theme-gta-v #cluster-speed.na #cluster-speed-num{
+  font-weight:200;font-size:120px;letter-spacing:.1em;color:#5f6a6a}
+body.cluster-mode.theme-gta-v #cluster-speed-unit{
+  font-family:'Chalet London',sans-serif;font-size:22px;
+  letter-spacing:.42em;color:#6d7878;margin-top:8px}
+body.cluster-mode.theme-gta-v #cluster-limit{
+  position:absolute;left:831px;top:218px;width:68px;height:68px;z-index:32;
+  border:5px solid #ff3b30;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:#f0f2f2}
 body.cluster-mode.theme-gta-v #cluster-limit[hidden]{display:none}
-body.cluster-mode.theme-gta-v #cluster-limit-num{font-family:'Chalet London',sans-serif;
-  font-size:26px;color:#f0f2f2}
+body.cluster-mode.theme-gta-v #cluster-limit-num{
+  font-family:'Chalet London',sans-serif;font-size:26px;color:#0a0d0f;font-weight:700}
 
-/* ---------- REGEN / COAST / POWER bar ---------- */
+/* ---------- power bar ---------- */
 #gv-powerbar{display:none}
-body.cluster-mode.theme-gta-v #gv-powerbar{display:block;position:absolute;
-  left:365px;top:448px;width:560px;height:50px;z-index:32;
-  /* cradles the entire speed cluster: 560px wide, not a little progress bar */}
-.gv-pb-track{position:relative;height:6px;border-radius:3px;background:rgba(255,255,255,.07);
-  overflow:hidden}
-.gv-pb-regen{position:absolute;left:0;top:0;bottom:0;width:0;background:#46e08c;
-  border-radius:3px 0 0 3px;transition:width .5s}
-.gv-pb-power{position:absolute;right:0;top:0;bottom:0;width:0;background:#f5a623;
-  border-radius:0 3px 3px 0;transition:width .5s}
-.gv-pb-hatch{position:absolute;top:0;bottom:0;width:26px;
-  background:repeating-linear-gradient(55deg,transparent 0 4px,rgba(255,255,255,.28) 4px 6px)}
-.gv-pb-hatch.h1{left:30%}.gv-pb-hatch.h2{right:30%;transform:scaleX(-1)}
-.gv-pb-labels{display:flex;margin-top:10px;font-family:'Chalet London',sans-serif;
-  font-size:15px;letter-spacing:.32em}
+body.cluster-mode.theme-gta-v #gv-powerbar{
+  display:block;position:absolute;
+  left:365px;top:448px;width:560px;height:50px;z-index:32}
+.gv-pb-track{position:relative;height:5px;background:rgba(255,255,255,.06)}
+.gv-pb-base-regen{position:absolute;left:0;top:0;bottom:0;width:30%;
+  background:rgba(70,224,140,.12)}
+.gv-pb-base-coast{position:absolute;left:30%;top:0;bottom:0;width:40%;
+  background:rgba(255,255,255,.04)}
+.gv-pb-base-power{position:absolute;right:0;top:0;bottom:0;width:30%;
+  background:rgba(245,166,35,.12)}
+.gv-pb-regen{position:absolute;left:0;top:0;bottom:0;width:0;
+  background:#46e08c;transition:width .4s}
+.gv-pb-power{position:absolute;right:0;top:0;bottom:0;width:0;
+  background:#f5a623;transition:width .4s}
+.gv-pb-hatch{position:absolute;top:0;bottom:0;width:18px;opacity:.5;
+  background:repeating-linear-gradient(55deg,
+    transparent 0 3px,rgba(255,255,255,.25) 3px 4px)}
+.gv-pb-hatch.h1{left:30%;transform:translateX(-50%)}
+.gv-pb-hatch.h2{right:30%;transform:translateX(50%) scaleX(-1)}
+.gv-pb-labels{display:flex;margin-top:10px;
+  font-family:'Chalet London',sans-serif;font-size:13px;letter-spacing:.32em}
 .gv-pb-labels span{color:#5f6a6a;transition:color .4s}
-.gv-pb-labels .l-regen{width:30%}.gv-pb-labels .l-coast{width:40%;text-align:center}
+.gv-pb-labels .l-regen{width:30%}
+.gv-pb-labels .l-coast{width:40%;text-align:center}
 .gv-pb-labels .l-power{width:30%;text-align:right}
 #gv-powerbar[data-state="regen"] .l-regen{color:#46e08c}
 #gv-powerbar[data-state="coast"] .l-coast{color:#9aa4a4}
@@ -128,63 +137,82 @@ body.cluster-mode.theme-gta-v #gv-powerbar{display:block;position:absolute;
 
 /* ---------- maneuver card ---------- */
 #gv-turn-card{display:none}
-body.cluster-mode.theme-gta-v #gv-turn-card{display:block;position:absolute;
-  left:1350px;top:103px;width:534px;height:258px;z-index:30;
+body.cluster-mode.theme-gta-v #gv-turn-card{
+  display:block;position:absolute;
+  left:1465px;top:103px;width:455px;height:258px;z-index:30;
   clip-path:polygon(7.5% 0,100% 0,100% 100%,0 100%);
-  background:linear-gradient(120deg,rgba(17,22,25,.97),rgba(10,13,15,.97));
-  border-left:1px solid rgba(255,255,255,.07)}
-body.cluster-mode.theme-gta-v #cluster-turn{position:relative;left:0;top:0;right:0;
-  transform:none;display:block;padding:34px 40px 0 66px;max-width:none}
-body.cluster-mode.theme-gta-v #gv-turn-top{display:flex;align-items:flex-start;gap:26px}
+  background:
+    radial-gradient(ellipse 80% 60% at 60% 40%,rgba(255,255,255,.025),transparent 70%),
+    #0b0e10}
+body.cluster-mode.theme-gta-v #cluster-turn{
+  position:relative;padding:34px 32px 0 58px}
+body.cluster-mode.theme-gta-v #gv-turn-top{
+  display:flex;align-items:flex-start;gap:22px}
 body.cluster-mode.theme-gta-v #cluster-turn-arrow{width:64px;height:64px;flex:none}
-body.cluster-mode.theme-gta-v #cluster-turn-arrow svg{width:100%;height:100%;
-  fill:#34d17b;filter:drop-shadow(0 0 10px rgba(52,209,123,.45))}
-body.cluster-mode.theme-gta-v #cluster-turn-distance{font-family:'Chalet London',sans-serif;
-  font-size:46px;color:#f0f3f3;letter-spacing:.06em}
-body.cluster-mode.theme-gta-v #cluster-turn-road{font-family:'Chalet London',sans-serif;
-  font-size:32px;color:#cfd6d6;letter-spacing:.1em;margin-top:4px}
-body.cluster-mode.theme-gta-v #cluster-turn-instruction{font-family:'Chalet London',sans-serif;
-  font-size:22px;color:#8b9595;letter-spacing:.14em;margin-top:10px}
-#gv-turn-idle{display:none;padding:60px 40px 0 66px}
+body.cluster-mode.theme-gta-v #cluster-turn-arrow svg{
+  width:100%;height:100%;fill:#34d17b}
+body.cluster-mode.theme-gta-v #cluster-turn-distance{
+  font-family:'Chalet London',sans-serif;font-size:46px;
+  color:#f0f3f3;letter-spacing:.06em}
+body.cluster-mode.theme-gta-v #cluster-turn-road{
+  font-family:'Chalet London',sans-serif;font-size:30px;
+  color:#cfd6d6;letter-spacing:.1em;margin-top:6px}
+body.cluster-mode.theme-gta-v #cluster-turn-instruction{
+  font-family:'Chalet London',sans-serif;font-size:20px;
+  color:#8b9595;letter-spacing:.14em;margin-top:10px}
+#gv-turn-idle{display:none;padding:54px 32px 0 58px}
 body.cluster-mode.theme-gta-v #cluster-turn[hidden]~#gv-turn-idle{display:block}
-/* Quiet idle: green hairline, no decorative furniture */
-#gv-turn-idle::before{content:"";display:block;width:36px;height:2px;
-  background:#46e08c;opacity:.6;margin-bottom:20px}
-#gv-turn-idle .t1{font-family:'Chalet London',sans-serif;font-size:19px;
-  letter-spacing:.30em;color:#9aa4a4}
-#gv-turn-idle .t2{font-family:'Chalet London',sans-serif;font-size:13px;
-  letter-spacing:.18em;color:#5f6a6a;margin-top:10px}
-body.cluster-mode.theme-gta-v #cluster-trip{display:block;position:relative;left:0;right:0;
-  margin:18px 0 0 0;padding:16px 40px 0 66px;
-  border-top:1px solid rgba(255,255,255,.1);font-family:'Chalet London',sans-serif;
-  font-size:17px;letter-spacing:.12em;color:#9aa4a4}
+#gv-turn-idle::before{
+  content:"";display:block;width:36px;height:2px;
+  background:#46e08c;opacity:.6;margin-bottom:18px}
+#gv-turn-idle .t1{
+  font-family:'Chalet London',sans-serif;font-size:17px;
+  letter-spacing:.28em;color:#9aa4a4}
+#gv-turn-idle .t2{
+  font-family:'Chalet London',sans-serif;font-size:12px;
+  letter-spacing:.16em;color:#5f6a6a;margin-top:10px}
+body.cluster-mode.theme-gta-v #cluster-trip{
+  margin:16px 0 0 0;padding:14px 32px 0 58px;
+  border-top:1px solid rgba(255,255,255,.08);
+  font-family:'Chalet London',sans-serif;font-size:15px;
+  letter-spacing:.12em;color:#6d7878}
 body.cluster-mode.theme-gta-v #cluster-trip .trip-cyan{color:#7fd6a8}
-body.cluster-mode.theme-gta-v #cluster-trip .trip-sep{margin:0 12px;color:#4a5454}
+body.cluster-mode.theme-gta-v #cluster-trip .trip-sep{margin:0 10px;color:#3f4a4a}
 
 /* ---------- bottom bar ---------- */
 #gv-bottombar{display:none}
-body.cluster-mode.theme-gta-v #gv-bottombar{display:flex;position:absolute;
-  left:0;bottom:0;width:1920px;height:92px;z-index:32;align-items:center;
-  padding:0 44px;gap:34px;background:#0a0d0f;border-top:1px solid rgba(255,255,255,.10);
+body.cluster-mode.theme-gta-v #gv-bottombar{
+  display:flex;position:absolute;
+  left:0;bottom:0;width:1920px;height:92px;z-index:32;
+  align-items:center;padding:0 44px;gap:28px;
+  background:#0a0d0f;border-top:1px solid rgba(255,255,255,.10);
   font-family:'Chalet London',sans-serif}
-.gv-batt{display:flex;align-items:center;gap:14px}
-.gv-batt svg{width:40px;height:22px}
-.gv-batt span{font-size:21px;letter-spacing:.14em;color:#dfe4e4}
-.gv-bsp{flex:1}
-.gv-range{display:flex;flex-direction:column;gap:4px;text-align:left}
-.gv-range[hidden]{display:none}
-.gv-range b{font-size:21px;letter-spacing:.14em;color:#dfe4e4;font-weight:400}
-.gv-range span{font-size:11px;letter-spacing:.3em;color:#6d7878}
-.gv-gear{display:flex;gap:18px;font-size:21px;letter-spacing:.14em;color:#4a5454}
-.gv-gear[hidden]{display:none}
+.gv-batt{display:flex;align-items:center;gap:12px}
+.gv-batt svg{width:36px;height:20px}
+.gv-batt .phone-label{
+  font-size:10px;letter-spacing:.28em;color:#5f6a6a;margin-left:2px}
+.gv-batt span.batt-val{font-size:19px;letter-spacing:.12em;color:#dfe4e4}
+.gv-bgroup{display:flex;align-items:center;gap:28px}
+.gv-bgroup[hidden]{display:none}
+.gv-bdiv{width:1px;height:36px;background:rgba(255,255,255,.10)}
+.gv-range{display:flex;flex-direction:column;gap:4px}
+.gv-range b{font-size:19px;letter-spacing:.12em;color:#dfe4e4;font-weight:400}
+.gv-range span{font-size:10px;letter-spacing:.28em;color:#6d7878}
+.gv-gear{display:flex;gap:16px;font-size:19px;letter-spacing:.12em;color:#4a5454}
 .gv-gear .on{color:#46e08c}
-.gv-btag{display:flex;align-items:center;gap:14px}
-.gv-btag svg{width:34px;height:34px;fill:#3f4a4a}
+.gv-bsp{flex:1}
+#gv-to-dash{
+  background:none;border:0;cursor:pointer;
+  font-family:'Chalet London',sans-serif;font-size:14px;
+  letter-spacing:.3em;color:#6d7878;padding:12px 8px}
+#gv-to-dash:hover{color:#46e08c}
+.gv-btag{display:flex;align-items:center;gap:12px}
+.gv-btag svg{width:30px;height:30px;fill:#3f4a4a}
 .gv-btag>div{display:flex;flex-direction:column;gap:4px;text-align:right}
-.gv-btag b{font-size:16px;letter-spacing:.3em;color:#cfd6d6;font-weight:400}
-.gv-btag span{font-size:11px;letter-spacing:.3em;color:#6d7878}
+.gv-btag b{font-size:14px;letter-spacing:.28em;color:#cfd6d6;font-weight:400}
+.gv-btag span{font-size:10px;letter-spacing:.28em;color:#6d7878}
 
-/* ---------- attribution: compact dark badge, not a white pill ---------- */
+/* ---------- attribution ---------- */
 body.cluster-mode.theme-gta-v .maplibregl-ctrl-attrib{
   background:transparent!important;box-shadow:none!important}
 body.cluster-mode.theme-gta-v .maplibregl-ctrl-attrib:not(.maplibregl-compact-show) .maplibregl-ctrl-attrib-inner{
@@ -192,67 +220,51 @@ body.cluster-mode.theme-gta-v .maplibregl-ctrl-attrib:not(.maplibregl-compact-sh
 body.cluster-mode.theme-gta-v .maplibregl-ctrl-attrib-button{
   background:rgba(10,13,15,.72)!important;
   border:1px solid rgba(255,255,255,.08)!important;
-  border-radius:3px!important;
-  width:24px!important;height:24px!important;
+  border-radius:3px!important;width:24px!important;height:24px!important;
   font-size:13px!important;color:#5f6a6a!important;opacity:.7}
-body.cluster-mode.theme-gta-v .maplibregl-ctrl-attrib.maplibregl-compact-show{
-  background:rgba(10,13,15,.92)!important;
-  border:1px solid rgba(255,255,255,.08)!important;
-  border-radius:3px!important;padding:6px 10px!important}
-body.cluster-mode.theme-gta-v .maplibregl-ctrl-attrib.maplibregl-compact-show a{
-  color:#5f6a6a!important;text-decoration:none!important;font-size:10px!important}
 
-/* ---------- map restraint: driving focus, not exploration ---------- */
-body.cluster-mode.theme-gta-v #map .maplibregl-marker{
-  opacity:.17!important;transform:scale(.55)!important;
-  transition:opacity .3s, transform .3s;filter:saturate(.5)}
-body.cluster-mode.theme-gta-v #map .maplibregl-marker:hover{
-  opacity:.9!important;transform:scale(.85)!important;filter:none}
-/* Keep player marker and destination full-strength */
-body.cluster-mode.theme-gta-v #map .maplibregl-marker.player-marker,
-body.cluster-mode.theme-gta-v #map .maplibregl-marker.dest-marker{
-  opacity:1!important;transform:none!important;filter:none}
+/* ---------- map markers ---------- */
+body.cluster-mode.theme-gta-v #map .maplibregl-marker .marker-inner{
+  opacity:.22;transform:scale(.6);transition:opacity .3s;
+  filter:saturate(.5)}
+body.cluster-mode.theme-gta-v #map .maplibregl-marker.player-marker .marker-inner,
+body.cluster-mode.theme-gta-v #map .maplibregl-marker.dest-marker .marker-inner{
+  opacity:1;transform:none;filter:none}
 
-/* ---------- architectural black geometry: subtle intersecting planes ---------- */
+/* ---------- architectural planes ---------- */
 #gv-geo-plane{display:none}
-body.cluster-mode.theme-gta-v #gv-geo-plane{display:block;position:absolute;
+body.cluster-mode.theme-gta-v #gv-geo-plane{
+  display:block;position:absolute;
   left:0;top:94px;width:1920px;height:534px;z-index:1;pointer-events:none;
-  /* tonal architecture: barely-visible planes, perceived not seen */
   background:
-    linear-gradient(105deg,transparent 0%,transparent 45%,rgba(255,255,255,.012) 45.5%,transparent 46%),
+    linear-gradient(105deg,transparent 0%,transparent 45%,
+      rgba(255,255,255,.012) 45.5%,transparent 46%),
     linear-gradient(285deg,#0a0d0f 0%,#0c1012 35%,#0a0d0f 70%)}
 
-/* ---------- map atmospheric integration: dark overlay + geometry over edges ---------- */
+/* ---------- map atmosphere ---------- */
 #gv-map-atmo{display:none}
-body.cluster-mode.theme-gta-v #gv-map-atmo{display:block;position:absolute;
-  left:900px;top:100px;width:680px;height:520px;z-index:21;pointer-events:none;
-  /* vertical atmosphere only: transparent top/middle, gentle bottom falloff */
+body.cluster-mode.theme-gta-v #gv-map-atmo{
+  display:block;position:absolute;
+  left:900px;top:100px;width:680px;height:520px;
+  z-index:21;pointer-events:none;
   background:linear-gradient(to bottom,
-    transparent 0%,transparent 55%,rgba(8,10,12,.45) 82%,rgba(8,10,12,.85) 100%)}
-/* Black geometry planes overlapping the map fade zone (Point 7) */
+    transparent 0%,transparent 55%,
+    rgba(8,10,12,.45) 82%,rgba(8,10,12,.85) 100%)}
 
-/* ---------- green accent language: sparse, intentional ---------- */
-
-
-/* ---------- left branding: secondary, 35-45% luminance ---------- */
+/* ---------- left branding ---------- */
 #gv-brand-left{display:none}
-body.cluster-mode.theme-gta-v #gv-brand-left{display:block;position:absolute;
-  left:44px;top:380px;z-index:25;pointer-events:none}
-#gv-brand-left .bl1{font-family:'Chalet London',sans-serif;font-size:28px;
-  letter-spacing:.28em;color:rgba(255,255,255,.40);line-height:1.5}
-#gv-brand-left .bl2{font-family:'Chalet London',sans-serif;font-size:13px;
-  letter-spacing:.22em;color:rgba(255,255,255,.38);margin-top:18px;line-height:1.7}
-
-/* long quiet hairline after WAYSTATION (hero rhythm) */
-body.cluster-mode.theme-gta-v #gv-topbar .gv-hairline{width:195px;height:1px;
-  background:rgba(255,255,255,.14);margin:0 8px;flex:none}
-
-/* DASH button: direct exit to dashboard */
-#gv-to-dash{display:none}
-body.cluster-mode.theme-gta-v #gv-to-dash{display:block;position:absolute;
-  right:44px;top:50%;transform:translateY(-50%);
-  background:none;border:1px solid rgba(255,255,255,.18);border-radius:3px;
-  color:#8b9595;font-family:'Chalet London',sans-serif;font-size:13px;
-  letter-spacing:.22em;padding:8px 16px;cursor:pointer;z-index:33}
-body.cluster-mode.theme-gta-v #gv-to-dash:hover{
-  border-color:#46e08c;color:#46e08c}
+body.cluster-mode.theme-gta-v #gv-brand-left{
+  display:block;position:absolute;
+  left:44px;top:420px;z-index:25;pointer-events:none;max-width:180px}
+#gv-brand-left .bl1{
+  font-family:'Chalet London',sans-serif;font-size:13px;
+  letter-spacing:.32em;color:rgba(255,255,255,.40);line-height:2.0}
+#gv-brand-left .bl2{
+  display:flex;align-items:center;gap:12px;margin-top:24px}
+#gv-brand-left .bl2 .w-mark{
+  width:26px;height:26px;flex:none;opacity:.4}
+#gv-brand-left .bl2 .w-copy{
+  font-family:'Chalet London',sans-serif;font-size:9px;
+  letter-spacing:.28em;color:rgba(255,255,255,.38);line-height:1.8}
+#gv-brand-left .bl2 .w-rule{
+  width:40px;height:1px;background:rgba(255,255,255,.14);margin-top:8px}

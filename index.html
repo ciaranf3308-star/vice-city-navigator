@@ -323,16 +323,17 @@
   <button id="sa-cluster-locate" type="button" aria-label="Find my location">◎</button>
   <!-- GTA V console view layers -->
   <div id="gv-geo-plane" aria-hidden="true"></div>
-  <div id="gv-skyline" aria-hidden="true"></div>
+  <div id="gv-skyline" aria-hidden="true"><img src="themes/gta-v/cluster/skyline.png" alt=""></div>
   <div id="gv-brand-left" aria-hidden="true">
     <div class="bl1">A<br>BIGGER<br>CLEANER<br>LOS SANTOS</div>
-    <div class="bl2">W<br>ELECTRIC FOR<br>A BRIGHTER TOMORROW</div>
+    <div class="bl2">
+      <svg class="w-mark" viewBox="0 0 34 34" aria-hidden="true"><path d="M16 33h2l-.7-14h-.6z" fill="currentColor"/><path d="M17 17c-4-3.2-8.5-3.8-11.5-2.8 2.6.3 5.2 1.6 7.2 3.6-3.1-.6-6.2.4-7.7 2.4 3-.6 6.1-.1 8.2 1.4-2 1-3.6 3-4.2 5.1 1.6-1.6 3.6-2.6 5.6-2.6.5 2.1 1.5 4 3 5.4-.3-2.3.3-4.5 1.6-6.2 2 .4 4.4 1.2 6.4 2.4-1.8-2.2-4.5-3.4-7.6-3.1 2-1.6 4.6-2.4 7.2-2.2-3.1-1.6-7.2-1.9-11.2-.4z" fill="currentColor"/></svg>
+      <div class="w-copy">ELECTRIC FOR<br>A BRIGHTER TOMORROW<div class="w-rule"></div></div>
+    </div>
   </div>
   <div id="gv-map-atmo" aria-hidden="true"></div>
-  <div id="gv-card-fade" aria-hidden="true"></div>
   <header id="gv-topbar">
     <button id="gv-cluster-menu" type="button" aria-label="Open menu"><svg viewBox="0 0 52 30"><path d="M4 4 L14 26 L21 10 L26 18 L31 10 L38 26 L48 4"/></svg></button>
-    <button id="gv-to-dash" type="button" aria-label="Back to dashboard">DASH</button>
     <div class="gv-brand">WAYSTATION</div>
     <div class="gv-hairline" aria-hidden="true"></div>
     <div class="gv-div" aria-hidden="true"></div>
@@ -356,10 +357,13 @@
   <div id="cluster-radar-north" aria-hidden="true"><span>N</span></div>
   <div id="gv-powerbar" data-state="coast" aria-hidden="true">
     <div class="gv-pb-track">
+      <div class="gv-pb-base-regen"></div>
+      <div class="gv-pb-base-coast"></div>
+      <div class="gv-pb-base-power"></div>
       <div class="gv-pb-regen"></div>
+      <div class="gv-pb-power"></div>
       <div class="gv-pb-hatch h1"></div>
       <div class="gv-pb-hatch h2"></div>
-      <div class="gv-pb-power"></div>
     </div>
     <div class="gv-pb-labels"><span class="l-regen">REGEN</span><span class="l-coast">COAST</span><span class="l-power">POWER</span></div>
   </div>
@@ -400,13 +404,11 @@
     <div id="cluster-footer-logo" aria-hidden="true">Vice city</div>
   </footer>
   <footer id="gv-bottombar">
-    <div class="gv-batt"><svg viewBox="0 0 40 22" aria-hidden="true"><rect x="1.5" y="1.5" width="33" height="19" rx="4" fill="none" stroke="#9aa4a4" stroke-width="2"/><rect x="36" y="7" width="4" height="8" rx="2" fill="#9aa4a4"/><rect x="5.5" y="5.5" width="22" height="11" rx="2" fill="#46e08c"/></svg><span id="gv-battpct">--%</span></div>
-    <div class="gv-div" aria-hidden="true"></div>
-    <div class="gv-range" id="gv-range" hidden><b id="gv-range-num">--</b><span>EST. RANGE</span></div>
-    <div class="gv-div" aria-hidden="true"></div>
-    <div class="gv-gear" id="gv-gear" hidden><span class="on">D</span><span>P</span><span>R</span><span>N</span><span>D</span></div>
-    <div class="gv-div" aria-hidden="true"></div>
+    <div class="gv-batt"><svg viewBox="0 0 40 22" aria-hidden="true"><rect x="1.5" y="1.5" width="33" height="19" rx="4" fill="none" stroke="#9aa4a4" stroke-width="2"/><rect x="36" y="7" width="4" height="8" rx="2" fill="#9aa4a4"/><rect x="5.5" y="5.5" width="22" height="11" rx="2" fill="#46e08c"/></svg><span class="phone-label">PHONE</span><span class="batt-val" id="gv-battpct">--%</span></div>
+    <div class="gv-bgroup" id="gv-range-group" hidden><div class="gv-bdiv" aria-hidden="true"></div><div class="gv-range" id="gv-range"><b id="gv-range-num">--</b><span>EST. RANGE</span></div></div>
+    <div class="gv-bgroup" id="gv-gear-group" hidden><div class="gv-bdiv" aria-hidden="true"></div><div class="gv-gear" id="gv-gear"><span class="on">D</span><span>P</span><span>R</span><span>N</span><span>D</span></div></div>
     <div class="gv-bsp"></div>
+    <button id="gv-to-dash" type="button">DASH</button>
     <div class="gv-btag"><svg viewBox="0 0 34 34" aria-hidden="true"><path d="M16 33h2l-.7-14h-.6z"/><path d="M17 17c-4-3.2-8.5-3.8-11.5-2.8 2.6.3 5.2 1.6 7.2 3.6-3.1-.6-6.2.4-7.7 2.4 3-.6 6.1-.1 8.2 1.4-2 1-3.6 3-4.2 5.1 1.6-1.6 3.6-2.6 5.6-2.6.5 2.1 1.5 4 3 5.4-.3-2.3.3-4.5 1.6-6.2 2 .4 4.4 1.2 6.4 2.4-1.8-2.2-4.5-3.4-7.6-3.1 2-1.6 4.6-2.4 7.2-2.2-3.1-1.6-7.2-1.9-11.2-.4z"/></svg><div><b>GOOD PEOPLE</b><span>BETTER TOMORROW</span></div></div>
   </footer>
   <button id="cluster-mode-exit" type="button">Exit cluster</button>
