@@ -720,8 +720,8 @@ ok(/theme-vice-city \.vcsp\{[^}]*bottom:118px/.test(cssSrc), 'VC widget bottom-a
 ok(cssSrc.includes("dashboard/skyline-sunset.png"), 'VC skyline uses the supplied sunset scenery asset');
 ok(!cssSrc.includes("dashboard/topbar-skyline.png"), 'old glitch-strip skyline treatment fully retired');
 ok(/theme-vice-city(?::is\([^)]*\))? #dash-topbar\{[^}]*97\.5% 100%/.test(cssSrc), 'VC header has a skyline pocket in its silhouette');
-ok(/theme-vice-city #vc-maneuver::before/.test(cssSrc), 'VC maneuver card uses a double-layer pink neon border');
-ok(/theme-vice-city #vc-maneuver::after/.test(cssSrc), 'VC maneuver card carries a cyan secondary accent');
+ok(/theme-vice-city #vc-maneuver::before/.test(cssSrc), 'VC maneuver pill uses a double-layer pink neon border');
+ok(/theme-vice-city #vc-maneuver \.vc-man-text span\{[^}]*color:var\(--cyan\)/.test(cssSrc), 'VC maneuver pill keeps its cyan accent on the road name');
 ok(/theme-vice-city(?::is\([^)]*\))? #dash-bottombar\{[^}]*rgba\(1,205,254/.test(cssSrc), 'VC footer has a cyan cradle accent at the map join');
 ok(/theme-vice-city \.dash-tag::before/.test(cssSrc), 'VC footer separates arrival and slogan with a divider');
 ok(/theme-vice-city #dash-dest\{[^}]*overflow:visible/.test(cssSrc), 'VC locality plate never truncates');
@@ -1143,7 +1143,8 @@ ok(cssSrc.includes('body.dashboard-mode.theme-vice-city .dash-zoom{'),
   'VC dashboard shows the bottom-bar zoom/locate buttons');
 ok(cssSrc.includes('body.dashboard-mode.theme-vice-city .player-arrow'),
   'VC dashboard player arrow is larger and more luminous');
-ok(cssSrc.includes('.vc-man-meta'), 'VC maneuver meta row styled');
+ok(!cssSrc.includes('.vc-man-meta'), 'VC maneuver pill drops the meta row (trip stats already live in the bottom bar)');
+ok(/theme-vice-city #vc-maneuver\{[^}]*display:flex/.test(cssSrc), 'VC maneuver pill is a compact horizontal chip, not a giant card');
 ok(cssSrc.includes('.vc-man-text'), 'VC maneuver text block styled');
 ok(appSrc2.includes("roadName(next) || instrText(next)"),
   'VC maneuver card shows the clean road name (voice text untouched)');
@@ -2209,7 +2210,8 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
     'MainActivity: no fine-only permission request remains');
   ok(/anyLocationGranted =\s*\n?\s*fineLocationGranted \|\| coarseLocationGranted/.test(mainKt),
     'MainActivity: anyLocationGranted = fine || coarse');
-  ok(/origin == CarWebViewRenderer\.WAYSTATION_ORIGIN &&\s*\n?\s*anyLocationGranted/.test(mainKt),
+  ok(/isWaystationOrigin\(origin\)/.test(mainKt) &&
+     /if \(anyLocationGranted\)/.test(mainKt),
     'MainActivity: WebView geolocation grants on ANY location grant (coarse is enough)');
   ok(/coarse=\$coarseLocationGranted fine=\$fineLocationGranted/.test(mainKt),
     'MainActivity: geolocation prompt logs BOTH coarse and fine states');
