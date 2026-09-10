@@ -29,7 +29,13 @@ import android.app.Activity
 class MainActivity : Activity() {
 
     private var webView: WebView? = null
-    private var locationGranted = false
+    // Android permission model: coarse (approximate) and fine (precise) are
+    // independent grants. A user with "Location allowed, precise OFF" has
+    // COARSE granted and FINE denied — that is a VALID granted state and
+    // must unlock WebView geolocation. Never collapse this to one boolean.
+    private var coarseLocationGranted = false
+    private var fineLocationGranted = false
+    private var anyLocationGranted = false
     private var retryCount = 0
     private var retryRunnable: Runnable? = null
     private var loadFailed = false
@@ -49,26 +55,54 @@ class MainActivity : Activity() {
     }
 
     /**
-     * Every cold start while location is not granted: force the issue.
+     * Every cold start while no location at all is granted: force the issue.
+     * Requests COARSE and FINE together — never fine by itself. If coarse is
+     * already granted we have usable location: do NOT get stuck re-prompting
+     * for precise, just offer the non-blocking accuracy note once.
      * Android permanently blocks the system permission dialog after two
      * denials, so in that state we show our own prompt with a one-tap jump
      * to Settings instead — the closest the OS allows to "ask every time".
      */
     private fun ensureLocationPermission() {
-        if (locationGranted) return
+        if (anyLocationGranted) {
+            if (coarseLocationGranted && !fineLocationGranted) {
+                maybeSuggestPreciseLocation()
+            }
+            return
+        }
         val prefs = getSharedPreferences(PREFS, MODE_PRIVATE)
         val asked = prefs.getBoolean(KEY_LOCATION_ASKED, false)
         if (!asked ||
-            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)
+            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) ||
+            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION)
         ) {
             prefs.edit().putBoolean(KEY_LOCATION_ASKED, true).apply()
             requestPermissions(
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                arrayOf(
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ),
                 REQ_LOCATION
             )
         } else {
             showLocationSettingsPrompt()
         }
+    }
+
+    /**
+     * Non-blocking, once-per-install: precise location improves driving
+     * accuracy, but coarse is a valid granted state — never present this
+     * as "Location blocked" and never force Settings for it.
+     */
+    private fun maybeSuggestPreciseLocation() {
+        val prefs = getSharedPreferences(PREFS, MODE_PRIVATE)
+        if (prefs.getBoolean(KEY_PRECISE_SUGGESTED, false)) return
+        prefs.edit().putBoolean(KEY_PRECISE_SUGGESTED, true).apply()
+        android.widget.Toast.makeText(
+            this,
+            "Precise location improves driving accuracy",
+            android.widget.Toast.LENGTH_LONG
+        ).show()
     }
 
     private fun showLocationSettingsPrompt() {
@@ -92,9 +126,13 @@ class MainActivity : Activity() {
     }
 
     private fun refreshLocationState() {
-        locationGranted = ContextCompat.checkSelfPermission(
+        fineLocationGranted = ContextCompat.checkSelfPermission(
             this, Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
+        coarseLocationGranted = ContextCompat.checkSelfPermission(
+            this, Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        anyLocationGranted = fineLocationGranted || coarseLocationGranted
     }
 
     override fun onResume() {
@@ -102,10 +140,12 @@ class MainActivity : Activity() {
         // The user may have granted location via Settings while we were
         // backgrounded — re-check every time we come forward, otherwise the
         // WebView keeps denying geolocation until the app is killed.
-        val was = locationGranted
+        val was = anyLocationGranted
         refreshLocationState()
-        if (locationGranted && !was) {
-            Log.i(TAG, "location granted via Settings; reloading for clean geolocation")
+        if (anyLocationGranted && !was) {
+            Log.i(TAG, "location granted via Settings " +
+                "(coarse=$coarseLocationGranted fine=$fineLocationGranted); " +
+                "reloading for clean geolocation")
             webView?.reload()
         }
     }
@@ -115,11 +155,14 @@ class MainActivity : Activity() {
     ) {
         if (requestCode == REQ_LOCATION) {
             refreshLocationState()
-            if (locationGranted) {
+            if (anyLocationGranted) {
                 // The page may have requested geolocation while the system
                 // dialog was still up and been denied — reload so it fires
                 // cleanly now that permission exists.
                 webView?.reload()
+                if (coarseLocationGranted && !fineLocationGranted) {
+                    maybeSuggestPreciseLocation()
+                }
             }
         }
     }
@@ -148,10 +191,15 @@ class MainActivity : Activity() {
                 origin: String,
                 callback: GeolocationPermissions.Callback
             ) {
-                val granted = origin == CarWebViewRenderer.WAYSTATION_ORIGIN &&
-                    locationGranted
-                Log.i(TAG, "phone geolocation prompt for $origin -> $granted")
-                callback.invoke(origin, granted, false)
+                // Approximate location is sufficient to initialise the map
+                // and obtain a position — never deny just because precise
+                // location is off.
+                val allow = origin == CarWebViewRenderer.WAYSTATION_ORIGIN &&
+                    anyLocationGranted
+                Log.i(TAG, "phone geolocation prompt origin=$origin " +
+                    "coarse=$coarseLocationGranted fine=$fineLocationGranted " +
+                    "allow=$allow")
+                callback.invoke(origin, allow, false)
             }
         }
         wv.webViewClient = object : WebViewClient() {
@@ -233,5 +281,6 @@ class MainActivity : Activity() {
         private const val REQ_LOCATION = 41
         private const val PREFS = "waystation_prefs"
         private const val KEY_LOCATION_ASKED = "location_permission_asked"
+        private const val KEY_PRECISE_SUGGESTED = "precise_location_suggested"
     }
 }

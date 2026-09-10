@@ -864,15 +864,37 @@ function locateUser(center) {
   // Center on the last known fix straight away so the button always
   // answers visibly, then refine with a fresh fix when it arrives.
   if (center && userPos && map) map.flyTo({ center: userPos, duration: 800 });
+  const onFix = pos => {
+    userPos = [pos.coords.longitude, pos.coords.latitude];
+    placeUserMarker();
+    if (window.VCNPlaces) VCNPlaces.maybeRefresh(userPos); // ambient POIs
+    if (center && map) map.flyTo({ center: userPos, zoom: 14, duration: 1200 });
+  };
+  const onLocateErr = err => {
+    // Never swallow the real error: 1=PERMISSION_DENIED, 2=POSITION_UNAVAILABLE, 3=TIMEOUT.
+    console.warn('[location] initial locate failed',
+      { code: err && err.code, message: err && err.message });
+    const code = err && err.code;
+    if (code === 1) toast('Location permission was denied', 5000);
+    else if (code === 2) toast('Location provider unavailable', 5000);
+    else if (code === 3) toast('Location fix timed out', 5000);
+    else if (center && !userPos) toast('Location unavailable — showing Dublin.', 5000);
+  };
+  // STAGE 1: coarse-capable fix first — fast, gets the map off Dublin even
+  // on approximate-only permission grants.
   navigator.geolocation.getCurrentPosition(
     pos => {
-      userPos = [pos.coords.longitude, pos.coords.latitude];
-      placeUserMarker();
-      if (window.VCNPlaces) VCNPlaces.maybeRefresh(userPos); // ambient POIs
-      if (center && map) map.flyTo({ center: userPos, zoom: 14, duration: 1200 });
+      onFix(pos);
+      // STAGE 2: refine with high accuracy. A coarse fix already held is
+      // NEVER thrown away for a failed refinement — no Dublin reset, no
+      // "location unavailable" when the precise fix times out.
+      navigator.geolocation.getCurrentPosition(onFix, refineErr => {
+        console.warn('[location] high-accuracy refine failed, keeping coarse fix',
+          { code: refineErr && refineErr.code, message: refineErr && refineErr.message });
+      }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 });
     },
-    () => { if (center && !userPos) toast('Location unavailable — showing Dublin.'); },
-    { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 }
+    onLocateErr,
+    { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
   );
 }
 

@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v210"), 'SW theme cache v210');
+ok(swSrc.includes("ws-theme-v211"), 'SW theme cache v211');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -2116,6 +2116,61 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
   ok(gvSkin.includes('#76b900'), 'GTA V toggle uses minimal green marker');
   const rdrSkin = fs.readFileSync(path.join(REPO, 'themes/rdr2/mode-toggle.css'), 'utf8');
   ok(rdrSkin.includes('RDR Lino'), 'RDR2 toggle uses frontier type');
+}
+
+/* Location permission + initial-fix reliability (2026-09-10, v211).
+   Android "Location allowed, precise OFF" is a VALID granted state
+   (COARSE granted, FINE denied) — the native shell must grant WebView
+   geolocation on coarse alone, and the web initial locate must be a
+   two-stage coarse-first / high-accuracy-refine flow that never throws
+   away a coarse fix for a failed refinement. */
+{
+  const locateFn = (appSrc.match(/function locateUser\(center\) \{[\s\S]*?\n\}/) || [''])[0];
+  ok(/enableHighAccuracy:\s*false/.test(locateFn) &&
+     /maximumAge:\s*60000/.test(locateFn) && /timeout:\s*8000/.test(locateFn),
+    'locateUser stage 1: coarse-capable fix first (low accuracy, 60s cache, 8s timeout)');
+  ok(/enableHighAccuracy:\s*true/.test(locateFn) &&
+     /maximumAge:\s*5000/.test(locateFn) && /timeout:\s*15000/.test(locateFn),
+    'locateUser stage 2: high-accuracy refinement after the coarse fix');
+  ok(/code === 1\) toast\('Location permission was denied'/.test(locateFn),
+    'locateUser: PERMISSION_DENIED reports the real error');
+  ok(/code === 2\) toast\('Location provider unavailable'/.test(locateFn),
+    'locateUser: POSITION_UNAVAILABLE reports the real error');
+  ok(/code === 3\) toast\('Location fix timed out'/.test(locateFn),
+    'locateUser: TIMEOUT reports the real error');
+  ok(/console\.warn\('\[location\] initial locate failed'[\s\S]{0,80}err\.code/.test(locateFn),
+    'locateUser: initial failure logs code + message (no swallowed errors)');
+  ok(!/\(\) => \{ if \(center && !userPos\) toast\('Location unavailable/.test(appSrc),
+    'locateUser: the old error-swallowing one-liner is gone');
+  ok(/keeping coarse fix/.test(locateFn),
+    'locateUser: failed refinement keeps the coarse fix — no Dublin reset');
+  const refineErr = (locateFn.match(/refineErr => \{[\s\S]*?\}\)/) || [''])[0];
+  ok(refineErr.includes('console.warn') && !refineErr.includes('toast('),
+    'locateUser: refine failure warns only — never toasts "location unavailable"');
+  /* Native shell (MainActivity.kt): coarse+fine tracked separately, both
+     requested together, WebView geolocation gated on ANY grant. */
+  const mainKt = fs.readFileSync(
+    path.join(REPO, 'android/app/src/main/java/com/waystation/auto/MainActivity.kt'), 'utf8');
+  ok(mainKt.includes('coarseLocationGranted') && mainKt.includes('fineLocationGranted') &&
+     mainKt.includes('anyLocationGranted'),
+    'MainActivity tracks coarse / fine / any location grants separately');
+  ok(!/private var locationGranted/.test(mainKt),
+    'MainActivity: the misleading fine-only "locationGranted" boolean is gone');
+  ok(/arrayOf\(\s*\n?\s*Manifest\.permission\.ACCESS_COARSE_LOCATION,\s*\n?\s*Manifest\.permission\.ACCESS_FINE_LOCATION/.test(mainKt),
+    'MainActivity requests COARSE + FINE together, never fine by itself');
+  ok(!/arrayOf\(Manifest\.permission\.ACCESS_FINE_LOCATION\)/.test(mainKt),
+    'MainActivity: no fine-only permission request remains');
+  ok(/anyLocationGranted =\s*\n?\s*fineLocationGranted \|\| coarseLocationGranted/.test(mainKt),
+    'MainActivity: anyLocationGranted = fine || coarse');
+  ok(/origin == CarWebViewRenderer\.WAYSTATION_ORIGIN &&\s*\n?\s*anyLocationGranted/.test(mainKt),
+    'MainActivity: WebView geolocation grants on ANY location grant (coarse is enough)');
+  ok(/coarse=\$coarseLocationGranted fine=\$fineLocationGranted/.test(mainKt),
+    'MainActivity: geolocation prompt logs BOTH coarse and fine states');
+  ok(mainKt.includes('shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)') &&
+     mainKt.includes('shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION)'),
+    'MainActivity: rationale handling covers coarse + fine');
+  ok(mainKt.includes('Precise location improves driving accuracy'),
+    'MainActivity: coarse-only state gets a non-blocking accuracy note, never "Location blocked"');
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);
