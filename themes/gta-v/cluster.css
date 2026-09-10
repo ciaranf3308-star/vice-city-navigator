@@ -246,3 +246,13 @@ body.cluster-mode.theme-gta-v #gv-brand-left{display:block;position:absolute;
 /* long quiet hairline after WAYSTATION (hero rhythm) */
 body.cluster-mode.theme-gta-v #gv-topbar .gv-hairline{width:195px;height:1px;
   background:rgba(255,255,255,.14);margin:0 8px;flex:none}
+
+/* DASH button: direct exit to dashboard */
+#gv-to-dash{display:none}
+body.cluster-mode.theme-gta-v #gv-to-dash{display:block;position:absolute;
+  right:44px;top:50%;transform:translateY(-50%);
+  background:none;border:1px solid rgba(255,255,255,.18);border-radius:3px;
+  color:#8b9595;font-family:'Chalet London',sans-serif;font-size:13px;
+  letter-spacing:.22em;padding:8px 16px;cursor:pointer;z-index:33}
+body.cluster-mode.theme-gta-v #gv-to-dash:hover{
+  border-color:#46e08c;color:#46e08c}

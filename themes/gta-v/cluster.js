@@ -188,6 +188,12 @@
     if (b) b.addEventListener('click', () => {
       if (inGvCluster() && typeof openMenu === 'function') openMenu();
     });
+    const dashBtn = $('gv-to-dash');
+    if (dashBtn) dashBtn.addEventListener('click', () => {
+      if (typeof WayStation !== 'undefined' && WayStation.setAppMode) {
+        WayStation.setAppMode('dashboard');
+      }
+    });
     if (inGvCluster()) { hookStyle(); tick(); }
     wasIn = inGvCluster();
   });

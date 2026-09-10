@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v197"), 'SW theme cache v197');
+ok(swSrc.includes("ws-theme-v198"), 'SW theme cache v198');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -692,7 +692,7 @@ ok(cssSrc.includes('vc-logo-script'), 'VC hero logo script styled');
 const barHeights = {
   'vice-city': ['78px', '100px'],
   'san-andreas': ['126px', '126px'], // hero7: bars are the hero art's own height
-  'gta-v': ['120px', '120px'], // generated bar art: fixed 120px chrome
+  'gta-v': ['94px', '92px'], // cluster convergence: dash matches cluster bars
   'rdr2': ['104px', '84px'], // 2026-09-08 redesign: badge header + frontier footer
 };
 for (const [id, [top, bottom]] of Object.entries(barHeights)) {

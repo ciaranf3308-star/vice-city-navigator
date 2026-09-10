@@ -36,7 +36,7 @@ body.dashboard-mode.theme-gta-v .maplibregl-ctrl-attrib a{color:#9aa3a8 !importa
    with the bar edge), SignPainter "Los Santos" over it like the Vinewood
    sign, whisper of grain for material, mint edge light. */
 body.dashboard-mode.theme-gta-v #dash-topbar{
-  display:block;position:absolute;left:0;right:0;top:0;height:120px;z-index:25;
+  display:block;position:absolute;left:0;right:0;top:0;height:94px;z-index:25;
   background:#0b0b0b;
   border-bottom:1px solid rgba(44,230,140,.35);
   box-shadow:0 1px 0 rgba(44,230,140,.16), 0 6px 22px rgba(44,230,140,.07);
@@ -128,7 +128,7 @@ body.dashboard-mode.theme-gta-v #dash-time{
 /* ============ BOTTOM BAR — pause-menu footer, 120px ============
    Grain for material + mint edge light, mirroring the top bar. */
 body.dashboard-mode.theme-gta-v #dash-bottombar{
-  display:block;position:absolute;left:0;right:0;bottom:0;height:120px;z-index:25;
+  display:block;position:absolute;left:0;right:0;bottom:0;height:92px;z-index:25;
   background:#0b0b0b;
   border-top:1px solid rgba(44,230,140,.35);
   box-shadow:0 -1px 0 rgba(44,230,140,.16), 0 -6px 22px rgba(44,230,140,.07);
