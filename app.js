@@ -1943,7 +1943,17 @@ function endNav() {
   try { const mc2 = $('maneuver-card'); if (mc2) mc2.classList.remove('has-maneuver'); } catch (e) {}
   try { const tm = $('trip-meta'); if (tm) tm.textContent = ''; } catch (e) {}
 }
-function onPosErr() { /* keep last known position; toast once */ }
+let _posErrTold = false;
+function onPosErr(err) {
+  /* Keep last known position; tell the user once why location isn't working. */
+  if (_posErrTold) return; _posErrTold = true;
+  if (err && err.code === err.PERMISSION_DENIED) {
+    toast('Location permission denied — allow it in your browser site settings, then tap ◎');
+  } else if (err && err.code === err.TIMEOUT) {
+    toast('Location timed out — try again outdoors with a clear sky view');
+  }
+  setTimeout(() => { _posErrTold = false; }, 60000);
+}
 
 function onPos(pos) {
   const p = [pos.coords.longitude, pos.coords.latitude];
@@ -2993,6 +3003,30 @@ function wireSpotifyMenu() {
   /* SA cluster: gold home button returns to dashboard view */
   const saClusterExit = $('sa-cluster-exit');
   if (saClusterExit) saClusterExit.addEventListener('click', () => setAppMode('dashboard'));
+  /* SA cluster: locate button (re)requests geolocation permission */
+  const saLocate = $('sa-cluster-locate');
+  if (saLocate) saLocate.addEventListener('click', () => {
+    if (!('geolocation' in navigator)) { toast('Geolocation not supported'); return; }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        userPos = [pos.coords.longitude, pos.coords.latitude];
+        placeUserMarker();
+        if (map) map.easeTo({ center: userPos, zoom: isSaCluster() ? SA_CLUSTER_OVERVIEW_ZOOM : map.getZoom(), duration: 800 });
+        // Restart the watch if it died
+        if (watchId === null && speedDisplayActive()) {
+          try { watchId = navigator.geolocation.watchPosition(onPos, onPosErr, { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 }); } catch (e) {}
+        }
+      },
+      (err) => {
+        if (err.code === err.PERMISSION_DENIED) {
+          toast('Location blocked — tap the lock icon in your browser bar, allow Location, then tap ◎ again');
+        } else {
+          toast('Location unavailable — try again outdoors');
+        }
+      },
+      { enableHighAccuracy: true, timeout: 15000 }
+    );
+  });
   let rsT = null;
   window.addEventListener('resize', () => {
     // Refit the 1920×720 dashboard canvas after resizes; debounced and

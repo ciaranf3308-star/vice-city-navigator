@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v191"), 'SW theme cache v191');
+ok(swSrc.includes("ws-theme-v192"), 'SW theme cache v192');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -1827,6 +1827,8 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
     'SA cluster map is a subtle underlay (549x281 aperture + 3% overscan), bleeding under the bezel');
   ok(saCluster.includes('#sa-cluster-exit') && saCluster.includes('cluster-exit-btn.png'),
     'SA cluster has a themed exit button (gold home) returning to dashboard');
+  ok(/Bank Gothic/.test(saCluster) && saCluster.includes('#sa-cluster-locate'),
+    'SA cluster time uses Bank Gothic and has a locate button');
   const appSrc = fs.readFileSync(path.join(REPO, 'app.js'), 'utf8');
   ok(/SA_CLUSTER_OVERVIEW_ZOOM\s*=\s*13\.0/.test(appSrc),
     'SA cluster defines a fixed overview zoom (13.0), not derived from nav zoom');
