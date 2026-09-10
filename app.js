@@ -2703,9 +2703,9 @@ function paintDashWeather(temp, code) {
   const ct = $('cluster-temp'), ci = $('cluster-wxicon');
   if (ct) ct.textContent = temp + '°C';
   if (ci) ci.innerHTML = dashWxIcon(code);
-  /* SA cluster hero shows temp below the battery bar. */
+  /* SA cluster hero shows temp below the battery bar; reveal only with a real reading. */
   const saT = $('sa-cluster-temp');
-  if (saT) saT.textContent = temp + '°C';
+  if (saT) { saT.textContent = temp + '°C'; saT.style.visibility = 'visible'; }
 }
 /* SA cluster hero clock: live 12h time below the battery bar ("7:24 PM"). */
 function tickSaClusterClock() {
