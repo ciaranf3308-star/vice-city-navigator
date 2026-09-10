@@ -1064,11 +1064,13 @@ function updateClusterSpeed(kmh) {
       const ltxt = String(speedLimitKmh);
       const ln = $('cluster-limit-num');
       if (ln && ln.textContent !== ltxt) ln.textContent = ltxt;
+      lim.classList.toggle('under', kmh !== null && kmh <= speedLimitKmh);
     } else lim.hidden = true;
   }
   const sp = $('cluster-speed');
   if (sp) {
     sp.classList.toggle('over', kmh !== null && !!speedLimitKmh && kmh > speedLimitKmh);
+    sp.classList.toggle('has-speed', kmh !== null && kmh > 0);
     /* Pricedown Bl's hyphen renders as a solid block, so the unavailable
        state gets its own class for a clean fallback-font placeholder. */
     sp.classList.toggle('na', kmh == null);

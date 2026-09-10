@@ -9,17 +9,19 @@ html body.theme-gta-v.cluster-mode #spotify-pane{position:absolute;left:1350px;t
   width:534px;height:281px;z-index:30;display:block!important;
   visibility:visible!important;opacity:1!important;pointer-events:none;
   clip-path:polygon(7.5% 0,100% 0,100% 100%,0 100%);
-  background:linear-gradient(120deg,rgba(17,22,25,.97),rgba(10,13,15,.97))}
+  background:linear-gradient(120deg,rgba(19,24,27,.98),rgba(10,13,15,.98));
+  /* hairline top rule: structural, not decorative */
+  border-top:1px solid rgba(255,255,255,.06)}
 html body.theme-gta-v.cluster-mode .gvcl{display:flex!important;width:100%;height:100%;
   margin:0;pointer-events:auto;align-items:center;gap:28px;padding:30px 36px 30px 62px;
   font-family:'Chalet London',sans-serif;box-sizing:border-box;position:relative}
-.gvcl-artwrap{position:relative;width:132px;height:132px;flex:none;border-radius:6px;
-  overflow:hidden;background:#14181b}
+.gvcl-artwrap{position:relative;width:132px;height:132px;flex:none;
+  overflow:hidden;background:#14181b;border:1px solid rgba(255,255,255,.08)}
 .gvcl-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;
   transition:opacity .4s}
 .gvcl-art.on{opacity:1}
 .gvcl-art-idle{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  color:#3d4747}
+  color:#2a3232;background:linear-gradient(135deg,#14181b,#0f1316)}
 .gvcl-art-idle svg{width:56px;height:56px;fill:currentColor}
 .gvcl-info{flex:1;min-width:0;display:flex;flex-direction:column}
 .gvcl-title{font-size:26px;color:#f0f3f3;letter-spacing:.04em;white-space:nowrap;
@@ -41,8 +43,9 @@ html body.theme-gta-v.cluster-mode .gvcl{display:flex!important;width:100%;heigh
   display:flex;align-items:center}
 .gvcl-tbtn svg{width:34px;height:34px;fill:currentColor}
 .gvcl-tbtn.big svg{width:64px;height:64px}
-.gvcl-tbtn.big{border:2px solid rgba(255,255,255,.55);border-radius:50%;
-  width:72px;height:72px;justify-content:center}
+.gvcl-tbtn.big{border:1px solid rgba(255,255,255,.35);border-radius:50%;
+  width:68px;height:68px;justify-content:center;transition:border-color .2s}
+.gvcl-tbtn.big:hover{border-color:#46e08c}
 .gvcl-tbtn.big svg{width:30px;height:30px}
 .gvcl-tag{position:absolute;left:62px;bottom:22px;right:36px;font-size:14px;
   letter-spacing:.42em;color:#5f6a6a}

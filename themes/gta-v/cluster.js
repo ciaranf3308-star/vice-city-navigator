@@ -108,9 +108,9 @@
 
   /* ---------- cluster map label treatment ---------- */
   const TWEAKS = [
-    { layer: 'v-label-place', paint: { 'text-color': '#a9b2b2' }, layout: { 'text-letter-spacing': 0.18 } },
-    { layer: 'v-label-road-major', paint: { 'text-color': '#8b9494' } },
-    { layer: 'v-label-road-minor', paint: { 'text-color': '#7d8686' } },
+    { layer: 'v-label-place', paint: { 'text-color': '#7d8686', 'text-opacity': 0.7 }, layout: { 'text-letter-spacing': 0.18 } },
+    { layer: 'v-label-road-major', paint: { 'text-color': '#6d7878', 'text-opacity': 0.6 } },
+    { layer: 'v-label-road-minor', paint: { 'text-color': '#5f6a6a', 'text-opacity': 0.5 } },
   ];
   let tweaksOn = false;
   const saved = {};
