@@ -684,11 +684,13 @@ body.dashboard-mode.theme-rdr2 #speedo{bottom:108px}
    top/bottom/left/width below are fallback only — inline styles win. */
 body.dashboard-mode #menu-panel{
   z-index:60;
-  top:88px;bottom:100px;left:12px;
-  width:min(540px,94vw);
-  padding:26px 30px calc(26px + env(safe-area-inset-bottom));
-  border-radius:18px;
+  /* full-stage settings page: same 1920x720 canvas as the dash */
+  top:94px;bottom:92px;left:0;right:0;
+  width:auto;max-width:none;
+  padding:40px 80px;
+  border-radius:0;
   overflow-y:auto;
+  background:rgba(8,10,12,.98);
 }
 /* car-scale type + touch targets */
 body.dashboard-mode .menu-head{margin-bottom:14px;align-items:center}

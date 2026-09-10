@@ -1947,15 +1947,27 @@ function endNav() {
 }
 let _posErrTold = false;
 function onPosErr(err) {
-  /* Keep last known position; tell the user once why location isn't working. */
+  /* Keep last known position; tell the user why location isn't working. */
   if (_posErrTold) return; _posErrTold = true;
   if (err && err.code === err.PERMISSION_DENIED) {
-    toast('Location permission denied — allow it in your browser site settings, then tap ◎');
+    toast('Location blocked — check app permissions in system settings, then tap ◎');
+  } else if (err && err.code === err.POSITION_UNAVAILABLE) {
+    toast('No GPS fix — ensure location services are on and try outdoors');
   } else if (err && err.code === err.TIMEOUT) {
-    toast('Location timed out — try again outdoors with a clear sky view');
+    toast('Location timed out — try again with a clear sky view');
   }
-  setTimeout(() => { _posErrTold = false; }, 60000);
+  setTimeout(() => { _posErrTold = false; }, 30000);
 }
+/* Restart GPS when app returns to foreground (car WebView backgrounding). */
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && speedDisplayActive() && 'geolocation' in navigator) {
+    try {
+      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+      watchId = navigator.geolocation.watchPosition(onPos, onPosErr,
+        { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 });
+    } catch (e) {}
+  }
+});
 
 function onPos(pos) {
   const p = [pos.coords.longitude, pos.coords.latitude];

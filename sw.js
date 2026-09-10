@@ -8,9 +8,11 @@
      cached on demand into a separate cache the first time a theme is
      used. Nothing theme-specific is eagerly precached except the
      default Vice City set.
-   Map tiles, routing and search always go to the network. */
+   Map tiles are cached on demand for offline use (cache-first, 7-day TTL).
+   Routing and search always go to the network. */
 const CACHE = 'ws-shell-v68';
-const THEME_CACHE = 'ws-theme-v199';
+const THEME_CACHE = 'ws-theme-v200';
+const TILE_CACHE = 'ws-tiles-v1';
 const VC_BLIPS = ['airYard','barbers','burgerShot','cash','chicken','dateDisco','dateDrink',
   'dateFood','diner','fuel','girlfriend','gym','hostpital','modGarage','north','parking',
   'pizza','police','propertyG','qmark','race','runway','saveGame','school','spray','tattoo','waypoint'];
@@ -105,9 +107,47 @@ function staleWhileRevalidate(req) {
     return cached || network;
   });
 }
+/* Map tiles: cache-first for offline. OpenFreeMap vector tiles. */
+function isMapTile(url) {
+  return url.hostname === 'tiles.openfreemap.org' ||
+         url.hostname.endsWith('.openfreemap.org');
+}
+function cacheFirstTile(req) {
+  return caches.open(TILE_CACHE).then(cache => {
+    return cache.match(req).then(cached => {
+      if (cached) {
+        // Check age: 7-day TTL
+        const date = cached.headers.get('sw-cached-at');
+        if (date && (Date.now() - parseInt(date)) < 7 * 24 * 60 * 60 * 1000) {
+          return cached;
+        }
+      }
+      return fetch(req).then(res => {
+        if (res && res.ok) {
+          const copy = res.clone();
+          const headers = new Headers(res.headers);
+          headers.set('sw-cached-at', Date.now().toString());
+          const cachedRes = new Response(res.body, {
+            status: res.status,
+            statusText: res.statusText,
+            headers: headers
+          });
+          cache.put(req, cachedRes).catch(()=>{});
+        }
+        return res;
+      }).catch(() => cached || Response.error());
+    });
+  });
+}
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
-  if (e.request.method !== 'GET' || url.origin !== self.location.origin) return;
+  if (e.request.method !== 'GET') return;
+  // Cross-origin map tiles: cache for offline
+  if (isMapTile(url)) {
+    e.respondWith(cacheFirstTile(e.request));
+    return;
+  }
+  if (url.origin !== self.location.origin) return;
   const path = url.pathname;
   if (isShell(path)) {
     e.respondWith(staleWhileRevalidate(e.request));

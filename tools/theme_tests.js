@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v199"), 'SW theme cache v199');
+ok(swSrc.includes("ws-theme-v200"), 'SW theme cache v200');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -764,8 +764,8 @@ ok(appSrc.includes('function applyDashboardMapPaint'), 'app applies the VC dashb
 ok(/map\.on\('load'[^]*applyDashboardMapPaint/.test(appSrc), 'dashboard paint applies on map load');
 ok(/dashPaintActive = false;[^]*applyDashboardMapPaint/.test(appSrc), 'dashboard paint re-applies after a theme style rebuild');
 /* ---------- dashboard-mode settings: car-scale menu panel ---------- */
-ok(/body\.dashboard-mode #menu-panel\{[^}]*width:min\(540px,94vw\)/.test(cssSrc),
-  'dashboard settings panel is car-scale (540px), not phone-sized');
+ok(/body\.dashboard-mode #menu-panel\{[^}]*left:0;right:0/.test(cssSrc),
+  'dashboard settings is a full-stage page, not a side panel');
 ok(/body\.dashboard-mode #menu-panel\{[^}]*z-index:60/.test(cssSrc),
   'dashboard settings panel paints above the dash stage');
 for (const id of ['san-andreas', 'gta-v', 'rdr2']) {
