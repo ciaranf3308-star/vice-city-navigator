@@ -1879,6 +1879,31 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
   const gvCss = fs.readFileSync(path.join(REPO, 'themes/gta-v/cluster.css'), 'utf8');
   ok(gvCss.includes('#gv-map-atmo') && /linear-gradient.*rgba\(10,13,15/.test(gvCss),
     'GTA V cluster dissolves map edges via atmospheric gradient overlay');
+
+  /* REGRESSION: CSS must parse cleanly — rules at END of file must be in CSSOM.
+     An unclosed url("...") near the top (v195 bug) breaks parsing and drops
+     all later rules. This test uses a real CSS parser, not regex. */
+  try {
+    const { execSync } = require('node:child_process');
+    const out = execSync(
+      'python3 -c "import tinycss2, json; ' +
+      'css = open(\'themes/gta-v/cluster.css\').read(); ' +
+      'rules = tinycss2.parse_stylesheet(css, skip_comments=True); ' +
+      'errors = [r for r in rules if r.type == \'error\']; ' +
+      'sel_text = \'\'.join(tinycss2.serialize(r.prelude) for r in rules if r.type==\'qualified-rule\'); ' +
+      'print(json.dumps({\'errors\': len(errors), \'has_topbar\': \'#gv-topbar\' in sel_text, \'has_bottombar\': \'#gv-bottombar\' in sel_text}))"',
+      { encoding: 'utf8' }
+    );
+    const parsed = JSON.parse(out);
+    ok(parsed.errors === 0,
+      'GTA V cluster.css has zero CSS parse errors (regression: v195 unclosed url() quote)');
+    ok(parsed.has_topbar,
+      'GTA V cluster.css parses #gv-topbar rule (near end of file) into CSSOM');
+    ok(parsed.has_bottombar,
+      'GTA V cluster.css parses #gv-bottombar rule (near end of file) into CSSOM');
+  } catch (e) {
+    ok(false, 'GTA V cluster.css CSSOM regression test failed: ' + e.message);
+  }
   ok(gvCss.includes('#gv-topbar') && gvCss.includes('#gv-powerbar') &&
      gvCss.includes('#gv-turn-card') && gvCss.includes('#gv-bottombar'),
     'GTA V cluster styles the top bar, power bar, maneuver card and bottom bar');
