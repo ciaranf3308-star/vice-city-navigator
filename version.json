@@ -1,12 +1,12 @@
 {
   "build": "voice-search-2026-09-09",
   "shell": "ws-shell-v68",
-  "theme": "ws-theme-v176",
+  "theme": "ws-theme-v177",
   "assets": {
     "index.html": "86d008ab8033f0b7",
     "styles.css": "f257327a8af55041",
-    "app.js": "6541aca3be942a81",
-    "sw.js": "3da7729b795ba113",
+    "app.js": "0829f5237517ef14",
+    "sw.js": "8cdd926268163fe7",
     "themes/vice-city/spotify-skin.css": "541717ee14ca80e5",
     "themes/vice-city/phone.css": "87909b9d4538ba87",
     "themes/gta-v/dashboard.css": "d7248b9f49c87080",
@@ -14,7 +14,7 @@
     "themes/rdr2/spotify-skin.css": "9eb660c86d5fb48d",
     "themes/san-andreas/dashboard.css": "06dcdb8bd00dcc3f",
     "themes/san-andreas/spotify-skin.css": "34ee2c4790592d0e",
-    "themes/san-andreas/phone.css": "7c10e961686ee56c",
+    "themes/san-andreas/phone.css": "74afe3cc4b2d4345",
     "themes/vice-city/dashboard.css": "504f1c1cc1be106f",
     "themes/san-andreas/spotify-cluster.js": "d5149c5970670033",
     "themes/san-andreas/spotify-cluster.css": "6b1f174cf9d9901a"

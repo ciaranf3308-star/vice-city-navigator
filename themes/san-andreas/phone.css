@@ -261,8 +261,12 @@ body.cluster-mode.theme-san-andreas #dash-bottombar{display:none}
    (its gold frame bezels the map edges), below every live readout. */
 body.cluster-mode.theme-san-andreas #cluster-backdrop{display:block;position:absolute;inset:0;z-index:30;
   background:url('dashboard/cluster-overlay.png') 0 0 / 100% 100% no-repeat;pointer-events:none}
-/* live map underlaid in the window (stage px 78,261 513x272) */
-body.cluster-mode.theme-san-andreas #map{left:78px;top:261px;width:513px;height:272px;border-radius:0;z-index:20}
+/* live map underlaid in the window — the container runs 40px past the
+   transparent cutout on every side (stage px 38,221 593x352, same center
+   334.5,397) so the attribution bar sits behind the overlay's opaque art
+   instead of inside the visible window. Same center + zoom = the visible
+   map is pixel-identical; nothing to reframe. */
+body.cluster-mode.theme-san-andreas #map{left:38px;top:221px;width:593px;height:352px;border-radius:0;z-index:20}
 /* the overlay paints header/footer/frames/dial: hide the console chrome */
 body.cluster-mode.theme-san-andreas #cluster-header,
 body.cluster-mode.theme-san-andreas #cluster-footer,

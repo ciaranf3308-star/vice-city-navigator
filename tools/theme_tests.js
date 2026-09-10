@@ -1817,8 +1817,10 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
   const saPhone = fs.readFileSync(path.join(REPO, 'themes/san-andreas/phone.css'), 'utf8');
   const saCluster = saPhone.slice(saPhone.indexOf('Cluster Mode: San Andreas'));
   ok(saCluster.includes('cluster-overlay.png'), 'SA cluster paints the user-supplied overlay art as the stage');
-  ok(/body\.cluster-mode\.theme-san-andreas #map\{[^}]*left:78px[^}]*top:261px[^}]*width:513px[^}]*height:272px/.test(saCluster),
-    'SA cluster underlays the live map in the overlay\'s transparent window');
+  ok(/body\.cluster-mode\.theme-san-andreas #map\{[^}]*left:38px[^}]*top:221px[^}]*width:593px[^}]*height:352px/.test(saCluster),
+    'SA cluster map container overshoots the window 40px per side (same center) so the attribution hides behind the art');
+  ok(!/body\.cluster-mode\.theme-san-andreas #map\{[^}]*left:78px[^}]*top:261px[^}]*width:513px[^}]*height:272px/.test(saCluster),
+    'SA cluster map is no longer exactly the window size (attribution bar used to show inside it)');
   ok(/body\.cluster-mode\.theme-san-andreas #cluster-header,/.test(saCluster) &&
      /#cluster-gauge,/.test(saCluster) && /#cluster-limit,/.test(saCluster),
     'SA cluster hides the console chrome the overlay art already paints');
@@ -1852,6 +1854,12 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
   ok(saCluster.includes('HERO-locked'), 'SA cluster documents that it avoids the HERO-locked dashboard.css');
   ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/cluster-overlay.png')),
     'SA cluster overlay asset exists on disk');
+}
+// one attribution control only: the constructor's compact control — the
+// extra bottom-left addControl rendered the bar twice
+{
+  const addCount = (appSrc.match(/new maplibregl\.AttributionControl/g) || []).length;
+  ok(addCount <= 1, `single attribution control (found ${addCount})`);
 }
 // stage lifecycle: teardown runs before build so a stale home never yanks
 // the shared map/Spotify nodes out of the stage just entered

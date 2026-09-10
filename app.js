@@ -468,7 +468,6 @@ async function initMap() {
     container: mapEl, style, center: DUBLIN, zoom: 12,
     attributionControl: { compact: true }
   });
-  map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
   map.on('load', () => {
     try { map.on('move', syncDashCompass); } catch (e) {}
     try { map.on('moveend', queueDashLocality); } catch (e) {}
