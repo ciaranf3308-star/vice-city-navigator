@@ -1,7 +1,7 @@
 {
-  "build": "gta-v-cluster-fix-2026-09-10",
+  "build": "gta-v-cluster-master-2026-09-10",
   "shell": "ws-shell-v68",
-  "theme": "ws-theme-v196",
+  "theme": "ws-theme-v197",
   "assets": {
     "index.html": "45890e8390be33ff",
     "styles.css": "4495188db9dc7867",

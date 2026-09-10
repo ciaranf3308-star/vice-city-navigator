@@ -5,17 +5,15 @@
    title/artist + progress + transport right, tagline along the
    bottom. One shared SpotifyCore session; dashboard keeps .gvsp.
    ============================================================ */
-html body.theme-gta-v.cluster-mode #spotify-pane{position:absolute;left:1350px;top:366px;
-  width:534px;height:281px;z-index:30;display:block!important;
+html body.theme-gta-v.cluster-mode #spotify-pane{position:absolute;left:1460px;top:365px;
+  width:450px;height:245px;z-index:30;display:block!important;
   visibility:visible!important;opacity:1!important;pointer-events:none;
   clip-path:polygon(7.5% 0,100% 0,100% 100%,0 100%);
-  background:linear-gradient(120deg,rgba(19,24,27,.98),rgba(10,13,15,.98));
-  /* hairline top rule: structural, not decorative */
-  border-top:1px solid rgba(255,255,255,.06)}
+  background:radial-gradient(ellipse 85% 90% at 35% 25%,rgba(20,25,28,.93),rgba(10,13,15,.91));}
 html body.theme-gta-v.cluster-mode .gvcl{display:flex!important;width:100%;height:100%;
   margin:0;pointer-events:auto;align-items:center;gap:28px;padding:30px 36px 30px 62px;
   font-family:'Chalet London',sans-serif;box-sizing:border-box;position:relative}
-.gvcl-artwrap{position:relative;width:132px;height:132px;flex:none;
+.gvcl-artwrap{position:relative;width:138px;height:138px;flex:none;
   overflow:hidden;background:#14181b;border:1px solid rgba(255,255,255,.08)}
 .gvcl-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;
   transition:opacity .4s}
@@ -44,7 +42,7 @@ html body.theme-gta-v.cluster-mode .gvcl{display:flex!important;width:100%;heigh
 .gvcl-tbtn svg{width:34px;height:34px;fill:currentColor}
 .gvcl-tbtn.big svg{width:64px;height:64px}
 .gvcl-tbtn.big{border:1px solid rgba(255,255,255,.35);border-radius:50%;
-  width:68px;height:68px;justify-content:center;transition:border-color .2s}
+  width:56px;height:56px;justify-content:center;transition:border-color .2s}
 .gvcl-tbtn.big:hover{border-color:#46e08c}
 .gvcl-tbtn.big svg{width:30px;height:30px}
 .gvcl-tag{position:absolute;left:62px;bottom:22px;right:36px;font-size:14px;
