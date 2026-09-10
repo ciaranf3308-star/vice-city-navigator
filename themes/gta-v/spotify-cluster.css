@@ -67,7 +67,7 @@ html body.theme-gta-v.cluster-mode .gvcl{
 .gvcl-idle{
   position:absolute;inset:0;display:flex;flex-direction:column;
   gap:12px;align-items:center;justify-content:center;
-  background:rgba(10,13,15,.72);padding:20px;text-align:center}
+  background:#0b0e10;padding:20px;text-align:center}
 .gvcl-idle[hidden]{display:none}
 .gvcl-idle-kicker{font-size:15px;letter-spacing:.36em;color:#8b9595}
 .gvcl-idle-sub{font-size:13px;letter-spacing:.2em;color:#5f6a6a}

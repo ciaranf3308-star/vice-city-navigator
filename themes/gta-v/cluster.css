@@ -52,10 +52,11 @@ body.cluster-mode.theme-gta-v #gv-skyline{
 body.cluster-mode.theme-gta-v #gv-topbar{
   display:grid;position:absolute;
   left:0;top:0;width:1920px;height:94px;z-index:32;
-  grid-template-columns:auto auto 1fr auto auto auto auto auto auto;
+  grid-template-columns:auto auto auto 1px auto 1px auto 1px auto 1fr auto 1px auto;
   align-items:center;gap:28px;padding:0 44px;
   background:#0a0d0f;border-bottom:1px solid rgba(255,255,255,.10);
   font-family:'Chalet London','Chalet Comprime',sans-serif}
+.gv-sp{min-width:24px}
 #gv-cluster-menu{background:none;border:0;padding:6px;cursor:pointer}
 #gv-cluster-menu svg{display:block;width:52px;height:30px}
 #gv-cluster-menu path{stroke:#e8ecec;stroke-width:4.5;fill:none;stroke-linecap:square}
@@ -80,7 +81,7 @@ body.cluster-mode.theme-gta-v #gv-topbar{
 /* ---------- speed cluster ---------- */
 body.cluster-mode.theme-gta-v #cluster-speed{
   position:absolute;left:430px;top:165px;width:460px;z-index:32;
-  text-align:center;
+  transform:none;text-align:center;
   background:
     radial-gradient(ellipse 45% 50% at 50% 48%,rgba(0,0,0,.78),rgba(0,0,0,.35) 52%,transparent 75%),
     radial-gradient(ellipse 85% 70% at 50% 48%,rgba(0,0,0,.32),transparent 78%);
@@ -97,6 +98,7 @@ body.cluster-mode.theme-gta-v #cluster-speed-unit{
   letter-spacing:.42em;color:#6d7878;margin-top:8px}
 body.cluster-mode.theme-gta-v #cluster-limit{
   position:absolute;left:831px;top:218px;width:68px;height:68px;z-index:32;
+  transform:none;
   border:5px solid #ff3b30;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
   background:#f0f2f2}
@@ -145,7 +147,8 @@ body.cluster-mode.theme-gta-v #gv-turn-card{
     radial-gradient(ellipse 80% 60% at 60% 40%,rgba(255,255,255,.025),transparent 70%),
     #0b0e10}
 body.cluster-mode.theme-gta-v #cluster-turn{
-  position:relative;padding:34px 32px 0 58px}
+  position:relative;display:block;top:auto;left:auto;transform:none;
+  padding:34px 32px 0 58px}
 body.cluster-mode.theme-gta-v #gv-turn-top{
   display:flex;align-items:flex-start;gap:22px}
 body.cluster-mode.theme-gta-v #cluster-turn-arrow{width:64px;height:64px;flex:none}
