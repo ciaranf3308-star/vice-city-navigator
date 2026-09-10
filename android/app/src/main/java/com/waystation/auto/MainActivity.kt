@@ -97,6 +97,19 @@ class MainActivity : Activity() {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
+    override fun onResume() {
+        super.onResume()
+        // The user may have granted location via Settings while we were
+        // backgrounded — re-check every time we come forward, otherwise the
+        // WebView keeps denying geolocation until the app is killed.
+        val was = locationGranted
+        refreshLocationState()
+        if (locationGranted && !was) {
+            Log.i(TAG, "location granted via Settings; reloading for clean geolocation")
+            webView?.reload()
+        }
+    }
+
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<out String>, grantResults: IntArray
     ) {
