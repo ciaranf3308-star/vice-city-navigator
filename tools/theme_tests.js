@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v180"), 'SW theme cache v180');
+ok(swSrc.includes("ws-theme-v180"), 'SW theme cache v181');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -1816,12 +1816,8 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
   const saPhone = fs.readFileSync(path.join(REPO, 'themes/san-andreas/phone.css'), 'utf8');
   const saCluster = saPhone.slice(saPhone.indexOf('Cluster Mode: San Andreas'));
   ok(saCluster.includes('cluster-overlay.png'), 'SA cluster paints the user-supplied overlay art as the stage');
-  ok(/body\.cluster-mode\.theme-san-andreas #map\{[^}]*left:54px[^}]*top:237px[^}]*width:561px[^}]*height:320px/.test(saCluster),
-    'SA cluster map container overshoots the window 26px per side (same center) so the attribution hides behind the art');
-  ok(saPhone.includes('#cluster-maptint') && /#cluster-maptint\{display:none/.test(saPhone),
-    'SA cluster smoked-glass map tint exists and is hidden by default');
-  ok(/body\.cluster-mode\.theme-san-andreas #cluster-maptint\{[^}]*z-index:25[^}]*background:rgba\(6,5,4,.55\)/.test(saPhone),
-    'SA cluster map tint sits between map (20) and backdrop (30) as a translucent layer');
+  ok(/body\.cluster-mode\.theme-san-andreas #map\{[^}]*left:-175px[^}]*top:128px[^}]*width:1019px[^}]*height:536px/.test(saCluster),
+    'SA cluster map is 2x the window, same center, clipping invisibly behind the art');
   ok(!/body\.cluster-mode\.theme-san-andreas #map\{[^}]*left:78px[^}]*top:261px[^}]*width:513px[^}]*height:272px/.test(saCluster),
     'SA cluster map is no longer exactly the window size (attribution bar used to show inside it)');
   ok(/body\.cluster-mode\.theme-san-andreas #cluster-header,/.test(saCluster) &&
