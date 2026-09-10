@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v195"), 'SW theme cache v195');
+ok(swSrc.includes("ws-theme-v196"), 'SW theme cache v196');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -1877,8 +1877,8 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
 // music cards overlapping the map's right edge, thin speed digits.
 {
   const gvCss = fs.readFileSync(path.join(REPO, 'themes/gta-v/cluster.css'), 'utf8');
-  ok(/body\.cluster-mode\.theme-gta-v #map\{[^}]*mask-image:url\("data:image\/svg\+xml/.test(gvCss),
-    'GTA V cluster dissolves the live map via feathered SVG mask (no hard polygon edge)');
+  ok(gvCss.includes('#gv-map-atmo') && /linear-gradient.*rgba\(10,13,15/.test(gvCss),
+    'GTA V cluster dissolves map edges via atmospheric gradient overlay');
   ok(gvCss.includes('#gv-topbar') && gvCss.includes('#gv-powerbar') &&
      gvCss.includes('#gv-turn-card') && gvCss.includes('#gv-bottombar'),
     'GTA V cluster styles the top bar, power bar, maneuver card and bottom bar');

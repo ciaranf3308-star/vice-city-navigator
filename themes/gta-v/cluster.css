@@ -21,12 +21,8 @@ body.cluster-mode.theme-gta-v #cluster-turn-compass,
 body.cluster-mode.theme-gta-v #menu-btn{display:none!important}
 
 /* ---------- live map: parallelogram panel ---------- */
-body.cluster-mode.theme-gta-v #map{left:807px;top:50px;width:750px;height:650px;
-  border-radius:0;z-index:20;
-  -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27750%27%20height%3D%27650%27%3E%3Cdefs%3E%3Cfilter%20id%3D%27m%27%20x%3D%27-30%25%27%20y%3D%27-30%25%27%20width%3D%27160%25%27%20height%3D%27160%25%27%3E%3CfeGaussianBlur%20stdDeviation%3D%2748%27%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Cpolygon%20points%3D%27135%2C0%20750%2C0%20585%2C650%200%2C650%27%20fill%3D%27white%27%20filter%3D%27url%28%23m%29%27%2F%3E%3C%2Fsvg%3E");
-  -webkit-mask-size:100% 100%;-webkit-mask-repeat:no-repeat;
-  mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27750%27%20height%3D%27650%27%3E%3Cdefs%3E%3Cfilter%20id%3D%27m%27%20x%3D%27-30%25%27%20y%3D%27-30%25%27%20width%3D%27160%25%27%20height%3D%27160%25%27%3E%3CfeGaussianBlur%20stdDeviation%3D%2748%27%2F%3E%3C%2Ffilter%3E%3C%2Fdefs%3E%3Cpolygon%20points%3D%27135%2C0%20750%2C0%20585%2C650%200%2C650%27%20fill%3D%27white%27%20filter%3D%27url%28%23m%29%27%2F%3E%3C%2Fsvg%3E);
-  mask-size:100% 100%;mask-repeat:no-repeat}
+body.cluster-mode.theme-gta-v #map{left:872px;top:103px;width:619px;height:544px;
+  border-radius:0;z-index:20}
 /* 1px panel edge following the parallelogram */
 /* gv-map-edge removed: no hard edge to trace */
 /* vignette: map melts into the dark UI at the panel borders */
@@ -232,20 +228,20 @@ body.cluster-mode.theme-gta-v #gv-geo-plane{display:block;position:absolute;
 /* ---------- map atmospheric integration: dark overlay + geometry over edges ---------- */
 #gv-map-atmo{display:none}
 body.cluster-mode.theme-gta-v #gv-map-atmo{display:block;position:absolute;
-  left:807px;top:50px;width:750px;height:650px;z-index:21;pointer-events:none;
-  /* darkens the map edges so they melt into the surrounding black */
+  left:872px;top:103px;width:619px;height:544px;z-index:21;pointer-events:none;
+  /* feathered dissolve: dark gradients over the map edges */
   background:
-    linear-gradient(105deg,rgba(10,13,15,.95) 0%,transparent 22%,transparent 78%,rgba(10,13,15,.95) 100%),
-    linear-gradient(to bottom,rgba(10,13,15,.9) 0%,transparent 18%,transparent 82%,rgba(10,13,15,.9) 100%)}
+    linear-gradient(105deg,rgba(10,13,15,1) 0%,rgba(10,13,15,.85) 8%,transparent 28%,transparent 72%,rgba(10,13,15,.85) 92%,rgba(10,13,15,1) 100%),
+    linear-gradient(to bottom,rgba(10,13,15,1) 0%,rgba(10,13,15,.8) 10%,transparent 30%,transparent 70%,rgba(10,13,15,.8) 90%,rgba(10,13,15,1) 100%)}
 /* Black geometry planes overlapping the map fade zone (Point 7) */
 #gv-geo-map-left{display:none}
 body.cluster-mode.theme-gta-v #gv-geo-map-left{display:block;position:absolute;
-  left:740px;top:50px;width:180px;height:650px;z-index:22;pointer-events:none;
+  left:802px;top:103px;width:140px;height:544px;z-index:22;pointer-events:none;
   background:linear-gradient(105deg,#0a0d0f 0%,#0d1114 60%,transparent 100%);
   clip-path:polygon(0 0,100% 0,72% 100%,0 100%)}
 #gv-geo-map-right{display:none}
 body.cluster-mode.theme-gta-v #gv-geo-map-right{display:block;position:absolute;
-  left:1380px;top:50px;width:200px;height:650px;z-index:22;pointer-events:none;
+  left:1350px;top:103px;width:180px;height:544px;z-index:22;pointer-events:none;
   background:linear-gradient(285deg,#0a0d0f 0%,#0c1013 55%,transparent 100%);
   clip-path:polygon(28% 0,100% 0,100% 100%,0 100%)}
 
