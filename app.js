@@ -2703,7 +2703,22 @@ function paintDashWeather(temp, code) {
   const ct = $('cluster-temp'), ci = $('cluster-wxicon');
   if (ct) ct.textContent = temp + '°C';
   if (ci) ci.innerHTML = dashWxIcon(code);
+  /* SA cluster hero shows temp below the battery bar. */
+  const saT = $('sa-cluster-temp');
+  if (saT) saT.textContent = temp + '°C';
 }
+/* SA cluster hero clock: live 12h time below the battery bar ("7:24 PM"). */
+function tickSaClusterClock() {
+  const el = $('sa-cluster-time');
+  if (!el) return;
+  const d = new Date();
+  let h = d.getHours(), m = d.getMinutes();
+  const ap = h >= 12 ? 'PM' : 'AM';
+  h = h % 12; if (h === 0) h = 12;
+  el.textContent = h + ':' + String(m).padStart(2, '0') + ' ' + ap;
+}
+setInterval(tickSaClusterClock, 15000);
+tickSaClusterClock();
 function paintDashWeatherCache() {
   try {
     const c = JSON.parse(localStorage.getItem(WX_CACHE_KEY) || 'null');

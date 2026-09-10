@@ -294,6 +294,11 @@ body.cluster-mode.theme-san-andreas #sa-cluster-menu{display:block;position:abso
 body.cluster-mode.theme-san-andreas #sa-cluster-exit{display:block;position:absolute;left:700px;top:628px;width:64px;height:64px;z-index:60;background:url('dashboard/cluster-exit-btn.png') 0 0 / 100% 100% no-repeat;border:0;border-radius:50%;cursor:pointer;opacity:.92}
 body.cluster-mode.theme-san-andreas #sa-cluster-exit:hover{opacity:1}
 body.cluster-mode.theme-san-andreas #sa-cluster-exit:active{transform:scale(.94)}
+/* SA cluster time/temp: white text below battery bar, matching hero (7:24 PM, 28°C) */
+#sa-cluster-clock{display:none}
+body.cluster-mode.theme-san-andreas #sa-cluster-clock{display:flex;position:absolute;left:280px;top:678px;z-index:60;gap:48px;pointer-events:none}
+body.cluster-mode.theme-san-andreas #sa-cluster-time,
+body.cluster-mode.theme-san-andreas #sa-cluster-temp{font-family:"Helvetica Neue",Arial,sans-serif;font-size:34px;font-weight:400;color:#fff;letter-spacing:1px;opacity:.95}
 /* hero speed in the dial */
 body.cluster-mode.theme-san-andreas #cluster-speed{left:961px;top:315px;z-index:32}
 body.cluster-mode.theme-san-andreas #cluster-speed-num{font-family:'Bank Gothic',sans-serif;font-weight:400;

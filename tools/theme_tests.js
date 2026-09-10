@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v189"), 'SW theme cache v189');
+ok(swSrc.includes("ws-theme-v190"), 'SW theme cache v190');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -1830,6 +1830,8 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
   const appSrc = fs.readFileSync(path.join(REPO, 'app.js'), 'utf8');
   ok(/SA_CLUSTER_OVERVIEW_ZOOM\s*=\s*13\.0/.test(appSrc),
     'SA cluster defines a fixed overview zoom (13.0), not derived from nav zoom');
+  ok(/tickSaClusterClock/.test(appSrc) && /\$\('sa-cluster-temp'\)/.test(appSrc),
+    'SA cluster clock ticks live time and paints weather temp');
   ok(!/saClusterZoom\(/.test(appSrc),
     'SA cluster no longer uses log2 bleed compensation');
   ok(!/body\.cluster-mode\.theme-san-andreas #map\{[^}]*left:78px[^}]*top:261px[^}]*width:513px[^}]*height:272px/.test(saCluster),
