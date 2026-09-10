@@ -859,6 +859,7 @@ function buildThemeSelector() {
 
 function locateUser(center) {
   if (!('geolocation' in navigator)) return;
+  checkLocationPermission();
   // Center on the last known fix straight away so the button always
   // answers visibly, then refine with a fresh fix when it arrives.
   if (center && userPos && map) map.flyTo({ center: userPos, duration: 800 });
@@ -1949,14 +1950,28 @@ let _posErrTold = false;
 function onPosErr(err) {
   /* Keep last known position; tell the user why location isn't working. */
   if (_posErrTold) return; _posErrTold = true;
-  if (err && err.code === err.PERMISSION_DENIED) {
-    toast('Location blocked — check app permissions in system settings, then tap ◎');
-  } else if (err && err.code === err.POSITION_UNAVAILABLE) {
-    toast('No GPS fix — ensure location services are on and try outdoors');
-  } else if (err && err.code === err.TIMEOUT) {
-    toast('Location timed out — try again with a clear sky view');
+  const code = err && err.code;
+  if (code === 1) { // PERMISSION_DENIED
+    toast('Location blocked for WayStation — open Android Settings → Apps → WayStation → Permissions → Location → Allow, then tap ◎', 8000);
+  } else if (code === 2) { // POSITION_UNAVAILABLE
+    toast('No GPS fix — ensure location services are on and try outdoors', 5000);
+  } else if (code === 3) { // TIMEOUT
+    toast('Location timed out — try again with a clear sky view', 5000);
   }
   setTimeout(() => { _posErrTold = false; }, 30000);
+}
+/* Check location permission state and guide the user. */
+function checkLocationPermission() {
+  if (!('permissions' in navigator)) return;
+  try {
+    navigator.permissions.query({ name: 'geolocation' }).then(result => {
+      if (result.state === 'denied') {
+        toast('WayStation location is blocked — Android Settings → Apps → WayStation → Permissions → Location → Allow', 8000);
+      } else if (result.state === 'prompt') {
+        toast('Tap ◎ to allow location access', 4000);
+      }
+    }).catch(()=>{});
+  } catch (e) {}
 }
 /* Restart GPS when app returns to foreground (car WebView backgrounding). */
 document.addEventListener('visibilitychange', () => {

@@ -11,7 +11,7 @@
    Map tiles are cached on demand for offline use (cache-first, 7-day TTL).
    Routing and search always go to the network. */
 const CACHE = 'ws-shell-v68';
-const THEME_CACHE = 'ws-theme-v201';
+const THEME_CACHE = 'ws-theme-v202';
 const TILE_CACHE = 'ws-tiles-v1';
 const VC_BLIPS = ['airYard','barbers','burgerShot','cash','chicken','dateDisco','dateDrink',
   'dateFood','diner','fuel','girlfriend','gym','hostpital','modGarage','north','parking',
