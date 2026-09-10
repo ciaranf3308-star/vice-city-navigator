@@ -304,15 +304,11 @@ body.cluster-mode.theme-san-andreas #cluster-trip:not([hidden]){display:flex;pos
   color:#c9bfa8;white-space:nowrap}
 body.cluster-mode.theme-san-andreas #cluster-trip .trip-sep{color:#7ec850}
 body.cluster-mode.theme-san-andreas #cluster-trip .trip-cyan{color:#e8a33d}
-/* the REAL Spotify widget docks into the overlay's music frame:
-   the 701x544 art zoomed to the frame width, top-aligned */
+/* the cluster music widget (.sacl skin) lives INSIDE the container boxes
+   already painted in the overlay art — the skin positions itself, so the
+   pane just stays a full-stage, click-through layer */
 html body.theme-san-andreas.cluster-mode #spotify-pane{position:absolute;left:0;top:0;width:1920px;height:720px;
   display:block!important;visibility:visible!important;opacity:1!important;pointer-events:none}
-html body.theme-san-andreas.cluster-mode .sasp{display:block!important;position:absolute;left:1322px;top:285px;
-  width:701px;height:544px;max-width:none;transform:scale(.745);transform-origin:top left;
-  margin:0;pointer-events:auto}
-/* the bezel img is dashboard-scoped; in the cluster the phone rule's
-   hud.png background already paints the bezel — hide the unstyled img */
-html body.theme-san-andreas.cluster-mode .sasp-bezel{display:none!important}
+html body.theme-san-andreas.cluster-mode .sacl{display:block!important;margin:0;pointer-events:auto}
 /* exit button lives on the overlay's cluster-mode logo tap */
 body.cluster-mode.theme-san-andreas #cluster-mode-exit{display:none}

@@ -173,7 +173,7 @@ function syncClusterTurn(data) {
 /* Push the current live state into every cluster region — called when
    entering cluster mode so the shell is correct immediately, not just
    after the next GPS fix or nav update. (Spotify needs no sync: the real
-   #spotify-pane widget is shared with the dashboard, not duplicated.) */
+   #spotify-pane widget mounts its own skin per layout, not duplicated.) */
 function refreshClusterLive() {
   updateSpeedo();
   syncClusterTurn(currentTurnData());
@@ -2440,8 +2440,8 @@ function applyAppMode() {
   layoutDashMenu(); // dock (or undock) the body-level menu panel
   layoutDashDrawer(); // dock (or undock) the planning drawer
   const pane = $('spotify-pane');
-  /* The SAME widget serves dashboard and cluster: one DOM, one skin,
-     one SpotifyCore session. Cluster only repositions it (theme CSS). */
+  /* One SpotifyCore session; the skin is per layout — SA cluster mounts
+     its own compact widget into the background's boxes. */
   const spotVisible = dash || clu;
   if (pane) pane.hidden = !spotVisible;
   if (spotVisible) mountSpotifySkin(wsThemeId());
@@ -2782,8 +2782,8 @@ let spotifySkinId = null;
    active — in normal mode no player exists anywhere. */
 function mountSpotifySkin(themeId) {
   if (!window.SpotifySkins || !window.SpotifyCore || !$('spotify-stage')) return;
-  /* The widget is shared by dashboard and cluster — one DOM, one skin,
-     one session. Cluster only repositions it (theme CSS). */
+  /* One SpotifyCore session; the skin is chosen per layout (SA cluster
+     mounts its own compact widget for the background's boxes). */
   if (!dashboardLayoutActive() && !clusterLayoutActive()) { unmountSpotifySkin(); return; }
   let want = 'default';
   try {
@@ -2791,6 +2791,13 @@ function mountSpotifySkin(themeId) {
     const skinId = theme && theme.spotify && theme.spotify.skin;
     if (skinId && SpotifySkins.get(skinId)) want = skinId;
   } catch (e) {}
+  /* San Andreas cluster uses its own compact widget built for the
+     container boxes painted in the cluster background art — the
+     dashboard keeps the full .sasp skin. */
+  if (clusterLayoutActive() && themeId === 'san-andreas' &&
+      SpotifySkins.get('san-andreas-cluster')) {
+    want = 'san-andreas-cluster';
+  }
   if (want === spotifySkinId) return;
   unmountSpotifySkin();
   const skin = SpotifySkins.get(want);

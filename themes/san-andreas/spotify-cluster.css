@@ -1,0 +1,133 @@
+/* ============================================================
+   San Andreas CLUSTER Spotify widget (.sacl) — lives INSIDE the
+   music container boxes already painted in the cluster background
+   art (cluster-overlay.png). No frame of its own: the art supplies
+   it. Cluster-only: every rule is scoped to
+   body.cluster-mode.theme-san-andreas.
+   Stage: 1920x720. Boxes (measured from the art):
+     art box   (1304,283) 208x204
+     info area (1519,283) 314x204
+     lyric bar (1297,503) 532x43
+   ============================================================ */
+
+/* root: transparent window over the frame interior */
+body.cluster-mode.theme-san-andreas .sacl{
+  position:absolute;left:1297px;top:283px;width:658px;height:263px;
+  pointer-events:auto;font-family:'Bank Gothic','Beckett',sans-serif;
+}
+
+/* ---- album art box ---- */
+body.cluster-mode.theme-san-andreas .sacl-artwrap{
+  position:absolute;left:7px;top:0;width:208px;height:204px;
+  border-radius:8px;overflow:hidden;background:rgba(0,0,0,.28);
+}
+body.cluster-mode.theme-san-andreas .sacl-art-idle{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  color:#8a744f;opacity:.55;
+}
+body.cluster-mode.theme-san-andreas .sacl-art-idle svg{width:64px;height:64px;fill:currentColor}
+body.cluster-mode.theme-san-andreas .sacl-art{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  opacity:0;transition:opacity .45s ease;
+}
+body.cluster-mode.theme-san-andreas .sacl-art.on{opacity:1}
+
+/* ---- track info area ---- */
+body.cluster-mode.theme-san-andreas .sacl-info{
+  position:absolute;left:222px;top:0;width:314px;height:204px;
+}
+body.cluster-mode.theme-san-andreas .sacl-title{
+  margin:4px 0 0;font-family:'Bank Gothic',sans-serif;font-size:30px;line-height:1.15;
+  color:#f2e3c2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  text-shadow:0 2px 6px rgba(0,0,0,.7);
+}
+body.cluster-mode.theme-san-andreas .sacl-artist{
+  margin-top:2px;font-family:'Beckett',serif;font-size:19px;
+  color:#b39b6d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+body.cluster-mode.theme-san-andreas .sacl-artist.sacl-status{color:#e8a33d;font-style:italic}
+
+/* progress */
+body.cluster-mode.theme-san-andreas .sacl-progress{margin-top:12px}
+body.cluster-mode.theme-san-andreas .sacl-bar{
+  position:relative;height:6px;border-radius:3px;background:#3a3226;
+  cursor:pointer;touch-action:none;
+}
+body.cluster-mode.theme-san-andreas .sacl-bar-fill{
+  position:absolute;left:0;top:0;bottom:0;width:0;border-radius:3px;
+  background:linear-gradient(90deg,#8a5f22,#e8a33d);
+}
+body.cluster-mode.theme-san-andreas .sacl-bar-knob{
+  position:absolute;top:50%;left:0;width:12px;height:12px;border-radius:50%;
+  background:#f2e3c2;transform:translate(-50%,-50%);
+  box-shadow:0 0 6px rgba(232,163,61,.8);
+}
+body.cluster-mode.theme-san-andreas .sacl-times{
+  display:flex;justify-content:space-between;margin-top:5px;
+  font-family:'Bank Gothic',sans-serif;font-size:16px;color:#c9bfa8;
+}
+
+/* transport: thin gold rings like the hero */
+body.cluster-mode.theme-san-andreas .sacl-controls{
+  margin-top:10px;display:flex;align-items:center;gap:16px;
+}
+body.cluster-mode.theme-san-andreas .sacl-tbtn{
+  width:52px;height:52px;border-radius:50%;padding:0;cursor:pointer;
+  background:rgba(0,0,0,.35);border:1.5px solid #c9973f;color:#f2e3c2;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .12s ease,background .12s ease;
+}
+body.cluster-mode.theme-san-andreas .sacl-tbtn.big{width:68px;height:68px;border-width:2px}
+body.cluster-mode.theme-san-andreas .sacl-tbtn:hover{background:rgba(232,163,61,.22)}
+body.cluster-mode.theme-san-andreas .sacl-tbtn:active{transform:scale(.93)}
+body.cluster-mode.theme-san-andreas .sacl-tbtn svg{width:44%;height:44%;fill:currentColor}
+
+/* idle: connect CTA over the info area only — art box keeps the note.
+   (.sacl-info is the offset parent, so the overlay sits at its origin) */
+body.cluster-mode.theme-san-andreas .sacl-idle{
+  position:absolute;left:0;top:0;width:314px;height:204px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  background:rgba(0,0,0,.35);
+}
+body.cluster-mode.theme-san-andreas .sacl-idle[hidden]{display:none}
+/* idle hides the track chrome — the overlay's kicker + CTA own the area */
+body.cluster-mode.theme-san-andreas .sacl.is-idle .sacl-title,
+body.cluster-mode.theme-san-andreas .sacl.is-idle .sacl-artist,
+body.cluster-mode.theme-san-andreas .sacl.is-idle .sacl-progress,
+body.cluster-mode.theme-san-andreas .sacl.is-idle .sacl-controls{visibility:hidden}
+body.cluster-mode.theme-san-andreas .sacl-idle-kicker{
+  font-family:'Beckett',serif;font-size:26px;color:#e8d9b8;font-style:italic;
+  text-shadow:0 2px 6px rgba(0,0,0,.7);
+}
+body.cluster-mode.theme-san-andreas .sacl-connect-btn{
+  font-family:'Bank Gothic',sans-serif;font-size:18px;letter-spacing:2px;
+  color:#e8a33d;background:rgba(0,0,0,.4);border:1.5px solid #c9973f;border-radius:8px;
+  padding:10px 22px;cursor:pointer;
+}
+body.cluster-mode.theme-san-andreas .sacl-connect-btn:hover{background:rgba(232,163,61,.22)}
+
+/* ---- lyric bar: one live line, engine-owned ---- */
+body.cluster-mode.theme-san-andreas .sacl-lyrics{
+  position:absolute;left:0;top:220px;width:532px;height:43px;overflow:hidden;
+  container-type:inline-size;
+}
+body.cluster-mode.theme-san-andreas .sacl-lyrics .wslyr{position:absolute;inset:0}
+/* cluster bar shows the current line only — prev/next/state stay hidden */
+body.cluster-mode.theme-san-andreas .sacl-lyrics .wslyr-prev,
+body.cluster-mode.theme-san-andreas .sacl-lyrics .wslyr-next,
+body.cluster-mode.theme-san-andreas .sacl-lyrics .wslyr-state{display:none!important}
+body.cluster-mode.theme-san-andreas .sacl-lyrics .wslyr-hero{
+  position:absolute!important;left:18px!important;right:18px!important;
+  top:0!important;bottom:0!important;max-height:none!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  font-family:'Beckett',serif!important;font-style:italic!important;
+  font-size:22px!important;line-height:1.2!important;color:#d8c49a!important;
+  white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+  text-shadow:0 1px 4px rgba(0,0,0,.8);
+}
+/* idle lyric bar: quiet tagline instead of engine state text */
+body.cluster-mode.theme-san-andreas .sacl.is-idle .sacl-lyrics::after{
+  content:'“Same streets, different tomorrow.”';
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:'Beckett',serif;font-style:italic;font-size:21px;color:#8a744f;opacity:.8;
+}

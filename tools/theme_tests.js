@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v175"), 'SW theme cache v175');
+ok(swSrc.includes("ws-theme-v176"), 'SW theme cache v176');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -1824,8 +1824,27 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
     'SA cluster hides the console chrome the overlay art already paints');
   ok(/body\.cluster-mode\.theme-san-andreas #cluster-speed\{[^}]*left:961px[^}]*top:315px/.test(saCluster),
     'SA cluster hero speed sits in the overlay\'s dial');
-  ok(/\.sasp\{[^}]*left:1322px[^}]*top:285px[^}]*transform:scale\(\.745\)/.test(saCluster),
-    'SA cluster docks the real Spotify widget into the overlay\'s music frame');
+  ok(/\.sasp\{[^}]*left:1322px[^}]*top:285px[^}]*transform:scale\(\.745\)/.test(saCluster) === false,
+    'SA cluster no longer scales the dashboard .sasp skin into the music frame');
+  /* Cluster music widget: a compact .sacl skin built for the container
+     boxes already painted in the overlay art (art box / info area /
+     lyric bar) — the dashboard .sasp skin stays in the dashboard. */
+  const saclCss = fs.readFileSync(path.join(REPO, 'themes/san-andreas/spotify-cluster.css'), 'utf8');
+  ok(/\.sacl\{[^}]*left:1297px[^}]*top:283px/.test(saclCss),
+    'SA cluster .sacl widget positions itself over the overlay\'s music boxes');
+  ok(saclCss.includes('.sacl-artwrap') && saclCss.includes('.sacl-lyrics'),
+    'SA cluster .sacl widget fills the art box, info area and lyric bar');
+  const saclJs = fs.readFileSync(path.join(REPO, 'themes/san-andreas/spotify-cluster.js'), 'utf8');
+  ok(saclJs.includes("register('san-andreas-cluster'"),
+    'SA cluster Spotify skin is registered as san-andreas-cluster');
+  ok(appSrc.includes('san-andreas-cluster'),
+    'app.js selects the san-andreas-cluster skin in cluster mode');
+  ok(indexSrc.includes('themes/san-andreas/spotify-cluster.js') &&
+     indexSrc.includes('themes/san-andreas/spotify-cluster.css'),
+    'index.html loads the SA cluster Spotify skin');
+  ok(swSrc.includes('themes/san-andreas/spotify-cluster.js') &&
+     swSrc.includes('themes/san-andreas/spotify-cluster.css'),
+    'SW precaches the SA cluster Spotify skin');
   ok(/#spotify-pane\{[^}]*width:1920px[^}]*height:720px/.test(saCluster),
     'SA cluster Spotify surface is the 1920x720 stage, not viewport units');
   ok(!/100dvh|100vw/.test(saCluster), 'SA cluster has no viewport-unit survivors');

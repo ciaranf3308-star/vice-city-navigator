@@ -10,7 +10,7 @@
      default Vice City set.
    Map tiles, routing and search always go to the network. */
 const CACHE = 'ws-shell-v68';
-const THEME_CACHE = 'ws-theme-v175';
+const THEME_CACHE = 'ws-theme-v176';
 const VC_BLIPS = ['airYard','barbers','burgerShot','cash','chicken','dateDisco','dateDrink',
   'dateFood','diner','fuel','girlfriend','gym','hostpital','modGarage','north','parking',
   'pizza','police','propertyG','qmark','race','runway','saveGame','school','spray','tattoo','waypoint'];
@@ -34,6 +34,7 @@ const SHELL = [
   'themes/vice-city/spotify-skin.js', 'themes/vice-city/spotify-skin.css',
   'themes/vice-city/spotify/hud.png',
   'themes/san-andreas/spotify-skin.js', 'themes/san-andreas/spotify-skin.css',
+  'themes/san-andreas/spotify-cluster.js', 'themes/san-andreas/spotify-cluster.css',
   'themes/san-andreas/spotify/hud.png',
   'themes/gta-v/spotify-skin.js', 'themes/gta-v/spotify-skin.css',
   'themes/gta-v/spotify/hud.png',
