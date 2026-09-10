@@ -1086,3 +1086,30 @@ body.cluster-mode #cluster-footer,
 body.cluster-mode #cluster-trip,
 body.cluster-mode #cluster-turn-compass{display:none}
 body.cluster-mode #cluster-turn-main{display:flex;flex-direction:column;min-width:0}
+
+/* ============ VIEW toggle: console <-> dash (per-theme skins) ============
+   One floating two-button segmented control, visible in normal and
+   dashboard modes (cluster has its own tabs). Body-level so it floats
+   above the scaled dashboard stage in real pixels — car-scale touch
+   targets. Each theme's mode-toggle.css owns the visual design;
+   this block owns structure, placement and mode visibility only. */
+#mode-toggle{
+  position:fixed;z-index:70;display:flex;pointer-events:auto;
+  margin:0;padding:0;border:0;background:none;
+}
+#mode-toggle button{
+  appearance:none;border:0;background:none;cursor:pointer;
+  font:inherit;color:inherit;padding:0;margin:0;
+  min-height:56px;min-width:88px;
+  display:flex;align-items:center;justify-content:center;
+}
+/* normal (console) mode: below the search bar, top-right over the map */
+body:not(.dashboard-mode):not(.cluster-mode) #mode-toggle{
+  top:calc(76px + env(safe-area-inset-top));right:12px;
+}
+/* dashboard mode: below the tallest topbar, top-right over the map */
+body.dashboard-mode #mode-toggle{
+  top:140px;right:24px;
+}
+/* cluster mode has its own tab bar — no floating toggle */
+body.cluster-mode #mode-toggle{display:none}

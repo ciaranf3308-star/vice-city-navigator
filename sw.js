@@ -11,7 +11,7 @@
    Map tiles are cached on demand for offline use (cache-first, 7-day TTL).
    Routing and search always go to the network. */
 const CACHE = 'ws-shell-v68';
-const THEME_CACHE = 'ws-theme-v205';
+const THEME_CACHE = 'ws-theme-v206';
 const TILE_CACHE = 'ws-tiles-v1';
 const VC_BLIPS = ['airYard','barbers','burgerShot','cash','chicken','dateDisco','dateDrink',
   'dateFood','diner','fuel','girlfriend','gym','hostpital','modGarage','north','parking',
@@ -21,14 +21,17 @@ const SHELL = [
   'traffic.js', 'traffic-config.js',
   'discovery.js', 'voice.js', 'supabase-config.js',
   'themes/vice-city/dashboard.css',
+  'themes/vice-city/mode-toggle.css',
   'themes/vice-city/phone.css',
   'themes/vice-city/dashboard/waystation-logo.png',
   'themes/vice-city/dashboard/skyline-sunset.png',
   'themes/vice-city/dashboard/cluster-oceandrive.jpg',
   'themes/san-andreas/dashboard.css',
+  'themes/san-andreas/mode-toggle.css',
   'themes/san-andreas/phone.css',
   'themes/san-andreas/dashboard/cluster-overlay.png',
-  'themes/gta-v/dashboard.css', 'themes/rdr2/dashboard.css',
+  'themes/gta-v/dashboard.css', 'themes/gta-v/mode-toggle.css',
+  'themes/rdr2/dashboard.css', 'themes/rdr2/mode-toggle.css',
   'themes/registry.js',
   'themes/vice-city/theme.js', 'themes/san-andreas/theme.js',
   'themes/gta-v/theme.js', 'themes/rdr2/theme.js',

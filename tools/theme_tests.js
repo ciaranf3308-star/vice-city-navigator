@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v205"), 'SW theme cache v205');
+ok(swSrc.includes("ws-theme-v206"), 'SW theme cache v206');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -2029,6 +2029,46 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
     ok(cssSrc.includes(`body.cluster-mode.theme-${t} #dash-topbar,`) ||
        cssSrc.includes(`body.cluster-mode:not(.theme-vice-city) #dash-topbar,`),
       `${t} cluster never shows the dashboard bars`);
+}
+
+/* ============ view toggle: console <-> dash (per-theme skins) ============ */
+{
+  const htmlAll = fs.readFileSync(path.join(REPO, 'index.html'), 'utf8');
+  ok(htmlAll.includes('id="mode-toggle"'), 'view toggle element exists in index.html');
+  ok(htmlAll.includes('data-view="console"') && htmlAll.includes('data-view="dash"'),
+    'view toggle has console + dash buttons');
+  for (const t of ['vice-city', 'san-andreas', 'gta-v', 'rdr2']) {
+    ok(htmlAll.includes(`themes/${t}/mode-toggle.css`),
+      `${t} mode-toggle.css is linked in index.html`);
+    ok(fs.existsSync(path.join(REPO, `themes/${t}/mode-toggle.css`)),
+      `${t} mode-toggle.css file exists`);
+  }
+  const appAll = fs.readFileSync(path.join(REPO, 'app.js'), 'utf8');
+  ok(appAll.includes('function bindModeToggle') && appAll.includes('function syncModeToggle'),
+    'mode toggle bind + sync functions exist');
+  ok(/data-view.{0,40}setAppMode\('dashboard'\)/.test(appAll) || appAll.includes("setAppMode('dashboard')"),
+    'dash button routes to dashboard mode');
+  ok(/data-view.{0,40}setAppMode\('normal'\)/.test(appAll) || appAll.includes("setAppMode('normal')"),
+    'console button routes to normal mode');
+  ok(appAll.includes('syncModeToggle()') && /function syncModeSelector\(\)[\s\S]{0,300}syncModeToggle\(\)/.test(appAll),
+    'toggle active state syncs on every mode change');
+  ok(cssSrc.includes('body.cluster-mode #mode-toggle{display:none}'),
+    'view toggle hides in cluster mode (cluster has its own tabs)');
+  for (const t of ['vice-city', 'san-andreas', 'gta-v', 'rdr2']) {
+    const skin = fs.readFileSync(path.join(REPO, `themes/${t}/mode-toggle.css`), 'utf8');
+    ok(skin.includes(`body.theme-${t} #mode-toggle`),
+      `${t} toggle skin is theme-scoped`);
+    ok(skin.includes('.on'), `${t} toggle skin styles the active segment`);
+  }
+  const vcSkin = fs.readFileSync(path.join(REPO, 'themes/vice-city/mode-toggle.css'), 'utf8');
+  ok(vcSkin.includes('255,113,206') && vcSkin.includes('1,205,254'),
+    'VC toggle uses neon pink/cyan language');
+  const saSkin = fs.readFileSync(path.join(REPO, 'themes/san-andreas/mode-toggle.css'), 'utf8');
+  ok(saSkin.includes('#c9a227'), 'SA toggle uses gold console language');
+  const gvSkin = fs.readFileSync(path.join(REPO, 'themes/gta-v/mode-toggle.css'), 'utf8');
+  ok(gvSkin.includes('#76b900'), 'GTA V toggle uses minimal green marker');
+  const rdrSkin = fs.readFileSync(path.join(REPO, 'themes/rdr2/mode-toggle.css'), 'utf8');
+  ok(rdrSkin.includes('RDR Lino'), 'RDR2 toggle uses frontier type');
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);

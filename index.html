@@ -15,12 +15,16 @@
 <link href="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.css" rel="stylesheet">
 <link href="styles.css" rel="stylesheet">
 <link href="themes/vice-city/dashboard.css" rel="stylesheet">
+<link href="themes/vice-city/mode-toggle.css" rel="stylesheet">
 <link href="themes/vice-city/phone.css" rel="stylesheet">
 <link href="themes/san-andreas/dashboard.css" rel="stylesheet">
+<link href="themes/san-andreas/mode-toggle.css" rel="stylesheet">
 <link href="themes/san-andreas/phone.css" rel="stylesheet">
 <link href="themes/gta-v/dashboard.css" rel="stylesheet">
+<link href="themes/gta-v/mode-toggle.css" rel="stylesheet">
 <link href="themes/gta-v/cluster.css" rel="stylesheet">
 <link href="themes/rdr2/dashboard.css" rel="stylesheet">
+<link href="themes/rdr2/mode-toggle.css" rel="stylesheet">
 <link href="themes/vice-city/spotify-skin.css" rel="stylesheet">
 <link href="themes/san-andreas/spotify-skin.css" rel="stylesheet">
 <link href="themes/san-andreas/spotify-cluster.css" rel="stylesheet">
@@ -44,6 +48,12 @@
     <button id="zoom-out" class="ctl" aria-label="Zoom out">−</button>
     <button id="locate-btn" class="ctl" aria-label="My location">◎</button>
   </div>
+</div>
+
+<!-- ============ VIEW toggle: console <-> dash, per-theme skin ============ -->
+<div id="mode-toggle" role="group" aria-label="Switch view">
+  <button type="button" data-view="console"><span>Console</span></button>
+  <button type="button" data-view="dash"><span>Dash</span></button>
 </div>
 
 <!-- ============ MENU panel: discovery, voice, settings ============ -->

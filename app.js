@@ -3015,6 +3015,33 @@ function syncSpotifyMenu() {
 function syncModeSelector() {
   const radios = document.querySelectorAll('input[name="appmode"]');
   radios.forEach(r => { r.checked = r.value === appMode; });
+  syncModeToggle();
+}
+
+/* Floating console/dash toggle: the active segment follows the live mode.
+   Hidden by CSS in cluster mode (which has its own tabs). */
+function syncModeToggle() {
+  const t = $('mode-toggle');
+  if (!t || typeof t.querySelectorAll !== 'function') return;
+  t.querySelectorAll('button[data-view]').forEach(b => {
+    b.classList.toggle('on',
+      (b.dataset.view === 'dash' && appMode === 'dashboard') ||
+      (b.dataset.view === 'console' && appMode === 'normal'));
+  });
+}
+
+let modeToggleBound = false;
+function bindModeToggle() {
+  if (modeToggleBound) return; modeToggleBound = true;
+  const t = $('mode-toggle');
+  if (!t || typeof t.querySelectorAll !== 'function') return;
+  t.querySelectorAll('button[data-view]').forEach(b => {
+    b.addEventListener('click', () => {
+      if (b.dataset.view === 'dash') WayStation.setAppMode('dashboard');
+      else if (b.dataset.view === 'console') WayStation.setAppMode('normal');
+    });
+  });
+  syncModeToggle();
 }
 
 function wireSpotifyMenu() {
@@ -3287,6 +3314,7 @@ wireSavedPlaces();
 wireMarkerSheet();
 wireControls();
 wireSpotifyMenu();
+bindModeToggle();
 initMap();
 installOfflineWatch();
 applyAppMode();

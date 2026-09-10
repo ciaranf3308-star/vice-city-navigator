@@ -1,0 +1,25 @@
+/* ============================================================
+   GTA V — view toggle skin: minimal pause-menu chrome.
+   Translucent black, hairline rules, Chalet caps, green active
+   marker. Structure/placement/mode-visibility live in styles.css.
+   ============================================================ */
+body.theme-gta-v #mode-toggle{
+  gap:0;background:rgba(9,11,9,.74);
+  border:1px solid rgba(255,255,255,.22);border-radius:3px;
+  overflow:hidden;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  font-family:'Chalet London','Chalet Comprime',sans-serif;
+}
+body.theme-gta-v #mode-toggle button{
+  border-radius:0;padding:0 22px;min-height:52px;
+  font-size:13px;letter-spacing:.3em;text-transform:uppercase;
+  color:#8f978f;transition:all .15s ease;
+}
+body.theme-gta-v #mode-toggle button+button{
+  border-left:1px solid rgba(255,255,255,.13);
+}
+body.theme-gta-v #mode-toggle button.on{
+  color:#f2f5f2;background:rgba(118,185,0,.14);
+  box-shadow:inset 0 -2px 0 #76b900;
+}
+body.theme-gta-v #mode-toggle button:not(.on):hover{color:#c9d1c9}
