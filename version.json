@@ -1,7 +1,7 @@
 {
-  "build": "gta-v-cluster-dashbtn-2026-09-10",
+  "build": "gta-v-cluster-skyline-2026-09-10",
   "shell": "ws-shell-v68",
-  "theme": "ws-theme-v198",
+  "theme": "ws-theme-v199",
   "assets": {
     "index.html": "45890e8390be33ff",
     "styles.css": "4495188db9dc7867",
@@ -21,6 +21,7 @@
     "themes/gta-v/cluster.css": "7e2a78a2d4b42db9",
     "themes/gta-v/cluster.js": "c5e4b06d38de998d",
     "themes/gta-v/spotify-cluster.css": "5c636bfff8a353fd",
-    "themes/gta-v/spotify-cluster.js": "702d2d15f7077d59"
+    "themes/gta-v/spotify-cluster.js": "702d2d15f7077d59",
+    "themes/gta-v/cluster/skyline.png": "0c687a3b6c334d83"
   }
 }
