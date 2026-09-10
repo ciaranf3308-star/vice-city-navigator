@@ -209,7 +209,26 @@
     });
     if (inGvCluster()) { hookStyle(); tick(); }
     wasIn = inGvCluster();
+    gvFadeDebug();
   });
+
+  /* ---------- ?gvfade=1: crossfade layer debug toggles (local QA only) ----------
+     Query-gated: adds body.gvfade ONLY when the param is present, so the
+     debug HUD and the 1-5 layer toggles have zero impact on production. */
+  function gvFadeDebug() {
+    var qs = '';
+    try { qs = location.search || ''; } catch (e) {}
+    if (!/[?&]gvfade=1/.test(qs)) return;
+    document.body.classList.add('gvfade');
+    var layers = ['gvdbg-hide-skyline', 'gvdbg-hide-map', 'gvdbg-hide-atmo',
+                  'gvdbg-hide-speedrad', 'gvdbg-hide-cards'];
+    var codes = { Digit1: 0, Digit2: 1, Digit3: 2, Digit4: 3, Digit5: 4,
+                  Numpad1: 0, Numpad2: 1, Numpad3: 2, Numpad4: 3, Numpad5: 4 };
+    document.addEventListener('keydown', function (e) {
+      if (!(e.code in codes)) return;
+      document.body.classList.toggle(layers[codes[e.code]]);
+    });
+  }
 
   setInterval(tick, 1000);
 })();

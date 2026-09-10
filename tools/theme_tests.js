@@ -1878,7 +1878,7 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
 // music cards overlapping the map's right edge, thin speed digits.
 {
   const gvCss = fs.readFileSync(path.join(REPO, 'themes/gta-v/cluster.css'), 'utf8');
-  ok(gvCss.includes('#gv-map-atmo') && /linear-gradient[\s\S]*?rgba\(8,10,12/.test(gvCss),
+  ok(gvCss.includes('#gv-map-atmo') && /linear-gradient[\s\S]*?rgba\(10,13,15/.test(gvCss),
     'GTA V cluster dissolves map edges via atmospheric gradient overlay');
 
   /* REGRESSION: CSS must parse cleanly — rules at END of file must be in CSSOM.
@@ -1910,6 +1910,18 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
     'GTA V cluster styles the top bar, power bar, maneuver card and bottom bar');
   ok(gvCss.includes('#gv-skyline'),
     'GTA V cluster paints the skyline silhouette behind the speed cluster');
+  /* Crossfade architecture (2026-09-10): the scene/map transition is carried
+     by overlapping alpha ramps, never by a hard scenic-image|map seam. */
+  ok(/body\.cluster-mode\.theme-gta-v #gv-skyline[\s\S]{0,600}width:1250px/.test(gvCss),
+    'GTA V crossfade: scenic plate spans 1250px (350px overlap with the map)');
+  ok(/#gv-skyline[\s\S]{0,1200}mask-image:linear-gradient\(to right,[\s\S]*?transparent 100%\)/.test(gvCss),
+    'GTA V crossfade: scenic plate fades via alpha mask, not a black gradient');
+  ok(!/mask-image:url\("data:image\/svg/.test(gvCss),
+    'GTA V crossfade: no SVG data-uri masks (regression: v195 unclosed quote)');
+  ok(/#map[\s\S]{0,400}z-index:20/.test(gvCss) &&
+     /#gv-map-atmo[\s\S]{0,600}z-index:22/.test(gvCss) &&
+     /#gv-skyline[\s\S]{0,600}z-index:24/.test(gvCss),
+    'GTA V crossfade z-order: map 20 < atmo veil 22 < scenic plate 24');
   ok(/body\.cluster-mode\.theme-gta-v #(cluster-header|cluster-footer|cluster-gauge)[\s\S]{0,400}display:none/.test(gvCss),
     'GTA V cluster hides the generic cluster chrome');
   ok(indexSrc.includes('id="gv-topbar"') && indexSrc.includes('id="gv-turn-card"') &&

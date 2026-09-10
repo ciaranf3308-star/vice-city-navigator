@@ -19,30 +19,46 @@ body.cluster-mode.theme-gta-v #menu-btn{display:none!important}
 
 /* ---------- live map ---------- */
 body.cluster-mode.theme-gta-v #map{
-  left:900px;top:100px;width:680px;height:520px;
+  left:900px;top:94px;width:680px;height:534px;
   border-radius:0;z-index:20;
-  -webkit-mask-image:linear-gradient(106deg,
-    transparent 0%,rgba(0,0,0,.10) 7%,rgba(0,0,0,.45) 15%,
-    #000 28%,#000 88%,rgba(0,0,0,.55) 95%,transparent 100%);
-  mask-image:linear-gradient(106deg,
-    transparent 0%,rgba(0,0,0,.10) 7%,rgba(0,0,0,.45) 15%,
-    #000 28%,#000 88%,rgba(0,0,0,.55) 95%,transparent 100%)}
+  /* Secondary mask only: the crossfade is carried by #gv-skyline's alpha
+     mask + #gv-map-atmo. Gentle feathers keep the raw canvas edges buried. */
+  -webkit-mask-image:linear-gradient(to right,
+    transparent 0%,rgba(0,0,0,.5) 6%,#000 14%,
+    #000 92%,rgba(0,0,0,.6) 97%,transparent 100%);
+  mask-image:linear-gradient(to right,
+    transparent 0%,rgba(0,0,0,.5) 6%,#000 14%,
+    #000 92%,rgba(0,0,0,.6) 97%,transparent 100%)}
 
 /* ---------- scenic plate ---------- */
 #gv-skyline{display:none}
 body.cluster-mode.theme-gta-v #gv-skyline{
   display:block;position:absolute;
-  left:0;top:94px;width:1000px;height:520px;
-  z-index:24;pointer-events:none;overflow:hidden}
+  left:0;top:94px;width:1250px;height:520px;
+  z-index:24;pointer-events:none;overflow:hidden;
+  /* CROSSFADE: the plate's ALPHA fades to transparent (never to black).
+     350px of physical overlap with the map (starts x=900). At x=900 the
+     plate is still ~60% opaque; at x=1000 nothing special happens;
+     scene mixed with map at x=1100; map dominates by x=1200; gone by 1250. */
+  -webkit-mask-image:linear-gradient(to right,
+    #000 0%,#000 48%,
+    rgba(0,0,0,.92) 58%,rgba(0,0,0,.72) 68%,
+    rgba(0,0,0,.42) 80%,rgba(0,0,0,.15) 91%,
+    transparent 100%);
+  mask-image:linear-gradient(to right,
+    #000 0%,#000 48%,
+    rgba(0,0,0,.92) 58%,rgba(0,0,0,.72) 68%,
+    rgba(0,0,0,.42) 80%,rgba(0,0,0,.15) 91%,
+    transparent 100%)}
 #gv-skyline img{
   width:100%;height:100%;object-fit:cover;object-position:left center;
   filter:grayscale(.92) brightness(.62) contrast(1.08) sepia(.08)}
+/* ::after is VERTICAL / LUMINANCE control only: shade under the header,
+   deep lower falloff, speed readability. It must NOT build the right-side
+   fade — the mask above owns horizontal alpha. */
 #gv-skyline::after{
   content:"";position:absolute;inset:0;
   background:
-    linear-gradient(to right,
-      transparent 0%,transparent 45%,
-      rgba(10,13,15,.25) 62%,rgba(10,13,15,.75) 82%,#0a0d0f 100%),
     linear-gradient(to bottom,
       #0a0d0f 0%,transparent 15%,
       transparent 68%,rgba(10,13,15,.55) 84%,#0a0d0f 100%)}
@@ -86,6 +102,16 @@ body.cluster-mode.theme-gta-v #cluster-speed{
     radial-gradient(ellipse 45% 50% at 50% 48%,rgba(0,0,0,.78),rgba(0,0,0,.35) 52%,transparent 75%),
     radial-gradient(ellipse 85% 70% at 50% 48%,rgba(0,0,0,.32),transparent 78%);
   padding:28px 0 24px}
+/* Broad soft dark field behind the instrument: suppresses skyline detail,
+   merges scenic darkness into the map transition. Huge radius, no boundary.
+   Local contrast control, not a vignette. Paints above the plate/veil
+   (inside the speed's stacking context) but below the digits. */
+body.cluster-mode.theme-gta-v #cluster-speed::before{
+  content:"";position:absolute;inset:-170px -200px;z-index:-1;
+  pointer-events:none;
+  background:radial-gradient(ellipse 380px 300px at 50% 45%,
+    rgba(10,13,15,.78) 0%,rgba(10,13,15,.52) 35%,
+    rgba(10,13,15,.20) 65%,transparent 100%)}
 body.cluster-mode.theme-gta-v #cluster-speed-num{
   font-family:'Helvetica Neue',Helvetica,'Inter',system-ui,sans-serif;
   font-weight:100;font-size:210px;line-height:.95;color:#f2f4f4;
@@ -248,11 +274,20 @@ body.cluster-mode.theme-gta-v #gv-geo-plane{
 #gv-map-atmo{display:none}
 body.cluster-mode.theme-gta-v #gv-map-atmo{
   display:block;position:absolute;
-  left:900px;top:100px;width:680px;height:520px;
-  z-index:21;pointer-events:none;
-  background:linear-gradient(to bottom,
-    transparent 0%,transparent 55%,
-    rgba(8,10,12,.45) 82%,rgba(8,10,12,.85) 100%)}
+  left:760px;top:94px;width:720px;height:534px;
+  z-index:22;pointer-events:none;
+  /* Atmospheric veil, NOT a visible gradient: opaque before the map's
+     physical edge (x=900), transparent across a wide region. If its end
+     can be pointed at, it is too short. */
+  background:
+    linear-gradient(108deg,
+      #0a0d0f 0%,#0a0d0f 15%,
+      rgba(10,13,15,.96) 25%,rgba(10,13,15,.82) 36%,
+      rgba(10,13,15,.58) 48%,rgba(10,13,15,.30) 60%,
+      rgba(10,13,15,.10) 70%,transparent 80%),
+    linear-gradient(to bottom,
+      rgba(10,13,15,.22) 0%,transparent 14%,
+      transparent 73%,rgba(10,13,15,.35) 88%,rgba(10,13,15,.75) 100%)}
 
 /* ---------- left branding ---------- */
 #gv-brand-left{display:none}
@@ -271,3 +306,21 @@ body.cluster-mode.theme-gta-v #gv-brand-left{
   letter-spacing:.28em;color:rgba(255,255,255,.38);line-height:1.8}
 #gv-brand-left .bl2 .w-rule{
   width:40px;height:1px;background:rgba(255,255,255,.14);margin-top:8px}
+
+/* ---------- ?gvfade=1 debug: crossfade layer toggles (local QA only) ----------
+   Query-gated: the body.gvfade class is added by cluster.js ONLY when the
+   ?gvfade=1 query param is present. Zero impact on production otherwise. */
+#gv-fade-hud{display:none}
+body.gvfade #gv-fade-hud{
+  display:flex;position:absolute;left:16px;bottom:110px;z-index:90;
+  gap:10px;align-items:center;
+  font-family:'Chalet London',sans-serif;font-size:13px;letter-spacing:.18em;
+  color:#9fb3b3;background:rgba(8,10,12,.88);
+  border:1px solid rgba(255,255,255,.18);
+  padding:8px 14px;border-radius:4px;pointer-events:none;white-space:nowrap}
+body.gvfade.gvdbg-hide-skyline #gv-skyline,
+body.gvfade.gvdbg-hide-map #map,
+body.gvfade.gvdbg-hide-atmo #gv-map-atmo,
+body.gvfade.gvdbg-hide-cards #gv-turn-card,
+body.gvfade.gvdbg-hide-cards #spotify-pane{display:none!important}
+body.gvfade.gvdbg-hide-speedrad #cluster-speed::before{display:none!important}
