@@ -13,7 +13,7 @@ html body.theme-gta-v.cluster-mode #spotify-pane{position:absolute;left:1350px;t
 html body.theme-gta-v.cluster-mode .gvcl{display:flex!important;width:100%;height:100%;
   margin:0;pointer-events:auto;align-items:center;gap:28px;padding:30px 36px 30px 62px;
   font-family:'Chalet London',sans-serif;box-sizing:border-box;position:relative}
-.gvcl-artwrap{position:relative;width:158px;height:158px;flex:none;border-radius:6px;
+.gvcl-artwrap{position:relative;width:132px;height:132px;flex:none;border-radius:6px;
   overflow:hidden;background:#14181b}
 .gvcl-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;
   transition:opacity .4s}
@@ -22,10 +22,10 @@ html body.theme-gta-v.cluster-mode .gvcl{display:flex!important;width:100%;heigh
   color:#3d4747}
 .gvcl-art-idle svg{width:56px;height:56px;fill:currentColor}
 .gvcl-info{flex:1;min-width:0;display:flex;flex-direction:column}
-.gvcl-title{font-size:33px;color:#f0f3f3;letter-spacing:.06em;white-space:nowrap;
-  overflow:hidden;text-overflow:ellipsis}
-.gvcl-artist{font-size:24px;color:#8b9595;letter-spacing:.1em;margin-top:6px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gvcl-title{font-size:26px;color:#f0f3f3;letter-spacing:.04em;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;line-height:1.25;max-width:100%}
+.gvcl-artist{font-size:19px;color:#8b9595;letter-spacing:.08em;margin-top:4px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
 .gvcl-artist.gvcl-status{color:#e8a33d;font-style:italic}
 .gvcl-progress{margin-top:18px}
 .gvcl-bar{position:relative;height:6px;border-radius:3px;background:rgba(255,255,255,.14);
