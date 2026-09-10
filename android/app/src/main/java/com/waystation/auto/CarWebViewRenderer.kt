@@ -57,6 +57,9 @@ class CarWebViewRenderer(private val carContext: CarContext) {
 
         /** Retry backoff after a failed dashboard load (ms), then every 60s. */
         private val BACKOFF_MS = longArrayOf(2_000L, 4_000L, 8_000L, 16_000L)
+
+        /** Custom-scheme hook for the offline page's Retry button. */
+        private const val RETRY_URL = "waystation://retry"
     }
 
     /** JS nav state → host NavigationManager (wired in WayStationScreen). */
@@ -90,6 +93,52 @@ class CarWebViewRenderer(private val carContext: CarContext) {
     // built-in error page itself — without this the error page's finish
     // would cancel the retry we just scheduled.
     private var loadFailed = false
+    // True while our branded offline page is up (instead of the WebView's
+    // raw "Web page not available"). Reset whenever a real dashboard load
+    // is attempted.
+    private var errorPageShown = false
+
+    /** Branded offline page: dark, gold accents, one big Retry target.
+     *  Shown instead of the WebView's raw error page so a dead connection
+     *  never strands the driver on a broken surface. Auto-retry keeps
+     *  running underneath; the button just hurries it along. */
+    private fun errorPageHtml() = """
+        <!DOCTYPE html><html><head><meta name="viewport"
+        content="width=device-width,initial-scale=1">
+        <style>
+        *{box-sizing:border-box;margin:0}
+        body{background:#0d0b09;color:#f5d9a8;font-family:sans-serif;
+          display:flex;align-items:center;justify-content:center;
+          min-height:100vh;text-align:center;padding:24px}
+        .mark{font-size:52px;color:#e8a33d;margin-bottom:18px}
+        h1{font-size:30px;letter-spacing:1px;margin-bottom:12px;color:#fff}
+        p{font-size:17px;line-height:1.5;color:rgba(245,217,168,.75);
+          margin-bottom:28px}
+        .btn{display:inline-block;background:#e8a33d;color:#1a1206;
+          font-size:20px;font-weight:700;letter-spacing:.5px;
+          padding:16px 54px;border-radius:999px;text-decoration:none}
+        .note{margin-top:22px;font-size:14px;color:rgba(245,217,168,.45)}
+        </style></head><body><div>
+        <div class="mark">&#9672;</div>
+        <h1>No connection</h1>
+        <p>WayStation couldn't reach the dashboard.<br>
+        Check the phone's internet &mdash; retrying automatically.</p>
+        <a class="btn" href="$RETRY_URL">Retry now</a>
+        <div class="note">WayStation</div>
+        </div></body></html>
+    """.trimIndent()
+
+    private fun showErrorPage() {
+        if (errorPageShown) return
+        errorPageShown = true
+        try {
+            // base URL null -> page URL is about:blank, so onPageFinished's
+            // origin guard never mistakes it for a successful dashboard load.
+            webView?.loadDataWithBaseURL(null, errorPageHtml(), "text/html", "utf-8", null)
+        } catch (e: Exception) {
+            Log.w(TAG, "error page load threw", e)
+        }
+    }
 
     private fun scheduleRetry() {
         cancelRetry()
@@ -102,9 +151,12 @@ class CarWebViewRenderer(private val carContext: CarContext) {
         val r = Runnable {
             retryRunnable = null
             try {
-                webView?.reload()
+                // loadUrl, not reload(): the WebView may be sitting on our
+                // offline page, and reload() would just re-show that.
+                errorPageShown = false
+                webView?.loadUrl(DASH_URL)
             } catch (e: Exception) {
-                Log.w(TAG, "retry reload threw", e)
+                Log.w(TAG, "retry load threw", e)
                 scheduleRetry()
             }
         }
@@ -120,6 +172,7 @@ class CarWebViewRenderer(private val carContext: CarContext) {
     private fun notePageLoaded() {
         cancelRetry()
         retryCount = 0
+        errorPageShown = false // real page is up; a later failure may show the offline page again
         onPageLoadState?.invoke(true)
     }
 
@@ -127,16 +180,19 @@ class CarWebViewRenderer(private val carContext: CarContext) {
         Log.w(TAG, "dashboard page failed: $reason")
         loadFailed = true
         onPageLoadState?.invoke(false)
+        showErrorPage()
         scheduleRetry()
     }
 
-    /** Manual escape hatch (native Reload action): reset backoff, reload now. */
+    /** Manual escape hatch (native Reload action) and the offline page's
+     *  Retry button: reset backoff, load the dashboard fresh right now. */
     fun reloadNow() {
         cancelRetry()
         retryCount = 0
+        errorPageShown = false
         onPageLoadState?.invoke(false)
         try {
-            webView?.reload()
+            webView?.loadUrl(DASH_URL)
         } catch (e: Exception) {
             Log.w(TAG, "manual reload threw", e)
             scheduleRetry()
@@ -253,15 +309,28 @@ class CarWebViewRenderer(private val carContext: CarContext) {
             }
         }
         wv.webViewClient = object : WebViewClient() {
+            override fun shouldOverrideUrlLoading(
+                view: WebView,
+                request: WebResourceRequest
+            ): Boolean {
+                // Offline page's Retry button -> immediate fresh dashboard load.
+                if (request.url.toString() == RETRY_URL) {
+                    reloadNow()
+                    return true
+                }
+                return false
+            }
+
             override fun onPageStarted(view: WebView, url: String, favicon: android.graphics.Bitmap?) {
                 handoffDone = false // new page → token handoff may run again
                 loadFailed = false
             }
 
             override fun onPageFinished(view: WebView, url: String) {
-                // onPageFinished also fires for the built-in error page;
-                // only a clean finish counts as loaded (see loadFailed).
-                if (!loadFailed) notePageLoaded()
+                // onPageFinished also fires for our offline page (about:blank);
+                // only a clean finish of the real dashboard counts as loaded,
+                // otherwise the offline page would cancel its own retries.
+                if (!loadFailed && url.startsWith(WAYSTATION_ORIGIN)) notePageLoaded()
                 forwardAreas()
                 startPoll()
             }

@@ -437,7 +437,44 @@ function instrText(step) {
 }
 
 /* ---------------- map init ---------------- */
+/* ---------------- offline resilience ----------------
+   No data must never mean a white screen. Connectivity is tracked via
+   navigator.onLine plus online/offline events (banner), and if the map
+   style can't load we paint a styled offline placeholder into the map
+   container — auto-retried when the connection comes back — instead of
+   leaving it blank white. */
+let mapBootFailed = false;
+let mapBooting = false;
+function paintMapOffline(el) {
+  if (!el || el.querySelector('.ws-offline-map')) return;
+  const d = document.createElement('div');
+  d.className = 'ws-offline-map';
+  d.innerHTML = '<div><div class="ws-offline-icon">\u26a0</div>' +
+    '<div class="ws-offline-title">No connection</div>' +
+    '<div class="ws-offline-sub">The map will load automatically when you\u2019re back online.</div></div>';
+  el.appendChild(d);
+}
+function clearMapOffline(el) {
+  if (!el) return;
+  const d = el.querySelector('.ws-offline-map');
+  if (d) d.remove();
+}
+function setOfflineState() {
+  const offline = !navigator.onLine;
+  document.body.classList.toggle('is-offline', offline);
+  if (!offline && mapBootFailed && !mapBooting && !map) {
+    mapBootFailed = false;
+    initMap();
+  }
+}
+function installOfflineWatch() {
+  window.addEventListener('offline', setOfflineState);
+  window.addEventListener('online', setOfflineState);
+  setOfflineState();
+}
 async function initMap() {
+  if (map || mapBooting) return;
+  mapBooting = true;
   if (window.VCNThemes) VCNThemes.restore();
   // Paint the theme chrome (bars, menu docking, Spotify skin) immediately:
   // the dashboard must never depend on vector tiles arriving.
@@ -456,18 +493,24 @@ async function initMap() {
     style = await res.json();
   } catch (e) {
     toast('Could not load the map style. Check your connection.');
+    paintMapOffline(mapEl);
+    mapBootFailed = true;
+    mapBooting = false;
     return;
   }
   const glOk = !window.maplibregl || typeof maplibregl.supported !== 'function' || maplibregl.supported();
   if (!glOk) {
     mapEl.innerHTML = '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#ff71ce;font:16px sans-serif;text-align:center;padding:20px">Map needs WebGL.<br>Try a browser with hardware acceleration enabled.</div>';
     toast('Map could not start: WebGL unavailable.');
+    mapBooting = false;
     return;
   }
   map = new maplibregl.Map({
     container: mapEl, style, center: DUBLIN, zoom: 12,
     attributionControl: { compact: true }
   });
+  mapBooting = false;
+  clearMapOffline(mapEl);
   map.on('load', () => {
     try { map.on('move', syncDashCompass); } catch (e) {}
     try { map.on('moveend', queueDashLocality); } catch (e) {}
@@ -3130,6 +3173,7 @@ wireMarkerSheet();
 wireControls();
 wireSpotifyMenu();
 initMap();
+installOfflineWatch();
 applyAppMode();
 initSpotify();
 installCarBridge(); // ?car=1: Android Auto WebView bridge (no-op otherwise)

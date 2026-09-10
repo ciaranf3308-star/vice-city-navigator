@@ -1,12 +1,12 @@
 {
   "build": "voice-search-2026-09-09",
   "shell": "ws-shell-v68",
-  "theme": "ws-theme-v177",
+  "theme": "ws-theme-v178",
   "assets": {
-    "index.html": "86d008ab8033f0b7",
-    "styles.css": "f257327a8af55041",
-    "app.js": "0829f5237517ef14",
-    "sw.js": "8cdd926268163fe7",
+    "index.html": "b2d24a020c0a24f3",
+    "styles.css": "4495188db9dc7867",
+    "app.js": "00e11c2c6a5da668",
+    "sw.js": "b04d7ea7a2839de4",
     "themes/vice-city/spotify-skin.css": "541717ee14ca80e5",
     "themes/vice-city/phone.css": "87909b9d4538ba87",
     "themes/gta-v/dashboard.css": "d7248b9f49c87080",

@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v177"), 'SW theme cache v177');
+ok(swSrc.includes("ws-theme-v178"), 'SW theme cache v178');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -1860,6 +1860,23 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
 {
   const addCount = (appSrc.match(/new maplibregl\.AttributionControl/g) || []).length;
   ok(addCount <= 1, `single attribution control (found ${addCount})`);
+}
+// graceful offline: no-data must never white-screen. Banner element,
+// banner + placeholder styles, connectivity watch, and the map boot
+// failure path painting a placeholder instead of leaving blank white.
+{
+  const html = fs.readFileSync(path.join(REPO, 'index.html'), 'utf8');
+  const css = fs.readFileSync(path.join(REPO, 'styles.css'), 'utf8');
+  ok(html.includes('id="offline-banner"'), 'offline banner element exists');
+  ok(css.includes('#offline-banner') && css.includes('body.is-offline'),
+    'offline banner styles keyed on body.is-offline');
+  ok(css.includes('.ws-offline-map'), 'offline map placeholder styles exist');
+  ok(/installOfflineWatch\(\)/.test(appSrc), 'offline watch installed at boot');
+  ok(/addEventListener\('offline'/.test(appSrc) && /addEventListener\('online'/.test(appSrc),
+    'online/offline events toggle the offline state');
+  ok(/paintMapOffline\(mapEl\)/.test(appSrc),
+    'map style failure paints the offline placeholder instead of blank white');
+  ok(/mapBootFailed/.test(appSrc), 'failed map boot is retried on reconnect');
 }
 // stage lifecycle: teardown runs before build so a stale home never yanks
 // the shared map/Spotify nodes out of the stage just entered
