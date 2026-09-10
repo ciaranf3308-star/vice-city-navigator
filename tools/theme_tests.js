@@ -172,7 +172,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
-ok(swSrc.includes("ws-theme-v185"), 'SW theme cache v185');
+ok(swSrc.includes("ws-theme-v186"), 'SW theme cache v186');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
@@ -1800,6 +1800,13 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
   const spd = () => vm.runInContext('gpsSpeed', vBox);
   vBox.setGpsSpeed(182, 0.3, 1); // 657 km/h spike while standing still
   ok(Math.abs(spd() - 0.3) < 1e-9, 'speed: 182 m/s spike while stationary is refused (falls back to displacement)');
+  // 2692 km/h couch bug: wild coords.speed on first fix with jumping displacement
+  const vBox2 = { Date: { now: () => T } };
+  vm.createContext(vBox2);
+  vm.runInContext(vSrc, vBox2, { filename: 'speed-validation-2' });
+  const spd2 = () => vm.runInContext('gpsSpeed', vBox2);
+  vBox2.setGpsSpeed(747, 50, 1); // 2692 km/h glitch, null history, 50 m/s jump
+  ok(spd2() < 100, 'speed: 747 m/s wild fix is never accepted (absolute cap)');
   adv(1000); vBox.setGpsSpeed(0.2, 0.2, 1);
   ok(Math.abs(spd() - 0.2) < 1e-9, 'speed: real fixes flow through');
   for (let i = 1; i <= 10; i++) { adv(1000); vBox.setGpsSpeed(i * 2.5, i * 2.5, 1); }

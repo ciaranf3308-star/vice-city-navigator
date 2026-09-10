@@ -910,9 +910,17 @@ function setGpsSpeed(candidate, fixMs, dtSec) {
   const dt = (typeof dtSec === 'number' && dtSec > 0) ? dtSec : 1;
   const fix = (typeof fixMs === 'number' && isFinite(fixMs) && fixMs >= 0) ? fixMs : 0;
   let v = (typeof candidate === 'number' && isFinite(candidate) && candidate >= 0) ? candidate : NaN;
+  // Absolute physical sanity: no road vehicle does 100 m/s (360 km/h). A
+  // wilder coords.speed on a bad fix (e.g. 747 m/s while sitting still) is a
+  // receiver glitch, not speed — drop it outright before any other check.
+  if (!isNaN(v) && v > 100) v = NaN;
   // displacement cross-check: the phone isn't moving, the claim is bogus
   if (!isNaN(v) && fix < 2 && v > 10) v = fix;
   else if (!isNaN(v) && gpsSpeed === null && fix < 5 && v > 15) v = fix; // first fix: extra strict
+  // No history to gate against (first fix / after staleness): the candidate
+  // must roughly agree with displacement. A wild coords.speed paired with a
+  // jumping fix is not speed — trust the displacement instead.
+  if (!isNaN(v) && gpsSpeed === null && Math.abs(v - fix) > 30) v = fix;
   if (isNaN(v)) {
     // receiver gave nothing usable; displacement is still truth
     if (gpsSpeed === null || now - gpsRejectSince > 5000) { gpsSpeed = fix; gpsSpeedAt = now; gpsRejectSince = 0; }
