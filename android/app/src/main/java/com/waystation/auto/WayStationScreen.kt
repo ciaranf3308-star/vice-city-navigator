@@ -37,7 +37,6 @@ class WayStationScreen(carContext: CarContext) : Screen(carContext) {
         carContext.getCarService(NavigationManager::class.java)
 
     private var navActive = false
-    private var spotifyConnected = false
     private var locationGranted = false
     private var pageFailed = false
 
@@ -92,13 +91,9 @@ class WayStationScreen(carContext: CarContext) : Screen(carContext) {
                 else navManager.navigationEnded()
             }
         }
-        renderer.onSpotifyConnected = { connected ->
-            main.post {
-                if (connected == spotifyConnected) return@post
-                spotifyConnected = connected
-                invalidate() // show/hide the Connect Spotify action
-            }
-        }
+        // Spotify connection state is no longer needed here — auth happens
+        // on the phone and the car picks it up automatically. No Connect
+        // action to show/hide.
         renderer.locationPermissionGranted = { locationGranted }
         // When the page needs geolocation but we don't have permission yet,
         // trigger the system permission request immediately — don't wait for
@@ -174,14 +169,11 @@ class WayStationScreen(carContext: CarContext) : Screen(carContext) {
                     .build()
             )
         }
-        if (!spotifyConnected) {
-            actions.add(
-                Action.Builder()
-                    .setTitle("Connect Spotify")
-                    .setOnClickListener { renderer.startSpotifyAuth() }
-                    .build()
-            )
-        }
+        // NOTE: No "Connect Spotify" action on the head unit. Spotify auth
+        // happens once in the phone app (which mirrors the token to native
+        // storage); the car WebView picks it up automatically via
+        // trySpotifyHandoff(). The old Custom Tab flow was unreliable and
+        // is now redundant.
         if (pageFailed) {
             actions.add(
                 Action.Builder()
