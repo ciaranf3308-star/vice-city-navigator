@@ -75,6 +75,20 @@ class CarWebViewRenderer(private val carContext: CarContext) {
     /** Native location permission state (wired in WayStationScreen). */
     var locationPermissionGranted: (() -> Boolean)? = null
 
+    /** Called when the page needs geolocation but permission isn't granted yet —
+     *  the screen should trigger a permission request. */
+    var onLocationPermissionNeeded: (() -> Unit)? = null
+
+    /** Pending WebView geolocation callbacks. While the Android runtime
+     *  permission request is still in flight, the page may already ask for
+     *  geolocation. Answering "no" at that moment poisons the WebView's
+     *  origin permission state — the later grant never takes effect and the
+     *  page keeps reporting PERMISSION_DENIED forever. So we HOLD the
+     *  callback and answer it once the real permission result is known. */
+    private val pendingGeoCallbacks =
+        mutableListOf<Pair<String, GeolocationPermissions.Callback>>()
+    private var locationRequestInFlight = false
+
     private val main = Handler(Looper.getMainLooper())
     private val spotifyAuth = SpotifyAuthManager(carContext)
 
@@ -236,6 +250,13 @@ class CarWebViewRenderer(private val carContext: CarContext) {
 
             val wv = WebView(pres.context)
             webView = wv
+            // Nuke any stale geolocation denial cached for our origin by a
+            // previous run — a fresh renderer must never inherit a "no".
+            try {
+                GeolocationPermissions.getInstance().clear(WAYSTATION_ORIGIN)
+            } catch (e: Exception) {
+                Log.w(TAG, "clear geolocation state failed", e)
+            }
             configureWebView(wv)
             pres.setContentView(
                 wv,
@@ -294,18 +315,36 @@ class CarWebViewRenderer(private val carContext: CarContext) {
             /**
              * Geolocation is granted ONLY to the WayStation origin and ONLY
              * after the Android location permission is actually granted.
-             * Unknown origins are always denied. No second GPS
-             * implementation: phone location → WebView
-             * navigator.geolocation → the existing app.js logic.
+             * Unknown origins are always denied. While a permission request
+             * is in flight (or not yet started), we HOLD the callback instead
+             * of denying — a premature "no" poisons the WebView's origin
+             * state and the page reports PERMISSION_DENIED forever.
              */
             override fun onGeolocationPermissionsShowPrompt(
                 origin: String,
                 callback: GeolocationPermissions.Callback
             ) {
-                val granted = origin == WAYSTATION_ORIGIN &&
-                    (locationPermissionGranted?.invoke() == true)
-                Log.i(TAG, "geolocation prompt for $origin -> $granted")
-                callback.invoke(origin, granted, false)
+                if (origin != WAYSTATION_ORIGIN) {
+                    Log.i(TAG, "geolocation prompt for $origin -> denied (unknown origin)")
+                    callback.invoke(origin, false, false)
+                    return
+                }
+                if (locationPermissionGranted?.invoke() == true) {
+                    try {
+                        GeolocationPermissions.getInstance().clear(origin)
+                    } catch (e: Exception) { /* best effort */ }
+                    Log.i(TAG, "geolocation prompt for $origin -> granted")
+                    callback.invoke(origin, true, false)
+                    return
+                }
+                // Permission not yet granted: hold the callback and trigger
+                // a permission request. Never answer "no" prematurely.
+                Log.i(TAG, "geolocation prompt for $origin -> holding (permission not yet granted)")
+                pendingGeoCallbacks.add(origin to callback)
+                if (!locationRequestInFlight) {
+                    locationRequestInFlight = true
+                    onLocationPermissionNeeded?.invoke()
+                }
             }
         }
         wv.webViewClient = object : WebViewClient() {
@@ -550,6 +589,43 @@ class CarWebViewRenderer(private val carContext: CarContext) {
         } catch (e: Exception) {
             Log.w(TAG, "reload failed", e)
         }
+    }
+
+    /**
+     * Called by the screen when the Android location permission result is
+     * known. Answers every held WebView geolocation callback with the real
+     * result, then reloads the page for a clean state.
+     */
+    fun onLocationPermissionResult() {
+        locationRequestInFlight = false
+        flushPendingGeoCallbacks()
+        if (locationPermissionGranted?.invoke() == true) {
+            reloadPage()
+        }
+    }
+
+    /**
+     * Answer every held WebView geolocation callback with the current live
+     * permission state.
+     */
+    private fun flushPendingGeoCallbacks() {
+        if (pendingGeoCallbacks.isEmpty()) return
+        val allow = locationPermissionGranted?.invoke() == true
+        val pending = pendingGeoCallbacks.toList()
+        pendingGeoCallbacks.clear()
+        for ((origin, cb) in pending) {
+            try {
+                if (allow) {
+                    try {
+                        GeolocationPermissions.getInstance().clear(origin)
+                    } catch (e: Exception) { /* best effort */ }
+                }
+                cb.invoke(origin, allow, false)
+            } catch (e: Exception) {
+                Log.w(TAG, "flushPendingGeoCallbacks failed", e)
+            }
+        }
+        Log.i(TAG, "flushed ${pending.size} pending geolocation callbacks allow=$allow")
     }
 
     /** Kick off the native Spotify PKCE login (Custom Tab on the phone).

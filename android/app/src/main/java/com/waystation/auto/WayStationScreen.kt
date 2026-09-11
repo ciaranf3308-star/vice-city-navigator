@@ -100,6 +100,12 @@ class WayStationScreen(carContext: CarContext) : Screen(carContext) {
             }
         }
         renderer.locationPermissionGranted = { locationGranted }
+        // When the page needs geolocation but we don't have permission yet,
+        // trigger the system permission request immediately — don't wait for
+        // the user to find the "Enable location" action.
+        renderer.onLocationPermissionNeeded = {
+            main.post { requestLocationPermission() }
+        }
         // Dashboard load state drives the native Reload action: while the
         // page has failed (and is auto-retrying) the user gets a manual
         // escape hatch on the head unit instead of a dead surface.
@@ -135,12 +141,9 @@ class WayStationScreen(carContext: CarContext) : Screen(carContext) {
             OnRequestPermissionsListener { granted, _ ->
                 locationGranted = granted.contains(Manifest.permission.ACCESS_FINE_LOCATION) ||
                     granted.contains(Manifest.permission.ACCESS_COARSE_LOCATION)
-                if (locationGranted) {
-                    // The page was denied geolocation while permission was
-                    // missing; reload once so its watchPosition re-prompts
-                    // and the native grant takes effect.
-                    renderer.reloadPage()
-                }
+                // Answer any held WebView geolocation callbacks with the real
+                // result, then reload for a clean page state.
+                renderer.onLocationPermissionResult()
                 invalidate() // show/hide the Enable location action
             }
         )
