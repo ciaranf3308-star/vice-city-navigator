@@ -26,6 +26,7 @@
 <link href="themes/gta-v/cluster.css" rel="stylesheet">
 <link href="themes/rdr2/dashboard.css" rel="stylesheet">
 <link href="themes/rdr2/mode-toggle.css" rel="stylesheet">
+<link href="themes/rdr2/cluster.css" rel="stylesheet">
 <link href="themes/vice-city/spotify-skin.css" rel="stylesheet">
 <link href="themes/san-andreas/spotify-skin.css" rel="stylesheet">
 <link href="themes/san-andreas/spotify-cluster.css" rel="stylesheet">
@@ -397,6 +398,7 @@
     <div id="cluster-turn-instruction"></div>
   </div>
   <div id="gv-turn-idle" aria-hidden="true"><div class="t1">NO ACTIVE ROUTE</div><div class="t2">Set a destination to begin guidance</div></div>
+  <div id="rdr-turn-idle" aria-hidden="true"><div class="t1">NO ACTIVE ROUTE</div><div class="t2">Set a destination to begin guidance</div></div>
   <div id="cluster-trip" hidden></div>
   </div>
   <div id="cluster-speed">
@@ -429,10 +431,35 @@
     <div class="gv-btag"><svg viewBox="0 0 34 34" aria-hidden="true"><path d="M16 33h2l-.7-14h-.6z"/><path d="M17 17c-4-3.2-8.5-3.8-11.5-2.8 2.6.3 5.2 1.6 7.2 3.6-3.1-.6-6.2.4-7.7 2.4 3-.6 6.1-.1 8.2 1.4-2 1-3.6 3-4.2 5.1 1.6-1.6 3.6-2.6 5.6-2.6.5 2.1 1.5 4 3 5.4-.3-2.3.3-4.5 1.6-6.2 2 .4 4.4 1.2 6.4 2.4-1.8-2.2-4.5-3.4-7.6-3.1 2-1.6 4.6-2.4 7.2-2.2-3.1-1.6-7.2-1.9-11.2-.4z"/></svg><div><b>GOOD PEOPLE</b><span>BETTER TOMORROW</span></div></div>
   </footer>
   <button id="cluster-mode-exit" type="button">Exit cluster</button>
+  <!-- RDR2 console view layers -->
+  <div id="rdr-dusk" aria-hidden="true"></div>
+  <header id="rdr-topbar">
+    <button id="rdr-cluster-menu" type="button" aria-label="Open menu"><svg viewBox="0 0 40 30" aria-hidden="true"><path d="M6 7h28M6 15h28M6 23h28"/></svg></button>
+    <div class="rdr-brand">WAYSTATION</div>
+    <div class="rdr-hairline" aria-hidden="true"></div>
+    <div class="rdr-div" aria-hidden="true"></div>
+    <div class="rdr-place"><b id="rdr-place">DUBLIN</b><span id="rdr-county">CO. DUBLIN</span></div>
+    <div class="rdr-div" aria-hidden="true"></div>
+    <div class="rdr-coords" id="rdr-coords">ACQUIRING SIGNAL</div>
+    <div class="rdr-div" aria-hidden="true"></div>
+    <div class="rdr-time" id="rdr-time">--:--</div>
+    <div class="rdr-div" aria-hidden="true"></div>
+    <div class="rdr-wx"><span id="rdr-wxicon" aria-hidden="true"></span><div><b id="rdr-temp">--°C</b><span id="rdr-cond">--</span></div></div>
+  </header>
+  <footer id="rdr-bottombar">
+    <nav id="rdr-tabs" aria-label="Presentation">
+      <button type="button" data-tab="cluster" class="on">CLUSTER</button>
+      <button type="button" data-tab="dashboard">DASH</button>
+    </nav>
+    <div class="rdr-bsp"></div>
+    <div class="rdr-bplace"><b id="rdr-bplace">DUBLIN</b><span>FRONTIER MAPS</span></div>
+    <button id="rdr-exit" type="button">EXIT&nbsp;CLUSTER</button>
+  </footer>
 </section>
 
 <script src="car.js"></script>
 <script src="app.js"></script>
 <script src="themes/gta-v/cluster.js"></script>
+<script src="themes/rdr2/cluster.js"></script>
 </body>
 </html>

@@ -2237,5 +2237,35 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
     'MainActivity: coarse-only state gets a non-blocking accuracy note, never "Location blocked"');
 }
 
+/* ---------- RDR2 cluster console view (2026-09-11): full art-directed
+   rebuild at the GTA V cluster's finish bar — dedicated cluster.css +
+   cluster.js, dusk scenic plate, composed map window, themed top/bottom
+   bars, zero generic chrome. */
+{
+  const rdrCluster = fs.readFileSync(path.join(REPO, 'themes/rdr2/cluster.css'), 'utf8');
+  ok(rdrCluster.includes('#rdr-dusk'), 'RDR2 cluster has a scenic dusk plate');
+  ok(/header-dusk\.png/.test(rdrCluster), 'RDR2 cluster plate uses the frontier dusk art');
+  ok(/mask-image:linear-gradient\(to right/.test(rdrCluster), 'RDR2 cluster plate crossfades alpha (never to black)');
+  ok(rdrCluster.includes('#rdr-topbar'), 'RDR2 cluster has a themed top bar');
+  ok(rdrCluster.includes('#rdr-bottombar'), 'RDR2 cluster has a themed bottom bar');
+  ok(/#rdr-exit/.test(rdrCluster), 'RDR2 cluster exit is a themed leather tab, not a generic button');
+  ok(/body\.cluster-mode\.theme-rdr2 #cluster-mode-exit\{[^}]*display:none/.test(rdrCluster) ||
+     /#cluster-mode-exit,/.test(rdrCluster), 'RDR2 cluster hides the generic exit button');
+  ok(/body\.cluster-mode\.theme-rdr2 #gv-turn-card\{\s*\n?\s*display:block/.test(rdrCluster),
+    'RDR2 cluster turn card is visible (fixes the display:none parent bug)');
+  ok(rdrCluster.includes('#rdr-turn-idle'), 'RDR2 cluster has its own idle card');
+  ok(/body\.cluster-mode\.theme-rdr2 \.rdsp\{/.test(rdrCluster), 'RDR2 cluster repositions the frontier radio panel');
+  ok(!/cluster-mode\.theme-rdr2/.test(fs.readFileSync(path.join(REPO, 'themes/rdr2/dashboard.css'), 'utf8')),
+    'RDR2 cluster rules live in cluster.css, not dashboard.css');
+  const rdrJs = fs.readFileSync(path.join(REPO, 'themes/rdr2/cluster.js'), 'utf8');
+  ok(rdrJs.includes('rdr-time') && rdrJs.includes('rdr-place'), 'RDR2 cluster.js paints clock + place');
+  ok(indexSrc.includes('themes/rdr2/cluster.css') && indexSrc.includes('themes/rdr2/cluster.js'),
+    'index.html loads the RDR2 cluster files');
+  ok(swSrc.includes('themes/rdr2/cluster.css') && swSrc.includes('themes/rdr2/cluster.js'),
+    'SW precaches the RDR2 cluster files');
+  ok(indexSrc.includes('id="rdr-dusk"') && indexSrc.includes('id="rdr-topbar"') && indexSrc.includes('id="rdr-bottombar"'),
+    'index.html carries the RDR2 cluster DOM nodes');
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

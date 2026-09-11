@@ -33,6 +33,7 @@ const SHELL = [
   'themes/san-andreas/dashboard/cluster-overlay.png',
   'themes/gta-v/dashboard.css', 'themes/gta-v/mode-toggle.css',
   'themes/rdr2/dashboard.css', 'themes/rdr2/mode-toggle.css',
+  'themes/rdr2/cluster.css', 'themes/rdr2/cluster.js',
   'themes/registry.js',
   'themes/vice-city/theme.js', 'themes/san-andreas/theme.js',
   'themes/gta-v/theme.js', 'themes/rdr2/theme.js',
