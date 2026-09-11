@@ -149,6 +149,10 @@ const cssSrc = fs.readFileSync(path.join(REPO, 'styles.css'), 'utf8')
   + ['vice-city','san-andreas','gta-v','rdr2'].map(t => {
     try { return fs.readFileSync(path.join(REPO, `themes/${t}/dashboard.css`), 'utf8'); }
     catch (e) { return ''; }
+  }).join('\n')
+  + ['vice-city','san-andreas','gta-v','rdr2'].map(t => {
+    try { return fs.readFileSync(path.join(REPO, `themes/${t}/cluster.css`), 'utf8'); }
+    catch (e) { return ''; }
   }).join('\n');
 const swBox = { self: { addEventListener() {} }, caches: undefined, console };
 vm.createContext(swBox);
@@ -171,7 +175,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v68"), 'SW shell cache v68');
+ok(swSrc.includes("ws-shell-v69"), 'SW shell cache v69');
 ok(swSrc.includes("ws-theme-v214"), 'SW theme cache v214');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
@@ -576,7 +580,7 @@ for (const sel of ['#cluster-header', '#cluster-footer', '#cluster-gauge', '#clu
                    '#cluster-turn-compass']) {
   ok(cssSrc.includes(`body.cluster-mode.theme-vice-city ${sel}`), `VC hero skin styles ${sel}`);
 }
-ok(cssSrc.includes('.cg-seg'), 'VC hero: gauge segment styling present');
+ok(cssSrc.includes('.vc-pb-regen') || cssSrc.includes('#vc-powerbar'), 'VC hero: power bar styling present');
 // wiring (source-level guards)
 ok(/maybeFetchSpeedLimit\(lat, lon\) \{\s*\n\s*if \(!speedDisplayActive\(\)\)/.test(appSrc),
   'speed limit lookup runs in cluster mode too');
@@ -2048,54 +2052,33 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
     'stage teardowns tolerate a stale home.next (no insertBefore crash)');
 }
 
-// VC cluster reuses the dashboard bars + sunset panorama (2026-09-09)
+// VC cluster: hero-based console (2026-09-11 rebuild) — rectangular nav panel,
+// scenic Ocean Drive plate, dedicated vc-* chrome. Replaces the circular radar.
 {
   const fs = require('fs');
   ok(fs.existsSync('themes/vice-city/dashboard/cluster-oceandrive.jpg'), 'VC cluster Ocean Drive panorama asset exists');
   ok(swSrc.includes('themes/vice-city/dashboard/cluster-oceandrive.jpg'), 'SW precaches the VC cluster backdrop');
-  ok(appSrc.includes("const CLUSTER_STAGE_NODES = ['map', 'spotify-pane', 'dash-topbar', 'dash-bottombar']"),
-    'dash bars reparent into the cluster stage');
-  ok(/body\.cluster-mode\.theme-vice-city #cluster-ui\{[^}]*cluster-oceandrive\.jpg[^}]*\/ 100% 100%/.test(cssSrc),
-    'VC cluster paints the backdrop 1:1 on the stage (no crop: art is 8:3, stage is 8:3)');
-  ok(/body\.cluster-mode\.theme-vice-city::before\{[^}]*cluster-oceandrive\.jpg[^}]*blur/.test(cssSrc),
-    'VC cluster letterbox is the same art blurred+dimmed, not a second crop');
-  ok(/body\.cluster-mode\.theme-vice-city #map\{[^}]*width:440px;height:440px[^}]*border-radius:50%/.test(cssSrc),
-    'VC cluster radar is a true circle: square 440 map masked round');
-  ok(/body\.cluster-mode\.theme-vice-city #map\{[^}]*overflow:hidden/.test(cssSrc),
-    'VC cluster radar clips the live map to the circle');
-  ok(!cssSrc.includes('#cluster-ui:has(#cluster-turn:not([hidden])) #map'),
-    'VC cluster turn tab never shrinks the radar map');
-  ok(/body\.cluster-mode\.theme-vice-city #cluster-minimap\{[^}]*border-radius:50%/.test(cssSrc),
-    'VC cluster radar frame is a circular ring assembly');
-  ok(/body\.cluster-mode\.theme-vice-city #cluster-minimap\{[^}]*255,45,149/.test(cssSrc) && /body\.cluster-mode\.theme-vice-city #cluster-minimap\{[^}]*1,205,254/.test(cssSrc),
-    'VC cluster radar ring: hot-pink edge with cyan accent');
-  ok(cssSrc.includes('#cluster-radar-north') && indexSrc.includes('id="cluster-radar-north"'),
-    'VC cluster radar carries a north cue on the bezel');
-  ok(appSrc.includes('function syncRadarNorth'),
-    'radar N tracks the live map bearing (never faked)');
-  ok(cssSrc.includes('body.cluster-mode.theme-vice-city #map::after'),
-    'VC cluster radar has an inset ring above the tiles');
-  ok(/body\.cluster-mode\.theme-vice-city #map \.maplibregl-ctrl-bottom-right/.test(cssSrc),
-    'VC cluster attribution is tucked inside the circular clip');
-  ok(/body\.cluster-mode\.theme-vice-city #cluster-turn:not\(\[hidden\]\)/.test(cssSrc),
-    'VC cluster turn information is a compact tab, not a card');
-  ok(/body\.cluster-mode\.theme-vice-city \.vcsp\{[^}]*filter:\s*drop-shadow/.test(cssSrc),
-    'VC cluster music widget wears a drop shadow');
-  ok(cssSrc.includes('body.cluster-mode.theme-vice-city #cluster-header{display:none}'),
-    'VC cluster retires its old header for the dashboard topbar');
-  ok(/body\.cluster-mode\.theme-vice-city #cluster-footer\{[^}]*background:none/.test(cssSrc),
-    'VC cluster footer is a transparent tab strip on the dashboard bottombar');
-  ok(cssSrc.includes('body.theme-vice-city:is(.dashboard-mode,.cluster-mode) #dash-topbar{'),
-    'VC topbar chrome is shared between dashboard and cluster');
-  const syncFn = appSrc.slice(appSrc.indexOf('function syncClusterHeader'));
-  ok(syncFn.includes("$('dash-date')") && syncFn.includes("$('dash-time')") && syncFn.includes("$('dash-temp')"),
-    'VC cluster header sync keeps the reused topbar clock/temp live');
-  ok(appSrc.includes("#dash-topbar .dash-brand"),
-    'VC cluster brand mark keeps menu access (replaces the retired cluster logo)');
-  for (const t of ['san-andreas', 'gta-v', 'rdr2'])
-    ok(cssSrc.includes(`body.cluster-mode.theme-${t} #dash-topbar,`) ||
-       cssSrc.includes(`body.cluster-mode:not(.theme-vice-city) #dash-topbar,`),
-      `${t} cluster never shows the dashboard bars`);
+  ok(fs.existsSync('themes/vice-city/cluster.css'), 'VC cluster has dedicated cluster.css');
+  ok(fs.existsSync('themes/vice-city/cluster.js'), 'VC cluster has dedicated cluster.js');
+  ok(indexSrc.includes('themes/vice-city/cluster.css'), 'VC cluster.css is linked in index.html');
+  ok(indexSrc.includes('themes/vice-city/cluster.js'), 'VC cluster.js is linked in index.html');
+  ok(indexSrc.includes('id="vc-topbar"'), 'VC cluster top bar DOM exists');
+  ok(indexSrc.includes('id="vc-navpanel"'), 'VC cluster nav panel DOM exists');
+  ok(indexSrc.includes('id="vc-speedzone"'), 'VC cluster speed zone DOM exists');
+  ok(indexSrc.includes('id="vc-mediapanel"'), 'VC cluster media panel DOM exists');
+  ok(indexSrc.includes('id="vc-bottombar"'), 'VC cluster bottom bar DOM exists');
+  ok(/body\.cluster-mode\.theme-vice-city #vc-scenic\{[^}]*cluster-oceandrive\.jpg/.test(cssSrc),
+    'VC cluster scenic plate uses the Ocean Drive art');
+  ok(/body\.cluster-mode\.theme-vice-city #vc-navpanel\{/.test(cssSrc),
+    'VC cluster nav panel is styled');
+  ok(/body\.cluster-mode\.theme-vice-city #map\{[^}]*left:44px/.test(cssSrc),
+    'VC cluster map is docked in the nav panel');
+  ok(/body\.cluster-mode\.theme-vice-city #vc-speed-num\{/.test(cssSrc),
+    'VC cluster has a dedicated speed readout');
+  ok(/body\.cluster-mode\.theme-vice-city #vc-tabs button/.test(cssSrc),
+    'VC cluster bottom tabs are styled');
+  ok(/body\.cluster-mode\.theme-vice-city #mode-toggle\{display:none/.test(cssSrc),
+    'VC cluster hides the floating toggle (tabs own switching)');
 }
 
 /* ============ view toggle: cluster <-> dash (per-theme skins) ============ */

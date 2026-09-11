@@ -21,6 +21,7 @@
 <link href="themes/san-andreas/mode-toggle.css" rel="stylesheet">
 <link href="themes/san-andreas/phone.css" rel="stylesheet">
 <link href="themes/san-andreas/cluster.css" rel="stylesheet">
+<link href="themes/vice-city/cluster.css" rel="stylesheet">
 <link href="themes/gta-v/dashboard.css" rel="stylesheet">
 <link href="themes/gta-v/mode-toggle.css" rel="stylesheet">
 <link href="themes/gta-v/cluster.css" rel="stylesheet">
@@ -455,10 +456,39 @@
     <div class="rdr-bplace"><b id="rdr-bplace">DUBLIN</b><span>FRONTIER MAPS</span></div>
     <button id="rdr-exit" type="button">EXIT&nbsp;CLUSTER</button>
   </footer>
+  <!-- VC console view layers -->
+  <div id="vc-scenic" aria-hidden="true"></div>
+  <header id="vc-topbar">
+    <button id="vc-cluster-menu" type="button" aria-label="Open menu"></button>
+    <div class="vc-brand"><img src="themes/vice-city/dashboard/waystation-logo.png" alt="WayStation"></div>
+    <div class="vc-wx"><span id="vc-temp">--°C</span><span id="vc-wxicon" aria-hidden="true"></span></div>
+    <div class="vc-clock"><span id="vc-date"></span><span id="vc-time"></span></div>
+    <div class="vc-tagline" aria-hidden="true">Good Roads<span>Better Times</span></div>
+  </header>
+  <div id="vc-navpanel" aria-hidden="true"><div id="vc-navpanel-frame"></div></div>
+  <div id="vc-speedzone" aria-hidden="true">
+    <div id="vc-speed"><span id="vc-speed-num">--</span><span class="vc-speed-unit">km/h</span></div>
+    <div id="vc-powerbar"><span class="vc-pb-regen">REGEN</span><span class="vc-pb-coast">COAST</span><span class="vc-pb-power">POWER</span></div>
+    <div id="vc-batt"><span id="vc-battpct">--%</span><span class="vc-batt-sep"></span><span id="vc-range">-- km</span><span class="vc-range-label">RANGE</span></div>
+  </div>
+  <div id="vc-mediapanel" aria-hidden="true">
+    <div class="vc-vclogo">vice city</div>
+    <div class="vc-music-tag">GOOD MUSIC<span>BETTER TIMES</span></div>
+  </div>
+  <footer id="vc-bottombar">
+    <nav id="vc-tabs" aria-label="Presentation">
+      <button type="button" data-tab="cluster" class="on">CLUSTER</button>
+      <button type="button" data-tab="dashboard">DASHBOARD</button>
+      <button type="button" data-tab="map">MAP</button>
+    </nav>
+    <div class="vc-prnd" aria-hidden="true"><span class="prnd-on">D</span><span>P</span><span>R</span><span>N</span><span>D</span></div>
+    <div class="vc-blogo" aria-hidden="true">Vice city</div>
+  </footer>
 </section>
 
 <script src="car.js"></script>
 <script src="app.js"></script>
+<script src="themes/vice-city/cluster.js"></script>
 <script src="themes/gta-v/cluster.js"></script>
 <script src="themes/rdr2/cluster.js"></script>
 </body>

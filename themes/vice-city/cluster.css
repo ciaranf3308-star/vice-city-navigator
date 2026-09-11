@@ -1,0 +1,247 @@
+/* ============================================================
+   WayStation — VICE CITY CLUSTER console view.
+   Scope: body.cluster-mode.theme-vice-city ONLY.
+   Stage: 1920x720. Hero: themes/vice-city/cluster/hero.png (2048x768, scale 0.9375).
+   ============================================================ */
+
+/* ---------- stage + chrome reset ---------- */
+body.cluster-mode.theme-vice-city #cluster-ui{background:#07030f}
+body.cluster-mode.theme-vice-city #cluster-header,
+body.cluster-mode.theme-vice-city #cluster-footer,
+body.cluster-mode.theme-vice-city #cluster-minimap,
+body.cluster-mode.theme-vice-city #cluster-radar-north,
+body.cluster-mode.theme-vice-city #cluster-gauge,
+body.cluster-mode.theme-vice-city #cluster-mode-exit,
+body.cluster-mode.theme-vice-city #cluster-turn-compass,
+body.cluster-mode.theme-vice-city #cluster-logo,
+body.cluster-mode.theme-vice-city #cluster-wx,
+body.cluster-mode.theme-vice-city #cluster-clock,
+body.cluster-mode.theme-vice-city #cluster-tagline,
+body.cluster-mode.theme-vice-city #menu-btn,
+body.cluster-mode.theme-vice-city #dash-topbar,
+body.cluster-mode.theme-vice-city #dash-bottombar{display:none!important}
+
+/* ---------- scenic plate: Ocean Drive at dusk ---------- */
+#vc-scenic{display:none}
+body.cluster-mode.theme-vice-city #vc-scenic{
+  display:block;position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:url('dashboard/cluster-oceandrive.jpg') center 30%/cover no-repeat;
+}
+/* darken edges so chrome sits proud of the scene */
+body.cluster-mode.theme-vice-city #vc-scenic::after{
+  content:'';position:absolute;inset:0;
+  background:
+    linear-gradient(to bottom, rgba(7,3,15,.72) 0%, rgba(7,3,15,0) 18%),
+    linear-gradient(to top, rgba(7,3,15,.78) 0%, rgba(7,3,15,0) 22%),
+    radial-gradient(120% 90% at 50% 45%, rgba(0,0,0,0) 55%, rgba(7,3,15,.55) 100%);
+}
+
+/* ---------- top bar ---------- */
+#vc-topbar{display:none}
+body.cluster-mode.theme-vice-city #vc-topbar{
+  display:flex;position:absolute;left:0;top:0;width:1920px;height:72px;z-index:40;
+  align-items:center;gap:18px;padding:0 28px;
+  background:linear-gradient(to bottom, rgba(10,4,20,.92), rgba(10,4,20,.55) 70%, transparent);
+  border-bottom:2px solid rgba(255,45,149,.75);
+  box-shadow:0 2px 18px rgba(255,45,149,.35), 0 1px 0 rgba(255,113,206,.6);
+}
+body.cluster-mode.theme-vice-city #vc-topbar::after{
+  content:'';position:absolute;left:0;right:0;bottom:-2px;height:2px;
+  background:linear-gradient(to right, transparent 0%, rgba(255,45,149,.9) 12%, rgba(255,45,149,.9) 88%, transparent 100%);
+  filter:blur(1px);
+}
+body.cluster-mode.theme-vice-city #vc-cluster-menu{
+  width:44px;height:44px;flex:0 0 auto;border-radius:10px;cursor:pointer;
+  background:rgba(10,4,20,.6);border:1px solid rgba(255,45,149,.5);
+}
+body.cluster-mode.theme-vice-city .vc-brand img{height:40px;width:auto;display:block;
+  filter:drop-shadow(0 0 8px rgba(255,45,149,.6))}
+body.cluster-mode.theme-vice-city .vc-wx{
+  display:flex;align-items:center;gap:10px;
+  font-family:'Pricedown Bl',sans-serif;font-size:34px;color:#01cdfe;letter-spacing:2px;
+  text-shadow:0 0 12px rgba(1,205,254,.8);
+}
+body.cluster-mode.theme-vice-city .vc-clock{
+  margin-left:auto;margin-right:auto;text-align:center;
+  font-family:'Pricedown Bl',sans-serif;letter-spacing:3px;
+}
+body.cluster-mode.theme-vice-city .vc-clock #vc-date{
+  display:block;font-size:22px;color:#ff71ce;text-shadow:0 0 10px rgba(255,45,149,.7);
+}
+body.cluster-mode.theme-vice-city .vc-clock #vc-time{
+  display:block;font-size:40px;color:#ffd319;line-height:1;
+  text-shadow:0 0 14px rgba(255,211,25,.8);
+}
+body.cluster-mode.theme-vice-city .vc-tagline{
+  font-family:'Pricedown Bl',sans-serif;font-size:24px;color:#ff71ce;text-align:right;
+  line-height:1.1;text-shadow:0 0 10px rgba(255,45,149,.7);
+}
+body.cluster-mode.theme-vice-city .vc-tagline span{display:block}
+
+/* ---------- left nav panel ---------- */
+#vc-navpanel{display:none}
+body.cluster-mode.theme-vice-city #vc-navpanel{
+  display:block;position:absolute;left:20px;top:100px;width:360px;height:520px;z-index:30;
+  pointer-events:none;
+}
+body.cluster-mode.theme-vice-city #vc-navpanel-frame{
+  position:absolute;inset:0;border-radius:26px;
+  background:linear-gradient(160deg, rgba(12,5,24,.88), rgba(8,3,18,.94));
+  border:2px solid rgba(255,45,149,.65);
+  box-shadow:
+    0 0 0 1px rgba(1,205,254,.35),
+    0 0 24px rgba(255,45,149,.30),
+    0 0 70px rgba(255,45,149,.12),
+    0 18px 44px rgba(0,0,0,.6),
+    inset 0 0 40px rgba(255,45,149,.06);
+}
+/* live map sits in the panel window */
+body.cluster-mode.theme-vice-city #map{
+  left:44px;top:252px;width:312px;height:288px;z-index:31;
+  border-radius:14px;overflow:hidden;
+  border:1px solid rgba(1,205,254,.4);
+  box-shadow:inset 0 0 24px rgba(0,0,0,.5);
+}
+body.cluster-mode.theme-vice-city #map::after{
+  content:'';position:absolute;inset:0;z-index:2;pointer-events:none;border-radius:14px;
+  box-shadow:inset 0 0 0 6px rgba(6,3,14,.85), inset 0 0 30px rgba(0,0,0,.45);
+}
+/* maneuver card docked to panel top */
+body.cluster-mode.theme-vice-city #cluster-turn:not([hidden]){
+  left:44px;top:120px;z-index:32;transform:none;
+  display:flex;align-items:center;gap:14px;width:312px;
+  padding:10px 16px 10px 12px;
+  background:rgba(8,3,18,.92);
+  border:1px solid rgba(255,45,149,.55);border-radius:16px;
+  box-shadow:0 8px 22px rgba(0,0,0,.5), 0 0 16px rgba(255,45,149,.25);
+}
+body.cluster-mode.theme-vice-city #cluster-turn-arrow{width:46px;height:46px;flex:0 0 auto;
+  filter:drop-shadow(0 0 10px rgba(255,45,149,.8))}
+body.cluster-mode.theme-vice-city #cluster-turn-arrow svg{width:100%;height:100%;stroke:#ff71ce}
+body.cluster-mode.theme-vice-city #cluster-turn-distance{
+  font-family:'Pricedown Bl',sans-serif;font-size:44px;line-height:1;color:#ff71ce;
+  letter-spacing:2px;text-shadow:0 0 14px rgba(255,45,149,.75)}
+body.cluster-mode.theme-vice-city #cluster-turn-road{
+  font-family:'Pricedown Bl',sans-serif;font-size:24px;color:#01cdfe;letter-spacing:2px;
+  text-shadow:0 0 10px rgba(1,205,254,.7);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;max-width:220px}
+body.cluster-mode.theme-vice-city #cluster-turn-instruction{display:none}
+/* trip strip docked to panel bottom */
+body.cluster-mode.theme-vice-city #cluster-trip:not([hidden]){
+  display:flex;position:absolute;left:44px;top:556px;width:312px;z-index:32;
+  align-items:center;justify-content:center;gap:16px;
+  font-family:'Pricedown Bl',sans-serif;font-size:28px;letter-spacing:2px;color:#ff71ce;
+  text-shadow:0 0 10px rgba(255,45,149,.7)}
+body.cluster-mode.theme-vice-city #cluster-trip .trip-sep,
+body.cluster-mode.theme-vice-city #cluster-trip .trip-cyan{color:#01cdfe;text-shadow:0 0 10px rgba(1,205,254,.7)}
+
+/* ---------- center speed zone ---------- */
+#vc-speedzone{display:none}
+body.cluster-mode.theme-vice-city #vc-speedzone{
+  display:block;position:absolute;left:420px;top:100px;width:620px;height:520px;z-index:30;
+  pointer-events:none;text-align:center;
+}
+body.cluster-mode.theme-vice-city #vc-speed{margin-top:96px}
+body.cluster-mode.theme-vice-city #vc-speed-num{
+  font-family:'Pricedown Bl',sans-serif;font-size:190px;line-height:.9;color:#fff5fa;
+  letter-spacing:4px;
+  text-shadow:
+    0 0 18px rgba(255,45,149,.95),
+    0 0 55px rgba(255,45,149,.55),
+    0 0 120px rgba(255,45,149,.30),
+    0 4px 0 rgba(120,10,60,.9);
+}
+body.cluster-mode.theme-vice-city .vc-speed-unit{
+  display:block;font-family:'Pricedown Bl',sans-serif;font-size:44px;color:#ff71ce;
+  letter-spacing:14px;margin-top:6px;text-shadow:0 0 12px rgba(255,45,149,.8);
+}
+/* REGEN / COAST / POWER arc */
+body.cluster-mode.theme-vice-city #vc-powerbar{
+  margin:26px auto 0;display:flex;justify-content:center;gap:34px;
+  font-family:'Pricedown Bl',sans-serif;font-size:30px;letter-spacing:4px;
+}
+body.cluster-mode.theme-vice-city .vc-pb-regen{color:#01cdfe;text-shadow:0 0 12px rgba(1,205,254,.85)}
+body.cluster-mode.theme-vice-city .vc-pb-coast{color:#e8e4f0;text-shadow:0 0 10px rgba(232,228,240,.6)}
+body.cluster-mode.theme-vice-city .vc-pb-power{color:#ff71ce;text-shadow:0 0 12px rgba(255,45,149,.85)}
+body.cluster-mode.theme-vice-city #vc-batt{
+  margin-top:22px;display:flex;align-items:center;justify-content:center;gap:16px;
+  font-family:'Pricedown Bl',sans-serif;font-size:34px;letter-spacing:2px;
+}
+body.cluster-mode.theme-vice-city #vc-battpct{color:#01cdfe;text-shadow:0 0 12px rgba(1,205,254,.8)}
+body.cluster-mode.theme-vice-city .vc-batt-sep{width:2px;height:34px;background:rgba(255,45,149,.6);
+  box-shadow:0 0 8px rgba(255,45,149,.6)}
+body.cluster-mode.theme-vice-city #vc-range{color:#01cdfe;text-shadow:0 0 12px rgba(1,205,254,.8)}
+body.cluster-mode.theme-vice-city .vc-range-label{color:#8f86a8;font-size:22px;letter-spacing:6px}
+/* hide the generic speed readout; vc-speedzone owns it */
+body.cluster-mode.theme-vice-city #cluster-speed{display:none!important}
+
+/* ---------- right media panel ---------- */
+#vc-mediapanel{display:none}
+body.cluster-mode.theme-vice-city #vc-mediapanel{
+  display:block;position:absolute;left:1080px;top:140px;width:700px;height:480px;z-index:30;
+  pointer-events:none;
+  border-radius:26px;
+  background:linear-gradient(200deg, rgba(14,6,28,.90), rgba(8,3,18,.95));
+  border:2px solid rgba(1,205,254,.55);
+  box-shadow:
+    0 0 0 1px rgba(255,45,149,.35),
+    0 0 24px rgba(1,205,254,.28),
+    0 0 70px rgba(1,205,254,.10),
+    0 18px 44px rgba(0,0,0,.6),
+    inset 0 0 40px rgba(1,205,254,.05);
+}
+body.cluster-mode.theme-vice-city .vc-vclogo{
+  position:absolute;top:-64px;left:24px;
+  font-family:'Pricedown Bl',sans-serif;font-size:88px;color:#ff71ce;line-height:1;
+  transform:rotate(-4deg);
+  text-shadow:
+    0 0 12px rgba(255,45,149,.95),
+    0 0 40px rgba(255,45,149,.55),
+    3px 3px 0 rgba(120,10,60,.9);
+}
+body.cluster-mode.theme-vice-city .vc-music-tag{
+  position:absolute;top:-34px;left:330px;text-align:center;
+  font-family:'Pricedown Bl',sans-serif;font-size:19px;letter-spacing:5px;color:#e8e4f0;
+  text-shadow:0 0 8px rgba(232,228,240,.5);
+}
+body.cluster-mode.theme-vice-city .vc-music-tag span{display:block}
+/* Spotify lives inside the media panel */
+body.cluster-mode.theme-vice-city #spotify-pane{
+  position:absolute;left:1080px;top:200px;width:700px;height:420px;z-index:31;
+  display:block;
+}
+
+/* ---------- bottom bar ---------- */
+#vc-bottombar{display:none}
+body.cluster-mode.theme-vice-city #vc-bottombar{
+  display:flex;position:absolute;left:0;bottom:0;width:1920px;height:100px;z-index:40;
+  align-items:center;gap:8px;padding:0 28px;
+  background:linear-gradient(to top, rgba(10,4,20,.94), rgba(10,4,20,.55) 70%, transparent);
+  border-top:2px solid rgba(255,45,149,.75);
+  box-shadow:0 -2px 18px rgba(255,45,149,.35), 0 -1px 0 rgba(255,113,206,.6);
+}
+body.cluster-mode.theme-vice-city #vc-tabs{display:flex;gap:6px}
+body.cluster-mode.theme-vice-city #vc-tabs button{
+  font-family:'Pricedown Bl',sans-serif;font-size:30px;letter-spacing:3px;
+  color:#01cdfe;background:none;border:none;cursor:pointer;padding:10px 20px;
+  text-shadow:0 0 10px rgba(1,205,254,.7);
+}
+body.cluster-mode.theme-vice-city #vc-tabs button.on{
+  color:#ff71ce;text-shadow:0 0 14px rgba(255,45,149,.9);
+  border-bottom:3px solid #ff71ce;
+}
+body.cluster-mode.theme-vice-city #vc-tabs button[data-tab="dashboard"]:hover,
+body.cluster-mode.theme-vice-city #vc-tabs button[data-tab="map"]:hover{color:#ff71ce}
+body.cluster-mode.theme-vice-city .vc-prnd{
+  margin-left:auto;display:flex;gap:18px;align-items:center;
+  font-family:'Pricedown Bl',sans-serif;font-size:32px;letter-spacing:4px;color:#5a5470;
+}
+body.cluster-mode.theme-vice-city .vc-prnd .prnd-on{
+  color:#ff71ce;text-shadow:0 0 12px rgba(255,45,149,.9);
+}
+body.cluster-mode.theme-vice-city .vc-blogo{
+  font-family:'Pricedown Bl',sans-serif;font-size:34px;color:#ff71ce;margin-left:26px;
+  transform:rotate(-4deg);text-shadow:0 0 10px rgba(255,45,149,.7);
+}
+/* hide the floating mode toggle; vc-tabs owns switching */
+body.cluster-mode.theme-vice-city #mode-toggle{display:none!important}
