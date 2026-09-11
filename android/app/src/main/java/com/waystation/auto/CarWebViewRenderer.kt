@@ -571,13 +571,20 @@ class CarWebViewRenderer(private val carContext: CarContext) {
         if (handoffDone) return
         val tokenJson = spotifyAuth.storedTokenJson() ?: return
         val wv = webView ?: return
-        handoffDone = true
+        // Only mark done if the page actually received it — if the bridge
+        // isn't ready yet (page still loading), retry on the next poll.
         wv.evaluateJavascript(
-            "window.WayStationCar&&WayStationCar.setSpotifyAuth(" +
-                JSONObject.quote(tokenJson) + ")",
-            null
-        )
-        Log.i(TAG, "Spotify token handed to car WebView")
+            "(function(){try{return window.WayStationCar&&" +
+                "WayStationCar.setSpotifyAuth(" +
+                JSONObject.quote(tokenJson) + ");}catch(e){return false;}})()",
+        ) { result ->
+            if (result == "true") {
+                handoffDone = true
+                Log.i(TAG, "Spotify token handed to car WebView")
+            } else {
+                Log.i(TAG, "Spotify handoff deferred — page not ready, will retry")
+            }
+        }
     }
 
     /** Host asked to stop navigation: forward into the JS app so it stops
