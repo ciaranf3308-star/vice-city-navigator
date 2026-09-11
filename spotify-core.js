@@ -49,6 +49,15 @@
       if (auth) localStorage.setItem(AUTH_KEY, JSON.stringify(auth));
       else localStorage.removeItem(AUTH_KEY);
     } catch (e) {}
+    // Mirror to native storage so the car WebView picks it up without
+    // re-auth (phone ↔ car share the app's native prefs, not localStorage).
+    try {
+      if (window.WayStationCarNative && window.WayStationCarNative.onSpotifyAuthChanged) {
+        window.WayStationCarNative.onSpotifyAuthChanged(
+          auth ? JSON.stringify(auth) : ''
+        );
+      }
+    } catch (e) {}
   }
 
   /* ---------------- PKCE helpers ---------------- */

@@ -10,6 +10,7 @@ import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.webkit.GeolocationPermissions
+import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
@@ -29,6 +30,7 @@ import android.app.Activity
 class MainActivity : Activity() {
 
     private var webView: WebView? = null
+    private val spotifyAuth by lazy { SpotifyAuthManager(this) }
     // Android permission model: coarse (approximate) and fine (precise) are
     // independent grants. A user with "Location allowed, precise OFF" has
     // COARSE granted and FINE denied — that is a VALID granted state and
@@ -39,6 +41,26 @@ class MainActivity : Activity() {
     private var retryCount = 0
     private var retryRunnable: Runnable? = null
     private var loadFailed = false
+
+    /**
+     * Web → native bridge (injected as `window.WayStationCarNative`).
+     * Lets the page push Spotify auth into native storage so it carries
+     * over to the car WebView without re-auth.
+     */
+    inner class PhoneBridge {
+        @JavascriptInterface
+        fun onSpotifyAuthChanged(authJson: String) {
+            try {
+                if (authJson.isBlank()) return
+                val obj = org.json.JSONObject(authJson)
+                if (!obj.has("refresh_token")) return
+                spotifyAuth.storeTokenJson(authJson)
+                Log.i(TAG, "Spotify auth mirrored to native storage from phone WebView")
+            } catch (e: Exception) {
+                Log.w(TAG, "onSpotifyAuthChanged failed", e)
+            }
+        }
+    }
     // Pending WebView geolocation callbacks. While the Android runtime
     // permission request is still in flight, the page may already ask for
     // geolocation. Answering "no" at that moment poisons the WebView's
@@ -232,6 +254,9 @@ class MainActivity : Activity() {
         if (BuildConfig.WEBVIEW_DEBUG) {
             WebView.setWebContentsDebuggingEnabled(true)
         }
+        // Web → native bridge: lets the page push Spotify auth into native
+        // storage so it carries over to the car WebView without re-auth.
+        wv.addJavascriptInterface(PhoneBridge(), "WayStationCarNative")
         wv.setLayerType(View.LAYER_TYPE_HARDWARE, null)
         wv.settings.apply {
             javaScriptEnabled = true

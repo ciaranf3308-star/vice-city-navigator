@@ -63,6 +63,13 @@ class SpotifyAuthManager(private val context: Context) {
     /** Token JSON previously handed off (null until the user connects). */
     fun storedTokenJson(): String? = prefs.getString(KEY_TOKEN, null)
 
+    /** Mirror a token JSON from the web app (phone WebView) into native
+     *  storage so the car WebView can pick it up without re-auth. */
+    fun storeTokenJson(authJson: String) {
+        prefs.edit().putString(KEY_TOKEN, authJson).apply()
+        Log.i(TAG, "Spotify token mirrored from web; will hand off to car WebView on next poll")
+    }
+
     /** Launch the Spotify authorize page in a Custom Tab on the phone. */
     fun startAuth() {
         val verifier = randomString(64)

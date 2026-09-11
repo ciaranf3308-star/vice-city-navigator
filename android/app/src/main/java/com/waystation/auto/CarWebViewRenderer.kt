@@ -16,6 +16,7 @@ import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.GeolocationPermissions
+import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.car.app.CarContext
@@ -295,6 +296,10 @@ class CarWebViewRenderer(private val carContext: CarContext) {
         if (BuildConfig.WEBVIEW_DEBUG) {
             WebView.setWebContentsDebuggingEnabled(true) // chrome://inspect in DHU
         }
+        // Web → native bridge: lets the page push Spotify auth (and future
+        // state) into native storage so it survives across WebView instances
+        // (phone ↔ car) without re-auth.
+        wv.addJavascriptInterface(CarBridge(), "WayStationCarNative")
         wv.setLayerType(View.LAYER_TYPE_HARDWARE, null)
         wv.settings.apply {
             javaScriptEnabled = true
@@ -675,5 +680,28 @@ class CarWebViewRenderer(private val carContext: CarContext) {
             t = sb.toString()
         }
         return t
+    }
+
+    /**
+     * Web → native bridge (injected as `window.WayStationCarNative`).
+     * Lets the page push state into native storage so it carries across
+     * WebView instances (phone ↔ car) without re-auth.
+     */
+    inner class CarBridge {
+        /** Page saved/renewed Spotify auth: mirror it into native storage
+         *  so the car WebView can pick it up via the existing handoff. */
+        @JavascriptInterface
+        fun onSpotifyAuthChanged(authJson: String) {
+            try {
+                if (authJson.isBlank()) return
+                // Validate it's real auth JSON before storing.
+                val obj = JSONObject(authJson)
+                if (!obj.has("refresh_token")) return
+                spotifyAuth.storeTokenJson(authJson)
+                Log.i(TAG, "Spotify auth mirrored to native storage")
+            } catch (e: Exception) {
+                Log.w(TAG, "onSpotifyAuthChanged failed", e)
+            }
+        }
     }
 }
