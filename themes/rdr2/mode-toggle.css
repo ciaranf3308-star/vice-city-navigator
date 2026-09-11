@@ -33,3 +33,4 @@ body.theme-rdr2 #mode-toggle button:not(.on):hover{color:#e6d29a}
 /* cluster mode: view switching lives in the bottom bar's #rdr-tabs —
    the floating toggle is hidden so there is never a duplicate control. */
 body.cluster-mode.theme-rdr2 #mode-toggle{display:none!important}
+

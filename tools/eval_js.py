@@ -7,7 +7,7 @@ P = 'remote-debugging-port=9'; P += '224'
 subprocess.run(['pkill', '-f', P], capture_output=True); time.sleep(1)
 C = '/opt/meta-chrom'; C += 'ium/chrome'
 ch = subprocess.Popen([C, '--headless=new', '--no-sandbox', '--disable-gpu',
-    '--user-data-dir=' + tempfile.mkdtemp(prefix='eval-prof-'), '--remote-debugging-port=9224',
+    '--user-data-dir=' + (profdir := tempfile.mkdtemp(prefix='eval-prof-')), '--remote-debugging-port=9224',
     '--remote-allow-origins=*', 'about:blank'],
     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 try:
@@ -42,4 +42,9 @@ try:
     print('VALUE:', res.get('value', res))
     ws.close()
 finally:
-    ch.terminate()
+    try:
+        ch.terminate()
+    except Exception:
+        pass
+    import shutil
+    shutil.rmtree(profdir, ignore_errors=True)

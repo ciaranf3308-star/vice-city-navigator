@@ -11,7 +11,7 @@ WAIT = float(sys.argv[5]) if len(sys.argv) > 5 else 8
 subprocess.run(['pkill', '-f', 'remote-debugging-port=9222'], capture_output=True)
 time.sleep(1)
 chrome = subprocess.Popen([CHROME, '--headless=new', '--no-sandbox', '--disable-gpu',
-    '--user-data-dir=' + tempfile.mkdtemp(prefix='shoot-prof-'), '--remote-debugging-port=9222',
+    '--user-data-dir=' + (profdir := tempfile.mkdtemp(prefix='shoot-prof-')), '--remote-debugging-port=9222',
     '--remote-allow-origins=*',
     f'--window-size={W},{H}', '--hide-scrollbars', 'about:blank'],
     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -46,4 +46,9 @@ try:
     ws.close()
     print('wrote', out)
 finally:
-    chrome.terminate()
+    try:
+        chrome.terminate()
+    except Exception:
+        pass
+    import shutil
+    shutil.rmtree(profdir, ignore_errors=True)

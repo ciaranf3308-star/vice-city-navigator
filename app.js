@@ -2457,6 +2457,7 @@ function fitDashboardStage() {
   stage.style.top = ((vh - DASH_H * s) / 2) + 'px';
   layoutDashMenu(); // re-dock the body-level menu panel to the new stage rect
   layoutDashDrawer(); // and the planning drawer
+  layoutModeToggle(); // and the view toggle (per-theme dashboard anchors)
 }
 
 /* ---------------- cluster stage: fixed 1920x720 canvas ----------------
@@ -3111,47 +3112,76 @@ function bindModeToggle() {
 const CLUSTER_TOGGLE_POS = {
   'san-andreas': { right: 40, top: 64 },   /* gold plate over the sky, clear of the exit sign */
   'gta-v':       { footer: '#gv-bottombar' }, /* centered in the footer bar, footer typography */
-  'rdr2':        { right: 40, top: 24 },   /* free black space, top-right */
+  /* rdr2: toggle is hidden in cluster mode — #rdr-tabs in the bottombar owns view switching */
+};
+/* Dashboard toggle anchors, in 1920x720 stage coords, per theme. The toggle
+   is body-level position:fixed, so it must be docked against the live
+   #dash-stage rect (letterboxed + zoomed) — pure CSS can't do this. */
+const DASH_TOGGLE_POS = {
+  'vice-city':  { right: 18, top: 90 },   /* top-right, below the 78px neon topbar */
+  'san-andreas':{ left: 18, top: 138 },   /* top-left, below the 126px topbar (music owns top-right) */
+  'rdr2':       { right: 18, top: 116 },  /* top-right, below the 104px frontier topbar */
+  /* gta-v: CSS owns it (docked in the footer) — not listed here */
 };
 function layoutModeToggle() {
   const t = $('mode-toggle');
   if (!t) return;
-  if (!clusterLayoutActive() || document.body.classList.contains('theme-vice-city')) {
-    t.style.left = ''; t.style.top = ''; t.style.right = ''; t.style.bottom = '';
-    return;
-  }
-  const stage = $('cluster-ui');
-  let r = null;
-  try { r = stage && stage.getBoundingClientRect(); } catch (e) {}
-  if (!r || !r.width) return; // stage not built yet; CSS fallback applies
-  const s = r.width / 1920; // live stage zoom
-  const a = CLUSTER_TOGGLE_POS[wsThemeId()] || { right: 40, top: 24 };
-  t.style.bottom = '';
-  if (a.footer) {
-    /* dock centered inside a footer bar (GTA V): measure the live bar rect
-       so the toggle tracks stage scale/letterboxing like everything else */
-    const fb = document.querySelector(a.footer);
-    const fr = fb && fb.getBoundingClientRect();
-    if (fr && fr.width > 0 && fr.height > 0) {
-      t.style.top = (fr.top + (fr.height - t.offsetHeight) / 2) + 'px';
-      t.style.left = (fr.left + (fr.width - t.offsetWidth) / 2) + 'px';
+  const theme = wsThemeId();
+  if (clusterLayoutActive() && !document.body.classList.contains('theme-vice-city')) {
+    const stage = $('cluster-ui');
+    let r = null;
+    try { r = stage && stage.getBoundingClientRect(); } catch (e) {}
+    if (!r || !r.width) return; // stage not built yet; CSS fallback applies
+    const s = r.width / 1920; // live stage zoom
+    const a = CLUSTER_TOGGLE_POS[theme] || { right: 40, top: 24 };
+    t.style.bottom = '';
+    if (a.footer) {
+      /* dock centered inside a footer bar (GTA V): measure the live bar rect
+         so the toggle tracks stage scale/letterboxing like everything else */
+      const fb = document.querySelector(a.footer);
+      const fr = fb && fb.getBoundingClientRect();
+      if (fr && fr.width > 0 && fr.height > 0) {
+        t.style.top = (fr.top + (fr.height - t.offsetHeight) / 2) + 'px';
+        t.style.left = (fr.left + (fr.width - t.offsetWidth) / 2) + 'px';
+        t.style.right = 'auto';
+        return;
+      }
+      /* footer not laid out yet: bottom-center of the stage as a transient */
+      t.style.top = (r.top + r.height - t.offsetHeight - 20 * s) + 'px';
+      t.style.left = (r.left + (r.width - t.offsetWidth) / 2) + 'px';
       t.style.right = 'auto';
       return;
     }
-    /* footer not laid out yet: bottom-center of the stage as a transient */
-    t.style.top = (r.top + r.height - t.offsetHeight - 20 * s) + 'px';
-    t.style.left = (r.left + (r.width - t.offsetWidth) / 2) + 'px';
-    t.style.right = 'auto';
+    t.style.top = (r.top + a.top * s) + 'px';
+    if (a.left != null) {
+      t.style.right = 'auto';
+      t.style.left = (r.left + a.left * s) + 'px';
+    } else {
+      t.style.left = 'auto';
+      t.style.right = Math.max(0, window.innerWidth - (r.left + (1920 - a.right) * s)) + 'px';
+    }
     return;
   }
-  t.style.top = (r.top + a.top * s) + 'px';
-  if (a.left != null) {
-    t.style.right = 'auto';
-    t.style.left = (r.left + a.left * s) + 'px';
-  } else {
-    t.style.left = 'auto';
-    t.style.right = Math.max(0, window.innerWidth - (r.left + (1920 - a.right) * s)) + 'px';
+  if (document.body.classList.contains('dashboard-mode') && DASH_TOGGLE_POS[theme]) {
+    const stage = $('dash-stage');
+    let r = null;
+    try { r = stage && stage.getBoundingClientRect(); } catch (e) {}
+    if (!r || !r.width) return; // stage not built yet; CSS fallback applies
+    const s = r.width / 1920; // live stage zoom
+    const a = DASH_TOGGLE_POS[theme];
+    t.style.bottom = '';
+    t.style.top = (r.top + a.top * s) + 'px';
+    if (a.left != null) {
+      t.style.right = 'auto';
+      t.style.left = (r.left + a.left * s) + 'px';
+    } else {
+      t.style.left = 'auto';
+      t.style.right = Math.max(0, window.innerWidth - (r.left + (1920 - a.right) * s)) + 'px';
+    }
+    return;
   }
+  /* GTA V dashboard (CSS-owned), VC cluster (hidden), phone map: clear inline geometry */
+  t.style.left = ''; t.style.top = ''; t.style.right = ''; t.style.bottom = '';
 }
 
 function wireSpotifyMenu() {

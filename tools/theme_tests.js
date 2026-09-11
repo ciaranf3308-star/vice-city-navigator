@@ -2237,6 +2237,20 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
     'MainActivity: coarse-only state gets a non-blocking accuracy note, never "Location blocked"');
 }
 
+/* ---------- dashboard toggle: per-theme stage docking (2026-09-11) ----------
+   The toggle is body-level position:fixed; the dashboard stage is letterboxed
+   + zoomed, so pure CSS can't dock it. JS (layoutModeToggle + DASH_TOGGLE_POS)
+   docks it against the live #dash-stage rect, view by view. */
+{
+  ok(/DASH_TOGGLE_POS\s*=\s*\{/.test(appSrc), 'DASH_TOGGLE_POS defines per-theme dashboard toggle anchors');
+  ok(/'vice-city':\s*\{\s*right:\s*18,\s*top:\s*90\s*\}/.test(appSrc), 'VC dashboard toggle: top-right below the neon topbar');
+  ok(/'san-andreas':\s*\{\s*left:\s*18,\s*top:\s*138\s*\}/.test(appSrc), 'SA dashboard toggle: top-left below the Grove Street topbar');
+  ok(/'rdr2':\s*\{\s*right:\s*18,\s*top:\s*116\s*\}/.test(appSrc), 'RDR2 dashboard toggle: top-right below the frontier topbar');
+  ok(!/'gta-v'/.test(appSrc.split('DASH_TOGGLE_POS')[1].split('};')[0]), 'GTA V dashboard toggle stays CSS-owned (footer dock)');
+  ok(/layoutModeToggle\(\); \/\/ and the view toggle \(per-theme dashboard anchors\)/.test(appSrc),
+    'fitDashboardStage re-docks the toggle on every fit');
+}
+
 /* ---------- RDR2 cluster console view (2026-09-11): full art-directed
    rebuild at the GTA V cluster's finish bar — dedicated cluster.css +
    cluster.js, dusk scenic plate, composed map window, themed top/bottom
