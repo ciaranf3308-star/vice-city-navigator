@@ -1,20 +1,65 @@
 {
-  "_note": "Theme style locks. When the user approves a theme's styling, set locked:true and record the sha256 of its dashboard.css. Tests fail if a locked theme's CSS changes without unlocking.",
-  "gta-v": {
-    "locked": false,
-    "sha256": null
-  },
-  "rdr2": {
-    "locked": false,
-    "sha256": null
-  },
-  "san-andreas": {
-    "locked": true,
-    "sha256": "06dcdb8bd00dcc3f736326d1fad49a5756e971741c4eae9df3d0c615076006f3",
-    "note": "HERO7 (2026-09-08) + visible-polish pass (2026-09-09): dash drawer Grove Street console w/ grove-panel hero band; active tab dark plate + gold chamfer + diamond; dead vehicle tab removed 2026-09-09 — settings takes the 4th art slot, console coin retired. Header 126 / footer 126. User-authorized."
-  },
-  "vice-city": {
-    "locked": false,
-    "sha256": null
-  }
+  "_note": "Theme style locks. When the user approves a theme view's styling, add its files here with sha256. Tests fail if a locked file changes without unlocking.",
+  "locks": [
+    {
+      "file": "themes/san-andreas/dashboard.css",
+      "sha256": "06dcdb8bd00dcc3f736326d1fad49a5756e971741c4eae9df3d0c615076006f3",
+      "note": "HERO7 (2026-09-08) + visible-polish pass (2026-09-09): dash drawer Grove Street console w/ grove-panel hero band; active tab dark plate + gold chamfer + diamond. User-approved 2026-09-08."
+    },
+    {
+      "file": "themes/gta-v/dashboard.css",
+      "sha256": "ba3a45db1e1172e7a386a97e6a0abc5056d7ba3b8bdc7c3696aff51955c017ca",
+      "note": "GTA V dash approved 2026-09-11: restrained near-black atmospheric surfaces, Chalet typography, full-bleed hero map, near-black nav overlay. User-locked."
+    },
+    {
+      "file": "themes/gta-v/cluster.css",
+      "sha256": "b2ce6c091c6c23654ec4b2066456cfb6bfbb22e069b087bd4eef35004f5b7bb2",
+      "note": "GTA V cluster approved 2026-09-10 (user: done), reaffirmed 2026-09-11. The bar for all other views."
+    },
+    {
+      "file": "themes/gta-v/cluster.js",
+      "sha256": "331e5ba4a218834dec8494cdabea18e679caa57c593c3401183c7b0d991f4934",
+      "note": "GTA V cluster JS approved 2026-09-10, reaffirmed 2026-09-11. Do not modify."
+    },
+    {
+      "file": "themes/gta-v/spotify-cluster.css",
+      "sha256": "e3255f29261e2dd6a75a5c13aff2000e17befb52d72a5840591e633a0f121625",
+      "note": "GTA V cluster Spotify skin, part of the approved cluster view (2026-09-11)."
+    },
+    {
+      "file": "themes/gta-v/spotify-cluster.js",
+      "sha256": "702d2d15f7077d59a2083abf9d394d5e4c5a90892ea5cbf2b679396e2f0cd54c",
+      "note": "GTA V cluster Spotify JS, part of the approved cluster view (2026-09-11)."
+    },
+    {
+      "file": "themes/gta-v/spotify-skin.css",
+      "sha256": "64818a19731989881fb14ff5c92532650cc47bf05e8884e0ee69a3e104bf0f4b",
+      "note": "GTA V dash Spotify skin, part of the approved dash view (2026-09-11)."
+    },
+    {
+      "file": "themes/gta-v/spotify-skin.js",
+      "sha256": "c74d42b81242463da17dc25840264e77bf0768b276b23a1ca273660002f0b73d",
+      "note": "GTA V dash Spotify JS, part of the approved dash view (2026-09-11)."
+    },
+    {
+      "file": "themes/gta-v/mode-toggle.css",
+      "sha256": "d2e935085d89bc050caeaec2e02227e57d0188b415daa64edf26cbfac01e63e7",
+      "note": "GTA V dash discreet toggle, part of the approved dash view (2026-09-11)."
+    },
+    {
+      "file": "themes/san-andreas/cluster.css",
+      "sha256": "c1c3a928cf50b593f10f2b75125ef8035eaead8b0687b00dff21b312f17256da",
+      "note": "SA cluster approved 2026-09-11 (user: 'BOOM THATS EXACTLY IT' 2026-09-10). Extracted from phone.css 2026-09-11; strictly cluster-scoped."
+    },
+    {
+      "file": "themes/san-andreas/spotify-cluster.css",
+      "sha256": "6b1f174cf9d9901a1a369944efc71548aadbf0d7cb8e09939b5b182e02b1f120",
+      "note": "SA cluster Spotify skin, part of the approved cluster view (2026-09-11)."
+    },
+    {
+      "file": "themes/san-andreas/spotify-cluster.js",
+      "sha256": "d5149c597067003300a1d00ab3c9385eb440668533df3ba999c0c13bd7093ac6",
+      "note": "SA cluster Spotify JS, part of the approved cluster view (2026-09-11)."
+    }
+  ]
 }

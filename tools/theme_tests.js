@@ -1766,11 +1766,11 @@ ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/bottombar-palms.j
   const lockPath = path.join(REPO, 'themes/LOCKED.json');
   if (fs.existsSync(lockPath)) {
     const locks = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
-    for (const [theme, info] of Object.entries(locks)) {
-      if (theme.startsWith('_') || !info.locked) continue;
-      const cssPath = path.join(REPO, `themes/${theme}/dashboard.css`);
+    const entries = Array.isArray(locks.locks) ? locks.locks : [];
+    for (const entry of entries) {
+      const cssPath = path.join(REPO, entry.file);
       const hash = crypto.createHash('sha256').update(fs.readFileSync(cssPath)).digest('hex');
-      ok(hash === info.sha256, `Theme ${theme} is LOCKED and unchanged (hash match)`);
+      ok(hash === entry.sha256, `LOCKED file unchanged: ${entry.file}`);
     }
   }
 }
@@ -1799,7 +1799,7 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
   const vcCluster = vcCss.slice(vcCss.indexOf('Cluster Mode: Vice City HERO'))
     .replace(/body\.cluster-mode\.theme-vice-city::before\{[^}]*\}/, '');
   ok(!/position:fixed/.test(vcCluster), 'VC cluster: no viewport-fixed survivors in the stage');
-  const saPhone = fs.readFileSync(path.join(REPO, 'themes/san-andreas/phone.css'), 'utf8');
+  const saPhone = fs.readFileSync(path.join(REPO, 'themes/san-andreas/cluster.css'), 'utf8');
   const saCluster = saPhone.slice(saPhone.indexOf('Cluster Mode: San Andreas'));
   ok(!/position:fixed/.test(saCluster), 'SA cluster: no viewport-fixed survivors in the stage');
 }
@@ -1853,7 +1853,7 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
 }
 // SA cluster overlay redesign (2026-09-10): the user's perfect cluster art IS the stage
 {
-  const saPhone = fs.readFileSync(path.join(REPO, 'themes/san-andreas/phone.css'), 'utf8');
+  const saPhone = fs.readFileSync(path.join(REPO, 'themes/san-andreas/cluster.css'), 'utf8');
   const saCluster = saPhone.slice(saPhone.indexOf('Cluster Mode: San Andreas'));
   ok(saCluster.includes('cluster-overlay.png'), 'SA cluster paints the user-supplied overlay art as the stage');
   ok(/body\.cluster-mode\.theme-san-andreas #map\{[^}]*left:76px[^}]*top:264px[^}]*width:565px[^}]*height:290px/.test(saCluster),

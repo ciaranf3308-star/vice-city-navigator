@@ -29,6 +29,7 @@ const SHELL = [
   'themes/san-andreas/dashboard.css',
   'themes/san-andreas/mode-toggle.css',
   'themes/san-andreas/phone.css',
+  'themes/san-andreas/cluster.css',
   'themes/san-andreas/dashboard/cluster-overlay.png',
   'themes/gta-v/dashboard.css', 'themes/gta-v/mode-toggle.css',
   'themes/rdr2/dashboard.css', 'themes/rdr2/mode-toggle.css',

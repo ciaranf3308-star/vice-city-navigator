@@ -1,0 +1,96 @@
+/* ================= Cluster Mode: San Andreas =================
+   OVERLAY REDESIGN (2026-09-10): the user's perfect cluster art
+   (themes/san-andreas/dashboard/cluster-overlay.png, 2048x768, map
+   window cut transparent) IS the stage. The live map underlays in the
+   window; every live readout overlays, positioned to the hero.
+   NOTE: lives here in the dedicated cluster.css (extracted from phone.css
+   2026-09-11), not dashboard.css — that file is HERO-locked
+   (themes/LOCKED.json). Strictly cluster-scoped, no phone impact. */
+
+body.cluster-mode.theme-san-andreas{background:#000}
+/* dashboard bars are VC-cluster-only: never show them here */
+body.cluster-mode.theme-san-andreas #dash-topbar,
+body.cluster-mode.theme-san-andreas #dash-bottombar{display:none}
+/* the overlay: user's art, map window transparent. Above the live map
+   (its gold frame bezels the map edges), below every live readout. */
+body.cluster-mode.theme-san-andreas #cluster-backdrop{display:block;position:absolute;inset:0;z-index:30;
+  background:url('dashboard/cluster-overlay.png') 0 0 / 100% 100% no-repeat;pointer-events:none}
+/* live map underlaid BEHIND the cutout — the map is an oversized layer
+   (110% of the window: stage px 55,250 560x295, same center 334.5,397 as the
+   transparent opening) centered under the overlay art. The overlay's opaque
+   frame clips it on all sides (25px horizontal / 14px vertical bleed) so the
+   map reads as continuing beyond the window edges, never as a widget fitted
+   to them. The attribution bar stays buried behind the opaque art. */
+body.cluster-mode.theme-san-andreas #map{left:76px;top:264px;width:565px;height:290px;border-radius:0;z-index:20}
+/* SA cluster: compact legal attribution (small info badge, not the full white
+   bar). The control is created with compact:true; this enforces the compact
+   visual in cluster mode. Attribution remains visible and expandable. */
+body.cluster-mode.theme-san-andreas .maplibregl-ctrl-attrib{font-size:10px;line-height:14px;padding:2px 6px;background:rgba(0,0,0,.55);color:#ccc;border-radius:4px;max-width:180px}
+body.cluster-mode.theme-san-andreas .maplibregl-ctrl-attrib a{color:#ccc}
+body.cluster-mode.theme-san-andreas .maplibregl-ctrl-attrib.maplibregl-compact .maplibregl-ctrl-attrib-inner{display:none}
+body.cluster-mode.theme-san-andreas .maplibregl-ctrl-attrib.maplibregl-compact:hover .maplibregl-ctrl-attrib-inner,body.cluster-mode.theme-san-andreas .maplibregl-ctrl-attrib.maplibregl-compact:focus-within .maplibregl-ctrl-attrib-inner{display:block}
+/* the overlay paints header/footer/frames/dial: hide the console chrome */
+body.cluster-mode.theme-san-andreas #cluster-header,
+body.cluster-mode.theme-san-andreas #cluster-footer,
+body.cluster-mode.theme-san-andreas #cluster-minimap,
+body.cluster-mode.theme-san-andreas #cluster-radar-north,
+body.cluster-mode.theme-san-andreas #cluster-gauge,
+body.cluster-mode.theme-san-andreas #cluster-limit,
+body.cluster-mode.theme-san-andreas #cluster-mode-exit,
+body.cluster-mode.theme-san-andreas #cluster-turn-compass,
+body.cluster-mode.theme-san-andreas #menu-btn{display:none!important}
+/* menu: transparent button over the overlay's WayStation logo */
+#sa-cluster-menu{display:none}
+body.cluster-mode.theme-san-andreas #sa-cluster-menu{display:block;position:absolute;left:815px;top:20px;
+  width:180px;height:75px;z-index:33;background:transparent;border:none;cursor:pointer}
+/* SA cluster exit: gold home button, bottom bar, back to dashboard */
+#sa-cluster-exit{display:none}
+body.cluster-mode.theme-san-andreas #sa-cluster-exit{display:block;position:absolute;left:700px;top:628px;width:64px;height:64px;z-index:60;background:url('dashboard/cluster-exit-btn.png') 0 0 / 100% 100% no-repeat;border:0;border-radius:50%;cursor:pointer;opacity:.92}
+body.cluster-mode.theme-san-andreas #sa-cluster-exit:hover{opacity:1}
+body.cluster-mode.theme-san-andreas #sa-cluster-exit:active{transform:scale(.94)}
+/* SA cluster locate: gold-ringed button to (re)request location */
+#sa-cluster-locate{display:none}
+body.cluster-mode.theme-san-andreas #sa-cluster-locate{display:block;position:absolute;left:780px;top:628px;width:64px;height:64px;z-index:60;background:rgba(0,0,0,.6);border:2px solid #c9a227;border-radius:50%;color:#c9a227;font-size:32px;line-height:1;cursor:pointer;opacity:.92}
+body.cluster-mode.theme-san-andreas #sa-cluster-locate:hover{opacity:1}
+body.cluster-mode.theme-san-andreas #sa-cluster-locate:active{transform:scale(.94)}
+/* SA cluster time/temp: white text below battery bar, matching hero (7:24 PM, 28°C) */
+#sa-cluster-clock{display:none}
+body.cluster-mode.theme-san-andreas #sa-cluster-temp{visibility:hidden}
+body.cluster-mode.theme-san-andreas #sa-cluster-clock{display:flex;position:absolute;left:320px;top:668px;z-index:60;gap:32px;pointer-events:none}
+body.cluster-mode.theme-san-andreas #sa-cluster-time,
+body.cluster-mode.theme-san-andreas #sa-cluster-temp{font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:26px;font-weight:500;color:#fff;letter-spacing:2px;opacity:.92}
+/* hero speed in the dial */
+body.cluster-mode.theme-san-andreas #cluster-speed{left:961px;top:315px;z-index:32}
+body.cluster-mode.theme-san-andreas #cluster-speed-num{font-family:'Bank Gothic',sans-serif;font-weight:400;
+  font-size:190px;line-height:.95;color:#f6efdb;font-variant-numeric:tabular-nums;
+  text-shadow:0 4px 0 #111,0 10px 30px rgba(0,0,0,.7)}
+body.cluster-mode.theme-san-andreas #cluster-speed-unit{font-family:'Bank Gothic',sans-serif;font-size:30px;
+  color:#c8a75a;letter-spacing:12px;margin-top:4px}
+body.cluster-mode.theme-san-andreas #cluster-speed.over #cluster-speed-num{color:#ffd34d}
+/* nav strip under the map frame: turn left, trip right, text on the dark */
+body.cluster-mode.theme-san-andreas #cluster-turn:not([hidden]){left:78px;top:548px;transform:none;z-index:32;
+  width:340px;max-width:none;display:flex;align-items:center;gap:14px}
+body.cluster-mode.theme-san-andreas #cluster-turn-arrow{width:44px;height:44px;flex:0 0 auto;
+  filter:drop-shadow(0 3px 0 #000)}
+body.cluster-mode.theme-san-andreas #cluster-turn-arrow svg{width:100%;height:100%}
+body.cluster-mode.theme-san-andreas #cluster-turn-arrow svg path{fill:#7ec850}
+body.cluster-mode.theme-san-andreas #cluster-turn-main{display:flex;flex-direction:row;align-items:baseline;
+  gap:12px;min-width:0}
+body.cluster-mode.theme-san-andreas #cluster-turn-distance{font-family:'Bank Gothic',sans-serif;font-size:34px;
+  color:#f6efdb;white-space:nowrap}
+body.cluster-mode.theme-san-andreas #cluster-turn-road{font-family:'Bank Gothic',sans-serif;font-size:22px;
+  color:#e8a33d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px}
+body.cluster-mode.theme-san-andreas #cluster-turn-instruction{display:none}
+body.cluster-mode.theme-san-andreas #cluster-trip:not([hidden]){display:flex;position:absolute;left:420px;top:552px;
+  z-index:32;align-items:baseline;gap:10px;font-family:'Bank Gothic',sans-serif;font-size:23px;
+  color:#c9bfa8;white-space:nowrap}
+body.cluster-mode.theme-san-andreas #cluster-trip .trip-sep{color:#7ec850}
+body.cluster-mode.theme-san-andreas #cluster-trip .trip-cyan{color:#e8a33d}
+/* the cluster music widget (.sacl skin) lives INSIDE the container boxes
+   already painted in the overlay art — the skin positions itself, so the
+   pane just stays a full-stage, click-through layer */
+html body.theme-san-andreas.cluster-mode #spotify-pane{position:absolute;left:0;top:0;width:1920px;height:720px;
+  display:block!important;visibility:visible!important;opacity:1!important;pointer-events:none}
+html body.theme-san-andreas.cluster-mode .sacl{display:block!important;margin:0;pointer-events:auto}
+/* exit button lives on the overlay's cluster-mode logo tap */
+body.cluster-mode.theme-san-andreas #cluster-mode-exit{display:none}
