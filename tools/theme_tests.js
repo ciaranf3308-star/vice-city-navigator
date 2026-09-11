@@ -783,10 +783,14 @@ for (const id of ['san-andreas', 'gta-v', 'rdr2']) {
   ok(cssSrc.includes(`body.dashboard-mode.theme-${id} #menu-panel`),
     `${id} settings panel docks clear of its own bar heights`);
 }
-ok(/body\.dashboard-mode \.menu-section input\[type="checkbox"\]\{[^}]*width:36px/.test(cssSrc),
+ok(/body\.dashboard-mode \.menu-section input\[type="checkbox"\][^{]*\{[^}]*width:36px/.test(cssSrc),
   'dashboard settings checkboxes are car-size touch targets');
-ok(/body\.dashboard-mode \.vc-title\{[^}]*font-size:52px/.test(cssSrc),
+ok(/body\.dashboard-mode \.vc-title[^{]*\{[^}]*font-size:52px/.test(cssSrc),
   'dashboard settings title is car-legible');
+ok(/body\.cluster-mode #menu-panel\{[^}]*width:1920px/.test(cssSrc),
+  'cluster settings panel is car-scale (not phone-sized)');
+ok(/body\.cluster-mode \.vc-title[^{]*\{[^}]*font-size:52px/.test(cssSrc),
+  'cluster settings title is car-legible');
 /* The menu panel stays at body level (never shrinks with the stage zoom),
    so layoutDashMenu() docks it against the LIVE stage rect in real pixels
    — fixed stage-coordinate offsets would land on the dash bars whenever

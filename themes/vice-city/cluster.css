@@ -51,8 +51,9 @@ body.cluster-mode.theme-vice-city #vc-topbar::after{
   filter:blur(1px);
 }
 body.cluster-mode.theme-vice-city #vc-cluster-menu{
-  width:44px;height:44px;flex:0 0 auto;border-radius:10px;cursor:pointer;
+  width:56px;height:56px;flex:0 0 auto;border-radius:12px;cursor:pointer;
   background:rgba(10,4,20,.6);border:1px solid rgba(255,45,149,.5);
+  color:#ff71ce;font-size:28px;
 }
 body.cluster-mode.theme-vice-city .vc-brand img{height:40px;width:auto;display:block;
   filter:drop-shadow(0 0 8px rgba(255,45,149,.6))}

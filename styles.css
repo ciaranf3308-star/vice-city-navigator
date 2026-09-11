@@ -695,36 +695,64 @@ body.dashboard-mode #menu-panel{
   overflow-y:auto;
   background:rgba(8,10,12,.98);
 }
+/* cluster mode gets the same car-scale settings page (was phone-sized) */
+body.cluster-mode #menu-panel{
+  z-index:60;
+  top:72px;left:0;
+  width:1920px;height:548px;
+  padding:40px 80px;
+  border-radius:0;
+  overflow-y:auto;
+  background:rgba(8,10,12,.98);
+}
 /* car-scale type + touch targets */
-body.dashboard-mode .menu-head{margin-bottom:14px;align-items:center}
-body.dashboard-mode .vc-title{font-size:52px;letter-spacing:4px}
-body.dashboard-mode #menu-close{width:68px;height:68px;font-size:28px;flex:none}
-body.dashboard-mode .menu-section{margin-top:24px;padding:24px;border-radius:20px}
-body.dashboard-mode .menu-section h3{font-size:20px;letter-spacing:5px;margin:0 0 18px}
-body.dashboard-mode .menu-section .row{font-size:26px;margin:14px 0;gap:18px;min-height:68px;padding:8px 6px}
-body.dashboard-mode .menu-section .stack{font-size:20px;margin:18px 0}
+body.dashboard-mode .menu-head,
+body.cluster-mode .menu-head{margin-bottom:14px;align-items:center}
+body.dashboard-mode .vc-title,
+body.cluster-mode .vc-title{font-size:52px;letter-spacing:4px}
+body.dashboard-mode #menu-close,
+body.cluster-mode #menu-close{width:68px;height:68px;font-size:28px;flex:none}
+body.dashboard-mode .menu-section,
+body.cluster-mode .menu-section{margin-top:24px;padding:24px;border-radius:20px}
+body.dashboard-mode .menu-section h3,
+body.cluster-mode .menu-section h3{font-size:20px;letter-spacing:5px;margin:0 0 18px}
+body.dashboard-mode .menu-section .row,
+body.cluster-mode .menu-section .row{font-size:26px;margin:14px 0;gap:18px;min-height:68px;padding:8px 6px}
+body.dashboard-mode .menu-section .stack,
+body.cluster-mode .menu-section .stack{font-size:20px;margin:18px 0}
 body.dashboard-mode .menu-section select,
-body.dashboard-mode .menu-section input[type="url"]{
+body.dashboard-mode .menu-section input[type="url"],
+body.cluster-mode .menu-section input[type="url"]{
   font-size:22px;padding:18px;margin-top:12px;border-radius:14px;min-height:68px;
   background-position:right 22px center;
 }
-body.dashboard-mode .menu-section input[type="checkbox"]{width:36px;height:36px;flex:none}
+body.dashboard-mode .menu-section input[type="checkbox"],
+body.cluster-mode .menu-section input[type="checkbox"]{width:36px;height:36px;flex:none}
 /* custom car-size toggle switch (overrides the test-pinned base above) */
-body.dashboard-mode .menu-section .row input[type="checkbox"]{
+body.dashboard-mode .menu-section .row input[type="checkbox"],
+body.cluster-mode .menu-section .row input[type="checkbox"]{
   width:88px;height:50px;border-radius:25px;border-width:2.5px;
 }
-body.dashboard-mode .menu-section .row input[type="checkbox"]::after{
+body.dashboard-mode .menu-section .row input[type="checkbox"]::after,
+body.cluster-mode .menu-section .row input[type="checkbox"]::after{
   width:38px;height:38px;left:5px;
 }
-body.dashboard-mode .menu-section .row input[type="checkbox"]:checked::after{
+body.dashboard-mode .menu-section .row input[type="checkbox"]:checked::after,
+body.cluster-mode .menu-section .row input[type="checkbox"]:checked::after{
   left:calc(100% - 43px);
 }
-body.dashboard-mode .menu-section details.advanced{margin-top:16px}
-body.dashboard-mode .menu-section details.advanced summary{font-size:22px;padding:16px 0;cursor:pointer}
-body.dashboard-mode .stats{font-size:21px;margin:12px 0;padding:14px 18px}
-body.dashboard-mode .hint{font-size:17px;line-height:1.65;margin-top:14px}
-body.dashboard-mode .ghost-btn{font-size:21px;padding:16px 24px;margin-top:14px;border-radius:14px}
-body.dashboard-mode .attrib{font-size:16px;margin-top:24px}
+body.dashboard-mode .menu-section details.advanced,
+body.cluster-mode .menu-section details.advanced{margin-top:16px}
+body.dashboard-mode .menu-section details.advanced summary,
+body.cluster-mode .menu-section details.advanced summary{font-size:22px;padding:16px 0;cursor:pointer}
+body.dashboard-mode .stats,
+body.cluster-mode .stats{font-size:21px;margin:12px 0;padding:14px 18px}
+body.dashboard-mode .hint,
+body.cluster-mode .hint{font-size:17px;line-height:1.65;margin-top:14px}
+body.dashboard-mode .ghost-btn,
+body.cluster-mode .ghost-btn{font-size:21px;padding:16px 24px;margin-top:14px;border-radius:14px}
+body.dashboard-mode .attrib,
+body.cluster-mode .attrib{font-size:16px;margin-top:24px}
 
 /* ============ SAN ANDREAS menu skin (lives here: themes/san-andreas/dashboard.css is LOCKED) ============
    Grove Street: deep green glass, gold chunky borders, Bank Gothic, sharp corners.
