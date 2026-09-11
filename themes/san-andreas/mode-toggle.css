@@ -14,8 +14,8 @@ body.theme-san-andreas #mode-toggle{
   font-family:'Bank Gothic','Arial Narrow',sans-serif;
 }
 body.theme-san-andreas #mode-toggle button{
-  border-radius:0;padding:0 22px;
-  font-size:17px;letter-spacing:.16em;text-transform:uppercase;
+  border-radius:0;padding:0 16px;min-height:38px;min-width:0;
+  font-size:14px;letter-spacing:.16em;text-transform:uppercase;
   color:#d8c98a;transition:all .15s ease;
 }
 body.theme-san-andreas #mode-toggle button+button{

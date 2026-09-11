@@ -1094,6 +1094,12 @@ ok(appSrc.includes('syncDashPadding'), 'camera viewport offsets left of the VC w
    bottom:VC?100:88 left the camera target under the SA/GTA V bars. */
 ok(/DASH_BAR_HEIGHTS\[themeId\]/.test(appSrc) && /top:\s*bars\.top/.test(appSrc) && /bottom:\s*bars\.bottom/.test(appSrc),
   'syncDashPadding reads bar clearances from DASH_BAR_HEIGHTS per theme');
+/* GTA V cluster: the map is a 680x534 window with the skyline plate fading
+   over its left ~300px and the turn card on its top-right — zero padding
+   parked the player under the skyline fade. The camera viewport must pad
+   into the exposed band. */
+ok(/cluster-mode.*theme-gta-v/.test(appSrc) && /setPadding\(\{\s*top:\s*30,\s*right:\s*115,\s*bottom:\s*20,\s*left:\s*300\s*\}\)/.test(appSrc),
+  'GTA V cluster pads the camera into the exposed map band');
 ok(cssSrc.includes('#dash-bottombar::before'), 'VC bottom bar has a neon top edge');
 ok(!cssSrc.includes('#spotify-close'), 'no close-button styles');
 ok(/\#spotify-pane\{[\s\S]*?background:transparent/.test(cssSrc), 'pane transparent');
@@ -2117,6 +2123,15 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
     'view toggle stays off the phone map view (car views only)');
   ok(cssSrc.includes('body.cluster-mode.theme-vice-city #mode-toggle{display:none}'),
     'view toggle hides on the VC cluster (it has its own footer tabs)');
+  ok(/body\.dashboard-mode #mode-toggle\{\s*top:176px;left:18px/.test(cssSrc),
+    'dash toggle docks top-left under the maneuver card (old top-right slot hit every music widget)');
+  ok(!/body\.dashboard-mode #mode-toggle\{\s*top:140px;right:24px/.test(cssSrc),
+    'dash toggle no longer floats top-right over the widgets');
+  for (const t of ['vice-city', 'san-andreas', 'gta-v', 'rdr2']) {
+    const skin = fs.readFileSync(path.join(REPO, `themes/${t}/mode-toggle.css`), 'utf8');
+    ok(/\.theme-.* #mode-toggle button\{[^}]*min-height:38px/.test(skin),
+      `${t} toggle is a discreet chip (38px), not a billboard`);
+  }
   ok(appAll.includes('function layoutModeToggle') && appAll.includes('CLUSTER_TOGGLE_POS'),
     'cluster toggle docks against the live stage rect per theme');
   ok(/'gta-v':\s*{\s*footer:\s*'#gv-bottombar'/.test(appAll),

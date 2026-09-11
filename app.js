@@ -2553,6 +2553,15 @@ function syncDashPadding() {
     const bars = DASH_BAR_HEIGHTS[themeId] || { top: 76, bottom: 88 };
     m.setPadding({ top: bars.top, right: right, bottom: bars.bottom, left: 8 });
   }
+  else if (b.contains('cluster-mode') && b.contains('theme-gta-v')) {
+    /* GTA V cluster: the map is a 680x534 window at stage (900,94). The
+       skyline plate fades over its left ~300px and the turn card covers its
+       top-right corner — with zero padding the player lands at the raw
+       window center, half-buried under the skyline fade. Pad the camera
+       viewport into the exposed band so "center on me" truly centers the
+       player in the visible map. */
+    m.setPadding({ top: 30, right: 115, bottom: 20, left: 300 });
+  }
   else m.setPadding({ top: 0, right: 0, bottom: 0, left: 0 });
 }
 

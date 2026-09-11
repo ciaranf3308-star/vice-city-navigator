@@ -4,7 +4,7 @@
    this file is the Vice City visual design only.
    ============================================================ */
 body.theme-vice-city #mode-toggle{
-  border-radius:999px;padding:4px;gap:4px;
+  border-radius:999px;padding:3px;gap:2px;
   background:rgba(8,8,16,.78);
   border:2px solid rgba(255,113,206,.55);
   box-shadow:0 0 18px rgba(255,113,206,.35),
@@ -13,8 +13,8 @@ body.theme-vice-city #mode-toggle{
   font-family:'Pricedown Bl',sans-serif;
 }
 body.theme-vice-city #mode-toggle button{
-  border-radius:999px;padding:2px 24px 0;
-  font-size:26px;letter-spacing:.1em;text-transform:uppercase;
+  border-radius:999px;padding:0 16px;min-height:38px;min-width:0;
+  font-size:20px;letter-spacing:.1em;text-transform:uppercase;
   color:#8e9ac0;transition:all .18s ease;
 }
 body.theme-vice-city #mode-toggle button.on[data-view="dash"]{

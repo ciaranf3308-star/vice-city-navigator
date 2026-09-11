@@ -1112,9 +1112,12 @@ body.cluster-mode #cluster-turn-main{display:flex;flex-direction:column;min-widt
 }
 /* phone map view: no toggle — this is a car-views control */
 body:not(.dashboard-mode):not(.cluster-mode) #mode-toggle{display:none}
-/* dashboard mode: below the tallest topbar, top-right over the map */
+/* dashboard mode: top-left, tucked under the maneuver card. The old top-right
+   slot collided with every theme's right-side music widget. A compact,
+   discreet chip over free map — clear of the VC maneuver pill (ends ~162px)
+   and of the shared maneuver card (docked right of center on other themes). */
 body.dashboard-mode #mode-toggle{
-  top:140px;right:24px;
+  top:176px;left:18px;
 }
 /* Vice City cluster has its own CLUSTER|DASHBOARD|MAP footer tabs */
 body.cluster-mode.theme-vice-city #mode-toggle{display:none}
