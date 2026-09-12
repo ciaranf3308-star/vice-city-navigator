@@ -643,7 +643,7 @@ ok(appSrc.includes("classList.toggle('radio-off')"), 'RADIO tab toggles the musi
 ok(/body\.dashboard-mode #spotify-stage\{[\s\S]*?left:0;right:0;top:0;bottom:0/.test(cssSrc), 'Spotify stage is a full-canvas layer; every skin widget positions itself');
 ok(cssSrc.includes('#search-bar{right:740px}') && cssSrc.includes('#maneuver-card{right:740px}'), 'HUD chrome clears the larger tilted widgets');
 ok(cssSrc.includes('[data-spotskin="vice-city"] #search-bar{right:900px}'), 'VC chrome clears the wide tilted VC widget');
-ok(appSrc.includes('right = 765'), 'camera padding accounts for the larger VC widget');
+ok(appSrc.includes('right = 560'), 'camera padding accounts for the resized VC widget');
 ok(appSrc.includes("theme-san-andreas')) right = 701"), 'camera padding clears the SA music widget');
 ok(appSrc.includes("theme-gta-v')) right = 568"), 'camera padding clears the GTA V music widget');
 ok(appSrc.includes("theme-rdr2')) right = 670"), 'camera padding clears the RDR2 music widget');
@@ -2230,7 +2230,7 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
    docks it against the live #dash-stage rect, view by view. */
 {
   ok(/DASH_TOGGLE_POS\s*=\s*\{/.test(appSrc), 'DASH_TOGGLE_POS defines per-theme dashboard toggle anchors');
-  ok(/'vice-city':\s*\{\s*right:\s*18,\s*top:\s*90\s*\}/.test(appSrc), 'VC dashboard toggle: top-right below the neon topbar');
+  ok(/'vice-city':\s*\{\s*right:\s*560,\s*top:\s*25\s*\}/.test(appSrc), 'VC dashboard toggle: inside header, left of skyline pocket');
   ok(/'san-andreas':\s*\{\s*left:\s*18,\s*top:\s*138\s*\}/.test(appSrc), 'SA dashboard toggle: top-left below the Grove Street topbar');
   ok(/'rdr2':\s*\{\s*right:\s*18,\s*top:\s*116\s*\}/.test(appSrc), 'RDR2 dashboard toggle: top-right below the frontier topbar');
   ok(!/'gta-v'/.test(appSrc.split('DASH_TOGGLE_POS')[1].split('};')[0]), 'GTA V dashboard toggle stays CSS-owned (footer dock)');

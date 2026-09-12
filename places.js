@@ -433,6 +433,30 @@
       if (picked.length > band.cap) picked.length = band.cap;
     }
     lastPickedCount = picked.length;
+    /* Dashboard-only declutter: screen-space spacing so ambient POIs don't
+       pile on each other. Highest importance wins; qmark fallbacks are
+       lowest priority (they sort last by importance). Zooming in reveals
+       more, zooming out fewer. */
+    if (picked.length > 1 && typeof document !== 'undefined' &&
+        document.body.classList.contains('dashboard-mode') &&
+        typeof map.project === 'function') {
+      const MIN_PX = 50, MAX_DASH_POIS = 24;
+      const kept = [];
+      const keptPts = [];
+      for (const item of picked) {
+        if (kept.length >= MAX_DASH_POIS) break;
+        const rec = item[2];
+        let p;
+        try { p = map.project([rec.lng, rec.lat]); } catch (e) { continue; }
+        let ok = true;
+        for (const q of keptPts) {
+          const dx = p.x - q.x, dy = p.y - q.y;
+          if (dx * dx + dy * dy < MIN_PX * MIN_PX) { ok = false; break; }
+        }
+        if (ok) { kept.push(item); keptPts.push(p); }
+      }
+      picked = kept;
+    }
     const wantIds = new Set();
     const size = markerSizePx();
     for (const [imp, sem, rec] of picked) {

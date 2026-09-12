@@ -438,3 +438,174 @@ body.theme-vice-city .ghost-btn:hover{background:rgba(1,205,254,.16)}
 body.theme-vice-city .attrib{color:rgba(1,205,254,.55)}
 body.theme-vice-city .menu-section details.advanced{border-color:rgba(1,205,254,.35)}
 body.theme-vice-city .menu-section details.advanced summary{color:#eafcff}
+
+/* ============ BRUTAL POLISH PASS (2026-09-12): cohesive VC automotive UI ============
+   Dashboard-only overrides. Cluster is locked — every rule here is scoped to
+   body.dashboard-mode.theme-vice-city. Shared :is(.dashboard-mode,.cluster-mode)
+   selectors are NEVER modified; dashboard refinements override them below. */
+
+/* ---- 1. MODE TOGGLE: lightweight neon text selector, not a pill ----
+   Small Pricedown labels, muted inactive, bright active with a 2px pink
+   hairline. One subtle divider. Positioned by JS (DASH_TOGGLE_POS) inside
+   the header, left of the skyline pocket. */
+body.dashboard-mode.theme-vice-city #mode-toggle{
+  border-radius:0;padding:0;gap:0;
+  background:none;border:0;box-shadow:none;
+  backdrop-filter:none;-webkit-backdrop-filter:none;
+  align-items:center;
+}
+body.dashboard-mode.theme-vice-city #mode-toggle button{
+  border-radius:0;min-height:0;min-width:0;padding:6px 4px;
+  font-size:16px;letter-spacing:.14em;
+  color:rgba(142,154,192,.72);
+  text-shadow:none;box-shadow:none;background:none;
+  position:relative;transition:color .18s ease;
+}
+body.dashboard-mode.theme-vice-city #mode-toggle button span{
+  position:relative;display:inline-block;padding-bottom:3px;
+}
+body.dashboard-mode.theme-vice-city #mode-toggle button.on{
+  background:none;color:#ffd7f2;
+  text-shadow:0 0 2px rgba(255,244,250,.9),0 0 8px rgba(255,113,206,.85),0 0 22px rgba(255,46,136,.4);
+  box-shadow:none;
+}
+body.dashboard-mode.theme-vice-city #mode-toggle button.on span::after{
+  content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;
+  background:#ff4fc3;
+  box-shadow:0 0 8px rgba(255,79,195,.9),0 0 18px rgba(255,46,136,.4);
+}
+body.dashboard-mode.theme-vice-city #mode-toggle button:not(.on):hover{color:#dfe6ff}
+/* divider between CLUSTER and DASH */
+body.dashboard-mode.theme-vice-city #mode-toggle button + button{margin-left:14px}
+body.dashboard-mode.theme-vice-city #mode-toggle button + button::before{
+  content:'';position:absolute;left:-8px;top:22%;bottom:22%;width:1px;
+  background:linear-gradient(180deg,transparent,rgba(255,113,206,.4),transparent);
+}
+
+/* ---- 2/3/4. HEADER: controlled neon hierarchy ----
+   Logo: 41px, hot core + 8px glow + one 24px bloom (no 64px fog).
+   Skyline: longer left mask (60%) so the art melts into the chrome.
+   Clock: tabular digits, date quieter than time, one deliberate unit. */
+body.dashboard-mode.theme-vice-city .dash-logo{
+  font-size:41px;
+  text-shadow:0 0 2px rgba(255,244,250,.9),0 0 8px rgba(255,113,206,.85),0 0 24px rgba(255,46,136,.35);
+}
+body.dashboard-mode.theme-vice-city #dash-topbar::after{
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 60%);
+  mask-image:linear-gradient(90deg,transparent 0%,#000 60%);
+}
+body.dashboard-mode.theme-vice-city .dash-clock{
+  gap:14px;
+  font-variant-numeric:tabular-nums;
+}
+body.dashboard-mode.theme-vice-city #dash-date{
+  font-size:23px;letter-spacing:1.5px;opacity:.85;
+  text-shadow:0 0 8px rgba(255,46,136,.6);
+}
+body.dashboard-mode.theme-vice-city #dash-time{
+  text-shadow:0 0 2px rgba(255,244,250,.85),0 0 10px rgba(255,46,136,.85),0 0 28px rgba(255,46,136,.35);
+}
+body.dashboard-mode.theme-vice-city .dash-wx{
+  font-size:26px;
+  text-shadow:0 0 2px rgba(220,252,255,.8),0 0 8px rgba(1,205,254,.7);
+}
+
+/* ---- 5/6/7. SPOTIFY: visible-bounds scale, grounded not floating ----
+   hud.png visible bbox is 1388x1082 of 1448x1086 (95.9% width) — nearly
+   full-bleed. 520px CSS width = ~499px visible = 26% of the 1920 stage.
+   Right edge pulled to 40px (was 110px, felt detached). Tight dark contact
+   shadow + restrained 18-28px bloom; the 110px pink haze is gone. */
+body.dashboard-mode.theme-vice-city .vcsp{
+  width:520px;right:40px;bottom:112px;
+  filter:
+    drop-shadow(0 14px 22px rgba(0,0,0,.65))
+    drop-shadow(0 0 18px rgba(255,47,179,.28))
+    drop-shadow(0 0 28px rgba(255,47,179,.12));
+}
+
+/* ---- 10. SPEED READOUT: cardless, not a black pill ----
+   Small Pricedown number, hairline pink/cyan bracket. No rounded rect,
+   no grey pill, no box-shadow blob. */
+body.dashboard-mode.theme-vice-city #speedo{
+  bottom:112px;left:24px;
+  filter:none;
+}
+body.dashboard-mode.theme-vice-city #speedo-cur{
+  background:none;border:0;border-radius:0;padding:0;
+  gap:6px;position:relative;
+}
+body.dashboard-mode.theme-vice-city #speedo-cur::before{
+  content:'';position:absolute;left:-10px;top:8%;bottom:8%;width:2px;
+  background:linear-gradient(180deg,#ff4fc3,#01cdfe);
+  box-shadow:0 0 8px rgba(255,79,195,.7);
+}
+body.dashboard-mode.theme-vice-city #speedo-num{
+  font-size:38px;color:#ffd7f2;
+  text-shadow:0 0 2px rgba(255,244,250,.9),0 0 10px rgba(255,113,206,.8),0 0 24px rgba(255,46,136,.35);
+}
+body.dashboard-mode.theme-vice-city #speedo-unit{
+  font-size:15px;color:#01cdfe;opacity:.9;
+  text-shadow:0 0 8px rgba(1,205,254,.7);
+}
+
+/* ---- 11/12/13. FOOTER: 90px, quieter tabs, slimmer dest plate ----
+   Height override only — the shared clip-path percentages adapt; the
+   absolute chamfer insets (16px/2px) are preserved. */
+body.dashboard-mode.theme-vice-city #dash-bottombar{
+  height:90px;
+}
+/* Tabs: 24px, less tracking, inactive .65, active bright pink with ONE
+   crisp underline + small bloom (not pink fog). */
+body.dashboard-mode.theme-vice-city .dash-tabs button{
+  font-size:24px;letter-spacing:2px;opacity:.65;
+  text-shadow:0 0 6px rgba(1,205,254,.3);
+}
+body.dashboard-mode.theme-vice-city .dash-tabs button.on{
+  opacity:1;
+  text-shadow:0 0 2px rgba(255,244,250,.9),0 0 10px rgba(255,113,206,.9),0 0 26px rgba(255,46,136,.4);
+}
+body.dashboard-mode.theme-vice-city .dash-tabs button.on::after{
+  bottom:-7px;
+  box-shadow:0 0 8px rgba(255,79,195,.9),0 0 18px rgba(255,46,136,.4);
+}
+/* Destination plate: slimmer, tighter tracking, calmer cyan bloom. */
+body.dashboard-mode.theme-vice-city #dash-dest{
+  font-size:23px;letter-spacing:3px;padding:10px 30px;
+  text-shadow:0 0 2px rgba(255,244,250,.85),0 0 10px rgba(255,46,136,.85),0 0 24px rgba(255,46,136,.35);
+}
+body.dashboard-mode.theme-vice-city .dash-dest{
+  box-shadow:0 0 14px rgba(1,205,254,.45);
+}
+/* ---- 15. MAP CONTROLS: 40px visual, 1.5px line, tight bloom ----
+   Hit target stays 44px+ via the existing button size; the visual ring
+   shrinks. */
+body.dashboard-mode.theme-vice-city .dash-zoom button{
+  width:40px;height:40px;min-width:44px;min-height:44px;
+  font-size:20px;
+  border:1.5px solid rgba(53,224,255,.8);
+  background:rgba(8,10,24,.72);
+  box-shadow:0 0 2px rgba(220,252,255,.7),0 0 8px rgba(53,224,255,.4),inset 0 0 8px rgba(53,224,255,.18);
+  text-shadow:0 0 6px rgba(53,224,255,.9);
+}
+/* ---- 16. COMPASS/TAGLINE: functional brighter, decorative dimmer ---- */
+body.dashboard-mode.theme-vice-city #dash-compass{
+  font-size:30px;
+  text-shadow:0 0 2px rgba(255,244,250,.85),0 0 10px rgba(255,46,136,.8),0 0 22px rgba(255,46,136,.35);
+}
+body.dashboard-mode.theme-vice-city .dash-north{
+  font-size:22px;
+  text-shadow:0 0 8px rgba(255,46,136,.75);
+}
+body.dashboard-mode.theme-vice-city .dash-tag::after{
+  opacity:.65;
+  text-shadow:0 0 8px rgba(255,46,136,.6);
+}
+
+/* ---- 17. MANEUVER: tight contact shadow, hot edge, small bloom ----
+   Long road names ellipsize cleanly (300px cap). */
+body.dashboard-mode.theme-vice-city #vc-maneuver{
+  filter:drop-shadow(0 8px 16px rgba(0,0,0,.6)) drop-shadow(0 0 3px rgba(255,196,228,.7)) drop-shadow(0 0 16px rgba(255,46,136,.35));
+}
+body.dashboard-mode.theme-vice-city #vc-maneuver .vc-man-text span{
+  max-width:300px;
+}

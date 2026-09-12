@@ -505,8 +505,12 @@ async function initMap() {
     mapBooting = false;
     return;
   }
+  /* Dashboard idle framing: +0.7 zoom vs phone so the parked view shows
+     useful local context, not half the county. Active nav camera is
+     untouched. */
+  const idleZoom = document.body.classList.contains('dashboard-mode') ? 12.7 : 12;
   map = new maplibregl.Map({
-    container: mapEl, style, center: DUBLIN, zoom: 12,
+    container: mapEl, style, center: DUBLIN, zoom: idleZoom,
     attributionControl: { compact: true }
   });
   mapBooting = false;
@@ -2569,7 +2573,7 @@ function syncDashPadding() {
   const widgetHidden = !dash || b.contains('radio-off');
   let right = 8;
   if (!widgetHidden) {
-    if (b.contains('theme-vice-city')) right = 765;       // .vcsp: right:110px, width:687px
+    if (b.contains('theme-vice-city')) right = 560;       // .vcsp: right:40px, width:520px
     else if (b.contains('theme-san-andreas')) right = 701; // .sasp: left:1219px, width:701px
     else if (b.contains('theme-gta-v')) right = 568;      // .gvsp: right:48px, width:520px
     else if (b.contains('theme-rdr2')) right = 670;       // .rdsp: right:70px, width:600px
@@ -3145,7 +3149,7 @@ const CLUSTER_TOGGLE_POS = {
    is body-level position:fixed, so it must be docked against the live
    #dash-stage rect (letterboxed + zoomed) — pure CSS can't do this. */
 const DASH_TOGGLE_POS = {
-  'vice-city':  { right: 18, top: 90 },   /* top-right, below the 78px neon topbar */
+  'vice-city':  { right: 560, top: 25 },  /* inside the 78px header, left of the 27% skyline pocket */
   'san-andreas':{ left: 18, top: 138 },   /* top-left, below the 126px topbar (music owns top-right) */
   'rdr2':       { right: 18, top: 116 },  /* top-right, below the 104px frontier topbar */
   /* gta-v: CSS owns it (docked in the footer) — not listed here */
