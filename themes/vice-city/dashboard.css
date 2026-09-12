@@ -126,40 +126,137 @@ body.dashboard-mode.theme-vice-city #vc-maneuver .vc-man-text span{
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:250px;
 }
 
-/* ============ RIGHT PANEL: logo script + sunset scene ============ */
+/* ============ VICE BAY HERO (2026-09-12): composition rewrite ============
+   The old layout was a map-first screen with a small themed widget bolted
+   onto the right. The new composition is a Vice City hero dashboard: the
+   right 704px (36.7% of the 1920 stage) is a full-height authored hero bay
+   — a scenic object the map fades into, not a card floating on top of it.
+
+   #vc-right-panel is the bay: atmospheric map fade (left, open edge),
+   neon edge strips (top/right/bottom, tied to the bars), and the hero
+   crown (neon script + tagline, unhidden now that hud.png is retired on
+   dashboard). .vcsp is the music module seated INSIDE the bay — same box,
+   carrying the scenic art, album, lyric stage, track, progress, transport.
+   Phone keeps the classic hud.png widget (base skin rules untouched);
+   every rule here is dashboard-scoped. */
 body.dashboard-mode.theme-vice-city #vc-right-panel{
-  display:block;position:absolute;right:18px;top:92px;width:340px;z-index:24;
+  display:block;position:absolute;right:0;top:78px;bottom:90px;width:704px;z-index:24;
   pointer-events:none;
 }
-/* hud.png already crowns the widget with the Vice city logo — hide the duplicate */
-body.dashboard-mode.theme-vice-city #vc-right-panel .vc-logo-script,
-body.dashboard-mode.theme-vice-city #vc-right-panel .vc-tagline{display:none}
+/* map-side atmospheric fade: a field left of the bay that quiets the map so
+   the hero seats into the screen. It peaks just left of the bay edge and
+   dissolves over the bay itself (the bay art owns its own left melt) —
+   never a dark veil over the module. The bay's left edge stays OPEN, no
+   frame line, melting into the map. */
+body.dashboard-mode.theme-vice-city #vc-right-panel::before{
+  content:'';position:absolute;top:0;bottom:0;right:0;left:-340px;z-index:0;
+  background:linear-gradient(90deg,transparent 0%,rgba(3,2,10,.55) 32%,transparent 58%,transparent 100%);
+  pointer-events:none;
+}
+/* bay chrome: 3px neon strips along the top, right and bottom edges —
+   the same tube language as the bars, so the bay reads as connected to
+   the surrounding chrome instead of dropped onto the map. */
+body.dashboard-mode.theme-vice-city #vc-right-panel::after{
+  content:'';position:absolute;inset:0;z-index:5;pointer-events:none;
+  background:
+    linear-gradient(90deg,rgba(255,46,136,.95),rgba(255,46,136,.95)) 0 0/100% 3px no-repeat,
+    linear-gradient(90deg,rgba(255,46,136,.95),rgba(255,46,136,.95)) 0 100%/100% 3px no-repeat,
+    linear-gradient(180deg,rgba(255,46,136,.95),rgba(255,46,136,.3)) 100% 0/3px 100% no-repeat;
+  filter:drop-shadow(0 0 8px rgba(255,46,136,.8)) drop-shadow(0 0 24px rgba(255,46,136,.35));
+}
+/* hero crown: the big neon script. hud.png's baked logo is retired on
+   dashboard, so the panel's own script returns — crisp HTML, breathing. */
 body.dashboard-mode.theme-vice-city #vc-right-panel .vc-logo-script{
-  font-family:'Yellowtail',cursive;font-size:64px;color:#ff71ce;text-align:center;
-  text-shadow:0 0 10px rgba(255,113,206,1),0 0 30px rgba(255,46,136,.8),0 0 60px rgba(255,46,136,.4);
-  transform:rotate(-3deg);line-height:1;margin-bottom:2px;
-  -webkit-text-stroke:1px rgba(255,255,255,.25);
+  display:block;position:absolute;top:0;left:0;right:0;z-index:6;
+  font-family:'Yellowtail',cursive;font-size:98px;color:#ff71ce;text-align:center;
+  text-shadow:0 0 2px rgba(255,244,250,.95),0 0 12px rgba(255,113,206,.95),0 0 44px rgba(255,46,136,.8),0 0 96px rgba(255,46,136,.4);
+  transform:rotate(-3deg);line-height:1.15;
+  animation:vc-bay-breathe 5s ease-in-out infinite;
 }
 body.dashboard-mode.theme-vice-city #vc-right-panel .vc-tagline{
+  display:block;position:absolute;top:118px;left:0;right:0;z-index:6;
   text-align:center;font-family:var(--vclabel);font-size:15px;font-weight:700;
-  letter-spacing:4px;color:var(--cyan);line-height:1.5;
-  text-shadow:0 0 8px rgba(1,205,254,.7);margin-bottom:12px;
+  letter-spacing:7px;color:var(--cyan);line-height:1.6;
+  text-shadow:0 0 10px rgba(1,205,254,.8);
 }
-body.dashboard-mode.theme-vice-city #vc-right-panel .vc-sunset{
-  display:none; /* hud.png provides the sunset lyric stage */
-}
-/* Spotify sits between the logo and the sunset panel */
-body.dashboard-mode.theme-vice-city #spotify-pane{
-  position:static;
-  /* The .vcsp skin positions itself (right:70px;top:48%) relative to the
-     viewport — the pane must NOT create a positioning context. */
-}
-/* Widget sits below the top bar, clear of the bottom bar — hero weighting:
-   +8% scale (687px), bottom-anchored 18px above the footer, right edge near
-   the screen edge. Rotation and all internals untouched. */
+body.dashboard-mode.theme-vice-city #vc-right-panel .vc-sunset{display:none}
+@keyframes vc-bay-breathe{0%,100%{filter:brightness(1)}50%{filter:brightness(1.16)}}
+/* radio tab = full-bleed map: the whole bay (panel AND module) goes away */
+body.dashboard-mode.theme-vice-city.radio-off #vc-right-panel{display:none}
+/* Spotify module: seated in the bay, same box as the panel. The hud.png
+   skin layer is retired on dashboard (phone keeps it) — the module is
+   now a scenic installation, not a floating card. */
+body.dashboard-mode.theme-vice-city #spotify-pane{position:static}
 body.dashboard-mode.theme-vice-city .vcsp{
-  top:auto;bottom:118px;right:110px;translate:none;width:687px;
+  top:78px;bottom:90px;right:0;width:704px;height:auto;aspect-ratio:auto;translate:none;
+  z-index:23;background:#05030c;
+  filter:drop-shadow(0 18px 40px rgba(0,0,0,.55));
 }
+/* scenic bay art + legibility scrims. The art's left edge melts into the
+   map (mask); the top scrim beds the neon script, the bottom scrim beds
+   the track/controls zone. */
+body.dashboard-mode.theme-vice-city .vcsp::before{
+  content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:
+    linear-gradient(180deg,rgba(4,2,12,.74) 0%,rgba(4,2,12,.18) 26%,transparent 46%,transparent 64%,rgba(3,2,10,.88) 100%),
+    url('spotify/hero-bay.png') 74% 42%/cover no-repeat;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 9%);
+  mask-image:linear-gradient(90deg,transparent 0,#000 9%);
+}
+body.dashboard-mode.theme-vice-city .vcsp-hud{display:none}
+/* album: hero-scale, neon-framed, floating on the scene — not a cut-out */
+body.dashboard-mode.theme-vice-city .vcsp-art,
+body.dashboard-mode.theme-vice-city .vcsp-art-idle{
+  left:6%;top:33.5%;width:170px;height:170px;border-radius:14px;
+}
+body.dashboard-mode.theme-vice-city .vcsp-art{
+  border:2px solid rgba(255,79,195,.9);
+  box-shadow:0 0 2px rgba(255,244,250,.7),0 0 18px rgba(255,47,179,.55),0 0 64px rgba(255,47,179,.22),0 16px 34px rgba(0,0,0,.55);
+}
+body.dashboard-mode.theme-vice-city .vcsp-art-idle{background:radial-gradient(70% 70% at 50% 38%,#1a1440 0%,#070a1e 75%)}
+/* lyric stage: the sunset IS the stage — big kinetic type over the scene.
+   Starts well clear of the crown tagline. */
+body.dashboard-mode.theme-vice-city .vcsp-lyrics{
+  left:36%;right:5%;top:33.5%;bottom:auto;height:29%;
+}
+body.dashboard-mode.theme-vice-city .vc-lyric-line{font-size:30px}
+body.dashboard-mode.theme-vice-city .vc-lyric-line.ghost{font-size:26px}
+body.dashboard-mode.theme-vice-city .vc-lyric-line.active{font-size:36px}
+/* bottom zone: two columns — track + progress stack on the left,
+   transport rides on the right. Track clears the album, progress clears
+   the track, everything clears the footer. */
+body.dashboard-mode.theme-vice-city .vcsp-track{left:6%;right:42%;top:78%;text-align:left}
+body.dashboard-mode.theme-vice-city .vcsp-title{
+  font-size:36px;letter-spacing:.04em;
+  text-shadow:0 0 2px rgba(255,244,250,.9),0 0 12px rgba(255,47,179,.9),0 0 40px rgba(255,47,179,.4),0 2px 5px #000;
+}
+body.dashboard-mode.theme-vice-city .vcsp-artist{font-size:20px;margin-top:4px}
+body.dashboard-mode.theme-vice-city .vcsp-progress{left:6%;right:42%;top:89.5%}
+body.dashboard-mode.theme-vice-city .vcsp-bar{height:26px}
+body.dashboard-mode.theme-vice-city .vcsp-bar::before{height:7px;margin-top:-3.5px}
+body.dashboard-mode.theme-vice-city .vcsp-bar-fill{height:7px;margin-top:-3.5px}
+body.dashboard-mode.theme-vice-city .vcsp-bar-knob{width:20px;height:20px;margin:-10px 0 0 -10px}
+body.dashboard-mode.theme-vice-city .vcsp-controls{
+  left:62%;right:4%;top:81%;bottom:4%;gap:18px;background:none;padding:0;
+  align-items:center;justify-content:center;
+}
+body.dashboard-mode.theme-vice-city .vcsp-tbtn{
+  width:54px;height:54px;min-width:54px;min-height:54px;font-size:20px;
+}
+body.dashboard-mode.theme-vice-city .vcsp-tbtn.big{
+  width:68px;height:68px;min-width:68px;min-height:68px;
+}
+/* idle: an ambient hero stage waiting to come alive — not a placeholder.
+   The idle block owns the whole stage below the crown: track/progress are
+   hidden (base already hides transport), kicker + CTA + hint centered. */
+body.dashboard-mode.theme-vice-city .vcsp.is-idle .vcsp-track,
+body.dashboard-mode.theme-vice-city .vcsp.is-idle .vcsp-progress{display:none}
+body.dashboard-mode.theme-vice-city .vcsp-idle{
+  left:36%;right:5%;top:30%;bottom:8%;height:auto;gap:16px;justify-content:center;
+}
+body.dashboard-mode.theme-vice-city .vcsp-idle-kicker{font-size:50px;line-height:1}
+body.dashboard-mode.theme-vice-city .vcsp-connect-btn{font-size:38px;padding:8px 46px}
+body.dashboard-mode.theme-vice-city .vcsp-idle-hint{font-size:22px;line-height:1.5}
 
 /* ============ BOTTOM BAR: authored angular HUD footer (hero silhouette) ============
    One continuous chamfered console: pink outline follows the stepped top edge
@@ -375,11 +472,8 @@ body.dashboard-mode.theme-vice-city .vcsp{
     drop-shadow(0 0 26px rgba(255,47,179,.34))
     drop-shadow(0 0 110px rgba(255,47,179,.14));
 }
-/* connect state: the Pricedown kicker's swashes rendered past its line
-   box and sat under the Connect pill — give the line box room and widen
-   the column gap so the CTA clears the glyphs */
-body.dashboard-mode.theme-vice-city .vcsp-idle{gap:2.6cqh}
-body.dashboard-mode.theme-vice-city .vcsp-idle-kicker{line-height:1.5}
+/* connect state: superseded — idle layout is owned by the VICE BAY HERO
+   section above (the kicker/CTA collision was a hud.png-era problem). */
 /* Hide VC hero elements on other themes */
 #vc-maneuver,#vc-right-panel{display:none}
 body.dashboard-mode.theme-vice-city #vc-maneuver{display:flex}
@@ -472,18 +566,9 @@ body.dashboard-mode.theme-vice-city .dash-wx{
   text-shadow:0 0 2px rgba(220,252,255,.8),0 0 8px rgba(1,205,254,.7);
 }
 
-/* ---- 5/6/7. SPOTIFY: visible-bounds scale, grounded not floating ----
-   hud.png visible bbox is 1388x1082 of 1448x1086 (95.9% width) — nearly
-   full-bleed. 520px CSS width = ~499px visible = 26% of the 1920 stage.
-   Right edge pulled to 40px (was 110px, felt detached). Tight dark contact
-   shadow + restrained 18-28px bloom; the 110px pink haze is gone. */
-body.dashboard-mode.theme-vice-city .vcsp{
-  width:520px;right:40px;bottom:112px;
-  filter:
-    drop-shadow(0 14px 22px rgba(0,0,0,.65))
-    drop-shadow(0 0 18px rgba(255,47,179,.28))
-    drop-shadow(0 0 28px rgba(255,47,179,.12));
-}
+/* ---- 5/6/7. SPOTIFY: superseded by the VICE BAY HERO rewrite above ----
+   (the 520px widget-scale rules lived here; the module is now a 704px
+   full-height scenic bay, positioned in the hero section) */
 
 /* ---- 10. SPEED READOUT: cardless, not a black pill ----
    Small Pricedown number, hairline pink/cyan bracket. No rounded rect,
@@ -585,13 +670,5 @@ body.dashboard-mode.theme-vice-city .ws-poi-label{
     0 0 3px rgba(0,0,0,.9),0 0 8px rgba(0,0,0,.6);
 }
 
-/* ---- SPOTIFY grounding: local atmospheric contact zone ----
-   One very broad near-black radial field BEHIND the widget (not blur,
-   not a circle — map stays perceptible through it). Map detail gently
-   quietens near the HUD so it feels seated, not floating. */
-body.dashboard-mode.theme-vice-city .vcsp::before{
-  content:'';position:absolute;inset:-90px;z-index:-1;
-  background:radial-gradient(ellipse 65% 60% at 50% 55%,
-    rgba(2,2,8,.5) 0%,rgba(2,2,8,.28) 45%,rgba(2,2,8,0) 75%);
-  pointer-events:none;
-}
+/* ---- SPOTIFY grounding: superseded — the bay carries its own scenic
+   backdrop + map-side fade in the VICE BAY HERO section above. */

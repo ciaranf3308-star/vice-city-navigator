@@ -175,7 +175,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v70"), 'SW shell cache v69');
+ok(swSrc.includes("ws-shell-v71"), 'SW shell cache v71');
 ok(swSrc.includes("ws-theme-v214"), 'SW theme cache v214');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
@@ -643,7 +643,7 @@ ok(appSrc.includes("classList.toggle('radio-off')"), 'RADIO tab toggles the musi
 ok(/body\.dashboard-mode #spotify-stage\{[\s\S]*?left:0;right:0;top:0;bottom:0/.test(cssSrc), 'Spotify stage is a full-canvas layer; every skin widget positions itself');
 ok(cssSrc.includes('#search-bar{right:740px}') && cssSrc.includes('#maneuver-card{right:740px}'), 'HUD chrome clears the larger tilted widgets');
 ok(cssSrc.includes('[data-spotskin="vice-city"] #search-bar{right:900px}'), 'VC chrome clears the wide tilted VC widget');
-ok(appSrc.includes('right = 560'), 'camera padding accounts for the resized VC widget');
+ok(appSrc.includes('right = 712'), 'camera padding accounts for the Vice Bay hero (704px)');
 ok(appSrc.includes("theme-san-andreas')) right = 701"), 'camera padding clears the SA music widget');
 ok(appSrc.includes("theme-gta-v')) right = 568"), 'camera padding clears the GTA V music widget');
 ok(appSrc.includes("theme-rdr2')) right = 670"), 'camera padding clears the RDR2 music widget');
@@ -720,7 +720,21 @@ ok(/theme-vice-city(?::is\([^)]*\))? #dash-topbar\{[^}]*clip-path:polygon/.test(
 ok(/theme-vice-city(?::is\([^)]*\))? #dash-bottombar\{[^}]*clip-path:polygon/.test(cssSrc), 'VC bottom bar is a shaped angular footer');
 ok(cssSrc.includes('#dash-eta .eta-time'), 'VC arrival time uses the live eta-time hook');
 /* ---------- pass 3: hero convergence refinements ---------- */
-ok(/theme-vice-city \.vcsp\{[^}]*bottom:118px/.test(cssSrc), 'VC widget bottom-anchored 18px above the footer');
+/* Vice Bay hero (2026-09-12): the music module is a full-height scenic bay,
+   not a floating widget — 704px wide, stretched bar-to-bar, hud.png retired
+   on dashboard (phone keeps the classic widget). */
+ok(/dashboard-mode\.theme-vice-city #vc-right-panel\{[^}]*width:704px/.test(cssSrc),
+  'VC hero bay: #vc-right-panel is the 704px full-height bay');
+ok(/dashboard-mode\.theme-vice-city #vc-right-panel\{[^}]*top:78px[^}]*bottom:90px/.test(cssSrc),
+  'VC hero bay spans bar-to-bar (below topbar, above footer)');
+ok(/dashboard-mode\.theme-vice-city \.vcsp\{[^}]*top:78px[^}]*bottom:90px[^}]*width:704px/.test(cssSrc),
+  'VC hero bay: .vcsp module fills the bay (not a floating widget)');
+ok(/dashboard-mode\.theme-vice-city \.vcsp-hud\{[^}]*display:none/.test(cssSrc),
+  'VC hero bay: hud.png skin layer retired on dashboard');
+ok(/dashboard-mode\.theme-vice-city #vc-right-panel \.vc-logo-script\{[^}]*display:block/.test(cssSrc),
+  'VC hero bay: neon script crown unhidden');
+ok(/dashboard-mode\.theme-vice-city\.radio-off #vc-right-panel\{[^}]*display:none/.test(cssSrc),
+  'VC hero bay: radio tab hides the whole bay for a full-bleed map');
 ok(cssSrc.includes("dashboard/skyline-sunset.png"), 'VC skyline uses the supplied sunset scenery asset');
 ok(!cssSrc.includes("dashboard/topbar-skyline.png"), 'old glitch-strip skyline treatment fully retired');
 ok(/theme-vice-city(?::is\([^)]*\))? #dash-topbar\{[^}]*97\.5% 100%/.test(cssSrc), 'VC header has a skyline pocket in its silhouette');
@@ -1104,7 +1118,10 @@ ok(SW.isThemeAsset('/themes/san-andreas/dashboard/sa-logo.png'), 'isThemeAsset: 
 ok(SW.isThemeAsset('/themes/gta-v/dashboard/topbar-bg.png'), 'isThemeAsset: V dashboard bar art');
 ok(SW.isThemeAsset('/assets/themes/rdr2/dashboard/menu_header_1a.png'), 'isThemeAsset: RDR2 dashboard art');
 const vcSkinSrc = fs.readFileSync(path.join(REPO, 'themes/vice-city/spotify-skin.css'), 'utf8');
-ok(cssSrc.includes('theme-vice-city .vcsp{') && /theme-vice-city \.vcsp\{[^}]*width:687px/.test(cssSrc), 'VC widget scaled to 687px in dashboard (hero weighting)');
+ok(/dashboard-mode\.theme-vice-city \.vcsp\{[^}]*width:704px/.test(cssSrc),
+  'VC hero bay: music module is the 704px bay (hero weighting, not a widget)');
+ok(!/theme-vice-city \.vcsp\{[^}]*width:(520|687)px/.test(cssSrc),
+  'VC hero bay: old floating-widget widths are gone');
 ok(!vcSkinSrc.includes('rotate(6deg)'), 'VC widget is straight (hero has no tilt)');
 // every theme widget: explicit larger size, ~6-7 degree tilt (except VC hero-match), no-overlap idle states
 // (san-andreas pass 4: straight Radio Los Santos bezel, asserted in the pass 4 block)
@@ -1125,6 +1142,8 @@ for (const [theme, cls, shape, size] of skinSpecs) {
   ok(js.includes('!connected && !hasTrack'), `${theme}: is-idle requires disconnected AND no track (lyric void fix)`);
 }
 ok(appSrc.includes('syncDashPadding'), 'camera viewport offsets left of the VC widget');
+ok(/contains\('theme-vice-city'\)\) right = 712/.test(appSrc),
+  'camera right padding clears the 704px Vice Bay hero');
 /* Regression: dashboard camera padding must clear every theme's real bars
    (SA 126/126, GTA V 120/120, RDR2 104/84) — the old hardcoded top:76 /
    bottom:VC?100:88 left the camera target under the SA/GTA V bars. */
@@ -1142,7 +1161,7 @@ ok(/\#spotify-pane\{[\s\S]*?background:transparent/.test(cssSrc), 'pane transpar
 
 // sw precache follows the move
 for (const p of ['themes/vice-city/spotify-skin.js', 'themes/vice-city/spotify-skin.css',
-    'themes/vice-city/spotify/hud.png']) {
+    'themes/vice-city/spotify/hud.png', 'themes/vice-city/spotify/hero-bay.png']) {
   ok(SW.SHELL.includes(p), `SW precaches ${p}`);
 }
 ok(!SW.SHELL.some(p => p.includes('skin-vice-city') || p.includes('synthwave')), 'SW drops old skin paths');
