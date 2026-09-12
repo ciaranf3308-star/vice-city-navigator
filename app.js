@@ -511,6 +511,33 @@ async function initMap() {
   });
   mapBooting = false;
   clearMapOffline(mapEl);
+  // Tile watchdog: OpenFreeMap is flaky on some head-unit connections.
+  // If tiles error out with nothing successfully loading, reload the
+  // style once after a grace period instead of sitting on gray forever.
+  (function tileWatchdog() {
+    let tileErrors = 0, tilesOk = false, retried = false;
+    try {
+      map.on('error', e => {
+        if (e && e.error && /tile/i.test(e.error.message || '')) tileErrors++;
+      });
+      map.on('sourcedata', e => {
+        if (e && e.isSourceLoaded && !e.sourceDataType) tilesOk = true;
+      });
+    } catch (e) {}
+    setTimeout(() => {
+      if (!tilesOk && tileErrors > 0 && !retried) {
+        retried = true;
+        try {
+          const theme = wsTheme();
+          const styleUrl = (theme && theme.map.styleUrl) || 'themes/vice-city/style.json';
+          fetch(styleUrl, { cache: 'no-cache' }).then(r => r.json()).then(style => {
+            try { map.setStyle(style, { diff: false }); } catch (e) {}
+          }).catch(() => {});
+          toast('Map tiles were slow — retrying…');
+        } catch (e) {}
+      }
+    }, 12000);
+  })();
   map.on('load', () => {
     try { map.on('move', syncDashCompass); } catch (e) {}
     try { map.on('moveend', queueDashLocality); } catch (e) {}
