@@ -3556,6 +3556,45 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 }
 
+/* Shell version skew guard: the service worker serves shell assets
+   stale-while-revalidate, so after a deploy the page can boot with a
+   MIX of old and new app.js/CSS — e.g. new CSS hiding the dashboard
+   menu sections that an old openMenu() never activates, rendering an
+   empty settings page that no test can reproduce (the running files
+   are individually fine; only the combination is broken).
+   WS_SHELL_VERSION must match the CACHE name in sw.js (theme_tests.js
+   enforces this). On boot, compare against the live network sw.js; on
+   mismatch, ask the SW registration to update and reload once.
+   sessionStorage gates it so a blocked network can never loop. */
+const WS_SHELL_VERSION = 'ws-shell-v72';
+function healShellVersionSkew() {
+  try {
+    if (!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;
+    if (sessionStorage.getItem('ws-shell-healed') === WS_SHELL_VERSION) return;
+    /* Query-busted so the SW's own stale-while-revalidate can't hand
+       back its cached sw.js: an unmatched cache key falls through to
+       the live network copy (or fails offline -> no-op). */
+    fetch('sw.js?vercheck=' + Date.now(), { cache: 'no-store' }).then(r => {
+      if (!r || !r.ok) return null;
+      return r.text();
+    }).then(t => {
+      if (!t) return;
+      const m = t.match(/ws-shell-(v\d+)/);
+      if (m && ('ws-shell-' + m[1]) !== WS_SHELL_VERSION) {
+        sessionStorage.setItem('ws-shell-healed', WS_SHELL_VERSION);
+        const done = () => setTimeout(() => location.reload(), 900);
+        if (navigator.serviceWorker.getRegistration) {
+          navigator.serviceWorker.getRegistration().then(reg => {
+            try { if (reg && reg.update) reg.update(); } catch (e) {}
+            done();
+          }).catch(done);
+        } else done();
+      }
+    }).catch(() => {});
+  } catch (e) {}
+}
+healShellVersionSkew();
+
 // debug / test hook
 window.VCN = {
   state: () => ({ navActive, uiMode, stepIdx, steps: steps.length,

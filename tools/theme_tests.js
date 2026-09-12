@@ -175,8 +175,24 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v71"), 'SW shell cache v71');
+ok(swSrc.includes("ws-shell-v72"), 'SW shell cache v72');
 ok(swSrc.includes("ws-theme-v214"), 'SW theme cache v214');
+/* Shell version skew guard: app.js bakes the shell version and
+   self-heals a mixed old/new asset boot (2026-09-12: old openMenu +
+   new menu CSS rendered an empty settings page). The baked version
+   must track the SW CACHE name or the guard misfires. */
+const appSrcSkew = fs.readFileSync('app.js', 'utf8');
+const swVer = (swSrc.match(/const CACHE = '(ws-shell-v\d+)'/) || [])[1];
+const appVer = (appSrcSkew.match(/const WS_SHELL_VERSION = '(ws-shell-v\d+)'/) || [])[1];
+ok(!!swVer && !!appVer && swVer === appVer, 'app.js WS_SHELL_VERSION matches sw.js CACHE (' + (appVer || '?') + ')');
+ok(/healShellVersionSkew\(\)/.test(appSrcSkew), 'shell skew guard runs at boot');
+ok(/ws-shell-healed/.test(appSrcSkew), 'skew guard has a reload loop gate');
+/* VC dashboard view toggle is a chamfered console plate, not floating
+   text (2026-09-12: user called the naked text labels lashed-in). */
+const vcToggle = fs.readFileSync('themes/vice-city/mode-toggle.css', 'utf8');
+const dashToggleBlock = vcToggle.slice(vcToggle.indexOf('html body.dashboard-mode.theme-vice-city #mode-toggle{'));
+ok(dashToggleBlock.includes('clip-path:polygon(12px 0'), 'VC dash toggle: chamfered plate silhouette');
+ok(/filter:drop-shadow\(0 0 7px rgba\(255,79,195/.test(dashToggleBlock), 'VC dash toggle: pink edge glow follows the chamfer');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
 ok(/new Request\(req,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
