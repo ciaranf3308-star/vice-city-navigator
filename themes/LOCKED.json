@@ -18,8 +18,8 @@
     },
     {
       "file": "themes/gta-v/cluster.js",
-      "sha256": "331e5ba4a218834dec8494cdabea18e679caa57c593c3401183c7b0d991f4934",
-      "note": "GTA V cluster JS approved 2026-09-10, reaffirmed 2026-09-11. Do not modify."
+      "sha256": "ac02eb54fdd5d94bdd9f4946455e247130de119e70ca578ba8b06f1bddfe78e1",
+      "note": "GTA V cluster JS approved 2026-09-10, reaffirmed 2026-09-11. 2026-09-12: user-requested fix — queuePlace() re-armed its 1200ms timer on every 1s tick so syncPlace() starved forever and the topbar placename never left the hero branding; now a pending lookup is never re-armed. Logic-only, no visual/styling change. Deliberate change, re-recorded."
     },
     {
       "file": "themes/gta-v/spotify-cluster.css",

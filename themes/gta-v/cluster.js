@@ -46,7 +46,12 @@
      hammer Nominatim. */
   let gvPlaceKey = '', gvPlaceTimer = null;
   function queuePlace() {
-    clearTimeout(gvPlaceTimer);
+    /* The 1s tick calls this every second, so a pending lookup must NOT be
+       re-armed: clearTimeout + a fresh 1200ms timer here meant the timer
+       could never elapse and syncPlace() starved forever, leaving the
+       hardcoded hero-city branding on screen. syncPlace re-reads the
+       latest fix at fire time and dedupes on its ~100m grid key. */
+    if (gvPlaceTimer) return;
     gvPlaceTimer = setTimeout(() => { gvPlaceTimer = null; syncPlace(); }, 1200);
   }
   async function syncPlace() {

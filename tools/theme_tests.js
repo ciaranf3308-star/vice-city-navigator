@@ -175,7 +175,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v72"), 'SW shell cache v72');
+ok(swSrc.includes("ws-shell-v73"), 'SW shell cache v73');
 ok(swSrc.includes("ws-theme-v214"), 'SW theme cache v214');
 /* Shell version skew guard: app.js bakes the shell version and
    self-heals a mixed old/new asset boot (2026-09-12: old openMenu +
@@ -2253,6 +2253,15 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
     'GTA V cluster placename is keyed on a ~100m grid (no Nominatim hammering)');
   ok(/tick\(\)[\s\S]{0,200}queuePlace\(\)/.test(gvClusterJs),
     'GTA V cluster tick queues the placename sync');
+  /* 2026-09-12: starvation bug — tick() runs every 1000ms and called
+     queuePlace() each time; the old queuePlace did clearTimeout + a fresh
+     1200ms timer, so the timer could never elapse and syncPlace() never
+     fired (placename stuck on the hardcoded hero branding forever). A pending
+     lookup must not be re-armed. */
+  ok(/function queuePlace\(\) \{\s*\/\*[\s\S]*?\*\/\s*if \(gvPlaceTimer\) return;/.test(gvClusterJs),
+    'GTA V cluster queuePlace never re-arms a pending placename lookup (no 1s-tick starvation)');
+  ok(!/function queuePlace\(\) \{\s*clearTimeout\(gvPlaceTimer\)/.test(gvClusterJs),
+    'GTA V cluster queuePlace does not clearTimeout-and-reset on every tick');
   ok(!/LOS SANTOS/.test(gvClusterJs),
     'GTA V cluster JS never hardcodes a city name (hero branding stays in HTML only)');
 }
