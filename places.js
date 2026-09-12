@@ -386,6 +386,11 @@
     img.alt = '';
     img.draggable = false;
     el.appendChild(img);
+    // Place-name label under the icon.
+    const label = document.createElement('div');
+    label.className = 'ws-poi-label';
+    label.textContent = rec.displayName || '';
+    el.appendChild(label);
     const size = markerSizePx();
     el.style.width = size + 'px';
     el.style.height = size + 'px';
