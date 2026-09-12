@@ -2629,7 +2629,7 @@ function syncDashPadding() {
   const widgetHidden = !dash || b.contains('radio-off');
   let right = 8;
   if (!widgetHidden) {
-    if (b.contains('theme-vice-city')) right = 712;       // Vice Bay hero: right:0, width:704px
+    if (b.contains('theme-vice-city')) right = 560;       // .vcsp: right:40px, width:520px
     else if (b.contains('theme-san-andreas')) right = 701; // .sasp: left:1219px, width:701px
     else if (b.contains('theme-gta-v')) right = 568;      // .gvsp: right:48px, width:520px
     else if (b.contains('theme-rdr2')) right = 670;       // .rdsp: right:70px, width:600px
