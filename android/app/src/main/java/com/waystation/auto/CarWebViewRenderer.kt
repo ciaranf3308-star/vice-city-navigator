@@ -89,6 +89,8 @@ class CarWebViewRenderer(private val carContext: CarContext) {
     private val pendingGeoCallbacks =
         mutableListOf<Pair<String, GeolocationPermissions.Callback>>()
     private var locationRequestInFlight = false
+    /** True once we've asked the user; a denial must not re-prompt in a loop. */
+    private var locationPermissionAsked = false
 
     private val main = Handler(Looper.getMainLooper())
     private val spotifyAuth = SpotifyAuthManager(carContext)
@@ -343,7 +345,13 @@ class CarWebViewRenderer(private val carContext: CarContext) {
                     return
                 }
                 // Permission not yet granted: hold the callback and trigger
-                // a permission request. Never answer "no" prematurely.
+                // a permission request — but only once. If the user already
+                // denied, answer "no" directly instead of spamming dialogs.
+                if (locationPermissionAsked) {
+                    Log.i(TAG, "geolocation prompt for $origin -> denied (already asked)")
+                    callback.invoke(origin, false, false)
+                    return
+                }
                 Log.i(TAG, "geolocation prompt for $origin -> holding (permission not yet granted)")
                 pendingGeoCallbacks.add(origin to callback)
                 if (!locationRequestInFlight) {
@@ -610,6 +618,7 @@ class CarWebViewRenderer(private val carContext: CarContext) {
      */
     fun onLocationPermissionResult() {
         locationRequestInFlight = false
+        locationPermissionAsked = true
         flushPendingGeoCallbacks()
         if (locationPermissionGranted?.invoke() == true) {
             reloadPage()
