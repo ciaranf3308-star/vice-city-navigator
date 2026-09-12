@@ -175,7 +175,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v75"), 'SW shell cache v75');
+ok(swSrc.includes("ws-shell-v76"), 'SW shell cache v76');
 ok(swSrc.includes("ws-theme-v214"), 'SW theme cache v214');
 /* Shell version skew guard: app.js bakes the shell version and
    self-heals a mixed old/new asset boot (2026-09-12: old openMenu +
@@ -660,7 +660,7 @@ ok(/body\.dashboard-mode #spotify-stage\{[\s\S]*?left:0;right:0;top:0;bottom:0/.
 ok(cssSrc.includes('#search-bar{right:740px}') && cssSrc.includes('#maneuver-card{right:740px}'), 'HUD chrome clears the larger tilted widgets');
 ok(cssSrc.includes('[data-spotskin="vice-city"] #search-bar{right:900px}'), 'VC chrome clears the wide tilted VC widget');
 ok(appSrc.includes('right = 690'), 'camera padding accounts for the resized VC widget');
-ok(appSrc.includes("theme-san-andreas')) right = 640"), 'camera padding clears the SA music widget');
+ok(appSrc.includes("theme-san-andreas')) right = 695"), 'camera padding clears the SA music widget');
 ok(appSrc.includes("theme-gta-v')) right = 568"), 'camera padding clears the GTA V music widget');
 ok(appSrc.includes("theme-rdr2')) right = 670"), 'camera padding clears the RDR2 music widget');
 ok(appSrc.includes("b.contains('radio-off')"), 'camera padding drops widget clearance when the radio tab hides the widget');
@@ -746,8 +746,8 @@ ok(/theme-vice-city(?::is\([^)]*\))? #dash-bottombar\{[^}]*rgba\(1,205,254/.test
 ok(/theme-vice-city \.dash-tag::before/.test(cssSrc), 'VC footer separates arrival and slogan with a divider');
 ok(/theme-vice-city #dash-dest\{[^}]*overflow:visible/.test(cssSrc), 'VC locality plate never truncates');
 ok(/theme-vice-city \.dash-tabs button\{[^}]*clip-path:polygon/.test(cssSrc), 'VC tabs are chamfered hardware keys (redesign: dashboard worthy of the widget)');
-ok(/theme-san-andreas \.dash-tabs button\.on\{[^}]*linear-gradient\(180deg,#a9c46e/.test(cssSrc),
-  'SA active tab is a pale Grove-green console key (target-lock), not the dark gold plate');
+ok(/theme-san-andreas \.dash-tabs button\.on\{[^}]*linear-gradient\(180deg,#5c6e3c/.test(cssSrc),
+  'SA active tab is a muted Grove-olive key (target-lock pass 2), not the dark gold plate');
 ok(/theme-gta-v \.dash-tabs button\[data-dtab="map"\]::before\{[^}]*tab-map\.png/.test(cssSrc), 'V tabs use generated icons (map)');
 ok(/theme-gta-v \.dash-tabs button\[data-dtab="settings"\]::before\{[^}]*tab-settings\.png/.test(cssSrc), 'V tabs use generated icons (settings)');
 ok(/theme-gta-v \.dash-tag\{display:none/.test(cssSrc), 'V drops the 80s script tagline');
@@ -981,8 +981,8 @@ ok(/theme-san-andreas #dash-bottombar\{[^}]*height:88px/.test(cssSrc),
   'SA footer is the 88px CSS Grove console (target-lock), not the hero7 slice');
 ok(!/theme-san-andreas #dash-bottombar\{[^}]*clip-path/.test(cssSrc),
   'SA footer silhouette comes from the art, not CSS clip-path');
-ok(/theme-san-andreas \.dash-tabs button\.on\{[^}]*#a9c46e/.test(cssSrc),
-  'SA active tab is the pale Grove-green key (target-lock), gold plate retired');
+ok(/theme-san-andreas \.dash-tabs button\.on\{[^}]*#5c6e3c/.test(cssSrc),
+  'SA active tab is the muted Grove-olive key (target-lock pass 2), gold plate retired');
 ok(!/theme-san-andreas \.dash-tabs button:nth-child\(5\)/.test(cssSrc),
   'SA has 4 dash tabs after the dead vehicle tab removal (no 5th-tab rules)');
 ok(/theme-san-andreas \.dash-tabs button\{[^}]*width:172px/.test(cssSrc),
@@ -997,12 +997,12 @@ ok(/body:has\(#menu-panel:not\(\[hidden\]\)\) #mode-toggle\{display:none/.test(c
   'the dash/cluster view toggle hides while the full-stage settings page is open');
 ok(/theme-san-andreas \.dash-tabs button span\{display:inline/.test(cssSrc),
   'SA footer tabs show icon + label like the target console keys');
-ok(/theme-san-andreas \.sasp\{[^}]*left:1280px/.test(skinSaSrc),
-  'SA radio sits at the target radio x (1280px stage)');
-ok(/theme-san-andreas \.sasp\{[^}]*top:78px/.test(skinSaSrc),
-  'SA radio sits just under the 74px topbar (78px stage)');
-ok(/\.sasp-bezel/.test(skinSaSrc) && skinJsSa.includes('dashboard/radio-target-v1.png'),
-  'SA Spotify outer skin is the target dark-scenic base (radio-target-v1.png)');
+ok(/theme-san-andreas \.sasp\{[^}]*left:1215px/.test(skinSaSrc),
+  'SA radio sits at the target radio x (1215px stage, pass 2)');
+ok(/theme-san-andreas \.sasp\{[^}]*top:76px/.test(skinSaSrc),
+  'SA radio sits just under the 74px topbar (76px stage, pass 2)');
+ok(/\.sasp-bezel/.test(skinSaSrc) && skinJsSa.includes('dashboard/radio-target-v2.png'),
+  'SA Spotify outer skin is the scenic pass-2 base (radio-target-v2.png)');
 ok(/\.sasp-connect-btn/.test(skinSaSrc),
   'SA idle state is a station-branded card with a connect CTA');
 ok(/\.sasp\{[^}]*container-type:size/.test(skinSaSrc),
@@ -1837,8 +1837,8 @@ ok(/theme-san-andreas #sa-grove-panel/.test(cssSrc),
 ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/grove-panel.png')), 'SA grove-panel art exists');
 ok(!/bottombar-trim\.jpg/.test(cssSrc) && !/bottombar-palms\.jpg/.test(cssSrc),
   'SA retired the brass-trim/palm-sunset bottom bar (2026-09-09 polish)');
-ok(/theme-san-andreas \.dash-tabs button\.on\{[^}]*#7ba24e/.test(cssSrc),
-  'SA active tab is the pale Grove-green key (target-lock), not the dark gold plate');
+ok(/theme-san-andreas \.dash-tabs button\.on\{[^}]*#5c6e3c/.test(cssSrc),
+  'SA active tab is the muted Grove-olive key (target-lock pass 2), not the dark gold plate');
 ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/bottombar-trim.jpg')), 'SA bottom bar trim art exists');
 ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/bottombar-palms.jpg')), 'SA bottom bar palm art exists');
 // Theme lock enforcement: a locked theme's dashboard.css must match its recorded hash.
@@ -2409,14 +2409,14 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
     const sz = pngSize(path.join(REPO, 'themes/san-andreas/dashboard', f));
     ok(sz && sz.w === w && sz.h === h, `target-lock art ${f} is ${w}x${h}`);
   };
-  tl('radio-target-v1.png', 640, 544);
+  tl('radio-target-v2.png', 695, 556);
   tl('topbar-target-v1.png', 1920, 74);
   ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/flourish-tomorrow.png')), 'target-lock flourish-tomorrow.png on disk');
   // index.html + SW wiring
   ok(indexSrc.indexOf('station-resolver.js') !== -1 && indexSrc.indexOf('station-resolver.js') < indexSrc.indexOf('themes/san-andreas/spotify-skin.js'),
     'index.html loads station-resolver.js before the SA spotify skin');
   ok(swSrc.includes('themes/san-andreas/station-resolver.js'), 'SW precaches station-resolver.js');
-  ok(swSrc.includes('themes/san-andreas/dashboard/radio-target-v1.png'), 'SW precaches the target radio base art');
+  ok(swSrc.includes('themes/san-andreas/dashboard/radio-target-v2.png'), 'SW precaches the pass-2 radio base art');
   ok(swSrc.includes('themes/san-andreas/radio-stations/radio-los-santos.png'), 'SW precaches the station logo set');
 }
 

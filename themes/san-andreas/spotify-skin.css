@@ -1,8 +1,9 @@
 /* ============================================================
-   San Andreas Spotify skin — TARGET-LOCK PASS 1 (2026-09-12).
-   The skin IS authored art: radio-target-v1.png (640x544) — dark
-   scenic Los Santos / palm / lowrider base with a NEUTRAL top-left
-   zone. Live HTML sits over the art:
+   San Andreas Spotify skin — TARGET-LOCK PASS 2 (2026-09-12).
+   The skin IS authored art: radio-target-v2.png (695x556) — amber
+   sunset skyline + palm silhouettes + grounded lowrider, melting
+   into a near-black player surface; subtle shaped top hairline,
+   no heavy rectangular border. Live HTML sits over the art:
    - dynamic GTA:SA station logo (real PNGs, crossfaded) top-left
    - album art lower-left in an aged frame
    - title / artist / progress / transport in the lower column
@@ -13,10 +14,11 @@
    ============================================================ */
 
 /* widget placement: right side of the 1920x720 stage, just under the
-   74px topbar (stage coordinates) */
+   74px topbar (stage coordinates). Pass 2: slightly wider (695px),
+   art v2 carries the scenery through the whole panel. */
 body.dashboard-mode.theme-san-andreas .sasp{
   position:absolute;z-index:30;
-  left:1280px;top:78px;width:640px;height:544px;
+  left:1215px;top:76px;width:695px;height:556px;
   pointer-events:auto;
   filter:drop-shadow(0 18px 34px rgba(0,0,0,.65));
   container-type:size; /* scope cqw/cqh lyric units to the widget */
@@ -31,9 +33,10 @@ body.dashboard-mode.theme-san-andreas .sasp-main{
 }
 /* DYNAMIC STATION LOGO: the hero of the panel. Neutral stage —
    no baked logo in the art. object-fit:contain so tall/wide logos
-   never stretch; the stage is fixed so swaps never jump layout. */
+   never stretch; the stage is fixed so swaps never jump layout.
+   Pass 2: significantly larger stage (all vendored logos ~square). */
 body.dashboard-mode.theme-san-andreas .sasp-station{
-  position:absolute;left:30px;top:22px;width:320px;height:130px;
+  position:absolute;left:30px;top:20px;width:380px;height:160px;
   pointer-events:none;
 }
 body.dashboard-mode.theme-san-andreas .sasp-station-logo{
@@ -44,18 +47,18 @@ body.dashboard-mode.theme-san-andreas .sasp-station-logo{
 body.dashboard-mode.theme-san-andreas .sasp-station-logo.on{opacity:1}
 /* target tagline, top-right of the module, Grove green */
 body.dashboard-mode.theme-san-andreas .sasp-tagline{
-  position:absolute;right:34px;top:96px;z-index:1;pointer-events:none;
+  position:absolute;right:28px;top:92px;z-index:1;pointer-events:none;
   font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:15px;font-weight:700;
   letter-spacing:3px;line-height:1.5;text-align:right;color:#8fce62;
   text-shadow:0 2px 3px rgba(0,0,0,.9);
 }
-/* ALBUM: lower-left, thin aged-green/cream frame */
+/* ALBUM: lower-left anchor, thin aged frame, black backing (pass 2:
+   no bright gold picture frame) */
 body.dashboard-mode.theme-san-andreas .sasp-artwrap{
-  position:absolute;left:35px;top:272px;width:185px;height:185px;
+  position:absolute;left:35px;top:290px;width:190px;height:190px;
   background:#000;overflow:hidden;pointer-events:none;
-  border:2px solid rgba(216,198,144,.8);
-  outline:1px solid rgba(122,102,52,.7);outline-offset:3px;
-  box-shadow:0 6px 18px rgba(0,0,0,.7);
+  border:1px solid rgba(216,198,144,.55);
+  box-shadow:0 8px 22px rgba(0,0,0,.75);
 }
 body.dashboard-mode.theme-san-andreas .sasp-art-idle{
   position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
@@ -66,95 +69,96 @@ body.dashboard-mode.theme-san-andreas .sasp-art{
   position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;
 }
 body.dashboard-mode.theme-san-andreas .sasp-art.on{opacity:1}
-/* METADATA: right of the album */
+/* METADATA: right of the album, aligned to its upper-middle */
 body.dashboard-mode.theme-san-andreas .sasp-meta{
-  position:absolute;left:240px;top:337px;width:370px;min-width:0;pointer-events:none;
+  position:absolute;left:248px;top:350px;width:415px;min-width:0;pointer-events:none;
 }
 body.dashboard-mode.theme-san-andreas .sasp-title{
-  font-size:26px;font-weight:700;letter-spacing:1.5px;color:#f7f0dc;
+  font-family:'Outfit','Arial Narrow',Arial,sans-serif;
+  font-size:27px;font-weight:700;letter-spacing:1px;color:#f7f0dc;
   text-shadow:0 2px 0 #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 body.dashboard-mode.theme-san-andreas .sasp-artist{
-  font-size:15px;letter-spacing:2px;color:#9dc46a;margin-top:6px;
+  font-family:'Outfit','Arial Narrow',Arial,sans-serif;
+  font-size:15px;font-weight:500;letter-spacing:1.5px;color:#9dc46a;margin-top:6px;
   text-shadow:0 2px 0 #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 body.dashboard-mode.theme-san-andreas .sasp-artist.sasp-status{color:#d8a94e}
-/* PROGRESS: long bar beneath the metadata */
+/* PROGRESS: thin, clean, restrained green — not a glowing Spotify bar */
 body.dashboard-mode.theme-san-andreas .sasp-progress{
-  position:absolute;left:240px;top:417px;width:370px;pointer-events:auto;
+  position:absolute;left:248px;top:428px;width:415px;pointer-events:auto;
 }
 body.dashboard-mode.theme-san-andreas .sasp-bar{
-  position:relative;height:8px;background:rgba(240,230,200,.14);
-  border:1px solid rgba(216,169,78,.45);cursor:pointer;
+  position:relative;height:5px;background:rgba(240,230,200,.16);
+  border:0;cursor:pointer;border-radius:3px;
 }
 body.dashboard-mode.theme-san-andreas .sasp-bar-fill{
-  position:absolute;left:0;top:0;bottom:0;width:0%;
-  background:linear-gradient(90deg,#4e7a34,#8fbf5a);
+  position:absolute;left:0;top:0;bottom:0;width:0%;border-radius:3px;
+  background:linear-gradient(90deg,#557d38,#8fbf5a);
 }
 body.dashboard-mode.theme-san-andreas .sasp-bar-knob{
-  position:absolute;top:50%;width:12px;height:12px;border-radius:50%;
-  background:#f0e6c8;border:1px solid #8a6d2a;transform:translate(-50%,-50%);
+  position:absolute;top:50%;width:11px;height:11px;border-radius:50%;
+  background:#e8dcc0;border:1px solid rgba(0,0,0,.5);transform:translate(-50%,-50%);
+  box-shadow:0 1px 4px rgba(0,0,0,.6);
 }
 body.dashboard-mode.theme-san-andreas .sasp-times{
-  display:flex;justify-content:space-between;margin-top:4px;
+  display:flex;justify-content:space-between;margin-top:5px;
   font-size:11px;letter-spacing:1px;color:#8f8468;text-shadow:0 1px 0 #000;
 }
-/* TRANSPORT: one clean row — shuffle / prev / big toggle / next / repeat */
+/* TRANSPORT (pass 2): only PLAY/PAUSE gets the hero ring. The other
+   four are bare glyphs — visible chrome removed, 48px touch targets
+   kept. Cream icons; active shuffle/repeat in muted Grove green. */
 body.dashboard-mode.theme-san-andreas .sasp-controls{
-  position:absolute;left:240px;top:478px;width:370px;height:52px;
-  display:flex;align-items:center;justify-content:flex-start;gap:14px;
+  position:absolute;left:248px;top:484px;width:415px;height:56px;
+  display:flex;align-items:center;justify-content:flex-start;gap:16px;
   pointer-events:none;
 }
 body.dashboard-mode.theme-san-andreas .sasp-tbtn{
-  width:46px;height:46px;border-radius:50%;cursor:pointer;flex:0 0 auto;
-  background:transparent;border:1px solid rgba(216,198,144,.35);color:#e8dcc0;
+  width:48px;height:48px;border:0;border-radius:0;cursor:pointer;flex:0 0 auto;
+  background:none;color:#e8dcc0;
   display:flex;align-items:center;justify-content:center;
   pointer-events:auto;padding:0;
 }
-body.dashboard-mode.theme-san-andreas .sasp-tbtn svg{width:22px;height:22px;fill:currentColor;
+body.dashboard-mode.theme-san-andreas .sasp-tbtn svg{width:24px;height:24px;fill:currentColor;
   filter:drop-shadow(0 2px 2px rgba(0,0,0,.8))}
 body.dashboard-mode.theme-san-andreas .sasp-tbtn[data-act="toggle"]{
-  width:64px;height:64px;
-  background:linear-gradient(180deg,#1b2110,#0c0f07);
-  border:2px solid #e8dcc0;
-  box-shadow:0 0 0 1px rgba(0,0,0,.6), 0 4px 12px rgba(0,0,0,.6);
+  width:68px;height:68px;border-radius:50%;
+  background:rgba(10,12,7,.55);
+  border:2px solid #8fbf5a;
+  box-shadow:0 4px 14px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.08);
 }
-body.dashboard-mode.theme-san-andreas .sasp-tbtn[data-act="toggle"] svg{width:28px;height:28px}
+body.dashboard-mode.theme-san-andreas .sasp-tbtn[data-act="toggle"] svg{width:30px;height:30px}
 body.dashboard-mode.theme-san-andreas .sasp-tbtn.on{
-  color:#9dc46a;border-color:#9dc46a;
+  color:#9dc46a;
 }
 body.dashboard-mode.theme-san-andreas .sasp-tbtn:active{transform:scale(.92)}
 /* LYRICS: engine untouched, visually suppressed in SA dashboard
    (locked hero has no lyric stage). Other themes unaffected. */
 body.dashboard-mode.theme-san-andreas .sasp-lyrics{display:none}
-/* idle: station branding + connect CTA over the dark module */
+/* idle (pass 2): NO giant opaque card. The radio scene stays beautiful:
+   station logo, scenery, lowrider, album placeholder, dim progress rail
+   and dim controls all remain visible. The metadata region carries the
+   status text ("Nothing playing / Press play in Spotify", set by the
+   skin's render()). Only when fully disconnected does a slim inline
+   connect CTA appear in the metadata zone — no box, no border. */
 body.dashboard-mode.theme-san-andreas .sasp-idle{
   position:absolute;z-index:2;
-  left:30px;top:300px;width:580px;height:214px;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:10px;text-align:center;
-  background:rgba(10,12,7,.88);
-  border:1px solid rgba(216,169,78,.4);
-  padding:20px;box-sizing:border-box;pointer-events:auto;
+  left:248px;top:406px;width:415px;
+  display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;
+  gap:8px;text-align:left;
+  background:none;border:0;padding:0;pointer-events:auto;
 }
 body.dashboard-mode.theme-san-andreas .sasp-idle[hidden]{display:none}
-body.dashboard-mode.theme-san-andreas .sasp-idle-kicker{
-  font-family:'Beckett','Pricedown Bl',serif;font-size:26px;color:#f5edd8;
-  text-shadow:0 2px 0 #000;
-}
+body.dashboard-mode.theme-san-andreas .sasp-idle-kicker{display:none}
 body.dashboard-mode.theme-san-andreas .sasp-connect-btn{
   font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:13px;font-weight:700;
   letter-spacing:3px;text-transform:uppercase;cursor:pointer;
-  color:#0e120a;background:linear-gradient(180deg,#e8c56a,#c9982f);
-  border:1px solid rgba(255,240,200,.5);border-radius:0;padding:9px 20px 8px;
-  box-shadow:0 3px 10px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.35);
+  color:#9dc46a;background:none;border:0;border-bottom:1px solid rgba(157,196,106,.5);
+  border-radius:0;padding:2px 0;
 }
 body.dashboard-mode.theme-san-andreas .sasp-connect-btn:active{transform:scale(.95)}
-body.dashboard-mode.theme-san-andreas .sasp-idle-hint{
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:10px;letter-spacing:2px;
-  line-height:1.7;color:#8f8468;text-transform:uppercase;margin:0;
-}
-body.dashboard-mode.theme-san-andreas .sasp.is-idle .sasp-main{visibility:hidden}
-body.dashboard-mode.theme-san-andreas .sasp.is-idle .sasp-station{visibility:visible}
-/* idle keeps the station logo visible above the idle card */
+body.dashboard-mode.theme-san-andreas .sasp-idle-hint{display:none}
+body.dashboard-mode.theme-san-andreas .sasp.is-idle .sasp-main{visibility:visible;opacity:.55}
+body.dashboard-mode.theme-san-andreas .sasp.is-idle .sasp-station{visibility:visible;opacity:1}
+/* idle keeps the station logo visible above the dimmed panel */
 body.dashboard-mode.theme-san-andreas .sasp.is-idle .sasp-station{position:absolute;z-index:3}

@@ -27,7 +27,7 @@
 'use strict';
 
 (function () {
-  const BEZEL = 'themes/san-andreas/dashboard/radio-target-v1.png';
+  const BEZEL = 'themes/san-andreas/dashboard/radio-target-v2.png';
   const STATION_DIR = 'themes/san-andreas/radio-stations/';
   const FALLBACK_STATION = 'radio-los-santos';
 

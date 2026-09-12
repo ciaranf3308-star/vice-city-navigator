@@ -25,7 +25,8 @@ body.dashboard-mode.theme-san-andreas #dash-topbar{
 body.dashboard-mode.theme-san-andreas #dash-topbar .dash-chrome{
   position:absolute;inset:0;background:none;pointer-events:none;
 }
-/* LEFT: WayStation blackletter + live weather */
+/* LEFT: WayStation blackletter + live weather — deliberate branding,
+   weather grouped close, no divider (target-lock pass 2) */
 body.dashboard-mode.theme-san-andreas .dash-brand{
   position:absolute;left:28px;top:50%;transform:translateY(-50%);
   display:flex;align-items:center;gap:10px;
@@ -34,18 +35,18 @@ body.dashboard-mode.theme-san-andreas .dash-brand .dash-wmark{
   width:34px;height:22px;fill:none;stroke:#e8dcc0;stroke-width:3;
 }
 body.dashboard-mode.theme-san-andreas .dash-brand .dash-logo{
-  font-family:'Beckett','Pricedown Bl',serif;font-size:30px;letter-spacing:1px;
+  font-family:'Beckett','Pricedown Bl',serif;font-size:36px;letter-spacing:1px;
   color:#f2e9d2;text-shadow:0 2px 0 #000,0 0 12px rgba(0,0,0,.8);
   line-height:1;
 }
 body.dashboard-mode.theme-san-andreas .dash-brand .dash-palm{width:26px;height:34px}
 body.dashboard-mode.theme-san-andreas .dash-brand .dash-palm g{stroke:#7ec850} /* Grove green, not VC pink */
 body.dashboard-mode.theme-san-andreas .dash-wx{
-  position:absolute;left:262px;top:50%;transform:translateY(-50%);
+  position:absolute;left:238px;top:50%;transform:translateY(-50%);
   display:flex;align-items:center;gap:8px;white-space:nowrap;
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:17px;letter-spacing:2px;
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:19px;letter-spacing:2px;
   color:#e8dcc0;text-shadow:0 2px 0 #000;
-  padding-left:18px;border-left:1px solid rgba(216,169,78,.45);
+  padding-left:0;border-left:0;
 }
 body.dashboard-mode.theme-san-andreas .dash-wx::after{display:none}
 body.dashboard-mode.theme-san-andreas #dash-wxicon{display:inline-flex;width:22px;height:22px}
@@ -60,12 +61,13 @@ body.dashboard-mode.theme-san-andreas #dash-date{
   font-size:16px;letter-spacing:4px;color:#d9cba4;text-shadow:0 2px 0 #000;
 }
 body.dashboard-mode.theme-san-andreas #dash-time{
-  font-size:34px;font-weight:700;letter-spacing:3px;color:#f7f0dc;text-shadow:0 2px 0 #000;
+  font-size:46px;font-weight:700;letter-spacing:3px;color:#f7f0dc;text-shadow:0 2px 0 #000;
 }
-/* RIGHT: blackletter Los Santos over the skyline (DOM, crisp) */
+/* RIGHT: blackletter Los Santos over the skyline (DOM, crisp) —
+   asset recolored to aged cream in pass 2 */
 body.dashboard-mode.theme-san-andreas .dash-los-santos{
   display:block!important;position:absolute;right:26px;top:50%;
-  transform:translateY(-50%);height:52px;width:auto;z-index:1;
+  transform:translateY(-50%);height:52px;width:auto;z-index:1;opacity:.92;
   filter:drop-shadow(0 2px 3px rgba(0,0,0,.85));
 }
 body.dashboard-mode.theme-san-andreas .sa-logo,
@@ -77,28 +79,41 @@ body.dashboard-mode.theme-san-andreas .dash-pspacer,
 body.dashboard-mode.theme-san-andreas .dash-ptag,
 body.dashboard-mode.theme-san-andreas .dash-div{display:none!important}
 /* view toggle docks INSIDE the bar (DASH_TOGGLE_POS in app.js):
-   compact console plate, DASH active in muted Grove green */
+   pass 2 — small integrated hardware keys, not a floating console.
+   Bare dim CLUSTER text + one muted-Grove DASH pill. */
 body.dashboard-mode.theme-san-andreas #mode-toggle{
-  border-width:1px;box-shadow:0 2px 10px rgba(0,0,0,.6);
+  background:none;border:0;border-radius:0;box-shadow:none;gap:8px;padding:0;
 }
-body.dashboard-mode.theme-san-andreas #mode-toggle button{min-height:34px;font-size:12px}
+body.dashboard-mode.theme-san-andreas #mode-toggle button{
+  min-height:32px;min-width:0;padding:0 13px;font-size:12px;letter-spacing:2.5px;
+  border:0;border-radius:0;background:none;box-shadow:none;color:#7d7358;
+}
+body.dashboard-mode.theme-san-andreas #mode-toggle button+button{border-left:0}
+body.dashboard-mode.theme-san-andreas #mode-toggle button:not(.on):hover{color:#cfc39e}
 body.dashboard-mode.theme-san-andreas #mode-toggle button.on{
-  background:linear-gradient(180deg,#7fae5a,#4e7a34);
-  color:#0c1208;text-shadow:none;
-  box-shadow:inset 0 1px 4px rgba(255,255,255,.35), inset 0 -2px 6px rgba(0,0,0,.35);
+  background:linear-gradient(180deg,#7ba24e,#557d38);
+  color:#0e130a;text-shadow:none;border-radius:5px;
+  border:1px solid rgba(240,230,200,.35);
+  box-shadow:inset 0 1px 3px rgba(255,255,255,.3), inset 0 -2px 5px rgba(0,0,0,.3),
+    0 2px 8px rgba(0,0,0,.5);
 }
+
+/* pass 2: no floating speed pill on the SA dashboard — the radio module
+   owns the right side and the bar owns the bottom. Global speed logic
+   untouched; Cluster and other themes unaffected. */
+body.dashboard-mode.theme-san-andreas #speedo{display:none!important}
 
 /* ============ BOTTOM BAR: 88px Grove console ============ */
 body.dashboard-mode.theme-san-andreas #dash-bottombar{
   display:block;position:absolute;left:0;right:0;bottom:0;height:88px;z-index:25;
   background:linear-gradient(180deg,#131709 0%,#0a0c06 55%,#060704 100%);
-  border-top:2px solid rgba(216,198,144,.75);
+  border-top:1px solid rgba(160,150,110,.5);
   box-shadow:0 -1px 0 rgba(0,0,0,.9), 0 -8px 24px rgba(0,0,0,.45);
   pointer-events:auto;
 }
 body.dashboard-mode.theme-san-andreas #dash-bottombar::before{
-  content:"";position:absolute;left:0;right:0;top:2px;height:1px;
-  background:rgba(122,102,52,.55);pointer-events:none;
+  content:"";position:absolute;left:0;right:0;top:1px;height:1px;
+  background:rgba(122,102,52,.35);pointer-events:none;
 }
 body.dashboard-mode.theme-san-andreas #dash-bottombar .dash-chrome{
   position:absolute;inset:0;background:none;pointer-events:none;
@@ -113,7 +128,7 @@ body.dashboard-mode.theme-san-andreas .dash-tabs button{
   display:flex;align-items:center;justify-content:center;gap:10px;
   border:0;cursor:pointer;pointer-events:auto;padding:0;white-space:nowrap;
   font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:15px;font-weight:700;
-  letter-spacing:3px;color:#cfc39e;text-transform:uppercase;
+  letter-spacing:2px;color:#cfc39e;text-transform:uppercase;
   background:linear-gradient(180deg,#1a2010 0%,#0d1008 100%);
   clip-path:polygon(12px 0,calc(100% - 12px) 0,100% 100%,0 100%);
   box-shadow:inset 0 0 0 1px rgba(216,169,78,.35), inset 0 2px 6px rgba(0,0,0,.6);
@@ -121,23 +136,25 @@ body.dashboard-mode.theme-san-andreas .dash-tabs button{
 }
 body.dashboard-mode.theme-san-andreas .dash-tabs button svg{width:24px;height:24px;flex:0 0 auto}
 body.dashboard-mode.theme-san-andreas .dash-tabs button span{display:inline}
+/* active tab: darker, desaturated muted Grove green/olive — never lime */
 body.dashboard-mode.theme-san-andreas .dash-tabs button.on{
-  background:linear-gradient(180deg,#a9c46e 0%,#7ba24e 60%,#5d8440 100%);
-  color:#10160b;text-shadow:0 1px 0 rgba(255,255,255,.25);
-  box-shadow:inset 0 0 0 1px rgba(240,230,200,.5), inset 0 2px 8px rgba(255,255,255,.3),
+  background:linear-gradient(180deg,#5c6e3c 0%,#46582c 60%,#37451f 100%);
+  color:#0f140a;text-shadow:0 1px 0 rgba(255,255,255,.22);
+  box-shadow:inset 0 0 0 1px rgba(220,210,170,.4), inset 0 2px 8px rgba(255,255,255,.18),
     0 2px 10px rgba(0,0,0,.5);
   clip-path:polygon(12px 0,calc(100% - 12px) 0,100% 100%,0 100%);
 }
 body.dashboard-mode.theme-san-andreas .dash-tabs button.on::before,
 body.dashboard-mode.theme-san-andreas .dash-tabs button.on::after{display:none}
-/* CENTER: compact locality plate */
+/* CENTER: recessed dark-olive locality plate — clearly sunk into the
+   console, subtle cream/gold outline, chamfered (pass 2) */
 body.dashboard-mode.theme-san-andreas .dash-dest{
   position:absolute;left:50%;top:20px;transform:translateX(-50%);
   width:430px;height:48px;display:flex;align-items:center;justify-content:center;
   min-width:0;margin:0;padding:0 28px;pointer-events:auto;box-sizing:border-box;
-  background:linear-gradient(180deg,#151b0d 0%,#0b0e06 100%);
+  background:linear-gradient(180deg,#0e1108 0%,#070805 100%);
   clip-path:polygon(18px 0,calc(100% - 18px) 0,100% 100%,0 100%);
-  box-shadow:inset 0 0 0 1px rgba(216,169,78,.5), inset 0 3px 10px rgba(0,0,0,.7);
+  box-shadow:inset 0 0 0 1px rgba(200,180,130,.3), inset 0 4px 12px rgba(0,0,0,.8);
 }
 body.dashboard-mode.theme-san-andreas #dash-dest{
   font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:19px;font-weight:700;
@@ -154,25 +171,23 @@ body.dashboard-mode.theme-san-andreas .dash-zoom{
 }
 body.dashboard-mode.theme-san-andreas .dash-zoom button{
   width:44px;height:44px;border-radius:50%;cursor:pointer;pointer-events:auto;
-  background:linear-gradient(180deg,#1b2110,#0c0f07);
-  border:1px solid rgba(216,169,78,.55);color:#e8dcc0;
+  background:linear-gradient(180deg,#141a0c,#0a0d06);
+  border:1px solid rgba(216,198,144,.32);color:#cfc39e;
   font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center;
-  box-shadow:0 2px 8px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.08);
+  box-shadow:0 2px 8px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.06);
   text-shadow:0 2px 0 #000;
 }
 body.dashboard-mode.theme-san-andreas .dash-zoom button:active{transform:scale(.92)}
-/* RIGHT: compass + arrival */
+/* RIGHT: compass + arrival — minimal treatment, no chunky box (pass 2) */
 body.dashboard-mode.theme-san-andreas .dash-trip{
   position:absolute;right:238px;top:18px;width:130px;height:52px;
   display:flex;align-items:center;justify-content:center;gap:7px;
   padding:0 12px;pointer-events:none;
-  background:linear-gradient(180deg,#141a0c,#0a0d06);
-  clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 100%,0 100%);
-  box-shadow:inset 0 0 0 1px rgba(216,169,78,.4);
+  background:none;clip-path:none;box-shadow:none;
 }
 body.dashboard-mode.theme-san-andreas .dash-trip::before{display:none}
 body.dashboard-mode.theme-san-andreas #dash-compass{
-  font-size:22px;color:#e8a33d;text-shadow:0 2px 0 #000;
+  font-size:22px;color:#f2e9d2;text-shadow:0 2px 0 #000;
 }
 body.dashboard-mode.theme-san-andreas .dash-north{
   display:inline-block;
@@ -198,11 +213,11 @@ body.dashboard-mode.theme-san-andreas .dash-tag{
 }
 body.dashboard-mode.theme-san-andreas .dash-tag .tag-line{display:none}
 body.dashboard-mode.theme-san-andreas .dash-tag::before{
-  content:"A Better";font-size:30px;line-height:1;color:#e3b34f;
+  content:"A Better";font-size:25px;line-height:1;color:#d9c69a;
   text-shadow:0 2px 4px rgba(0,0,0,.9);transform:rotate(-2deg);
 }
 body.dashboard-mode.theme-san-andreas .dash-tag::after{
-  content:"Tomorrow";font-size:30px;line-height:1;color:#e3b34f;
+  content:"Tomorrow";font-size:25px;line-height:1;color:#d9c69a;
   text-shadow:0 2px 4px rgba(0,0,0,.9);transform:rotate(-2deg);margin-top:2px;
 }
 

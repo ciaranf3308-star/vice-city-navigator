@@ -2606,7 +2606,7 @@ function syncDashPadding() {
   let right = 8;
   if (!widgetHidden) {
     if (b.contains('theme-vice-city')) right = 690;       // .vcsp: right:36px, width:640px
-    else if (b.contains('theme-san-andreas')) right = 640; // .sasp: left:1280px, width:640px
+    else if (b.contains('theme-san-andreas')) right = 695; // .sasp: left:1215px, width:695px
     else if (b.contains('theme-gta-v')) right = 568;      // .gvsp: right:48px, width:520px
     else if (b.contains('theme-rdr2')) right = 670;       // .rdsp: right:70px, width:600px
   }
@@ -3538,7 +3538,7 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
    enforces this). On boot, compare against the live network sw.js; on
    mismatch, ask the SW registration to update and reload once.
    sessionStorage gates it so a blocked network can never loop. */
-const WS_SHELL_VERSION = 'ws-shell-v75';
+const WS_SHELL_VERSION = 'ws-shell-v76';
 function healShellVersionSkew() {
   try {
     if (!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;
