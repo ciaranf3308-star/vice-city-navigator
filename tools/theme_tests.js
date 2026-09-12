@@ -176,7 +176,7 @@ ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
 ok(swSrc.includes("ws-shell-v76"), 'SW shell cache v76');
-ok(swSrc.includes("ws-theme-v214"), 'SW theme cache v214');
+ok(swSrc.includes("ws-theme-v215"), 'SW theme cache v215');
 /* Shell version skew guard: app.js bakes the shell version and
    self-heals a mixed old/new asset boot (2026-09-12: old openMenu +
    new menu CSS rendered an empty settings page). The baked version
