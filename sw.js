@@ -10,14 +10,14 @@
      default Vice City set.
    Map tiles are cached on demand for offline use (cache-first, 7-day TTL).
    Routing and search always go to the network. */
-const CACHE = 'ws-shell-v74';
+const CACHE = 'ws-shell-v75';
 const THEME_CACHE = 'ws-theme-v214';
 const TILE_CACHE = 'ws-tiles-v1';
 const VC_BLIPS = ['airYard','barbers','burgerShot','cash','chicken','dateDisco','dateDrink',
   'dateFood','diner','fuel','girlfriend','gym','hostpital','modGarage','north','parking',
   'pizza','police','propertyG','qmark','race','runway','saveGame','school','spray','tattoo','waypoint'];
 const SHELL = [
-  './', 'index.html', 'styles.css', 'app.js', 'places.js', 'places-config.js',
+  './', 'index.html', 'styles.css', 'app.js', 'location.js', 'places.js', 'places-config.js',
   'traffic.js', 'traffic-config.js',
   'discovery.js', 'voice.js', 'supabase-config.js',
   'themes/vice-city/dashboard.css',

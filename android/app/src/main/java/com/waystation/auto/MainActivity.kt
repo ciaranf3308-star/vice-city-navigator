@@ -41,6 +41,9 @@ class MainActivity : Activity() {
     private var retryCount = 0
     private var retryRunnable: Runnable? = null
     private var loadFailed = false
+    // Native-direct location: the page calls window.WayStationLocation
+    // instead of fighting WebView geolocation. See NativeLocationBridge.
+    private var locationBridge: NativeLocationBridge? = null
 
     /**
      * Web → native bridge (injected as `window.WayStationCarNative`).
@@ -85,6 +88,14 @@ class MainActivity : Activity() {
         // Fresh launch only (not rotation): if location isn't granted, push
         // for it — every single time, until it's fixed.
         if (savedInstanceState == null) ensureLocationPermission()
+        locationBridge = NativeLocationBridge(
+            this,
+            pushJs = { js ->
+                try { webView?.evaluateJavascript(js, null) } catch (e: Exception) { }
+            },
+            requestPermission = { ensureLocationPermission() },
+            logTag = "WayStationPhoneLoc",
+        )
         val wv = WebView(this)
         webView = wv
         configureWebView(wv)
@@ -103,6 +114,9 @@ class MainActivity : Activity() {
      * to Settings instead — the closest the OS allows to "ask every time".
      */
     private fun ensureLocationPermission() {
+        // The system dialog is already up (e.g. the page called startWatch
+        // while it was showing) — never stack our own prompt on top of it.
+        if (locationRequestInFlight) return
         if (anyLocationGranted) {
             if (coarseLocationGranted && !fineLocationGranted) {
                 maybeSuggestPreciseLocation()
@@ -191,6 +205,8 @@ class MainActivity : Activity() {
             flushPendingGeoCallbacks()
             webView?.reload()
         }
+        // A native watch waiting on the permission dialog/Settings starts now.
+        locationBridge?.onPermissionResult()
     }
 
     override fun onRequestPermissionsResult(
@@ -202,6 +218,8 @@ class MainActivity : Activity() {
             // Answer any WebView geolocation prompt we held while the
             // system dialog was up — with the REAL result, not a stale "no".
             flushPendingGeoCallbacks()
+            // A native watch waiting on this dialog starts (or fails loudly) now.
+            locationBridge?.onPermissionResult()
             if (anyLocationGranted) {
                 // Reload for a clean page state: covers the case where the
                 // page's request timed out while the dialog was open.
@@ -257,6 +275,9 @@ class MainActivity : Activity() {
         // Web → native bridge: lets the page push Spotify auth into native
         // storage so it carries over to the car WebView without re-auth.
         wv.addJavascriptInterface(PhoneBridge(), "WayStationCarNative")
+        // Native-direct location: window.WayStationLocation. The page uses
+        // this instead of navigator.geolocation (see NativeLocationBridge).
+        locationBridge?.let { wv.addJavascriptInterface(it, "WayStationLocation") }
         wv.setLayerType(View.LAYER_TYPE_HARDWARE, null)
         wv.settings.apply {
             javaScriptEnabled = true
@@ -384,6 +405,8 @@ class MainActivity : Activity() {
         retryRunnable?.let { webView?.removeCallbacks(it) }
         retryRunnable = null
         pendingGeoCallbacks.clear()
+        locationBridge?.destroy()
+        locationBridge = null
         webView?.destroy()
         webView = null
         super.onDestroy()

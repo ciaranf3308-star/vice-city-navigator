@@ -31,7 +31,7 @@ let totalDist = 0, totalDur = 0;
 let navActive = false, followMode = true;
 let uiMode = 'explore';      // explore | planning | drive
 let discoveryOn = false;     // fog-of-war view (explore only — never while driving)
-let stepIdx = 0, watchId = null, lastCamMove = 0, lastPos = null;
+let stepIdx = 0, lastCamMove = 0, lastPos = null;
 let offRouteSince = 0, arrived = false, rerouting = false;
 
 /* ---------------- helpers ---------------- */
@@ -890,43 +890,25 @@ function buildThemeSelector() {
 }
 
 function locateUser(center) {
-  if (!('geolocation' in navigator)) return;
+  if (!window.VCNLocation) return;
   checkLocationPermission();
   // Center on the last known fix straight away so the button always
   // answers visibly, then refine with a fresh fix when it arrives.
   if (center && userPos && map) map.flyTo({ center: userPos, duration: 800 });
-  const onFix = pos => {
-    userPos = [pos.coords.longitude, pos.coords.latitude];
-    placeUserMarker();
-    if (window.VCNPlaces) VCNPlaces.maybeRefresh(userPos); // ambient POIs
-    if (center && map) map.flyTo({ center: userPos, zoom: 14, duration: 1200 });
-  };
-  const onLocateErr = err => {
-    // Never swallow the real error: 1=PERMISSION_DENIED, 2=POSITION_UNAVAILABLE, 3=TIMEOUT.
-    console.warn('[location] initial locate failed',
-      { code: err && err.code, message: err && err.message });
+  VCNLocation.getCurrentPosition(25000).then(pos => {
+    const p = [pos.coords.longitude, pos.coords.latitude];
+    userPos = p; placeUserMarker();
+    if (window.VCNPlaces) VCNPlaces.maybeRefresh(p); // ambient POIs
+    if (center && map) map.flyTo({ center: p, zoom: 14, duration: 1200 });
+  }).catch(err => {
+    // Never swallow the real error: 1=denied, 2=no provider, 3=timeout.
     const code = err && err.code;
-    if (code === 1) toast('Location permission was denied', 5000);
-    else if (code === 2) toast('Location provider unavailable', 5000);
-    else if (code === 3) toast('Location fix timed out', 5000);
+    console.warn('[location] locate failed', { code, message: err && err.message });
+    if (code === 1) toast('Location permission denied — enable it for WayStation, then tap ◎', 6000);
+    else if (code === 2) toast('Location unavailable — no provider enabled on this device', 5000);
     else if (center && !userPos) toast('Location unavailable — showing Dublin.', 5000);
-  };
-  // STAGE 1: coarse-capable fix first — fast, gets the map off Dublin even
-  // on approximate-only permission grants.
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      onFix(pos);
-      // STAGE 2: refine with high accuracy. A coarse fix already held is
-      // NEVER thrown away for a failed refinement — no Dublin reset, no
-      // "location unavailable" when the precise fix times out.
-      navigator.geolocation.getCurrentPosition(onFix, refineErr => {
-        console.warn('[location] high-accuracy refine failed, keeping coarse fix',
-          { code: refineErr && refineErr.code, message: refineErr && refineErr.message });
-      }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 });
-    },
-    onLocateErr,
-    { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
-  );
+    // Timeout: the passive watch keeps trying in the background; no nag.
+  });
 }
 
 let lastHeading = 0; // displayed heading, rotates the player arrow
@@ -1503,11 +1485,8 @@ function wireSavedPlaces() {
     let pos = (typeof userPos !== 'undefined') ? userPos : null;
     if (!pos) {
       try {
-        pos = await new Promise((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(
-            p => resolve([p.coords.longitude, p.coords.latitude]),
-            reject, { enableHighAccuracy: true, timeout: 9000 });
-        });
+        pos = await VCNLocation.getCurrentPosition(25000).then(
+          p => [p.coords.longitude, p.coords.latitude]);
       } catch (e) { toast('Could not get your location.'); return; }
     }
     VCNSaved.setHome({ label: 'Home', lnglat: pos });
@@ -1935,10 +1914,9 @@ async function planRoute(opts) {
   }
 }
 function currentPosOnce() {
-  return new Promise((resolve, reject) => {
-    navigator.geolocation.getCurrentPosition(
-      p => { userPos = [p.coords.longitude, p.coords.latitude]; placeUserMarker(); resolve(userPos); },
-      reject, { enableHighAccuracy: true, timeout: 9000 });
+  if (!window.VCNLocation) return Promise.reject({ code: 2, message: 'unsupported' });
+  return VCNLocation.getCurrentPosition(25000).then(p => {
+    userPos = [p.coords.longitude, p.coords.latitude]; placeUserMarker(); return userPos;
   });
 }
 
@@ -1966,9 +1944,9 @@ function startNav() {
   // navigation never waits for it. Canonical texts are stable ("In 300
   // meters, …") so they match exactly what maybeAnnounce will speak.
   if (window.VCNVoice) VCNVoice.pregenerate(upcomingManeuverTexts());
-  if (watchId !== null) navigator.geolocation.clearWatch(watchId);
-  watchId = navigator.geolocation.watchPosition(onPos, onPosErr,
-    { enableHighAccuracy: true, maximumAge: 1000, timeout: 15000 });
+  /* One shared location watch: navigation just (re)starts it with the live
+     callbacks; VCNLocation owns the underlying watcher. */
+  if (window.VCNLocation) VCNLocation.startWatch(onPos, onPosErr);
 }
 /* Stable canonical maneuver texts for the next few steps (voice pregen). */
 function upcomingManeuverTexts() {
@@ -1983,14 +1961,12 @@ function endNav() {
   navActive = false;
   syncDashTrip();
   try { const vc = $('vc-maneuver'); if (vc) vc.hidden = true; } catch (e) {}
-  if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
   /* Hand the GPS watch back to the passive speed feed so the readout keeps
-     working after the route ends (dashboard speedo or cluster hero). */
-  if (speedDisplayActive() && 'geolocation' in navigator) {
-    try {
-      watchId = navigator.geolocation.watchPosition(onPos, onPosErr,
-        { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 });
-    } catch (e) {}
+     working after the route ends (dashboard speedo or cluster hero).
+     VCNLocation owns the single shared watch — just re-point the callbacks. */
+  if (window.VCNLocation) {
+    if (speedDisplayActive()) VCNLocation.startWatch(onPos, onPosErr);
+    else VCNLocation.stopWatch();
   }
   resetWanted(); // drive's over: the heat dies with it
   syncClusterTurn(null);
@@ -2020,27 +1996,27 @@ function onPosErr(err) {
   }
   setTimeout(() => { _posErrTold = false; }, 30000);
 }
-/* Check location permission state and guide the user. */
+/* Check location permission state and guide the user.
+ * Native mode: the bridge reports the TRUE Android grant — the Permissions
+ * API is never consulted (it lies inside WebViews). Browser mode: the
+ * Permissions API is trustworthy, but we only ever toast on a hard denial —
+ * real errors surface from actual requests. */
 function checkLocationPermission() {
-  if (!('permissions' in navigator)) return;
+  if (!window.VCNLocation) return;
   try {
-    navigator.permissions.query({ name: 'geolocation' }).then(result => {
-      if (result.state === 'denied') {
+    VCNLocation.checkPermission(state => {
+      if (state === 'denied') {
         toast('WayStation location is blocked — Android Settings → Apps → WayStation → Permissions → Location → Allow', 8000);
-      } else if (result.state === 'prompt') {
+      } else if (state === 'prompt') {
         toast('Tap ◎ to allow location access', 4000);
       }
-    }).catch(()=>{});
+    });
   } catch (e) {}
 }
 /* Restart GPS when app returns to foreground (car WebView backgrounding). */
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && speedDisplayActive() && 'geolocation' in navigator) {
-    try {
-      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
-      watchId = navigator.geolocation.watchPosition(onPos, onPosErr,
-        { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 });
-    } catch (e) {}
+  if (!document.hidden && window.VCNLocation) {
+    try { VCNLocation.restart(); } catch (e) {}
   }
 });
 
@@ -2688,18 +2664,15 @@ function applyAppMode() {
     tickDashClock(); refreshDashWeather(); syncDashTrip(); queueDashLocality();
   }
   /* One passive GPS watch serves the dashboard speedo and the cluster hero
-     number alike (and heading/POIs outside nav). Navigation restarts this
-     same watch with its own options; endNav hands it back here so the speed
-     readout keeps living after a route ends. Never a second watcher. */
-  if (speedDisplayActive()) {
-    if (watchId === null && 'geolocation' in navigator) {
-      try {
-        watchId = navigator.geolocation.watchPosition(onPos, onPosErr,
-          { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 });
-      } catch (e) {}
+     number alike (and heading/POIs outside nav). VCNLocation owns the single
+     underlying watcher — native-direct in the app, geolocation fallback in
+     plain browsers. Never a second watcher. */
+  if (window.VCNLocation) {
+    if (speedDisplayActive()) {
+      try { VCNLocation.startWatch(onPos, onPosErr); } catch (e) {}
+    } else {
+      try { VCNLocation.stopWatch(); } catch (e) {}
     }
-  } else if (watchId !== null) {
-    try { navigator.geolocation.clearWatch(watchId); } catch (e) {} watchId = null;
   }
   if (!dash) {
     const sp = $('speedo'); if (sp) sp.hidden = true;
@@ -3293,25 +3266,24 @@ function wireSpotifyMenu() {
   /* SA cluster: locate button (re)requests geolocation permission */
   const saLocate = $('sa-cluster-locate');
   if (saLocate) saLocate.addEventListener('click', () => {
-    if (!('geolocation' in navigator)) { toast('Geolocation not supported'); return; }
-    navigator.geolocation.getCurrentPosition(
+    if (!window.VCNLocation) { toast('Geolocation not supported'); return; }
+    VCNLocation.getCurrentPosition(25000).then(
       (pos) => {
         userPos = [pos.coords.longitude, pos.coords.latitude];
         placeUserMarker();
         if (map) map.easeTo({ center: userPos, zoom: isSaCluster() ? SA_CLUSTER_OVERVIEW_ZOOM : map.getZoom(), duration: 800 });
         // Restart the watch if it died
-        if (watchId === null && speedDisplayActive()) {
-          try { watchId = navigator.geolocation.watchPosition(onPos, onPosErr, { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 }); } catch (e) {}
+        if (speedDisplayActive()) {
+          try { VCNLocation.startWatch(onPos, onPosErr); } catch (e) {}
         }
       },
       (err) => {
-        if (err.code === err.PERMISSION_DENIED) {
-          toast('Location blocked — tap the lock icon in your browser bar, allow Location, then tap ◎ again');
+        if (err && err.code === 1) {
+          toast('Location blocked — allow it for WayStation, then tap ◎ again');
         } else {
           toast('Location unavailable — try again outdoors');
         }
-      },
-      { enableHighAccuracy: true, timeout: 15000 }
+      }
     );
   });
   let rsT = null;
@@ -3566,7 +3538,7 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
    enforces this). On boot, compare against the live network sw.js; on
    mismatch, ask the SW registration to update and reload once.
    sessionStorage gates it so a blocked network can never loop. */
-const WS_SHELL_VERSION = 'ws-shell-v74';
+const WS_SHELL_VERSION = 'ws-shell-v75';
 function healShellVersionSkew() {
   try {
     if (!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;

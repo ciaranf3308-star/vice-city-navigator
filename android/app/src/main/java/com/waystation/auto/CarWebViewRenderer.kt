@@ -91,6 +91,8 @@ class CarWebViewRenderer(private val carContext: CarContext) {
     private var locationRequestInFlight = false
     /** True once we've asked the user; a denial must not re-prompt in a loop. */
     private var locationPermissionAsked = false
+    /** Native-direct location bridge (window.WayStationLocation). */
+    private var locationBridge: NativeLocationBridge? = null
 
     private val main = Handler(Looper.getMainLooper())
     private val spotifyAuth = SpotifyAuthManager(carContext)
@@ -260,6 +262,21 @@ class CarWebViewRenderer(private val carContext: CarContext) {
             } catch (e: Exception) {
                 Log.w(TAG, "clear geolocation state failed", e)
             }
+            // Native-direct location: the page calls window.WayStationLocation
+            // instead of fighting WebView geolocation. The bridge pushes fixes
+            // straight from LocationManager — the same thing every working
+            // map app does.
+            locationBridge?.destroy()
+            locationBridge = NativeLocationBridge(
+                carContext,
+                pushJs = { js ->
+                    main.post {
+                        try { webView?.evaluateJavascript(js, null) } catch (e: Exception) { }
+                    }
+                },
+                requestPermission = { onLocationPermissionNeeded?.invoke() },
+                logTag = "WayStationCarLoc",
+            )
             configureWebView(wv)
             pres.setContentView(
                 wv,
@@ -283,6 +300,8 @@ class CarWebViewRenderer(private val carContext: CarContext) {
         cancelRetry()
         main.removeCallbacks(pollRunnable)
         pollRunning = false
+        try { locationBridge?.destroy() } catch (e: Exception) { }
+        locationBridge = null
         try { webView?.stopLoading() } catch (e: Exception) { }
         try { webView?.removeAllViews() } catch (e: Exception) { }
         try { webView?.destroy() } catch (e: Exception) { }
@@ -302,6 +321,10 @@ class CarWebViewRenderer(private val carContext: CarContext) {
         // state) into native storage so it survives across WebView instances
         // (phone ↔ car) without re-auth.
         wv.addJavascriptInterface(CarBridge(), "WayStationCarNative")
+        // Native-direct location: window.WayStationLocation (see
+        // NativeLocationBridge). The page prefers this over
+        // navigator.geolocation.
+        locationBridge?.let { wv.addJavascriptInterface(it, "WayStationLocation") }
         wv.setLayerType(View.LAYER_TYPE_HARDWARE, null)
         wv.settings.apply {
             javaScriptEnabled = true
@@ -620,6 +643,8 @@ class CarWebViewRenderer(private val carContext: CarContext) {
         locationRequestInFlight = false
         locationPermissionAsked = true
         flushPendingGeoCallbacks()
+        // A native watch waiting on this result starts (or fails loudly) now.
+        locationBridge?.onPermissionResult()
         if (locationPermissionGranted?.invoke() == true) {
             reloadPage()
         }

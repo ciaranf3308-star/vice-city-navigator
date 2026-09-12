@@ -175,7 +175,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v74"), 'SW shell cache v74');
+ok(swSrc.includes("ws-shell-v75"), 'SW shell cache v75');
 ok(swSrc.includes("ws-theme-v214"), 'SW theme cache v214');
 /* Shell version skew guard: app.js bakes the shell version and
    self-heals a mixed old/new asset boot (2026-09-12: old openMenu +
@@ -607,8 +607,8 @@ ok(appSrc.includes('if (spotVisible) mountSpotifySkin(wsThemeId());'),
   'cluster mounts the real Spotify skin (same widget as dashboard)');
 ok(appSrc.includes('pane.hidden = !spotVisible'), 'Spotify pane visible in cluster mode');
 ok(appSrc.includes('if (clu) refreshClusterLive();'), 'entering cluster mode refreshes every live region');
-ok(/if \(speedDisplayActive\(\)\) \{\s*\n\s*if \(watchId === null/.test(appSrc),
-  'passive speed watch: single shared watchId for dashboard + cluster');
+ok(/if \(window\.VCNLocation\) \{\s*\n\s*if \(speedDisplayActive\(\)\) \{\s*\n\s*try \{ VCNLocation\.startWatch\(onPos, onPosErr\);/.test(appSrc),
+  'passive speed watch: single shared VCNLocation watch for dashboard + cluster');
 // no watcher is created inside the per-fix updaters
 for (const fn of ['updateSpeedo', 'updateClusterSpeed', 'maybeFetchSpeedLimit', 'syncClusterTurn', 'updateDriveForce']) {
   ok(!/watchPosition/.test(extractFn(appSrc, fn)), `no geolocation watcher inside ${fn}`);
@@ -2261,35 +2261,26 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
     'GTA V cluster JS never hardcodes a city name (hero branding stays in HTML only)');
 }
 
-/* Location permission + initial-fix reliability (2026-09-10, v211).
-   Android "Location allowed, precise OFF" is a VALID granted state
-   (COARSE granted, FINE denied) — the native shell must grant WebView
-   geolocation on coarse alone, and the web initial locate must be a
-   two-stage coarse-first / high-accuracy-refine flow that never throws
-   away a coarse fix for a failed refinement. */
+/* Location: native-direct pipeline (2026-09-12).
+   The page never touches navigator.geolocation / navigator.permissions
+   directly — VCNLocation owns the single watch (native bridge in the app,
+   geolocation fallback in plain browsers). Approximate-only stays a valid
+   grant; errors are never swallowed. */
 {
   const locateFn = (appSrc.match(/function locateUser\(center\) \{[\s\S]*?\n\}/) || [''])[0];
-  ok(/enableHighAccuracy:\s*false/.test(locateFn) &&
-     /maximumAge:\s*60000/.test(locateFn) && /timeout:\s*8000/.test(locateFn),
-    'locateUser stage 1: coarse-capable fix first (low accuracy, 60s cache, 8s timeout)');
-  ok(/enableHighAccuracy:\s*true/.test(locateFn) &&
-     /maximumAge:\s*5000/.test(locateFn) && /timeout:\s*15000/.test(locateFn),
-    'locateUser stage 2: high-accuracy refinement after the coarse fix');
-  ok(/code === 1\) toast\('Location permission was denied'/.test(locateFn),
+  ok(/VCNLocation\.getCurrentPosition\(25000\)/.test(locateFn),
+    'locateUser: patient 25s fix via VCNLocation (no aggressive 8s timeout)');
+  ok(/code === 1\) toast\('Location permission denied/.test(locateFn),
     'locateUser: PERMISSION_DENIED reports the real error');
-  ok(/code === 2\) toast\('Location provider unavailable'/.test(locateFn),
+  ok(/code === 2\) toast\('Location unavailable — no provider enabled/.test(locateFn),
     'locateUser: POSITION_UNAVAILABLE reports the real error');
-  ok(/code === 3\) toast\('Location fix timed out'/.test(locateFn),
-    'locateUser: TIMEOUT reports the real error');
-  ok(/console\.warn\('\[location\] initial locate failed'[\s\S]{0,80}err\.code/.test(locateFn),
-    'locateUser: initial failure logs code + message (no swallowed errors)');
-  ok(!/\(\) => \{ if \(center && !userPos\) toast\('Location unavailable/.test(appSrc),
-    'locateUser: the old error-swallowing one-liner is gone');
-  ok(/keeping coarse fix/.test(locateFn),
-    'locateUser: failed refinement keeps the coarse fix — no Dublin reset');
-  const refineErr = (locateFn.match(/refineErr => \{[\s\S]*?\}\)/) || [''])[0];
-  ok(refineErr.includes('console.warn') && !refineErr.includes('toast('),
-    'locateUser: refine failure warns only — never toasts "location unavailable"');
+  ok(!/Location fix timed out', 5000/.test(locateFn),
+    'locateUser: no timeout nag — the passive watch keeps trying quietly');
+  ok(/console\.warn\('\[location\] locate failed'[\s\S]{0,80}err\.code/.test(locateFn) ||
+     /console\.warn\('\[location\] locate failed', \{ code/.test(locateFn),
+    'locateUser: failure logs code + message (no swallowed errors)');
+  ok(!/enableHighAccuracy/.test(locateFn),
+    'locateUser: no two-stage coarse/refine dance — the bridge streams the best fix');
   /* Native shell (MainActivity.kt): coarse+fine tracked separately, both
      requested together, WebView geolocation gated on ANY grant. */
   const mainKt = fs.readFileSync(
@@ -2427,6 +2418,101 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
   ok(swSrc.includes('themes/san-andreas/station-resolver.js'), 'SW precaches station-resolver.js');
   ok(swSrc.includes('themes/san-andreas/dashboard/radio-target-v1.png'), 'SW precaches the target radio base art');
   ok(swSrc.includes('themes/san-andreas/radio-stations/radio-los-santos.png'), 'SW precaches the station logo set');
+}
+
+/* ---------- native-direct location (VCNLocation) ---------- */
+{
+  const locSrc = fs.readFileSync(path.join(REPO, 'location.js'), 'utf8');
+  const bridgeSrc = fs.readFileSync(path.join(REPO,
+    'android/app/src/main/java/com/waystation/auto/NativeLocationBridge.kt'), 'utf8');
+  const mainActSrc = fs.readFileSync(path.join(REPO,
+    'android/app/src/main/java/com/waystation/auto/MainActivity.kt'), 'utf8');
+  const carRendSrc = fs.readFileSync(path.join(REPO,
+    'android/app/src/main/java/com/waystation/auto/CarWebViewRenderer.kt'), 'utf8');
+
+  // module shape: native bridge first, browser geolocation only as fallback
+  ok(locSrc.includes('window.VCNLocation'), 'location.js exposes window.VCNLocation');
+  ok(locSrc.indexOf('WayStationLocation') !== -1 &&
+     locSrc.indexOf('WayStationLocation') < locSrc.indexOf('navigator.geolocation'),
+    'location.js prefers the native bridge over navigator.geolocation');
+  ok(locSrc.includes('window.__wsLocPush'), 'location.js installs the native push entry point');
+  ok(locSrc.includes('window.__wsLocError'), 'location.js installs the native error entry point');
+  ok(locSrc.includes('loc-debug'), 'location.js ships the ?loc-debug head-unit readout');
+  for (const m of ['startWatch', 'stopWatch', 'restart', 'getCurrentPosition', 'checkPermission', 'getState']) {
+    ok(new RegExp(m + '[:,\\s]').test(locSrc), `VCNLocation exposes ${m}`);
+  }
+
+  // native bridge: direct LocationManager, both providers, push protocol
+  ok((bridgeSrc.match(/@JavascriptInterface/g) || []).length >= 3,
+    'NativeLocationBridge exposes getState/startWatch/stopWatch to JS');
+  ok(bridgeSrc.includes('LocationManager.GPS_PROVIDER') && bridgeSrc.includes('LocationManager.NETWORK_PROVIDER'),
+    'NativeLocationBridge listens on GPS + network providers');
+  ok(bridgeSrc.includes('__wsLocPush') && bridgeSrc.includes('__wsLocError'),
+    'NativeLocationBridge pushes fixes/errors to the page entry points');
+  ok(bridgeSrc.includes('getLastKnownLocation'),
+    'NativeLocationBridge seeds the page with the last-known fix');
+  ok(bridgeSrc.includes('fun onPermissionResult()'),
+    'NativeLocationBridge resumes a permission-gated watch on grant');
+  ok(bridgeSrc.includes('ACCESS_FINE_LOCATION') && bridgeSrc.includes('ACCESS_COARSE_LOCATION'),
+    'NativeLocationBridge treats approximate-only as a valid grant');
+  // both hosts inject it and forward permission results
+  for (const [name, src] of [['MainActivity', mainActSrc], ['CarWebViewRenderer', carRendSrc]]) {
+    ok(src.includes('addJavascriptInterface(it, "WayStationLocation")') ||
+       src.includes('addJavascriptInterface(locationBridge'),
+      `${name} injects window.WayStationLocation`);
+    ok(src.includes('locationBridge?.onPermissionResult()'),
+      `${name} forwards permission results to the location bridge`);
+    ok(src.includes('locationBridge?.destroy()'),
+      `${name} tears down the location bridge`);
+  }
+
+  // app.js: every location call site goes through VCNLocation now
+  ok(!/navigator\.geolocation/.test(appSrc),
+    'app.js no longer touches navigator.geolocation directly');
+  ok(!/navigator\.permissions\.query/.test(appSrc),
+    'app.js no longer consults the (WebView-lying) Permissions API');
+  ok(appSrc.includes('VCNLocation.getCurrentPosition'), 'locate/currentPosOnce/SA-locate use VCNLocation');
+  ok(appSrc.includes('VCNLocation.startWatch(onPos, onPosErr)'), 'watches go through VCNLocation.startWatch');
+  ok(/VCNLocation\.checkPermission\(state =>/.test(appSrc),
+    'checkLocationPermission reads the bridge, not permissions.query');
+
+  // wiring: script order + SW precache
+  ok(indexSrc.indexOf('location.js') !== -1 && indexSrc.indexOf('location.js') < indexSrc.indexOf('src="app.js"'),
+    'index.html loads location.js before app.js');
+  ok(swSrc.includes("'location.js'") || swSrc.includes('"location.js"'),
+    'SW precaches location.js');
+
+  /* Live sandbox: the native bridge beats the lying Permissions API.
+     (This is the exact phone bug: fix flowing while permissions.query
+     insists the state is denied.) */
+  const locSandbox = {
+    window: { location: { search: '' } },
+    navigator: {
+      permissions: { query: () => Promise.resolve({ state: 'denied' }) },
+    },
+    console, setTimeout, clearTimeout, setInterval, Promise, JSON,
+  };
+  locSandbox.window.WayStationLocation = {
+    getState: () => JSON.stringify({ coarse: true, fine: false, gps: true, network: false, watching: false }),
+    startWatch: function () { this._watching = true; return 'ok'; },
+    stopWatch: function () { this._watching = false; },
+  };
+  vm.createContext(locSandbox);
+  vm.runInContext(locSrc, locSandbox);
+  const VCL = locSandbox.window.VCNLocation;
+  ok(VCL.getState().mode === 'native', 'sandbox: native bridge detected');
+  let permSeen = null;
+  VCL.checkPermission(s => { permSeen = s; });
+  ok(permSeen === 'granted', 'sandbox: bridge grant wins over lying permissions.query');
+  VCL.startWatch(() => {}, () => {});
+  ok(VCL.getState().state === 'waiting-fix', 'sandbox: native watch enters waiting-fix');
+  locSandbox.window.__wsLocPush(53.3498, -6.2603, 12, Date.now());
+  const st = VCL.getState();
+  ok(st.state === 'active' && st.fixCount === 1 && st.lastFixAcc === 12,
+    'sandbox: native push delivers a fix');
+  locSandbox.window.__wsLocError(1, 'denied');
+  ok(VCL.getState().state === 'denied' && VCL.getState().lastError.code === 1,
+    'sandbox: native error surfaces with its code');
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);
