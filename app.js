@@ -2096,10 +2096,12 @@ function onPos(pos) {
   if (wantedLastAt) wantedTick(Math.min(5, (wNow - wantedLastAt) / 1000));
   wantedLastAt = wNow;
 
-  if (!navActive || !steps.length) return;
-
-  // camera follow
-  if (followMode && now - lastCamMove > 900 && map) {
+  /* Camera follow — during navigation, and always in the cluster: an
+     instrument never leaves the driver off the map. The cluster used to
+     center once on entry and then drift; now every GPS fix re-centers it
+     (throttled, yielding to manual moves like the nav follow cam).
+     Dashboard/phone without nav are untouched — free pan, ◎ recenters. */
+  if (followMode && now - lastCamMove > 900 && map && (navActive || clusterLayoutActive())) {
     lastCamMove = now;
     const camBearing = bestBearing(heading);
     /* The VC cluster radar loses the rectangle's corners, so it rides a
@@ -2115,6 +2117,8 @@ function onPos(pos) {
     }
     syncRadarNorth(camBearing, 900);
   }
+
+  if (!navActive || !steps.length) return;
 
   // off-route detection
   const offD = distToRoute(p);

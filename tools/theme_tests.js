@@ -1913,6 +1913,17 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
   ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/cluster-overlay.png')),
     'SA cluster overlay asset exists on disk');
 }
+// Cluster follow cam without navigation (2026-09-12): the cluster map used
+// to center once on entry and then drift, leaving the driver off the map.
+{
+  const appSrc = fs.readFileSync(path.join(REPO, 'app.js'), 'utf8');
+  const followIdx = appSrc.indexOf('and always in the cluster');
+  const gateIdx = appSrc.indexOf('if (!navActive || !steps.length) return;');
+  ok(followIdx !== -1 && gateIdx !== -1 && followIdx < gateIdx,
+    'cluster follow cam sits above the nav-only gate, so it centers without navigation');
+  ok(/\(navActive \|\| clusterLayoutActive\(\)\)/.test(appSrc),
+    'follow cam condition includes clusterLayoutActive(): the cluster map rides centered even with no route');
+}
 // GTA V cluster console view (2026-09-10): DOM/CSS-built dark console per
 // the user's concept render — parallelogram live map, glass maneuver +
 // music cards overlapping the map's right edge, thin speed digits.
