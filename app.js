@@ -2436,7 +2436,7 @@ const DASH_STAGE_NODES = ['map', 'fx', 'explore-ui', 'drive-hud', 'spotify-pane'
    layoutDashMenu() scales these by the live stage zoom. */
 const DASH_BAR_HEIGHTS = {
   'vice-city':   { top: 76, bottom: 100 },
-  'san-andreas': { top: 126, bottom: 126 },
+  'san-andreas': { top: 74, bottom: 88 },
   'gta-v':       { top: 120, bottom: 120 },
   'rdr2':        { top: 104, bottom: 84 },
 };
@@ -2630,7 +2630,7 @@ function syncDashPadding() {
   let right = 8;
   if (!widgetHidden) {
     if (b.contains('theme-vice-city')) right = 690;       // .vcsp: right:36px, width:640px
-    else if (b.contains('theme-san-andreas')) right = 701; // .sasp: left:1219px, width:701px
+    else if (b.contains('theme-san-andreas')) right = 640; // .sasp: left:1280px, width:640px
     else if (b.contains('theme-gta-v')) right = 568;      // .gvsp: right:48px, width:520px
     else if (b.contains('theme-rdr2')) right = 670;       // .rdsp: right:70px, width:600px
   }
@@ -3206,7 +3206,7 @@ const CLUSTER_TOGGLE_POS = {
    #dash-stage rect (letterboxed + zoomed) — pure CSS can't do this. */
 const DASH_TOGGLE_POS = {
   'vice-city':  { right: 560, top: 25 },  /* inside the 78px header, left of the 27% skyline pocket */
-  'san-andreas':{ left: 18, top: 138 },   /* top-left, below the 126px topbar (music owns top-right) */
+  'san-andreas':{ right: 620, top: 16 },   /* inside the 74px topbar, left of the skyline zone */
   'rdr2':       { right: 18, top: 116 },  /* top-right, below the 104px frontier topbar */
   /* gta-v: CSS owns it (docked in the footer) — not listed here */
 };
@@ -3566,7 +3566,7 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
    enforces this). On boot, compare against the live network sw.js; on
    mismatch, ask the SW registration to update and reload once.
    sessionStorage gates it so a blocked network can never loop. */
-const WS_SHELL_VERSION = 'ws-shell-v73';
+const WS_SHELL_VERSION = 'ws-shell-v74';
 function healShellVersionSkew() {
   try {
     if (!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;

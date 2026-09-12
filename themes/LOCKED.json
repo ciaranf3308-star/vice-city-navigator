@@ -2,11 +2,6 @@
   "_note": "Theme style locks. When the user approves a theme view's styling, add its files here with sha256. Tests fail if a locked file changes without unlocking.",
   "locks": [
     {
-      "file": "themes/san-andreas/dashboard.css",
-      "sha256": "1c87f1a9b73bbfaf58a39c5bd3daede76062f635666cf28ce1f8d5c4fc93c794",
-      "note": "HERO7 (2026-09-08) + visible-polish pass (2026-09-09); 2026-09-12 settings redesign: grove-panel hero header band + 48px close coin retired (collided with the shared full-stage settings page — header now owned by styles.css, visually QA'd at 1920x720). Gold chamfer frame, deep-green panel and gold content tints kept. Deliberate change, re-recorded."
-    },
-    {
       "file": "themes/gta-v/dashboard.css",
       "sha256": "ba3a45db1e1172e7a386a97e6a0abc5056d7ba3b8bdc7c3696aff51955c017ca",
       "note": "GTA V dash approved 2026-09-11: restrained near-black atmospheric surfaces, Chalet typography, full-bleed hero map, near-black nav overlay. User-locked."
@@ -19,7 +14,7 @@
     {
       "file": "themes/gta-v/cluster.js",
       "sha256": "ac02eb54fdd5d94bdd9f4946455e247130de119e70ca578ba8b06f1bddfe78e1",
-      "note": "GTA V cluster JS approved 2026-09-10, reaffirmed 2026-09-11. 2026-09-12: user-requested fix — queuePlace() re-armed its 1200ms timer on every 1s tick so syncPlace() starved forever and the topbar placename never left the hero branding; now a pending lookup is never re-armed. Logic-only, no visual/styling change. Deliberate change, re-recorded."
+      "note": "GTA V cluster JS approved 2026-09-10, reaffirmed 2026-09-11. 2026-09-12: user-requested fix \u2014 queuePlace() re-armed its 1200ms timer on every 1s tick so syncPlace() starved forever and the topbar placename never left the hero branding; now a pending lookup is never re-armed. Logic-only, no visual/styling change. Deliberate change, re-recorded."
     },
     {
       "file": "themes/gta-v/spotify-cluster.css",

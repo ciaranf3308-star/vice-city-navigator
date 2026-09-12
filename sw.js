@@ -10,7 +10,7 @@
      default Vice City set.
    Map tiles are cached on demand for offline use (cache-first, 7-day TTL).
    Routing and search always go to the network. */
-const CACHE = 'ws-shell-v73';
+const CACHE = 'ws-shell-v74';
 const THEME_CACHE = 'ws-theme-v214';
 const TILE_CACHE = 'ws-tiles-v1';
 const VC_BLIPS = ['airYard','barbers','burgerShot','cash','chicken','dateDisco','dateDrink',
@@ -43,8 +43,23 @@ const SHELL = [
   'themes/vice-city/spotify-skin.js', 'themes/vice-city/spotify-skin.css',
   'themes/vice-city/spotify/hud.png',
   'themes/san-andreas/spotify-skin.js', 'themes/san-andreas/spotify-skin.css',
+  'themes/san-andreas/station-resolver.js',
   'themes/san-andreas/spotify-cluster.js', 'themes/san-andreas/spotify-cluster.css',
   'themes/san-andreas/spotify/hud.png',
+  'themes/san-andreas/dashboard/radio-target-v1.png',
+  'themes/san-andreas/dashboard/topbar-target-v1.png',
+  'themes/san-andreas/dashboard/flourish-tomorrow.png',
+  'themes/san-andreas/radio-stations/bounce-fm.png',
+  'themes/san-andreas/radio-stations/csr-1039.png',
+  'themes/san-andreas/radio-stations/k-dst.png',
+  'themes/san-andreas/radio-stations/k-jah-west.png',
+  'themes/san-andreas/radio-stations/k-rose.png',
+  'themes/san-andreas/radio-stations/master-sounds-983.png',
+  'themes/san-andreas/radio-stations/playback-fm.png',
+  'themes/san-andreas/radio-stations/radio-los-santos.png',
+  'themes/san-andreas/radio-stations/radio-x.png',
+  'themes/san-andreas/radio-stations/sf-ur.png',
+  'themes/san-andreas/radio-stations/wctr.png',
   'themes/gta-v/spotify-skin.js', 'themes/gta-v/spotify-skin.css',
   'themes/gta-v/spotify/hud.png',
   'themes/gta-v/cluster.css', 'themes/gta-v/cluster.js',

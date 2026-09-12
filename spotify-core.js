@@ -324,6 +324,62 @@
     if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
   }
 
+  /* ---------------- artist genre resolution (theme-independent) ----------------
+     Returns full artist objects for the given ids via
+     GET /artists?ids=..., backed by a localStorage cache with a
+     30-day TTL. The San Andreas dashboard skin uses this to resolve
+     the current track to a fictional GTA:SA radio station. Skins
+     must call it on TRACK CHANGE ONLY — never on the 5 s poll. */
+  const ARTIST_CACHE_KEY = 'vcn.spotify.artistCache';
+  const ARTIST_CACHE_TTL_MS = 30 * 24 * 3600 * 1000;
+  const ARTIST_CACHE_MAX = 400;
+
+  function loadArtistCache() {
+    try {
+      const raw = localStorage.getItem(ARTIST_CACHE_KEY);
+      const obj = raw ? JSON.parse(raw) : {};
+      return (obj && typeof obj === 'object') ? obj : {};
+    } catch (e) { return {}; }
+  }
+  function saveArtistCache(cache) {
+    try {
+      const now = Date.now();
+      const keys = Object.keys(cache);
+      for (const k of keys) {
+        if (!cache[k] || (now - cache[k].at) > ARTIST_CACHE_TTL_MS) delete cache[k];
+      }
+      const ks = Object.keys(cache);
+      if (ks.length > ARTIST_CACHE_MAX) {
+        ks.sort((a, b) => cache[a].at - cache[b].at);
+        for (const k of ks.slice(0, ks.length - ARTIST_CACHE_MAX)) delete cache[k];
+      }
+      localStorage.setItem(ARTIST_CACHE_KEY, JSON.stringify(cache));
+    } catch (e) {}
+  }
+
+  async function getArtists(ids) {
+    const wanted = Array.isArray(ids) ? [...new Set(ids.filter(Boolean))].slice(0, 50) : [];
+    if (!wanted.length) return [];
+    const cache = loadArtistCache();
+    const now = Date.now();
+    const fresh = {};
+    const missing = [];
+    for (const id of wanted) {
+      const hit = cache[id];
+      if (hit && hit.artist && (now - hit.at) < ARTIST_CACHE_TTL_MS) fresh[id] = hit.artist;
+      else missing.push(id);
+    }
+    if (missing.length) {
+      const res = await api('/artists', { query: { ids: missing.join(',') } });
+      const artists = (res && res.artists) || [];
+      for (const a of artists) {
+        if (a && a.id) { cache[a.id] = { at: now, artist: a }; fresh[a.id] = a; }
+      }
+      saveArtistCache(cache);
+    }
+    return wanted.map(id => fresh[id]).filter(Boolean);
+  }
+
   /* ---------------- car-mode token handoff ----------------
      The Android Auto shell performs Spotify PKCE natively (Custom Tab on
      the phone) and hands the resulting auth JSON here via
@@ -368,6 +424,7 @@
     getState, getPosition, refreshNow,
     play, pause, next, previous, seek, setShuffle, setRepeat,
     startPolling, stopPolling,
+    getArtists,
     onBeforeRedirect(fn) { beforeRedirectHook = fn; },
     on(name, fn) {
       if (listeners[name]) listeners[name].push(fn);

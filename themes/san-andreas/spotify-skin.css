@@ -1,160 +1,145 @@
 /* ============================================================
-   San Andreas Spotify skin — HERO7 (2026-09-08).
-   The skin IS the user's hero art, sliced straight out of it
-   (radio-hero7.png, 701x544, true alpha): framed unit with the
-   baked San Andreas crown logo, two dark panels, drawn Spotify
-   logo / progress bar / transport icons, lowrider at the base.
-   Live HTML sits exactly over the art's panels and controls:
-   album art in the left panel, title/artist + lyrics in the
-   right panel, live progress over the drawn bar, live transport
-   over the drawn prev/play/next icons. Right side, overlapping
-   the dash bars exactly like the hero. Bank Gothic throughout;
-   blackletter only on the idle station kicker.
-
-   LYRICS: owned by the shared kinetic karaoke engine (lyrics.js,
-     LRCLIB provider) mounted into [data-lyrics-stage] via
-     window.WSLyrics.render(). skin.setLyricsRenderer(fn) /
-     skin.clearLyrics() remain as an override hook. Never invent
-     lyric text, never scrape, never fake FFT from Spotify audio
-     (the Web API exposes none).
+   San Andreas Spotify skin — TARGET-LOCK PASS 1 (2026-09-12).
+   The skin IS authored art: radio-target-v1.png (640x544) — dark
+   scenic Los Santos / palm / lowrider base with a NEUTRAL top-left
+   zone. Live HTML sits over the art:
+   - dynamic GTA:SA station logo (real PNGs, crossfaded) top-left
+   - album art lower-left in an aged frame
+   - title / artist / progress / transport in the lower column
+   LYRICS: the shared kinetic karaoke engine (lyrics.js, LRCLIB) is
+   untouched and still mounted via window.WSLyrics.render(); it is
+   only VISUALLY suppressed in SA dashboard to match the locked
+   hero (display:none on .sasp-lyrics). No other theme is affected.
    ============================================================ */
 
-/* widget placement: the hero's radio position — right side,
-   overlapping the header and footer bars (stage coordinates) */
+/* widget placement: right side of the 1920x720 stage, just under the
+   74px topbar (stage coordinates) */
 body.dashboard-mode.theme-san-andreas .sasp{
   position:absolute;z-index:30;
-  left:1219px;top:83px;width:701px;height:544px;
+  left:1280px;top:78px;width:640px;height:544px;
   pointer-events:auto;
   filter:drop-shadow(0 18px 34px rgba(0,0,0,.65));
-  /* Lyrics use cqw/cqh units: without a container they resolve against the
-     viewport (huge on landscape). Scope them to the widget. */
-  container-type:size;
+  container-type:size; /* scope cqw/cqh lyric units to the widget */
 }
 body.dashboard-mode.theme-san-andreas .sasp-bezel{
   position:absolute;inset:0;width:100%;height:100%;z-index:0;
   pointer-events:none;
 }
-/* live layer fills the widget; children sit over the art */
 body.dashboard-mode.theme-san-andreas .sasp-main{
   position:absolute;inset:0;z-index:1;pointer-events:none;
   font-family:'Bank Gothic','Arial Narrow',sans-serif;
 }
-/* LEFT panel: album art, measured against radio-hero7-r2.png
-   (2026-09-09 audit). Drawn panel interior is x 89-313, y ~166-351;
-   the artwrap sits INSIDE the cream double border so no cream edge
-   is covered. Chamfered top corners like the panel. */
+/* DYNAMIC STATION LOGO: the hero of the panel. Neutral stage —
+   no baked logo in the art. object-fit:contain so tall/wide logos
+   never stretch; the stage is fixed so swaps never jump layout. */
+body.dashboard-mode.theme-san-andreas .sasp-station{
+  position:absolute;left:30px;top:22px;width:320px;height:130px;
+  pointer-events:none;
+}
+body.dashboard-mode.theme-san-andreas .sasp-station-logo{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:contain;
+  object-position:left center;opacity:0;transition:opacity .22s ease;
+  filter:drop-shadow(0 3px 6px rgba(0,0,0,.85));
+}
+body.dashboard-mode.theme-san-andreas .sasp-station-logo.on{opacity:1}
+/* target tagline, top-right of the module, Grove green */
+body.dashboard-mode.theme-san-andreas .sasp-tagline{
+  position:absolute;right:34px;top:96px;z-index:1;pointer-events:none;
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:15px;font-weight:700;
+  letter-spacing:3px;line-height:1.5;text-align:right;color:#8fce62;
+  text-shadow:0 2px 3px rgba(0,0,0,.9);
+}
+/* ALBUM: lower-left, thin aged-green/cream frame */
 body.dashboard-mode.theme-san-andreas .sasp-artwrap{
-  position:absolute;left:89px;top:166px;width:224px;height:185px;
+  position:absolute;left:35px;top:272px;width:185px;height:185px;
   background:#000;overflow:hidden;pointer-events:none;
-  clip-path:polygon(12px 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%,0 12px);
+  border:2px solid rgba(216,198,144,.8);
+  outline:1px solid rgba(122,102,52,.7);outline-offset:3px;
+  box-shadow:0 6px 18px rgba(0,0,0,.7);
 }
 body.dashboard-mode.theme-san-andreas .sasp-art-idle{
   position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   color:#5a5344;
 }
-body.dashboard-mode.theme-san-andreas .sasp-art-idle svg{width:38%;height:38%;fill:currentColor}
+body.dashboard-mode.theme-san-andreas .sasp-art-idle svg{width:34%;height:34%;fill:currentColor}
 body.dashboard-mode.theme-san-andreas .sasp-art{
   position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;
 }
 body.dashboard-mode.theme-san-andreas .sasp-art.on{opacity:1}
-/* RIGHT panel: opaque black backing (no map bleed), track meta up top,
-   lyrics fill the rest. Measured against radio-hero7-r2.png
-   (2026-09-09 audit): drawn right panel interior is x 365-644,
-   y ~172-425; the side panel sits INSIDE the cream border. */
-body.dashboard-mode.theme-san-andreas .sasp-side{
-  position:absolute;left:365px;top:172px;width:279px;height:253px;
-  display:flex;flex-direction:column;min-height:0;min-width:0;pointer-events:none;
-  background:#0b0a07;
+/* METADATA: right of the album */
+body.dashboard-mode.theme-san-andreas .sasp-meta{
+  position:absolute;left:240px;top:337px;width:370px;min-width:0;pointer-events:none;
 }
-body.dashboard-mode.theme-san-andreas .sasp-track{margin-bottom:6px;min-width:0;flex:0 0 auto}
 body.dashboard-mode.theme-san-andreas .sasp-title{
-  font-size:15px;font-weight:700;letter-spacing:1.5px;color:#f7f0dc;
+  font-size:26px;font-weight:700;letter-spacing:1.5px;color:#f7f0dc;
   text-shadow:0 2px 0 #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 body.dashboard-mode.theme-san-andreas .sasp-artist{
-  font-size:11px;letter-spacing:1.5px;color:#b3a582;margin-top:2px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-size:15px;letter-spacing:2px;color:#9dc46a;margin-top:6px;
+  text-shadow:0 2px 0 #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 body.dashboard-mode.theme-san-andreas .sasp-artist.sasp-status{color:#d8a94e}
-body.dashboard-mode.theme-san-andreas .sasp-lyrics{
-  flex:1;min-height:0;overflow:hidden;position:relative;
-  border-top:1px solid rgba(216,169,78,.3);padding-top:6px;
-}
-/* progress: live bar drawn exactly over the art's bar. Measured
-   (2026-09-09 audit): drawn track x 79-340, y 441-445. The 8px live
-   bar is centered on it (439-447) so the drawn track is fully covered. */
+/* PROGRESS: long bar beneath the metadata */
 body.dashboard-mode.theme-san-andreas .sasp-progress{
-  position:absolute;left:79px;top:439px;width:261px;pointer-events:auto;
+  position:absolute;left:240px;top:417px;width:370px;pointer-events:auto;
 }
 body.dashboard-mode.theme-san-andreas .sasp-bar{
-  position:relative;height:8px;background:rgba(240,230,200,.16);
-  border:1px solid rgba(216,169,78,.4);cursor:pointer;
+  position:relative;height:8px;background:rgba(240,230,200,.14);
+  border:1px solid rgba(216,169,78,.45);cursor:pointer;
 }
 body.dashboard-mode.theme-san-andreas .sasp-bar-fill{
   position:absolute;left:0;top:0;bottom:0;width:0%;
-  background:linear-gradient(90deg,#1a9e4b,#2bd96a);
+  background:linear-gradient(90deg,#4e7a34,#8fbf5a);
 }
 body.dashboard-mode.theme-san-andreas .sasp-bar-knob{
-  position:absolute;top:50%;width:10px;height:10px;border-radius:50%;
+  position:absolute;top:50%;width:12px;height:12px;border-radius:50%;
   background:#f0e6c8;border:1px solid #8a6d2a;transform:translate(-50%,-50%);
 }
 body.dashboard-mode.theme-san-andreas .sasp-times{
-  display:flex;justify-content:space-between;margin-top:3px;
-  font-size:9px;letter-spacing:1px;color:#8f8468;
+  display:flex;justify-content:space-between;margin-top:4px;
+  font-size:11px;letter-spacing:1px;color:#8f8468;text-shadow:0 1px 0 #000;
 }
-/* transport: measured against radio-hero7-r2.png (2026-09-09 audit).
-   The art draws ONLY the pause/play in a cream ring (x 172-230,
-   y 458-516); prev/next are bare cream glyphs (prev x 132-150,
-   next x 248-266, y 478-498). The live toggle keeps its filled
-   circle matched to the drawn ring; prev/next are transparent hit
-   areas whose cream glyphs sit exactly over the drawn glyphs, so no
-   extra circles appear that the art doesn't have. Shuffle/repeat
-   stay as drawn art. */
+/* TRANSPORT: one clean row — shuffle / prev / big toggle / next / repeat */
 body.dashboard-mode.theme-san-andreas .sasp-controls{
-  position:absolute;inset:0;pointer-events:none;
+  position:absolute;left:240px;top:478px;width:370px;height:52px;
+  display:flex;align-items:center;justify-content:flex-start;gap:14px;
+  pointer-events:none;
 }
 body.dashboard-mode.theme-san-andreas .sasp-tbtn{
-  position:absolute;width:46px;height:46px;border-radius:50%;cursor:pointer;
-  background:transparent;border:0;color:#f0e6c8;
+  width:46px;height:46px;border-radius:50%;cursor:pointer;flex:0 0 auto;
+  background:transparent;border:1px solid rgba(216,198,144,.35);color:#e8dcc0;
   display:flex;align-items:center;justify-content:center;
   pointer-events:auto;padding:0;
 }
-body.dashboard-mode.theme-san-andreas .sasp-tbtn svg{width:30px;height:30px;fill:currentColor;
+body.dashboard-mode.theme-san-andreas .sasp-tbtn svg{width:22px;height:22px;fill:currentColor;
   filter:drop-shadow(0 2px 2px rgba(0,0,0,.8))}
-body.dashboard-mode.theme-san-andreas .sasp-tbtn[data-act="prev"]{left:118px;top:465px}
-body.dashboard-mode.theme-san-andreas .sasp-tbtn[data-act="next"]{left:234px;top:465px}
 body.dashboard-mode.theme-san-andreas .sasp-tbtn[data-act="toggle"]{
-  left:172px;top:458px;width:58px;height:58px;
-  background:#0e0a05;border:2px solid #f0e6c8;
-  box-shadow:0 0 0 1px rgba(0,0,0,.6);
+  width:64px;height:64px;
+  background:linear-gradient(180deg,#1b2110,#0c0f07);
+  border:2px solid #e8dcc0;
+  box-shadow:0 0 0 1px rgba(0,0,0,.6), 0 4px 12px rgba(0,0,0,.6);
 }
-body.dashboard-mode.theme-san-andreas .sasp-tbtn[data-act="toggle"] svg{width:26px;height:26px}
+body.dashboard-mode.theme-san-andreas .sasp-tbtn[data-act="toggle"] svg{width:28px;height:28px}
+body.dashboard-mode.theme-san-andreas .sasp-tbtn.on{
+  color:#9dc46a;border-color:#9dc46a;
+}
 body.dashboard-mode.theme-san-andreas .sasp-tbtn:active{transform:scale(.92)}
-/* idle: covers both panels, one branding moment */
+/* LYRICS: engine untouched, visually suppressed in SA dashboard
+   (locked hero has no lyric stage). Other themes unaffected. */
+body.dashboard-mode.theme-san-andreas .sasp-lyrics{display:none}
+/* idle: station branding + connect CTA over the dark module */
 body.dashboard-mode.theme-san-andreas .sasp-idle{
   position:absolute;z-index:2;
-  left:70px;top:154px;width:582px;height:294px;
+  left:30px;top:300px;width:580px;height:214px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:10px;text-align:center;
-  background:rgba(13,15,10,.94);
-  box-shadow:inset 0 0 26px rgba(0,0,0,.9);
-  padding:6%;box-sizing:border-box;pointer-events:auto;
+  background:rgba(10,12,7,.88);
+  border:1px solid rgba(216,169,78,.4);
+  padding:20px;box-sizing:border-box;pointer-events:auto;
 }
 body.dashboard-mode.theme-san-andreas .sasp-idle[hidden]{display:none}
-/* Idle also covers the art's drawn transport strip (baked-in glyphs)
-   so the disconnected state never implies something is playing.
-   Measured 2026-09-09: the dimmed backdrop must cover widget x 48-345,
-   y 430-542 (idle box sits at 70,154), hiding the drawn logo and the
-   full transport row. The drawn progress bar above it stays visible.
-   The lowrider stays visible. */
-body.dashboard-mode.theme-san-andreas .sasp-idle::after{
-  content:"";position:absolute;left:-22px;top:276px;width:317px;height:118px;
-  background:linear-gradient(90deg,rgba(13,15,10,.97) 88%,rgba(13,15,10,0));
-  box-shadow:inset 0 26px 26px -26px rgba(0,0,0,.9);
-  pointer-events:none;
-}
 body.dashboard-mode.theme-san-andreas .sasp-idle-kicker{
-  font-family:'Beckett','Pricedown Bl',serif;font-size:24px;color:#f5edd8;
+  font-family:'Beckett','Pricedown Bl',serif;font-size:26px;color:#f5edd8;
   text-shadow:0 2px 0 #000;
 }
 body.dashboard-mode.theme-san-andreas .sasp-connect-btn{
@@ -170,22 +155,6 @@ body.dashboard-mode.theme-san-andreas .sasp-idle-hint{
   line-height:1.7;color:#8f8468;text-transform:uppercase;margin:0;
 }
 body.dashboard-mode.theme-san-andreas .sasp.is-idle .sasp-main{visibility:hidden}
-/* ---------- lyric engine clamps ----------
-   The shared .wslyr sizes are cqw-based (9cqw of the 701px widget =
-   ~63px) — far too big for the 279px right panel, so lyrics overflowed
-   and clipped. Clamp to px exactly like the GTA V / RDR2 skins do. */
-body.dashboard-mode.theme-san-andreas .sasp-lyrics .wslyr{position:absolute;inset:0}
-body.dashboard-mode.theme-san-andreas .sasp-lyrics .wslyr-hero.s-xl{font-size:24px}
-body.dashboard-mode.theme-san-andreas .sasp-lyrics .wslyr-hero.s-lg{font-size:20px}
-body.dashboard-mode.theme-san-andreas .sasp-lyrics .wslyr-hero.s-md{font-size:17px}
-body.dashboard-mode.theme-san-andreas .sasp-lyrics .wslyr-hero.s-sm{font-size:16px} /* never tiny */
-body.dashboard-mode.theme-san-andreas .sasp-lyrics .wslyr-prev{font-size:13px;opacity:.6}
-body.dashboard-mode.theme-san-andreas .sasp-lyrics .wslyr-next{font-size:12px;opacity:.6}
-body.dashboard-mode.theme-san-andreas .sasp-lyrics .wslyr-state .wslyr-wait{font-size:28px}
-body.dashboard-mode.theme-san-andreas .sasp-lyrics .wslyr-state .wslyr-cap{font-size:11px}
-body.dashboard-mode.theme-san-andreas .sasp-lyrics .wslyr-hero{left:6%;right:6%} /* keep inside the panel */
-body.dashboard-mode.theme-san-andreas .sasp-lyrics .wslyr-hero.v-up{top:18%;max-height:68%}
-body.dashboard-mode.theme-san-andreas .sasp-lyrics .wslyr-hero.v-low{top:38%;max-height:54%}
-body.dashboard-mode.theme-san-andreas .sasp-lyrics .wslyr-hero .wslyr-w{
-  text-shadow:.07em .07em 0 #1a1206,0 0 .35em rgba(255,180,40,.45);
-} /* guarantee contrast on the dark panel */
+body.dashboard-mode.theme-san-andreas .sasp.is-idle .sasp-station{visibility:visible}
+/* idle keeps the station logo visible above the idle card */
+body.dashboard-mode.theme-san-andreas .sasp.is-idle .sasp-station{position:absolute;z-index:3}

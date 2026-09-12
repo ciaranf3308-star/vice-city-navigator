@@ -1,27 +1,35 @@
 /* ============================================================
    WayStation — San Andreas Spotify skin (dashboard mode only),
-   HARD VISUAL RESET pass 5.
+   TARGET-LOCK PASS 1 (2026-09-08 hero7 skin replaced 2026-09-12).
 
-   HERO7 (2026-09-08): the outer skin is the user's hero art sliced
-   straight out of it (themes/san-andreas/dashboard/radio-hero7-r2.png,
-   701x544, true alpha). Framed unit with baked San Andreas crown
-   logo, two dark panels, drawn Spotify logo / progress / transport,
-   lowrider at the base — right side, overlapping the dash bars.
-   Live HTML sits over the art: album art in the left panel,
-   title/artist + lyrics in the right panel, live progress over the
-   drawn bar, live transport over the drawn prev/play/next icons.
+   The outer skin is authored art (themes/san-andreas/dashboard/
+   radio-target-v1.png, 640x544): dark scenic Los Santos / palm /
+   lowrider base with a NEUTRAL top-left zone. Live HTML sits over
+   the art: a DYNAMIC GTA:SA station logo (real vendored PNGs in
+   themes/san-andreas/radio-stations/, crossfaded on change),
+   album art lower-left, title/artist + progress + transport in the
+   lower column. Right side, under the 74px topbar.
+
+   DYNAMIC STATION: on every NEW track the skin asks SpotifyCore
+   for the artists' full objects (cached 30d, track-change only —
+   never on the 5s poll), merges their genre strings and resolves
+   the nearest fictional station via SAStationResolver (weighted,
+   San-Andreas-owned logic). Episodes -> WCTR with no genre fetch.
+   Unresolvable -> keep the previous station (no flicker); first
+   run falls back to Radio Los Santos.
 
    LYRICS: owned by the shared kinetic karaoke engine (lyrics.js,
      LRCLIB provider) mounted into [data-lyrics-stage] via
-     window.WSLyrics.render(). skin.setLyricsRenderer(fn) /
-     skin.clearLyrics() remain as an override hook. Never invent
-     lyric text, never scrape, never fake FFT from Spotify audio
-     (the Web API exposes none).
+     window.WSLyrics.render(). Visually suppressed in SA dashboard
+     by CSS to match the locked hero; the engine and other themes
+     are untouched.
    ============================================================ */
 'use strict';
 
 (function () {
-  const BEZEL = 'themes/san-andreas/dashboard/radio-hero7-r2.png';
+  const BEZEL = 'themes/san-andreas/dashboard/radio-target-v1.png';
+  const STATION_DIR = 'themes/san-andreas/radio-stations/';
+  const FALLBACK_STATION = 'radio-los-santos';
 
   const SVG = {
     play: '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',
@@ -29,6 +37,8 @@
     prev: '<svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg>',
     next: '<svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg>',
     note: '<svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>',
+    shuffle: '<svg viewBox="0 0 24 24"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>',
+    repeat: '<svg viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>',
   };
 
   function el(tag, cls, html) {
@@ -41,34 +51,56 @@
     const s = Math.max(0, Math.floor((ms || 0) / 1000));
     return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
   }
+  function stationName(id) {
+    try {
+      if (window.SAStationResolver && SAStationResolver.STATIONS[id]) {
+        return SAStationResolver.STATIONS[id].name;
+      }
+    } catch (e) {}
+    return 'Radio Los Santos';
+  }
+  function stationFile(id) {
+    try {
+      if (window.SAStationResolver && SAStationResolver.STATIONS[id]) {
+        return SAStationResolver.STATIONS[id].file;
+      }
+    } catch (e) {}
+    return 'radio-los-santos.png';
+  }
 
   function createSkin() {
     let root = null, core = null;
     let offs = [];
     let tickTimer = null;
     let currentArtUrl = '';
-    let artGen = 0;          // bumped on every track change
-    let artTrackId = null;   // Spotify item.id the art belongs to
+    let artGen = 0;
+    let artTrackId = null;
     let statusTimer = null;
     let lyricsRenderer = null;
+    /* station state */
+    let currentStation = FALLBACK_STATION;
+    let stationTrackId = null;   // item.id the logo was resolved for
+    let stationGen = 0;
 
     /* ---------- dom ---------- */
     function build() {
       root = el('div', 'sasp');
       root.innerHTML =
         '<img class="sasp-bezel" src="' + BEZEL + '" alt="" aria-hidden="true">' +
+        '<div class="sasp-station" aria-hidden="true">' +
+          '<img class="sasp-station-logo a" alt="">' +
+          '<img class="sasp-station-logo b" alt="">' +
+        '</div>' +
+        '<div class="sasp-tagline" aria-hidden="true">GOOD MUSIC<br>BETTER DRIVES</div>' +
         '<div class="sasp-main">' +
           '<div class="sasp-artwrap">' +
             '<div class="sasp-art-idle">' + SVG.note + '</div>' +
             '<img class="sasp-art a" alt="">' +
             '<img class="sasp-art b" alt="">' +
           '</div>' +
-          '<div class="sasp-side">' +
-            '<div class="sasp-track">' +
-              '<div class="sasp-title">Radio Los Santos</div>' +
-              '<div class="sasp-artist">Connect Spotify to play</div>' +
-            '</div>' +
-            '<div class="sasp-lyrics" data-lyrics-stage="1"></div>' +
+          '<div class="sasp-meta">' +
+            '<div class="sasp-title">Radio Los Santos</div>' +
+            '<div class="sasp-artist">Connect Spotify to play</div>' +
           '</div>' +
           '<div class="sasp-progress">' +
             '<div class="sasp-bar" role="slider" aria-label="Seek" tabindex="0" aria-valuemin="0" aria-valuemax="100">' +
@@ -78,20 +110,75 @@
             '<div class="sasp-times"><span class="sasp-elapsed">0:00</span><span class="sasp-duration">0:00</span></div>' +
           '</div>' +
           '<div class="sasp-controls">' +
+            '<button class="sasp-tbtn" data-act="shuffle" aria-label="Shuffle">' + SVG.shuffle + '</button>' +
             '<button class="sasp-tbtn" data-act="prev" aria-label="Previous">' + SVG.prev + '</button>' +
-            '<button class="sasp-tbtn big" data-act="toggle" aria-label="Play or pause">' + SVG.play + '</button>' +
+            '<button class="sasp-tbtn" data-act="toggle" aria-label="Play or pause">' + SVG.play + '</button>' +
             '<button class="sasp-tbtn" data-act="next" aria-label="Next">' + SVG.next + '</button>' +
+            '<button class="sasp-tbtn" data-act="repeat" aria-label="Repeat">' + SVG.repeat + '</button>' +
           '</div>' +
+          '<div class="sasp-lyrics" data-lyrics-stage="1"></div>' +
         '</div>' +
         '<div class="sasp-idle">' +
           '<div class="sasp-idle-kicker">Radio Los Santos</div>' +
           '<button class="sasp-connect-btn" type="button">Connect Spotify</button>' +
           '<p class="sasp-idle-hint">Music plays on your phone or car.<br>WayStation controls it.</p>' +
         '</div>';
+      // initial fallback logo, no flash
+      const a = root.querySelector('.sasp-station-logo.a');
+      a.src = STATION_DIR + stationFile(currentStation);
+      a.classList.add('on');
       return root;
     }
 
     const q = sel => root.querySelector(sel);
+
+    /* ---------- dynamic station logo ---------- */
+    function setStation(id) {
+      if (!id || id === currentStation) return;
+      currentStation = id;
+      stationGen++;
+      const myGen = stationGen;
+      const a = q('.sasp-station-logo.a'), b = q('.sasp-station-logo.b');
+      const show = a.classList.contains('on') ? b : a;
+      const hide = show === a ? b : a;
+      show.onload = () => {
+        if (myGen !== stationGen) return; // stale
+        show.classList.add('on');
+        hide.classList.remove('on');
+      };
+      show.onerror = () => { if (myGen === stationGen) show.classList.remove('on'); };
+      show.setAttribute('src', STATION_DIR + stationFile(id));
+      const kicker = q('.sasp-idle-kicker');
+      if (kicker) kicker.textContent = stationName(id);
+    }
+
+    /* Resolve the station for a fresh track. Episodes go straight to
+       WCTR; music merges cached artist genres then weighted-resolves.
+       Null resolution keeps the previous station (no flicker). */
+    function resolveStationFor(item) {
+      if (!item || !item.id) return;
+      stationTrackId = item.id;
+      const myTrack = item.id;
+      let ep = false;
+      try {
+        ep = window.SAStationResolver &&
+          SAStationResolver.stationForItem(item, []) === 'wctr' &&
+          (String(item.currently_playing_type || item.type || '').toLowerCase() === 'episode' ||
+           !!item.show);
+      } catch (e) {}
+      if (ep) { setStation('wctr'); return; }
+      if (!window.SAStationResolver || !core.getArtists) return;
+      const ids = (item.artists || []).map(a => a && a.id).filter(Boolean);
+      if (!ids.length) return; // keep previous
+      core.getArtists(ids).then(artists => {
+        if (myTrack !== stationTrackId) return; // stale track
+        const genres = [];
+        (artists || []).forEach(a => (a.genres || []).forEach(g => genres.push(g)));
+        let st = null;
+        try { st = SAStationResolver.stationForItem(item, genres); } catch (e) {}
+        if (st) setStation(st); // null -> retain previous, no flicker
+      }).catch(() => { /* offline/API hiccup: keep previous station */ });
+    }
 
     /* ---------- transient status line (reuses the artist slot) ---------- */
     function status(msg, sticky) {
@@ -119,14 +206,16 @@
       root.classList.toggle('is-idle', !connected && !hasTrack);
       const title = q('.sasp-title'), artist = q('.sasp-artist');
       const toggle = q('.sasp-tbtn[data-act="toggle"]');
+      const shuffleBtn = q('.sasp-tbtn[data-act="shuffle"]');
+      const repeatBtn = q('.sasp-tbtn[data-act="repeat"]');
       if (!connected) {
-        // Disconnected state stays inside the one widget: themed idle
-        // text on the console, connect CTA in the stage.
         stopTick();
-        title.textContent = 'Radio Los Santos';
+        title.textContent = stationName(currentStation);
         artist.textContent = 'Connect Spotify to play';
         artist.classList.remove('sasp-status');
         setArt('', null);
+        stationTrackId = null;
+        toggle.innerHTML = SVG.play;
         renderLyrics(null);
         return;
       }
@@ -134,6 +223,7 @@
         title.textContent = 'Nothing playing';
         artist.textContent = 'Press play in Spotify';
         setArt('', null);
+        stationTrackId = null;
         toggle.innerHTML = SVG.play;
         q('.sasp-duration').textContent = '0:00';
         updateProgress(0, 0);
@@ -141,23 +231,20 @@
         return;
       }
       const item = s.item;
+      /* new track -> resolve the SA station (once per track id) */
+      if (item.id !== stationTrackId) resolveStationFor(item);
       title.textContent = item.name || '—';
-      /* Clear any pending status timer and sync dataset.real so a stale
-         timer can't restore the previous track's artist. */
       if (statusTimer) { clearTimeout(statusTimer); statusTimer = null; }
       artist.textContent = (item.artists || []).map(a => a.name).join(', ') || '—';
       artist.dataset.real = artist.textContent;
       artist.classList.remove('sasp-status');
       const imgs = item.album && item.album.images;
-      /* Atomic per track: capture item.id — title, artist, art, duration
-         and lyric request all belong to this ID. */
       const renderTrackId = item.id;
-      if (window.__WS_SPOTIFY_DIAG) console.log('[spotify-diag] render', {
-        trackId: renderTrackId, title: item.name,
-        artist: (item.artists || []).map(a => a.name).join(', '),
-        art: imgs && imgs.length ? (imgs[1] || imgs[0]).url : '' });
       setArt(imgs && imgs.length ? (imgs[1] || imgs[0]).url : '', renderTrackId);
       toggle.innerHTML = s.is_playing ? SVG.pause : SVG.play;
+      shuffleBtn.classList.toggle('on', !!s.shuffle_state);
+      repeatBtn.classList.toggle('on', !!s.repeat_state && s.repeat_state !== 'off');
+      repeatBtn.dataset.mode = s.repeat_state || 'off';
       q('.sasp-duration').textContent = fmt(item.duration_ms);
       if (s.device && s.device.name) title.title = 'On ' + s.device.name;
       renderLyrics(s);
@@ -165,8 +252,8 @@
     }
 
     /* Lyrics stage: owned by the shared kinetic karaoke engine
-       (lyrics.js, LRCLIB). A custom lyricsRenderer set via the mount
-       api still overrides the engine. Never fake words. */
+       (lyrics.js, LRCLIB). Visually suppressed in SA dashboard by
+       CSS; the engine itself is untouched. */
     function renderLyrics(s) {
       const box = q('.sasp-lyrics');
       if (lyricsRenderer && s && s.item) {
@@ -182,11 +269,8 @@
       if (window.WSLyrics) WSLyrics.render(box, core, s && s.item, 'san-andreas');
     }
 
-    /* ---------- album art crossfade ---------- */
+    /* ---------- album art crossfade (generation-safe) ---------- */
     function setArt(url, trackId) {
-      /* Generation-safe: a stale onload can never reveal old artwork.
-         The load only becomes visible if, at completion time, the track,
-         URL and generation all still match the current render. */
       if (!trackId) {
         artGen++;
         artTrackId = null;
@@ -203,7 +287,6 @@
       artTrackId = trackId;
       currentArtUrl = url;
       const a = q('.sasp-art.a'), b = q('.sasp-art.b');
-      // Cancel stale handlers so an old load can't toggle visibility.
       a.onload = null; b.onload = null;
       const show = a.classList.contains('on') ? b : a;
       const hide = show === a ? b : a;
@@ -212,13 +295,8 @@
         a.removeAttribute('src'); b.removeAttribute('src');
         return;
       }
-      if (window.__WS_SPOTIFY_DIAG) console.log('[spotify-diag] art request', { trackId, url, gen: myGen });
       show.onload = () => {
-        if (trackId !== artTrackId || url !== currentArtUrl || myGen !== artGen) {
-          if (window.__WS_SPOTIFY_DIAG) console.log('[spotify-diag] art DISCARDED (stale)', { trackId, url, gen: myGen, curTrack: artTrackId, curGen: artGen });
-          return; // stale: never toggle .on
-        }
-        if (window.__WS_SPOTIFY_DIAG) console.log('[spotify-diag] art shown', { trackId, gen: myGen });
+        if (trackId !== artTrackId || url !== currentArtUrl || myGen !== artGen) return;
         show.classList.add('on');
         hide.classList.remove('on');
       };
@@ -260,6 +338,17 @@
           toggle: () => {
             const s = core.getState();
             return (s && s.is_playing) ? core.pause() : core.play();
+          },
+          shuffle: () => {
+            const s = core.getState();
+            return core.setShuffle(!(s && s.shuffle_state)).catch(() => status('Shuffle failed'));
+          },
+          repeat: () => {
+            const cur = btn.dataset.mode || 'off';
+            const nxt = cur === 'off' ? 'context' : cur === 'context' ? 'track' : 'off';
+            btn.dataset.mode = nxt;
+            btn.classList.toggle('on', nxt !== 'off');
+            return core.setRepeat(nxt).catch(() => status('Repeat failed'));
           },
         }[act];
         if (run) run().catch(err => {
@@ -319,8 +408,6 @@
       render();
       if (core.isConnected()) core.startPolling();
       return {
-        /* Override hook: fn(item) -> DOM node replaces the shared
-           kinetic karaoke engine (lyrics.js) for this stage. */
         setLyricsRenderer(fn) { lyricsRenderer = fn; renderLyrics(core.getState()); },
         clearLyrics() { lyricsRenderer = null; renderLyrics(core.getState()); },
       };
@@ -331,6 +418,7 @@
       offs = [];
       stopTick();
       if (statusTimer) { clearTimeout(statusTimer); statusTimer = null; }
+      stationTrackId = null;
       core.stopPolling();
       if (root && root.parentNode) root.parentNode.removeChild(root);
       root = null;
