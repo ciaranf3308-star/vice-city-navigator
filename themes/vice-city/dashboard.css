@@ -444,44 +444,6 @@ body.theme-vice-city .menu-section details.advanced summary{color:#eafcff}
    body.dashboard-mode.theme-vice-city. Shared :is(.dashboard-mode,.cluster-mode)
    selectors are NEVER modified; dashboard refinements override them below. */
 
-/* ---- 1. MODE TOGGLE: lightweight neon text selector, not a pill ----
-   Small Pricedown labels, muted inactive, bright active with a 2px pink
-   hairline. One subtle divider. Positioned by JS (DASH_TOGGLE_POS) inside
-   the header, left of the skyline pocket. */
-body.dashboard-mode.theme-vice-city #mode-toggle{
-  border-radius:0;padding:0;gap:0;
-  background:none;border:0;box-shadow:none;
-  backdrop-filter:none;-webkit-backdrop-filter:none;
-  align-items:center;
-}
-body.dashboard-mode.theme-vice-city #mode-toggle button{
-  border-radius:0;min-height:0;min-width:0;padding:6px 4px;
-  font-size:16px;letter-spacing:.14em;
-  color:rgba(142,154,192,.72);
-  text-shadow:none;box-shadow:none;background:none;
-  position:relative;transition:color .18s ease;
-}
-body.dashboard-mode.theme-vice-city #mode-toggle button span{
-  position:relative;display:inline-block;padding-bottom:3px;
-}
-body.dashboard-mode.theme-vice-city #mode-toggle button.on{
-  background:none;color:#ffd7f2;
-  text-shadow:0 0 2px rgba(255,244,250,.9),0 0 8px rgba(255,113,206,.85),0 0 22px rgba(255,46,136,.4);
-  box-shadow:none;
-}
-body.dashboard-mode.theme-vice-city #mode-toggle button.on span::after{
-  content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;
-  background:#ff4fc3;
-  box-shadow:0 0 8px rgba(255,79,195,.9),0 0 18px rgba(255,46,136,.4);
-}
-body.dashboard-mode.theme-vice-city #mode-toggle button:not(.on):hover{color:#dfe6ff}
-/* divider between CLUSTER and DASH */
-body.dashboard-mode.theme-vice-city #mode-toggle button + button{margin-left:14px}
-body.dashboard-mode.theme-vice-city #mode-toggle button + button::before{
-  content:'';position:absolute;left:-8px;top:22%;bottom:22%;width:1px;
-  background:linear-gradient(180deg,transparent,rgba(255,113,206,.4),transparent);
-}
-
 /* ---- 2/3/4. HEADER: controlled neon hierarchy ----
    Logo: 41px, hot core + 8px glow + one 24px bloom (no 64px fog).
    Skyline: longer left mask (60%) so the art melts into the chrome.
@@ -582,10 +544,10 @@ body.dashboard-mode.theme-vice-city .dash-dest{
 body.dashboard-mode.theme-vice-city .dash-zoom button{
   width:40px;height:40px;min-width:44px;min-height:44px;
   font-size:20px;
-  border:1.5px solid rgba(53,224,255,.8);
+  border:1.5px solid rgba(53,224,255,.65);
   background:rgba(8,10,24,.72);
-  box-shadow:0 0 2px rgba(220,252,255,.7),0 0 8px rgba(53,224,255,.4),inset 0 0 8px rgba(53,224,255,.18);
-  text-shadow:0 0 6px rgba(53,224,255,.9);
+  box-shadow:0 0 2px rgba(220,252,255,.55),0 0 6px rgba(53,224,255,.32),inset 0 0 6px rgba(53,224,255,.14);
+  text-shadow:0 0 5px rgba(53,224,255,.7);
 }
 /* ---- 16. COMPASS/TAGLINE: functional brighter, decorative dimmer ---- */
 body.dashboard-mode.theme-vice-city #dash-compass{
@@ -597,8 +559,8 @@ body.dashboard-mode.theme-vice-city .dash-north{
   text-shadow:0 0 8px rgba(255,46,136,.75);
 }
 body.dashboard-mode.theme-vice-city .dash-tag::after{
-  opacity:.65;
-  text-shadow:0 0 8px rgba(255,46,136,.6);
+  opacity:.5;
+  text-shadow:0 0 6px rgba(255,46,136,.45);
 }
 
 /* ---- 17. MANEUVER: tight contact shadow, hot edge, small bloom ----
@@ -608,4 +570,28 @@ body.dashboard-mode.theme-vice-city #vc-maneuver{
 }
 body.dashboard-mode.theme-vice-city #vc-maneuver .vc-man-text span{
   max-width:300px;
+}
+
+/* ---- POI LABEL micro-polish (dashboard only) ----
+   Slightly smaller, softer than pure white, strong 2-3px dark halo
+   for map readability. No opaque background. */
+body.dashboard-mode.theme-vice-city .ws-poi-label{
+  font-size:11px;letter-spacing:.4px;
+  color:#f2e8f0;
+  margin-top:3px;
+  text-shadow:
+    -1px -1px 2px rgba(0,0,0,.95),1px -1px 2px rgba(0,0,0,.95),
+    -1px 1px 2px rgba(0,0,0,.95),1px 1px 2px rgba(0,0,0,.95),
+    0 0 3px rgba(0,0,0,.9),0 0 8px rgba(0,0,0,.6);
+}
+
+/* ---- SPOTIFY grounding: local atmospheric contact zone ----
+   One very broad near-black radial field BEHIND the widget (not blur,
+   not a circle — map stays perceptible through it). Map detail gently
+   quietens near the HUD so it feels seated, not floating. */
+body.dashboard-mode.theme-vice-city .vcsp::before{
+  content:'';position:absolute;inset:-90px;z-index:-1;
+  background:radial-gradient(ellipse 65% 60% at 50% 55%,
+    rgba(2,2,8,.5) 0%,rgba(2,2,8,.28) 45%,rgba(2,2,8,0) 75%);
+  pointer-events:none;
 }

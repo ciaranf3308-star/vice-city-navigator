@@ -27,3 +27,49 @@ body.theme-vice-city #mode-toggle button.on[data-view="cluster"]{
 }
 body.theme-vice-city #mode-toggle button:not(.on):hover{color:#dfe6ff}
 
+/* ============================================================
+   Vice City DASHBOARD toggle: text selector, not a pill.
+   mode-toggle.css loads after dashboard.css, so this file owns
+   the dashboard toggle skin. Explicit html prefix beats the
+   general rules above by specificity — no !important needed.
+   Container: transparent. Labels: 16px Pricedown text with
+   44-48px hit targets (visual size != hit size).
+   ============================================================ */
+html body.dashboard-mode.theme-vice-city #mode-toggle{
+  background:none;background-color:transparent;
+  border:0;border-width:0;border-radius:0;
+  box-shadow:none;
+  backdrop-filter:none;-webkit-backdrop-filter:none;
+  padding:0;gap:0;align-items:center;
+}
+html body.dashboard-mode.theme-vice-city #mode-toggle button{
+  background:none;background-color:transparent;
+  border:0;border-radius:0;box-shadow:none;text-shadow:none;
+  min-height:48px;min-width:44px;padding:0 6px;
+  font-size:16px;letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(142,154,192,.6);
+  position:relative;transition:color .18s ease;
+}
+html body.dashboard-mode.theme-vice-city #mode-toggle button span{
+  position:relative;display:inline-block;padding-bottom:4px;
+}
+html body.dashboard-mode.theme-vice-city #mode-toggle button.on[data-view="dash"],
+html body.dashboard-mode.theme-vice-city #mode-toggle button.on[data-view="cluster"]{
+  background:none;background-color:transparent;background-image:none;
+  border:0;border-radius:0;box-shadow:none;
+  color:#ffd7f2;
+  text-shadow:0 0 2px rgba(255,244,250,.9),0 0 8px rgba(255,113,206,.85),0 0 22px rgba(255,46,136,.4);
+}
+html body.dashboard-mode.theme-vice-city #mode-toggle button.on span::after{
+  content:'';position:absolute;left:0;right:0;bottom:0;height:2px;
+  background:#ff4fc3;border-radius:0;
+  box-shadow:0 0 8px rgba(255,79,195,.9),0 0 12px rgba(255,46,136,.4);
+}
+html body.dashboard-mode.theme-vice-city #mode-toggle button:not(.on):hover{color:#dfe6ff}
+/* 1px divider between CLUSTER and DASH */
+html body.dashboard-mode.theme-vice-city #mode-toggle button + button{margin-left:16px}
+html body.dashboard-mode.theme-vice-city #mode-toggle button + button::before{
+  content:'';position:absolute;left:-9px;top:24%;bottom:24%;width:1px;
+  background:linear-gradient(180deg,transparent,rgba(255,113,206,.35),transparent);
+}
+
