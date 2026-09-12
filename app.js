@@ -3179,7 +3179,7 @@ const CLUSTER_TOGGLE_POS = {
    #dash-stage rect (letterboxed + zoomed) — pure CSS can't do this. */
 const DASH_TOGGLE_POS = {
   'vice-city':  { right: 560, top: 25 },  /* inside the 78px header, left of the 27% skyline pocket */
-  'san-andreas':{ right: 620, top: 16 },   /* inside the 74px topbar, left of the skyline zone */
+  'san-andreas':{ left: 1055, top: 19 },   /* LEFT-anchored: clock is right-anchored, fonts can never collide */
   'rdr2':       { right: 18, top: 116 },  /* top-right, below the 104px frontier topbar */
   /* gta-v: CSS owns it (docked in the footer) — not listed here */
 };
@@ -3538,7 +3538,7 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
    enforces this). On boot, compare against the live network sw.js; on
    mismatch, ask the SW registration to update and reload once.
    sessionStorage gates it so a blocked network can never loop. */
-const WS_SHELL_VERSION = 'ws-shell-v76';
+const WS_SHELL_VERSION = 'ws-shell-v77';
 function healShellVersionSkew() {
   try {
     if (!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;

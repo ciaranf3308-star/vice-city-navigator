@@ -16,11 +16,24 @@ body.theme-san-andreas .dest-pin{ background-image:url('assets/themes/san-andrea
 body.dashboard-mode.theme-san-andreas #search-bar{display:none} /* hero composition: no search pill */
 body.dashboard-mode.theme-san-andreas #map{background:#ece0bd} /* map ground tone, never pure black */
 
-/* ============ TOP BAR: 74px target fascia ============ */
+/* ============ TOP BAR: 74px target fascia ============
+   PASS 3: full measured recomposition. Five deliberate non-overlapping
+   regions (1920x720 stage coords):
+     brand    x   28 -  200     | weather  x  245 -  360
+     clock    x  700 -  990  (time RIGHT-anchored: font variance grows left)
+     toggle   x 1055 - 1300  (LEFT-anchored: font variance grows right)
+     scenic   x 1310 - 1920
+   The clock/toggle anchor in opposite directions so no font rendering can
+   ever push them into each other. DASH_TOGGLE_POS uses left for SA. */
 body.dashboard-mode.theme-san-andreas #dash-topbar{
   display:block;position:absolute;left:0;right:0;top:0;height:74px;z-index:25;
-  background:url('dashboard/topbar-target-v1.png') left top/100% 100% no-repeat;
+  background:url('dashboard/topbar-target-v2.png') left top/100% 100% no-repeat;
   pointer-events:none;
+}
+body.dashboard-mode.theme-san-andreas #dash-topbar::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:2px;pointer-events:none;
+  background:linear-gradient(90deg,transparent 0%,rgba(150,128,66,.55) 18%,
+    rgba(150,128,66,.55) 82%,transparent 100%);
 }
 body.dashboard-mode.theme-san-andreas #dash-topbar .dash-chrome{
   position:absolute;inset:0;background:none;pointer-events:none;
@@ -35,40 +48,48 @@ body.dashboard-mode.theme-san-andreas .dash-brand .dash-wmark{
   width:34px;height:22px;fill:none;stroke:#e8dcc0;stroke-width:3;
 }
 body.dashboard-mode.theme-san-andreas .dash-brand .dash-logo{
-  font-family:'Beckett','Pricedown Bl',serif;font-size:36px;letter-spacing:1px;
-  color:#f2e9d2;text-shadow:0 2px 0 #000,0 0 12px rgba(0,0,0,.8);
+  font-family:'Beckett','Pricedown Bl',serif;font-size:38px;letter-spacing:1px;
+  color:#f4ecd6;text-shadow:0 2px 0 #000,0 0 14px rgba(0,0,0,.85);
   line-height:1;
 }
 body.dashboard-mode.theme-san-andreas .dash-brand .dash-palm{width:26px;height:34px}
 body.dashboard-mode.theme-san-andreas .dash-brand .dash-palm g{stroke:#7ec850} /* Grove green, not VC pink */
 body.dashboard-mode.theme-san-andreas .dash-wx{
-  position:absolute;left:238px;top:50%;transform:translateY(-50%);
-  display:flex;align-items:center;gap:8px;white-space:nowrap;
-  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:19px;letter-spacing:2px;
-  color:#e8dcc0;text-shadow:0 2px 0 #000;
+  position:absolute;left:245px;top:50%;transform:translateY(-50%);
+  display:flex;align-items:center;gap:10px;white-space:nowrap;
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;font-size:26px;font-weight:700;letter-spacing:2px;
+  color:#7dc383;text-shadow:0 2px 0 #000,0 0 10px rgba(0,0,0,.7);
   padding-left:0;border-left:0;
 }
 body.dashboard-mode.theme-san-andreas .dash-wx::after{display:none}
-body.dashboard-mode.theme-san-andreas #dash-wxicon{display:inline-flex;width:22px;height:22px}
+body.dashboard-mode.theme-san-andreas #dash-wxicon{display:inline-flex;width:28px;height:28px}
 body.dashboard-mode.theme-san-andreas #dash-wxicon svg{width:100%;height:100%}
-/* CENTER: date + time, optically centered in the dark zone (x~860) */
+/* CENTER: date + time. The TIME's right edge is anchored at x=990 — the
+   block grows LEFT with wider fonts, never right into the toggle. */
 body.dashboard-mode.theme-san-andreas .dash-clock{
-  position:absolute;left:860px;top:50%;transform:translate(-50%,-50%);
-  display:flex;align-items:baseline;gap:14px;white-space:nowrap;margin:0;pointer-events:none;
+  position:absolute;right:930px;top:50%;transform:translateY(-50%);
+  display:flex;align-items:baseline;justify-content:flex-end;gap:14px;
+  white-space:nowrap;margin:0;pointer-events:none;max-width:340px;
   font-family:'Bank Gothic','Arial Narrow',sans-serif;
 }
 body.dashboard-mode.theme-san-andreas #dash-date{
-  font-size:16px;letter-spacing:4px;color:#d9cba4;text-shadow:0 2px 0 #000;
+  font-size:15px;letter-spacing:4px;color:#d9cba4;text-shadow:0 2px 0 #000;flex:0 0 auto;
 }
 body.dashboard-mode.theme-san-andreas #dash-time{
-  font-size:46px;font-weight:700;letter-spacing:3px;color:#f7f0dc;text-shadow:0 2px 0 #000;
+  font-size:42px;font-weight:700;letter-spacing:2px;color:#f7f0dc;text-shadow:0 2px 0 #000;
+  flex:0 0 auto;
 }
 /* RIGHT: blackletter Los Santos over the skyline (DOM, crisp) —
    asset recolored to aged cream in pass 2 */
 body.dashboard-mode.theme-san-andreas .dash-los-santos{
   display:block!important;position:absolute;right:26px;top:50%;
-  transform:translateY(-50%);height:52px;width:auto;z-index:1;opacity:.92;
-  filter:drop-shadow(0 2px 3px rgba(0,0,0,.85));
+  transform:translateY(-50%);height:58px;width:auto;z-index:1;opacity:1;
+  filter:brightness(1.35) contrast(1.12) drop-shadow(0 2px 4px rgba(0,0,0,.9));
+}
+/* dark backing so the cream script reads over the bright sunset */
+body.dashboard-mode.theme-san-andreas #dash-topbar .dash-chrome::before{
+  content:"";position:absolute;right:0;top:0;width:330px;height:74px;pointer-events:none;
+  background:radial-gradient(220px 60px at 78% 45%,rgba(4,5,3,.72),rgba(4,5,3,0) 70%);
 }
 body.dashboard-mode.theme-san-andreas .sa-logo,
 body.dashboard-mode.theme-san-andreas .dash-tomorrow{display:none!important}
@@ -79,23 +100,26 @@ body.dashboard-mode.theme-san-andreas .dash-pspacer,
 body.dashboard-mode.theme-san-andreas .dash-ptag,
 body.dashboard-mode.theme-san-andreas .dash-div{display:none!important}
 /* view toggle docks INSIDE the bar (DASH_TOGGLE_POS in app.js):
-   pass 2 — small integrated hardware keys, not a floating console.
-   Bare dim CLUSTER text + one muted-Grove DASH pill. */
+   pass 3 — LEFT-anchored hardware keys. CLUSTER is dim understated type;
+   DASH is a compact flat muted-Grove plate (no gloss, no glow), embedded
+   in the header like a physical selector key. */
 body.dashboard-mode.theme-san-andreas #mode-toggle{
-  background:none;border:0;border-radius:0;box-shadow:none;gap:8px;padding:0;
+  background:none;border:0;border-radius:0;box-shadow:none;gap:10px;padding:0;
+  height:36px;align-items:center;white-space:nowrap;
 }
 body.dashboard-mode.theme-san-andreas #mode-toggle button{
-  min-height:32px;min-width:0;padding:0 13px;font-size:12px;letter-spacing:2.5px;
-  border:0;border-radius:0;background:none;box-shadow:none;color:#7d7358;
+  min-height:0;height:36px;min-width:0;padding:0 12px;font-size:12px;letter-spacing:2.5px;
+  border:0;border-radius:0;background:none;box-shadow:none;color:#8a7f63;
+  text-shadow:0 1px 0 #000;
 }
 body.dashboard-mode.theme-san-andreas #mode-toggle button+button{border-left:0}
 body.dashboard-mode.theme-san-andreas #mode-toggle button:not(.on):hover{color:#cfc39e}
 body.dashboard-mode.theme-san-andreas #mode-toggle button.on{
-  background:linear-gradient(180deg,#7ba24e,#557d38);
-  color:#0e130a;text-shadow:none;border-radius:5px;
-  border:1px solid rgba(240,230,200,.35);
-  box-shadow:inset 0 1px 3px rgba(255,255,255,.3), inset 0 -2px 5px rgba(0,0,0,.3),
-    0 2px 8px rgba(0,0,0,.5);
+  background:linear-gradient(180deg,#8ba184 0%,#7d9578 60%,#718a6d 100%);
+  color:#202719;text-shadow:0 1px 0 rgba(240,235,210,.25);border-radius:4px;
+  border:1px solid rgba(20,26,16,.8);
+  box-shadow:inset 0 1px 0 rgba(235,240,220,.28), inset 0 -2px 4px rgba(20,28,16,.35);
+  padding:0 20px;height:34px;
 }
 
 /* pass 2: no floating speed pill on the SA dashboard — the radio module

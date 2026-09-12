@@ -175,8 +175,8 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v76"), 'SW shell cache v76');
-ok(swSrc.includes("ws-theme-v215"), 'SW theme cache v215');
+ok(swSrc.includes("ws-shell-v77"), 'SW shell cache v76');
+ok(swSrc.includes("ws-theme-v217"), 'SW theme cache v215');
 /* Shell version skew guard: app.js bakes the shell version and
    self-heals a mixed old/new asset boot (2026-09-12: old openMenu +
    new menu CSS rendered an empty settings page). The baked version
@@ -680,7 +680,7 @@ ok(cssSrc.includes('body.dashboard-mode.nav-driving #drive-bar'), 'drive trip ba
 ok(!cssSrc.includes('.dash-skyline') && !indexSrc.includes('dash-skyline'), 'old skyline img fully retired in favour of the authored top bar strip');
 ok(!/topbar-composite\.jpg/.test(cssSrc),
   'SA top bar is CSS chrome now — the photo collage is retired');
-ok(cssSrc.includes("#dash-topbar{") && /topbar-target-v1\.png/.test(cssSrc),
+ok(cssSrc.includes("#dash-topbar{") && /topbar-target-v2\.png/.test(cssSrc),
   'SA top bar is the slim 74px target fascia art, not the hero7 slice');
 ok(!/tbar-night/.test(indexSrc) && !/tbar-sunset/.test(indexSrc),
   'SA top bar has no split-panel divs');
@@ -965,8 +965,8 @@ for (const [f, w, h] of [['topbar-hero7.png', 1920, 126], ['bottombar-hero7.png'
 ok(!fs.existsSync(saHero('topbar-hero.png')), 'pass6 generated header deleted');
 ok(!fs.existsSync(saHero('bottombar-hero.png')), 'pass6 generated footer deleted');
 ok(!fs.existsSync(saHero('radio-frame-pass5.png')), 'pass5 radio frame deleted');
-ok(/theme-san-andreas #dash-topbar\{[^}]*topbar-target-v1\.png/.test(cssSrc),
-  'SA header IS the target fascia art (topbar-target-v1.png)');
+ok(/theme-san-andreas #dash-topbar\{[^}]*topbar-target-v2\.png/.test(cssSrc),
+  'SA header IS the target fascia art (topbar-target-v2.png)');
 ok(/theme-san-andreas #dash-topbar\{[^}]*height:74px/.test(cssSrc),
   'SA header shell is 74px per the locked target');
 ok(!/theme-san-andreas #dash-topbar\{[^}]*clip-path/.test(cssSrc),
@@ -1001,8 +1001,8 @@ ok(/theme-san-andreas \.sasp\{[^}]*left:1215px/.test(skinSaSrc),
   'SA radio sits at the target radio x (1215px stage, pass 2)');
 ok(/theme-san-andreas \.sasp\{[^}]*top:76px/.test(skinSaSrc),
   'SA radio sits just under the 74px topbar (76px stage, pass 2)');
-ok(/\.sasp-bezel/.test(skinSaSrc) && skinJsSa.includes('dashboard/radio-target-v2.png'),
-  'SA Spotify outer skin is the scenic pass-2 base (radio-target-v2.png)');
+ok(/\.sasp-bezel/.test(skinSaSrc) && skinJsSa.includes('dashboard/radio-target-v3.png'),
+  'SA Spotify outer skin is the scenic pass-2 base (radio-target-v3.png)');
 ok(/\.sasp-connect-btn/.test(skinSaSrc),
   'SA idle state is a station-branded card with a connect CTA');
 ok(/\.sasp\{[^}]*container-type:size/.test(skinSaSrc),
@@ -2315,7 +2315,7 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
 {
   ok(/DASH_TOGGLE_POS\s*=\s*\{/.test(appSrc), 'DASH_TOGGLE_POS defines per-theme dashboard toggle anchors');
   ok(/'vice-city':\s*\{\s*right:\s*560,\s*top:\s*25\s*\}/.test(appSrc), 'VC dashboard toggle: inside header, left of skyline pocket');
-  ok(/'san-andreas':\s*\{\s*right:\s*620,\s*top:\s*16\s*\}/.test(appSrc), 'SA dashboard toggle: docked inside the 74px topbar, left of the skyline zone');
+  ok(/'san-andreas':\s*\{\s*left:\s*1055,\s*top:\s*19\s*\}/.test(appSrc), 'SA dashboard toggle: LEFT-anchored inside the 74px topbar (pass 3: clock is right-anchored, fonts cannot collide)');
   ok(/'rdr2':\s*\{\s*right:\s*18,\s*top:\s*116\s*\}/.test(appSrc), 'RDR2 dashboard toggle: top-right below the frontier topbar');
   ok(!/'gta-v'/.test(appSrc.split('DASH_TOGGLE_POS')[1].split('};')[0]), 'GTA V dashboard toggle stays CSS-owned (footer dock)');
   ok(/layoutModeToggle\(\); \/\/ and the view toggle \(per-theme dashboard anchors\)/.test(appSrc),
@@ -2409,14 +2409,14 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
     const sz = pngSize(path.join(REPO, 'themes/san-andreas/dashboard', f));
     ok(sz && sz.w === w && sz.h === h, `target-lock art ${f} is ${w}x${h}`);
   };
-  tl('radio-target-v2.png', 695, 556);
-  tl('topbar-target-v1.png', 1920, 74);
+  tl('radio-target-v3.png', 695, 556);
+  tl('topbar-target-v2.png', 1920, 74);
   ok(fs.existsSync(path.join(REPO, 'themes/san-andreas/dashboard/flourish-tomorrow.png')), 'target-lock flourish-tomorrow.png on disk');
   // index.html + SW wiring
   ok(indexSrc.indexOf('station-resolver.js') !== -1 && indexSrc.indexOf('station-resolver.js') < indexSrc.indexOf('themes/san-andreas/spotify-skin.js'),
     'index.html loads station-resolver.js before the SA spotify skin');
   ok(swSrc.includes('themes/san-andreas/station-resolver.js'), 'SW precaches station-resolver.js');
-  ok(swSrc.includes('themes/san-andreas/dashboard/radio-target-v2.png'), 'SW precaches the pass-2 radio base art');
+  ok(swSrc.includes('themes/san-andreas/dashboard/radio-target-v3.png'), 'SW precaches the pass-2 radio base art');
   ok(swSrc.includes('themes/san-andreas/radio-stations/radio-los-santos.png'), 'SW precaches the station logo set');
 }
 

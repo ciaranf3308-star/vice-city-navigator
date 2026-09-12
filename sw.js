@@ -10,8 +10,8 @@
      default Vice City set.
    Map tiles are cached on demand for offline use (cache-first, 7-day TTL).
    Routing and search always go to the network. */
-const CACHE = 'ws-shell-v76';
-const THEME_CACHE = 'ws-theme-v215';
+const CACHE = 'ws-shell-v77';
+const THEME_CACHE = 'ws-theme-v217';
 const TILE_CACHE = 'ws-tiles-v1';
 const VC_BLIPS = ['airYard','barbers','burgerShot','cash','chicken','dateDisco','dateDrink',
   'dateFood','diner','fuel','girlfriend','gym','hostpital','modGarage','north','parking',
@@ -46,8 +46,8 @@ const SHELL = [
   'themes/san-andreas/station-resolver.js',
   'themes/san-andreas/spotify-cluster.js', 'themes/san-andreas/spotify-cluster.css',
   'themes/san-andreas/spotify/hud.png',
-  'themes/san-andreas/dashboard/radio-target-v2.png',
-  'themes/san-andreas/dashboard/topbar-target-v1.png',
+  'themes/san-andreas/dashboard/radio-target-v3.png',
+  'themes/san-andreas/dashboard/topbar-target-v2.png',
   'themes/san-andreas/dashboard/flourish-tomorrow.png',
   'themes/san-andreas/radio-stations/bounce-fm.png',
   'themes/san-andreas/radio-stations/csr-1039.png',
