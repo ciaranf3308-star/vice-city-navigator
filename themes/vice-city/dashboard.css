@@ -154,12 +154,7 @@ body.dashboard-mode.theme-vice-city #spotify-pane{
   /* The .vcsp skin positions itself (right:70px;top:48%) relative to the
      viewport — the pane must NOT create a positioning context. */
 }
-/* Widget sits below the top bar, clear of the bottom bar — hero weighting:
-   +8% scale (687px), bottom-anchored 18px above the footer, right edge near
-   the screen edge. Rotation and all internals untouched. */
-body.dashboard-mode.theme-vice-city .vcsp{
-  top:auto;bottom:118px;right:110px;translate:none;width:687px;
-}
+/* Spotify geometry is set once, in the REDESIGN section at the end of this file. */
 
 /* ============ BOTTOM BAR: authored angular HUD footer (hero silhouette) ============
    One continuous chamfered console: pink outline follows the stepped top edge
@@ -472,18 +467,7 @@ body.dashboard-mode.theme-vice-city .dash-wx{
   text-shadow:0 0 2px rgba(220,252,255,.8),0 0 8px rgba(1,205,254,.7);
 }
 
-/* ---- 5/6/7. SPOTIFY: visible-bounds scale, grounded not floating ----
-   hud.png visible bbox is 1388x1082 of 1448x1086 (95.9% width) — nearly
-   full-bleed. 520px CSS width = ~499px visible = 26% of the 1920 stage.
-   Right edge pulled to 40px (was 110px, felt detached). Tight dark contact
-   shadow + restrained 18-28px bloom; the 110px pink haze is gone. */
-body.dashboard-mode.theme-vice-city .vcsp{
-  width:520px;right:40px;bottom:112px;
-  filter:
-    drop-shadow(0 14px 22px rgba(0,0,0,.65))
-    drop-shadow(0 0 18px rgba(255,47,179,.28))
-    drop-shadow(0 0 28px rgba(255,47,179,.12));
-}
+/* ---- 5/6/7. SPOTIFY: geometry consolidated in the REDESIGN section below. ---- */
 
 /* ---- 10. SPEED READOUT: cardless, not a black pill ----
    Small Pricedown number, hairline pink/cyan bracket. No rounded rect,
@@ -595,3 +579,163 @@ body.dashboard-mode.theme-vice-city .vcsp::before{
     rgba(2,2,8,.5) 0%,rgba(2,2,8,.28) 45%,rgba(2,2,8,0) 75%);
   pointer-events:none;
 }
+
+/* ============ VC REDESIGN (2026-09-12): a dashboard worthy of the widget ============
+   Principle: KEEP THE MUSIC WIDGET. BUILD THE REST UP TO ITS STANDARD.
+   The irregular hud.png neon sculpture stays the emotional focal object;
+   the map goes night-driving, the bars become authored hardware, and the
+   widget gets physically seated into the composition.
+   EVERYTHING below lives inside #dash-stage participants (#dash-topbar,
+   #dash-bottombar, #spotify-pane) in 1920x720 stage coordinates — no
+   body-level fixed-pixel artwork, so fitDashboardStage() scales it as one
+   composition. Nothing here may escape the car canvas. */
+
+/* ---- 1. WIDGET GEOMETRY (single source of truth) ----
+   hud.png visible bbox is 1388x1082 of 1448x1086 (95.9%): 640px CSS width
+   ~= 613px visible ~= 32% of the 1920 stage. Large, premium, deliberate —
+   still a floating sculpture, not a media column. Transparent regions keep
+   showing the map. Layered grounding: dark contact shadow + restrained
+   pink aura. The 12s breathe is barely-there by design. */
+body.dashboard-mode.theme-vice-city .vcsp{
+  top:auto;bottom:112px;right:36px;translate:none;width:640px;
+  filter:
+    drop-shadow(0 20px 34px rgba(0,0,0,.62))
+    drop-shadow(0 0 26px rgba(255,47,179,.32))
+    drop-shadow(0 0 110px rgba(255,47,179,.13));
+  animation:vc-breathe 12s ease-in-out infinite;
+}
+@keyframes vc-breathe{
+  0%,100%{filter:
+    drop-shadow(0 20px 34px rgba(0,0,0,.62))
+    drop-shadow(0 0 26px rgba(255,47,179,.30))
+    drop-shadow(0 0 110px rgba(255,47,179,.12));}
+  50%{filter:
+    drop-shadow(0 20px 34px rgba(0,0,0,.62))
+    drop-shadow(0 0 32px rgba(255,47,179,.40))
+    drop-shadow(0 0 130px rgba(255,47,179,.17));}
+}
+
+/* ---- 2. WIDGET SEATING: dock plinth + light spill (inside #spotify-pane) ----
+   The pane is a full-canvas stage layer (pointer-events:none), so these
+   pseudos are stage-locked artwork. ::before = faint pink spill onto the
+   map left of the widget. ::after = the chrome dock plinth the widget's
+   base tucks behind — it bridges the widget (base y=608) into the footer
+   (top y~646). radio-off hides the whole pane, dock included. */
+body.dashboard-mode.theme-vice-city #spotify-pane::before{
+  content:'';position:absolute;right:600px;top:190px;width:420px;height:440px;
+  background:radial-gradient(ellipse 60% 52% at 70% 50%,
+    rgba(255,46,136,.07) 0%,rgba(255,46,136,.025) 45%,transparent 70%);
+  pointer-events:none;
+}
+body.dashboard-mode.theme-vice-city #spotify-pane::after{
+  content:'';position:absolute;right:44px;bottom:74px;width:560px;height:40px;
+  background:
+    linear-gradient(180deg, rgba(255,120,200,.95) 0, rgba(255,120,200,.30) 2px, transparent 3px),
+    linear-gradient(180deg, rgba(30,20,54,.92) 0%, rgba(8,5,16,.96) 100%),
+    linear-gradient(90deg, transparent 0%, rgba(1,205,254,.10) 50%, transparent 100%);
+  clip-path:polygon(18px 0,calc(100% - 18px) 0,100% 100%,0 100%);
+  filter:drop-shadow(0 -8px 18px rgba(255,46,136,.28));
+  pointer-events:none;
+}
+
+/* ---- 3. TOP BAR: fascia highlight + zone light-pipes ----
+   The angular silhouette and skyline pocket stay; the bar gains a lit
+   fascia edge along its crown and two angled light-pipes flanking the
+   clock zone (cyan port, pink starboard — the pink one hands toward the
+   music sculpture). Shape and material, not more glow. */
+body.theme-vice-city:is(.dashboard-mode,.cluster-mode) #dash-topbar{
+  background:
+    linear-gradient(180deg, rgba(255,224,242,.5) 0, rgba(255,224,242,.10) 2px, transparent 3px),
+    linear-gradient(90deg,transparent 33%,rgba(1,205,254,.45) 36%,rgba(1,205,254,.9) 39%,rgba(1,205,254,.9) 61%,rgba(1,205,254,.45) 64%,transparent 67%),
+    linear-gradient(90deg,transparent 67.5%,rgba(1,205,254,.5) 69.5%,rgba(1,205,254,.5) 71.5%,transparent 73%),
+    #ff2e88;
+  background-size:100% 3px,100% 2px,100% 2px,auto;
+  background-position:0 0,0 100%,0 100%,0 0;
+  background-repeat:no-repeat;
+}
+body.theme-vice-city:is(.dashboard-mode,.cluster-mode) #dash-topbar .dash-chrome::before,
+body.theme-vice-city:is(.dashboard-mode,.cluster-mode) #dash-topbar .dash-chrome::after{
+  content:'';position:absolute;top:16px;bottom:24px;width:2px;
+  transform:skewX(-12deg);pointer-events:none;
+}
+body.theme-vice-city:is(.dashboard-mode,.cluster-mode) #dash-topbar .dash-chrome::before{
+  left:calc(50% - 285px);
+  background:linear-gradient(180deg,transparent,rgba(1,205,254,.6) 35%,rgba(1,205,254,.6) 65%,transparent);
+  box-shadow:0 0 8px rgba(1,205,254,.4);
+}
+body.theme-vice-city:is(.dashboard-mode,.cluster-mode) #dash-topbar .dash-chrome::after{
+  left:calc(50% + 285px);
+  background:linear-gradient(180deg,transparent,rgba(255,79,195,.6) 35%,rgba(255,79,195,.6) 65%,transparent);
+  box-shadow:0 0 8px rgba(255,46,136,.4);
+}
+
+/* ---- 4. BOTTOM BAR: dashboard hardware ----
+   Tabs become physical chamfered keys seated in a recessed console
+   channel; the active key gets a lit pink base strip (clipped by the key's
+   own chamfer) instead of a floating underline. Zoom dials keep their
+   circular instrument form but sit in a recessed pod. The compass becomes
+   a proper bezel. */
+/* recessed channel behind the tab keys */
+body.dashboard-mode.theme-vice-city .dash-tabs{
+  gap:8px;padding:9px 14px;margin:0 0 0 4px;
+  background:linear-gradient(180deg,rgba(2,1,8,.78),rgba(14,8,30,.5));
+  border-top:1px solid rgba(255,113,206,.30);
+  border-bottom:1px solid rgba(0,0,0,.65);
+  box-shadow:inset 0 4px 10px rgba(0,0,0,.7);
+}
+/* the keys themselves: chamfered lacquer, cyan-lit when idle */
+body.dashboard-mode.theme-vice-city .dash-tabs button{
+  background:
+    linear-gradient(180deg, rgba(1,205,254,.32) 0, rgba(1,205,254,.05) 2px, transparent 3px),
+    linear-gradient(180deg,#1e1538 0%,#0b0719 100%);
+  clip-path:polygon(13px 0,100% 0,calc(100% - 13px) 100%,0 100%);
+  padding:11px 30px 14px;
+  font-size:22px;letter-spacing:2px;
+  color:#8fdcf2;opacity:.85;
+  text-shadow:0 0 8px rgba(1,205,254,.55);
+  border:0;
+}
+body.dashboard-mode.theme-vice-city .dash-tabs button svg{display:none}
+/* active key: pink neon text, lit base strip following the chamfer */
+body.dashboard-mode.theme-vice-city .dash-tabs button.on{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.12) 0, transparent 3px),
+    linear-gradient(180deg, transparent calc(100% - 5px), #ff4fc3 calc(100% - 4px)),
+    linear-gradient(180deg,#351b52 0%,#130a26 100%);
+  color:#ff71ce;opacity:1;
+  text-shadow:0 0 2px rgba(255,244,250,.9),0 0 12px rgba(255,113,206,.9),0 0 30px rgba(255,46,136,.5);
+}
+body.dashboard-mode.theme-vice-city .dash-tabs button.on::after{display:none}
+/* zoom dials: recessed instrument pod (circles kept — functionally dials).
+   Parked left of the trip cluster with clear air between the pods. */
+body.dashboard-mode.theme-vice-city .dash-zoom{
+  right:430px;
+  background:linear-gradient(180deg,rgba(2,1,8,.78),rgba(14,8,30,.5));
+  border-top:1px solid rgba(1,205,254,.28);
+  border-bottom:1px solid rgba(0,0,0,.65);
+  box-shadow:inset 0 4px 10px rgba(0,0,0,.7);
+  padding:8px 14px;
+  gap:12px;
+}
+/* compass bezel: a real instrument, not a bare glyph */
+body.dashboard-mode.theme-vice-city #dash-compass{
+  width:54px;height:54px;border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:26px;
+  color:#ff71ce;
+  background:radial-gradient(circle at 50% 32%, #241644 0%, #0a0518 78%);
+  border:2px solid rgba(1,205,254,.55);
+  box-shadow:0 0 12px rgba(1,205,254,.35), inset 0 0 10px rgba(1,205,254,.18),
+    inset 0 2px 3px rgba(255,255,255,.08);
+  text-shadow:0 0 2px rgba(255,244,250,.85),0 0 10px rgba(255,46,136,.8);
+}
+/* trip cluster: quiet — the compass bezel is the instrument here */
+body.dashboard-mode.theme-vice-city .dash-trip{
+  background:none;border:0;box-shadow:none;
+  padding:6px 4px;gap:12px;
+}
+
+/* ---- 5. QUIET INTEGRATION DETAILS ----
+   The maneuver pill keeps its map clearance; the speedo keeps its
+   cardless readout. Tagline stays dimmed decorative. */
+body.dashboard-mode.theme-vice-city #vc-maneuver{top:100px}

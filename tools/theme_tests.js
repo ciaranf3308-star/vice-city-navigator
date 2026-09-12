@@ -175,7 +175,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v70"), 'SW shell cache v69');
+ok(swSrc.includes("ws-shell-v71"), 'SW shell cache v71');
 ok(swSrc.includes("ws-theme-v214"), 'SW theme cache v214');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
@@ -643,7 +643,7 @@ ok(appSrc.includes("classList.toggle('radio-off')"), 'RADIO tab toggles the musi
 ok(/body\.dashboard-mode #spotify-stage\{[\s\S]*?left:0;right:0;top:0;bottom:0/.test(cssSrc), 'Spotify stage is a full-canvas layer; every skin widget positions itself');
 ok(cssSrc.includes('#search-bar{right:740px}') && cssSrc.includes('#maneuver-card{right:740px}'), 'HUD chrome clears the larger tilted widgets');
 ok(cssSrc.includes('[data-spotskin="vice-city"] #search-bar{right:900px}'), 'VC chrome clears the wide tilted VC widget');
-ok(appSrc.includes('right = 560'), 'camera padding accounts for the resized VC widget');
+ok(appSrc.includes('right = 690'), 'camera padding accounts for the resized VC widget');
 ok(appSrc.includes("theme-san-andreas')) right = 701"), 'camera padding clears the SA music widget');
 ok(appSrc.includes("theme-gta-v')) right = 568"), 'camera padding clears the GTA V music widget');
 ok(appSrc.includes("theme-rdr2')) right = 670"), 'camera padding clears the RDR2 music widget');
@@ -720,7 +720,7 @@ ok(/theme-vice-city(?::is\([^)]*\))? #dash-topbar\{[^}]*clip-path:polygon/.test(
 ok(/theme-vice-city(?::is\([^)]*\))? #dash-bottombar\{[^}]*clip-path:polygon/.test(cssSrc), 'VC bottom bar is a shaped angular footer');
 ok(cssSrc.includes('#dash-eta .eta-time'), 'VC arrival time uses the live eta-time hook');
 /* ---------- pass 3: hero convergence refinements ---------- */
-ok(/theme-vice-city \.vcsp\{[^}]*bottom:118px/.test(cssSrc), 'VC widget bottom-anchored 18px above the footer');
+ok(/theme-vice-city \.vcsp\{[^}]*bottom:112px/.test(cssSrc), 'VC widget base tucks toward the footer dock (bottom:112px)');
 ok(cssSrc.includes("dashboard/skyline-sunset.png"), 'VC skyline uses the supplied sunset scenery asset');
 ok(!cssSrc.includes("dashboard/topbar-skyline.png"), 'old glitch-strip skyline treatment fully retired');
 ok(/theme-vice-city(?::is\([^)]*\))? #dash-topbar\{[^}]*97\.5% 100%/.test(cssSrc), 'VC header has a skyline pocket in its silhouette');
@@ -729,7 +729,7 @@ ok(/theme-vice-city #vc-maneuver \.vc-man-text span\{[^}]*color:var\(--cyan\)/.t
 ok(/theme-vice-city(?::is\([^)]*\))? #dash-bottombar\{[^}]*rgba\(1,205,254/.test(cssSrc), 'VC footer has a cyan cradle accent at the map join');
 ok(/theme-vice-city \.dash-tag::before/.test(cssSrc), 'VC footer separates arrival and slogan with a divider');
 ok(/theme-vice-city #dash-dest\{[^}]*overflow:visible/.test(cssSrc), 'VC locality plate never truncates');
-ok(!/theme-vice-city \.dash-tabs button\{[^}]*linear-gradient/.test(cssSrc), 'VC tabs are flat neon text, not chunky buttons');
+ok(/theme-vice-city \.dash-tabs button\{[^}]*clip-path:polygon/.test(cssSrc), 'VC tabs are chamfered hardware keys (redesign: dashboard worthy of the widget)');
 ok(/\.dash-tabs button\.on/.test(cssSrc) && /theme-san-andreas \.dash-tabs button\.on::before\{[^}]*linear-gradient\(180deg,#e9cd7d/.test(cssSrc) &&
   /theme-san-andreas \.dash-tabs button\.on::after\{[^}]*data:image\/svg\+xml/.test(cssSrc),
   'SA active tab is a dark plate with gold chamfer outline + gold diamond marker (2026-09-09 polish), not the cream slab');
@@ -764,10 +764,29 @@ ok(/theme-vice-city \.dash-tag::after\{[^}]*font-size:23px/.test(cssSrc), 'VC ta
 // dashboard-only map contrast: base style.json untouched, runtime paint list
 const vcThemeSrc = fs.readFileSync(path.join(REPO, 'themes/vice-city/theme.js'), 'utf8');
 ok(/dashboardPaint:\s*\[/.test(vcThemeSrc), 'VC theme declares a dashboard-only paint list');
-ok(vcThemeSrc.includes("'#8b8b90'") && vcThemeSrc.includes("'#838388'"), 'VC dashboard deepens major road casings');
-ok(vcThemeSrc.includes("'#7b7d91'"), 'VC dashboard deepens urban land');
-ok(vcThemeSrc.includes("'#4e825d'") && vcThemeSrc.includes("'#66a177'"), 'VC dashboard deepens greens');
+ok(vcThemeSrc.includes("'#c98aa8'") && vcThemeSrc.includes("'#e08ab0'"), 'VC dashboard gives arterials/motorways muted-pink casings');
+ok(vcThemeSrc.includes("'#14122b'"), 'VC dashboard night land');
+ok(vcThemeSrc.includes("'#0d2140'"), 'VC dashboard deep navy water');
+ok(vcThemeSrc.includes("'#a79fd2'"), 'VC dashboard lavender local streets');
+ok(vcThemeSrc.includes("'#1d3d31'") && vcThemeSrc.includes("'#183629'"), 'VC dashboard darkens greens to night teal');
 ok(vcThemeSrc.includes("'#ff2ba6'"), 'VC dashboard pops locality labels');
+ok(vcThemeSrc.includes("text-halo-color', '#14122b'"), 'VC dashboard labels get dark night halos');
+/* Drift guard: every dashboardPaint base value must equal the style.json
+   value it restores, or leaving dashboard mode paints the wrong color. */
+{
+  const entries = [...vcThemeSrc.matchAll(/\['(vc-[a-z-]+)', '([a-z-]+)', '([^']+)', ([^,\]]+)\]/g)];
+  ok(entries.length > 20, `VC dashboardPaint covers the night palette (${entries.length} entries)`);
+  for (const m of entries) {
+    const layer = vcStyle.layers.find(l => l.id === m[1]);
+    ok(layer, `VC dashboardPaint layer exists: ${m[1]}`);
+    if (!layer) continue;
+    const baseRaw = m[4].trim().replace(/^'|'$/g, '');
+    const baseVal = isNaN(Number(baseRaw)) ? baseRaw : Number(baseRaw);
+    ok(layer.paint[m[2]] === baseVal, `VC dashboardPaint base matches style.json: ${m[1]} ${m[2]}`);
+  }
+  /* road-name hue is the keeper even at night */
+  ok(!/\['vc-label-road-(major|minor)', 'text-color'/.test(vcThemeSrc), 'VC dashboard keeps the #c080a0 road-name hue');
+}
 const vcPaint4 = id => vcStyle.layers.find(l => l.id === id).paint;
 ok(vcPaint4('vc-road-primary-casing')['line-color'] === '#b1b1b7', 'VC style.json keeps the base major casing (phone untouched)');
 ok(vcPaint4('vc-label-place')['text-color'] === '#d42796', 'VC style.json keeps the base label pink (phone untouched)');
@@ -1104,7 +1123,22 @@ ok(SW.isThemeAsset('/themes/san-andreas/dashboard/sa-logo.png'), 'isThemeAsset: 
 ok(SW.isThemeAsset('/themes/gta-v/dashboard/topbar-bg.png'), 'isThemeAsset: V dashboard bar art');
 ok(SW.isThemeAsset('/assets/themes/rdr2/dashboard/menu_header_1a.png'), 'isThemeAsset: RDR2 dashboard art');
 const vcSkinSrc = fs.readFileSync(path.join(REPO, 'themes/vice-city/spotify-skin.css'), 'utf8');
-ok(cssSrc.includes('theme-vice-city .vcsp{') && /theme-vice-city \.vcsp\{[^}]*width:687px/.test(cssSrc), 'VC widget scaled to 687px in dashboard (hero weighting)');
+ok(cssSrc.includes('theme-vice-city .vcsp{') && /theme-vice-city \.vcsp\{[^}]*width:640px/.test(cssSrc), 'VC widget scaled to 640px in dashboard (seated sculpture)');
+/* Redesign regression: no body-level giant artwork — the rejected hero-bay
+   turned #vc-right-panel (NOT a stage node) into a 704px visual surface
+   that escaped fitDashboardStage() scaling. Dashboard art must live in
+   stage participants. */
+{
+  const vcDashCss = fs.readFileSync(path.join(REPO, 'themes/vice-city/dashboard.css'), 'utf8');
+  ok(!/body\.dashboard-mode\.theme-vice-city #vc-right-panel\{[^}]*width:\s*[4-9]\d\dpx/.test(vcDashCss),
+    'VC #vc-right-panel never becomes a giant body-level surface again');
+  ok(/body\.dashboard-mode\.theme-vice-city #spotify-pane::after/.test(vcDashCss),
+    'VC widget dock plinth lives in the stage-locked #spotify-pane');
+  ok(/body\.dashboard-mode\.theme-vice-city \.dash-tabs button\{[^}]*clip-path:polygon/.test(vcDashCss),
+    'VC footer tabs are chamfered hardware keys');
+  ok(!/body\.dashboard-mode\.theme-vice-city #dash-(topbar|bottombar)::after\{[^}]*position:\s*fixed/.test(vcDashCss),
+    'VC bar art never uses body-level fixed positioning');
+}
 ok(!vcSkinSrc.includes('rotate(6deg)'), 'VC widget is straight (hero has no tilt)');
 // every theme widget: explicit larger size, ~6-7 degree tilt (except VC hero-match), no-overlap idle states
 // (san-andreas pass 4: straight Radio Los Santos bezel, asserted in the pass 4 block)
