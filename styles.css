@@ -690,26 +690,102 @@ body.dashboard-mode.theme-rdr2 #speedo{bottom:108px}
    (the stage is letterboxed/zoomed on anything but a 1920×720 display,
    so fixed stage-coordinate offsets would land on the dash bars). The
    top/bottom/left/width below are fallback only — inline styles win. */
-body.dashboard-mode #menu-panel{
-  z-index:60;
-  /* full-stage settings page: same 1920x720 canvas as the dash */
-  top:94px;left:0;
-  width:1920px;height:534px;
-  padding:40px 80px;
-  border-radius:0;
-  overflow-y:auto;
-  background:rgba(8,10,12,.98);
-}
-/* cluster mode gets the same car-scale settings page (was phone-sized) */
+/* ---------- shared car settings page: dash + cluster, one rule ----------
+   Both are the same 1920x720 canvas, so they share ONE full-stage settings
+   page (Hyundai-style): a tile grid across the widescreen, never a vertical
+   list. The page carries its own header, so it covers the bars instead of
+   docking clear of them. layoutDashMenu() pins it to the live stage rect in
+   real CSS pixels (the stage is letterboxed/zoomed on anything but a
+   1920x720 display); the values below are fallback only. Phone keeps the
+   stacked section list. */
+body.dashboard-mode #menu-panel,
 body.cluster-mode #menu-panel{
   z-index:60;
-  top:72px;left:0;
-  width:1920px;height:548px;
-  padding:40px 80px;
-  border-radius:0;
-  overflow-y:auto;
+  top:0;left:0;bottom:auto;right:auto;
+  width:1920px;height:720px;
+  padding:0;border-radius:0;overflow-y:auto;overflow-x:hidden;
   background:rgba(8,10,12,.98);
 }
+/* neutralize the old docked-clear-of-bars geometry (higher specificity
+   than the per-theme dashboard.css rules, regardless of load order) */
+html body.dashboard-mode.theme-gta-v #menu-panel,
+html body.cluster-mode.theme-gta-v #menu-panel,
+html body.dashboard-mode.theme-rdr2 #menu-panel,
+html body.cluster-mode.theme-rdr2 #menu-panel{
+  top:0;bottom:auto;left:0;right:auto;width:1920px;height:720px;padding:0;
+}
+/* car head: back | title | clock | close, sticky over the scrolling page */
+body.dashboard-mode #menu-panel .menu-head,
+body.cluster-mode #menu-panel .menu-head{
+  position:sticky;top:0;z-index:3;
+  display:flex;align-items:center;gap:30px;
+  margin:0;padding:24px 72px;
+  background:rgba(4,6,8,.72);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  border-bottom:1px solid rgba(255,255,255,.14);
+}
+#menu-back{
+  width:68px;height:68px;font-size:40px;line-height:1;flex:none;
+  border-radius:50%;cursor:pointer;display:none;align-items:center;justify-content:center;
+  font-family:inherit;font-weight:700;padding-bottom:6px;
+  color:var(--tile-accent,#ff71ce);background:transparent;
+  border:2px solid var(--tile-accent,#ff71ce);
+  -webkit-tap-highlight-color:transparent;
+}
+#menu-back:active{transform:scale(.94)}
+body.dashboard-mode #menu-panel:not(.menu-home) #menu-back,
+body.cluster-mode #menu-panel:not(.menu-home) #menu-back{display:flex}
+/* clock like the reference head unit: big time, small date */
+.menu-clock{display:none;margin-left:auto;text-align:right;line-height:1.15;flex:none}
+body.dashboard-mode #menu-panel .menu-clock,
+body.cluster-mode #menu-panel .menu-clock{display:block}
+#menu-clock-time{display:block;font-size:44px;font-weight:600;letter-spacing:2px;color:#fff}
+#menu-clock-date{display:block;font-size:21px;letter-spacing:3px;color:rgba(255,255,255,.62)}
+/* the dash/cluster view toggle sits above the dash chrome; hide it while the
+   full-stage settings page is open so it never floats over the settings head */
+body:has(#menu-panel:not([hidden])) #mode-toggle{display:none}
+/* tile grid: hidden on phone, the whole home view in the car */
+.menu-tiles{display:none}
+body.dashboard-mode #menu-panel.menu-home .menu-tiles,
+body.cluster-mode #menu-panel.menu-home .menu-tiles{
+  display:grid;grid-template-columns:repeat(7,1fr);gap:22px;
+  padding:64px 72px;align-content:center;min-height:calc(100% - 140px);
+}
+.menu-tile{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+  min-height:238px;padding:30px 12px;cursor:pointer;
+  font-family:inherit;color:#fff;
+  background:rgba(255,255,255,.035);
+  border:2px solid color-mix(in srgb, var(--tile-accent,#ff71ce) 42%, transparent);
+  border-radius:18px;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .12s ease, border-color .12s ease, background .12s ease;
+}
+.menu-tile svg{width:78px;height:78px;color:var(--tile-accent,#ff71ce);flex:none}
+.menu-tile span{font-size:24px;letter-spacing:2px}
+.menu-tile:hover{border-color:var(--tile-accent,#ff71ce);background:rgba(255,255,255,.06)}
+.menu-tile:active{transform:scale(.95)}
+/* per-theme tile accents + corner language */
+body.theme-vice-city{--tile-accent:#ff71ce}
+body.theme-san-andreas{--tile-accent:#e8a33d}
+body.theme-san-andreas .menu-tile{border-radius:6px}
+body.theme-gta-v{--tile-accent:#2ce68c}
+body.theme-gta-v .menu-tile{border-radius:4px}
+body.theme-rdr2{--tile-accent:#d8b36a}
+body.theme-rdr2 .menu-tile{border-radius:0}
+/* detail view: one section at a time, head carries the title */
+body.dashboard-mode #menu-panel .menu-section,
+body.cluster-mode #menu-panel .menu-section{display:none}
+body.dashboard-mode #menu-panel .menu-section.active,
+body.cluster-mode #menu-panel .menu-section.active{
+  display:block;max-width:1280px;margin:26px auto 48px;
+}
+body.dashboard-mode #menu-panel .menu-section.active h3,
+body.cluster-mode #menu-panel .menu-section.active h3{display:none}
+body.dashboard-mode #menu-panel.menu-home .menu-section,
+body.cluster-mode #menu-panel.menu-home .menu-section{display:none}
+body.dashboard-mode #menu-panel .attrib,
+body.cluster-mode #menu-panel .attrib{text-align:center}
 /* car-scale type + touch targets */
 body.dashboard-mode .menu-head,
 body.cluster-mode .menu-head{margin-bottom:14px;align-items:center}

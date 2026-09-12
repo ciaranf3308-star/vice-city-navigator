@@ -3,8 +3,8 @@
   "locks": [
     {
       "file": "themes/san-andreas/dashboard.css",
-      "sha256": "06dcdb8bd00dcc3f736326d1fad49a5756e971741c4eae9df3d0c615076006f3",
-      "note": "HERO7 (2026-09-08) + visible-polish pass (2026-09-09): dash drawer Grove Street console w/ grove-panel hero band; active tab dark plate + gold chamfer + diamond. User-approved 2026-09-08."
+      "sha256": "1c87f1a9b73bbfaf58a39c5bd3daede76062f635666cf28ce1f8d5c4fc93c794",
+      "note": "HERO7 (2026-09-08) + visible-polish pass (2026-09-09); 2026-09-12 settings redesign: grove-panel hero header band + 48px close coin retired (collided with the shared full-stage settings page — header now owned by styles.css, visually QA'd at 1920x720). Gold chamfer frame, deep-green panel and gold content tints kept. Deliberate change, re-recorded."
     },
     {
       "file": "themes/gta-v/dashboard.css",

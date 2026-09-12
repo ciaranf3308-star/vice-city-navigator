@@ -2270,12 +2270,62 @@ function closeDrawer() {
   stopVoiceSearch();
   setUiMode(navActive ? 'drive' : 'explore');
 }
+/* Car settings home/detail navigation (dash + cluster share one page):
+   home = the widescreen tile grid; a tile opens its section as a detail
+   page with a back button. Phone keeps the stacked section list. */
+const MENU_PAGE_TITLES = {
+  theme: 'Theme', places: 'Places', discovery: 'Discovery', voice: 'Voice',
+  spotify: 'Spotify', display: 'Display', updates: 'Updates'
+};
+function carSettingsMode() { return dashboardLayoutActive() || clusterLayoutActive(); }
+function showMenuHome() {
+  const panel = $('menu-panel'); if (!panel) return;
+  panel.classList.add('menu-home');
+  panel.querySelectorAll('.menu-section').forEach(s => s.classList.remove('active'));
+  $('menu-title').textContent = 'Settings';
+  panel.scrollTop = 0;
+}
+function showMenuPage(id) {
+  const panel = $('menu-panel'); if (!panel) return;
+  panel.classList.remove('menu-home');
+  panel.querySelectorAll('.menu-section')
+    .forEach(s => s.classList.toggle('active', s.dataset.page === id));
+  $('menu-title').textContent = MENU_PAGE_TITLES[id] || 'Settings';
+  panel.scrollTop = 0;
+}
+/* Settings clock, like the reference head unit: big time + short date. */
+let menuClockT = null;
+function tickMenuClock() {
+  const t = $('menu-clock-time'), d = $('menu-clock-date');
+  if (!t || !d) return;
+  const now = new Date();
+  const ap = now.getHours() >= 12 ? 'PM' : 'AM';
+  const h = now.getHours() % 12 || 12;
+  t.textContent = h + ':' + String(now.getMinutes()).padStart(2, '0') + ' ' + ap;
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  d.textContent = days[now.getDay()] + ', ' +
+    String(now.getDate()).padStart(2, '0') + '.' + String(now.getMonth() + 1).padStart(2, '0');
+}
 function openMenu() {
-  $('menu-panel').hidden = false;
+  const panel = $('menu-panel');
+  panel.hidden = false;
+  if (carSettingsMode()) showMenuHome();
+  else {
+    /* phone: the classic stacked list, no tiles, no detail pages */
+    panel.classList.remove('menu-home');
+    panel.querySelectorAll('.menu-section').forEach(s => s.classList.remove('active'));
+    $('menu-title').textContent = 'WayStation';
+  }
+  tickMenuClock();
+  if (menuClockT) clearInterval(menuClockT);
+  menuClockT = setInterval(tickMenuClock, 10000);
   try { syncDiscoveryStats(); } catch (e) { /* menu must always open */ }
   try { renderSavedLists(); } catch (e) { /* menu must always open */ }
 }
-function closeMenu() { $('menu-panel').hidden = true; }
+function closeMenu() {
+  $('menu-panel').hidden = true;
+  if (menuClockT) { clearInterval(menuClockT); menuClockT = null; }
+}
 
 /* ---------------- App mode: normal | dashboard | cluster ----------------
    The Spotify player is a DASHBOARD feature. In normal (mobile)
@@ -2391,32 +2441,33 @@ const DASH_BAR_HEIGHTS = {
   'rdr2':        { top: 104, bottom: 84 },
 };
 
-/* Dock the body-level menu panel against the LIVE dashboard stage rect.
-   Fixed stage-coordinate CSS can't place this panel: on any window where
-   the stage is letterboxed or zoomed below 1, stage-coordinate offsets
-   land on top of the dash bars / off the visible canvas. This positions
-   the panel inside the visible stage, clear of the current theme's real
-   bar heights, in real CSS pixels. Runs on stage fit, theme commit and
-   mode switch; clears its inline geometry outside dashboard mode. */
+/* Dock the body-level car settings page (#menu-panel) to the LIVE stage
+   rect in real CSS pixels — ONE shared full-stage page for dashboard and
+   cluster (both are the same 1920x720 canvas). The page carries its own
+   header, so it covers the bars instead of docking clear of them. It stays
+   at body level, never reparented into a scaled stage (it would shrink with
+   the stage zoom). Fixed stage-coordinate offsets would land on the dash
+   bars whenever the stage is letterboxed or zoomed below 1. Runs on stage
+   fit, theme commit and mode switch; clears its inline geometry outside
+   the car modes. */
 function layoutDashMenu() {
   const panel = $('menu-panel');
   if (!panel) return;
-  if (!dashboardLayoutActive()) {
+  const stage = dashboardLayoutActive() ? $('dash-stage')
+    : clusterLayoutActive() ? $('cluster-ui') : null;
+  if (!stage) {
     panel.style.left = ''; panel.style.top = '';
-    panel.style.bottom = ''; panel.style.width = '';
+    panel.style.width = ''; panel.style.height = ''; panel.style.bottom = '';
     return;
   }
-  const stage = $('dash-stage');
   let r = null;
-  try { r = stage && stage.getBoundingClientRect(); } catch (e) {}
+  try { r = stage.getBoundingClientRect(); } catch (e) {}
   if (!r || !r.width) return; // stage not built yet; CSS fallback applies
-  const s = r.width / DASH_W; // live stage zoom (zoom or transform scale)
-  const bars = DASH_BAR_HEIGHTS[wsThemeId()] || DASH_BAR_HEIGHTS['vice-city'];
-  // Full-stage settings page: matches the dash canvas, clear of the bars
   panel.style.left = r.left + 'px';
-  panel.style.top = (r.top + bars.top * s) + 'px';
+  panel.style.top = r.top + 'px';
   panel.style.width = r.width + 'px';
-  panel.style.bottom = Math.max(0, window.innerHeight - (r.bottom - bars.bottom * s)) + 'px';
+  panel.style.height = r.height + 'px';
+  panel.style.bottom = '';
 }
 
 /* Dock the body-level planning drawer (search / results / route preview)
@@ -2549,6 +2600,7 @@ function fitClusterStage() {
   ui.style.left = ((vw - CLUSTER_W * s) / 2) + 'px';
   ui.style.top = ((vh - CLUSTER_H * s) / 2) + 'px';
   layoutModeToggle(); // re-dock the body-level view toggle to the new stage rect
+  layoutDashMenu(); // re-dock the shared car settings page to the new stage rect
 }
 
 /* The Vice City widget floats over the right of the map, so the camera's
@@ -3359,6 +3411,10 @@ function wireControls() {
   // explore chrome
   $('menu-btn').addEventListener('click', toggleMenu);
   $('menu-close').addEventListener('click', closeMenu);
+  /* car settings navigation: tiles open their detail page, ‹ goes home */
+  document.querySelectorAll('.menu-tile').forEach(b =>
+    b.addEventListener('click', () => showMenuPage(b.dataset.page)));
+  $('menu-back').addEventListener('click', showMenuHome);
   $('search-bar').addEventListener('click', () => openPlanning('search'));
 
   // planning drawer

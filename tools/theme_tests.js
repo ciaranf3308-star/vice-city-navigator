@@ -175,7 +175,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v69"), 'SW shell cache v69');
+ok(swSrc.includes("ws-shell-v70"), 'SW shell cache v69');
 ok(swSrc.includes("ws-theme-v214"), 'SW theme cache v214');
 ok(/new Request\(e\.request,\s*\{\s*cache:\s*['"]reload['"]\s*\}\)/.test(swSrc),
   'SW theme revalidation bypasses the HTTP cache (stale PNGs cannot be re-stored as fresh)');
@@ -774,21 +774,43 @@ ok(vcPaint4('vc-label-place')['text-color'] === '#d42796', 'VC style.json keeps 
 ok(appSrc.includes('function applyDashboardMapPaint'), 'app applies the VC dashboard paint at runtime');
 ok(/map\.on\('load'[^]*applyDashboardMapPaint/.test(appSrc), 'dashboard paint applies on map load');
 ok(/dashPaintActive = false;[^]*applyDashboardMapPaint/.test(appSrc), 'dashboard paint re-applies after a theme style rebuild');
-/* ---------- dashboard-mode settings: car-scale menu panel ---------- */
-ok(/body\.dashboard-mode #menu-panel\{[^}]*width:1920px/.test(cssSrc),
-  'dashboard settings is a full-stage page, not a side panel');
-ok(/body\.dashboard-mode #menu-panel\{[^}]*z-index:60/.test(cssSrc),
-  'dashboard settings panel paints above the dash stage');
-for (const id of ['san-andreas', 'gta-v', 'rdr2']) {
-  ok(cssSrc.includes(`body.dashboard-mode.theme-${id} #menu-panel`),
-    `${id} settings panel docks clear of its own bar heights`);
+/* ---------- shared car settings page: dash + cluster, tile-grid home ----------
+   Both are the same 1920x720 canvas, so they share ONE full-stage settings
+   page: a Hyundai-style tile grid across the widescreen, never a vertical
+   list. The old per-mode/per-theme docked-clear-of-bars geometry is retired. */
+ok(/body\.dashboard-mode #menu-panel,\s*body\.cluster-mode #menu-panel\{[^}]*width:1920px/.test(cssSrc),
+  'dash + cluster share one full-stage settings page (same 1920x720 canvas)');
+ok(/body\.dashboard-mode #menu-panel,\s*body\.cluster-mode #menu-panel\{[^}]*z-index:60/.test(cssSrc),
+  'shared settings page paints above the car stage');
+ok(/html body\.dashboard-mode\.theme-gta-v #menu-panel,/.test(cssSrc),
+  'shared settings page neutralizes the GTA V docked geometry');
+ok(/html body\.dashboard-mode\.theme-rdr2 #menu-panel,/.test(cssSrc),
+  'shared settings page neutralizes the RDR2 docked geometry');
+/* Tile-grid home: 7 tiles, each opening its detail page; phone keeps the list. */
+{
+  const tiles = [...indexSrc.matchAll(/class="menu-tile" data-page="([a-z]+)"/g)].map(m => m[1]);
+  const pages = [...indexSrc.matchAll(/<section class="menu-section" data-page="([a-z]+)">/g)].map(m => m[1]);
+  ok(tiles.length === 7, 'settings home has 7 category tiles');
+  ok(tiles.length === pages.length && tiles.every(t => pages.includes(t)),
+    'every tile opens a matching settings detail page');
+  ok(indexSrc.includes('id="menu-back"') && indexSrc.includes('id="menu-clock-time"') &&
+     indexSrc.includes('id="menu-clock-date"'),
+    'settings head carries back button, clock time and date');
+  ok(/\.menu-tiles\{display:none\}/.test(cssSrc),
+    'tiles hidden on phone — the stacked list stays');
+  ok(cssSrc.includes('body.dashboard-mode #menu-panel.menu-home .menu-tiles,'),
+    'car settings home shows the tile grid');
+  ok(appSrc.includes('function showMenuHome()') && appSrc.includes('function showMenuPage(id)'),
+    'settings home/page navigation functions exist');
+  ok(appSrc.includes('if (carSettingsMode()) showMenuHome();'),
+    'openMenu lands on the tile home in car modes');
+  ok(/\.menu-tile svg\{[^}]*var\(--tile-accent/.test(cssSrc),
+    'tile icons use the per-theme accent color');
 }
 ok(/body\.dashboard-mode \.menu-section input\[type="checkbox"\][^{]*\{[^}]*width:36px/.test(cssSrc),
   'dashboard settings checkboxes are car-size touch targets');
 ok(/body\.dashboard-mode \.vc-title[^{]*\{[^}]*font-size:52px/.test(cssSrc),
   'dashboard settings title is car-legible');
-ok(/body\.cluster-mode #menu-panel\{[^}]*width:1920px/.test(cssSrc),
-  'cluster settings panel is car-scale (not phone-sized)');
 ok(/body\.cluster-mode \.vc-title[^{]*\{[^}]*font-size:52px/.test(cssSrc),
   'cluster settings title is car-legible');
 /* The menu panel stays at body level (never shrinks with the stage zoom),
@@ -803,7 +825,9 @@ for (const [id, top, bottom] of [['vice-city', 76, 100], ['san-andreas', 126, 12
 }
 ok(/function layoutDashMenu\(\)/.test(appSrc) && appSrc.includes('getBoundingClientRect()'),
   'layoutDashMenu docks the panel to the live stage rect');
-ok(appSrc.includes('r.width / DASH_W'), 'layoutDashMenu scales bar clearance by the live stage zoom');
+ok(appSrc.includes("dashboardLayoutActive() ? $('dash-stage')") &&
+   appSrc.includes("clusterLayoutActive() ? $('cluster-ui')"),
+  'layoutDashMenu docks the shared settings page to the dash OR cluster live stage rect');
 ok(appSrc.includes('layoutDashMenu(); // re-dock the body-level menu panel to the new stage rect'),
   'stage refit re-docks the menu panel');
 ok(appSrc.includes('layoutDashMenu(); // bar heights changed with the theme'),
@@ -935,8 +959,12 @@ ok(/theme-san-andreas \.dash-tabs button:nth-child\(4\)\{left:555px\}/.test(cssS
   'SA settings takes the 4th art slot (the parked console coin is retired)');
 ok(/theme-san-andreas #menu-panel::before\{[^}]*clip-path:polygon\(26px/.test(cssSrc),
   'SA dash menu drawer is a gold chamfered console (2026-09-09 polish), not a flat box');
-ok(/theme-san-andreas #menu-panel \.menu-head\{[^}]*grove-panel\.png/.test(cssSrc),
-  'SA dash menu drawer wears the Grove Street hero-art header band');
+ok(!/theme-san-andreas #menu-panel \.menu-head\s*\{/.test(cssSrc),
+  'SA does not override the shared settings header (hero band retired after the 2026-09-12 collision — one owner)');
+ok(!/theme-san-andreas #menu-panel #menu-close\s*\{[^}]*width:48px/.test(cssSrc),
+  'SA keeps the shared 68px car-scale settings close button (no 48px drawer coin)');
+ok(/body:has\(#menu-panel:not\(\[hidden\]\)\) #mode-toggle\{display:none/.test(cssSrc),
+  'the dash/cluster view toggle hides while the full-stage settings page is open');
 ok(/theme-san-andreas \.dash-tabs button span\{display:none/.test(cssSrc),
   'SA footer tabs are icon-only like the hero');
 ok(/theme-san-andreas \.sasp\{[^}]*left:1219px/.test(skinSaSrc),
