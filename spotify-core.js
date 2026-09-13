@@ -84,6 +84,13 @@
   function isConnected() { return !!(auth && auth.refresh_token); }
 
   async function connect() {
+    // Car head unit: no login from the car. Single shared auth lives on
+    // the phone (Waze model) — point at the phone instead of starting any
+    // flow, native or web.
+    if (typeof window !== 'undefined' && window.__WAYSTATION_CAR) {
+      try { toast('Connect from Mobile \u2013 Settings instead'); } catch (e) {}
+      return;
+    }
     if (beforeRedirectHook) { try { beforeRedirectHook(); } catch (e) {} }
     // Native shell (car head unit or phone app): hand login to the Spotify
     // app via SSO (one-tap approve — it's already logged in, even via

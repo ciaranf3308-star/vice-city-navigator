@@ -1718,6 +1718,14 @@ ok(/function reloadAuth\(\)/.test(spCore) && spCore.includes('reloadAuth,'),
 ok(sw.includes("'car.js'"), 'car: service worker precaches car.js');
 ok(/carifySelect/.test(carJs) && carJs.includes('select:not([data-carified])'),
   'car: native <select> swapped for in-page button list (head-unit WebView has no window token for the popup)');
+ok(/__WAYSTATION_CAR/.test(spCore) && /Connect from Mobile/.test(spCore),
+  'car: Spotify connect warns "Connect from Mobile – Settings instead" instead of starting auth');
+ok(appSrc.includes("NAV_SYNC_KEY = 'ws-nav-sync'") && /function publishNavSync/.test(appSrc) &&
+   /function applyCarNavSync/.test(appSrc),
+  'car: phone publishes the active route to ws-nav-sync; car draws the line + pin');
+ok(/addEventListener\('storage'/.test(appSrc) && appSrc.includes('NAV_SYNC_KEY') &&
+   /flushPendingCarNavSync/.test(appSrc),
+  'car: storage-event listener + boot read + map-load flush pick up the phone route');
 
 /* ---------- android/ car shell (personal/internal test build) ---------- */
 const AND = path.join(REPO, 'android');

@@ -547,6 +547,7 @@ async function initMap() {
     try { map.on('moveend', queueDashLocality); } catch (e) {}
     try { syncDashPadding(); } catch (e) {}
     try { applyDashboardMapPaint(); } catch (e) {}
+    try { flushPendingCarNavSync(); } catch (e) {} // phone route published before the map was ready
     // Each module init is isolated: one failing module must never
     // silently prevent the others (e.g. POIs) from starting.
     try { if (window.VCNThemes) applyBodyTheme(VCNThemes.currentId()); }
@@ -1898,6 +1899,7 @@ async function planRoute(opts) {
     totalDist = route.distance; totalDur = route.duration;
     if (trafficOn && window.VCNTraffic) trafficDelayMin = Math.round((VCNTraffic.lastDelaySec() || 0) / 60);
     drawRoute();
+    publishNavSync(); // the car mirrors the line via shared localStorage
     saveRecent(dest);
     if (autostart) { startNav(); return; }
     $('dest-label').textContent = (dest && dest.label) || 'Destination';
@@ -1947,6 +1949,7 @@ function startNav() {
   /* One shared location watch: navigation just (re)starts it with the live
      callbacks; VCNLocation owns the underlying watcher. */
   if (window.VCNLocation) VCNLocation.startWatch(onPos, onPosErr);
+  publishNavSync(); // navActive=true now rides to the car
 }
 /* Stable canonical maneuver texts for the next few steps (voice pregen). */
 function upcomingManeuverTexts() {
@@ -1981,6 +1984,64 @@ function endNav() {
   routeCoords = []; steps = []; stepIdx = 0;
   try { const mc2 = $('maneuver-card'); if (mc2) mc2.classList.remove('has-maneuver'); } catch (e) {}
   try { const tm = $('trip-meta'); if (tm) tm.textContent = ''; } catch (e) {}
+  publishNavSync(); // phone cleared the route — the car wipes its line too
+}
+
+/* ---------------- phone -> car navigation sync ---------------------------
+   The car is a second WebView in the same app process, so localStorage is
+   shared with the phone page. The phone publishes the active route; the car
+   picks it up via storage events (live) and on boot (route started before
+   the car connected). The car only draws the line + destination pin — it
+   never starts its own voice/watch; the phone owns guidance. */
+const NAV_SYNC_KEY = 'ws-nav-sync';
+let pendingCarNavSync = null, hasPendingCarNavSync = false;
+function publishNavSync() {
+  if (window.__WAYSTATION_CAR) return; // the car never publishes
+  try {
+    if (!dest || !routeCoords.length) { localStorage.removeItem(NAV_SYNC_KEY); return; }
+    localStorage.setItem(NAV_SYNC_KEY, JSON.stringify({
+      dest: { label: dest.label, lnglat: dest.lnglat },
+      routeCoords: routeCoords,
+      navActive: navActive,
+      ts: Date.now()
+    }));
+  } catch (e) { /* sync is best-effort; navigation must never break */ }
+}
+function applyCarNavSync(state) {
+  try {
+    if (!map || !map.isStyleLoaded || !map.isStyleLoaded()) {
+      pendingCarNavSync = state; hasPendingCarNavSync = true; // map/style not ready — flush on load
+      return;
+    }
+    pendingCarNavSync = null; hasPendingCarNavSync = false;
+    if (!state || !state.dest || !Array.isArray(state.dest.lnglat) ||
+        !Array.isArray(state.routeCoords) || !state.routeCoords.length) {
+      // Phone cleared the route: wipe the car's line + pin.
+      try {
+        const src = map.getSource('vcn-route');
+        if (src) src.setData({ type: 'FeatureCollection', features: [] });
+      } catch (e) {}
+      if (destMarker) { destMarker.remove(); destMarker = null; }
+      dest = null; routeCoords = []; navActive = false;
+      return;
+    }
+    dest = { label: state.dest.label, lnglat: state.dest.lnglat.slice(), semantic: null };
+    routeCoords = state.routeCoords;
+    navActive = !!state.navActive;
+    drawRouteKeepView(); // line only — never moves the car's camera
+    if (destMarker) destMarker.remove();
+    const el = document.createElement('div'); el.className = 'dest-pin';
+    el.style.backgroundImage = `url('${destBlipUrl()}')`;
+    destMarker = new maplibregl.Marker({ element: el }).setLngLat(dest.lnglat).addTo(map);
+    const dl = $('dest-label'); if (dl) dl.textContent = dest.label || 'Destination';
+  } catch (e) { console.error('[ws] car nav sync failed', e); }
+}
+function flushPendingCarNavSync() {
+  if (!hasPendingCarNavSync) return;
+  hasPendingCarNavSync = false;
+  const s = pendingCarNavSync;
+  pendingCarNavSync = null;
+  applyCarNavSync(s);
 }
 let _posErrTold = false;
 function onPosErr(err) {
@@ -2768,6 +2829,18 @@ function installCarBridge() {
     },
   };
   try { document.body.classList.add('car-mode'); } catch (e) {}
+  /* Phone -> car navigation sync: the phone publishes the active route to
+     shared localStorage (ws-nav-sync). Pick it up live via storage events
+     and once on boot (route may predate the car session). */
+  try {
+    window.addEventListener('storage', (e) => {
+      if (!e || e.key !== NAV_SYNC_KEY) return;
+      try { applyCarNavSync(e.newValue ? JSON.parse(e.newValue) : null); }
+      catch (err) { console.error('[ws] car nav sync event failed', err); }
+    });
+    const raw = localStorage.getItem(NAV_SYNC_KEY);
+    if (raw) { try { applyCarNavSync(JSON.parse(raw)); } catch (err) {} }
+  } catch (e) { /* sync is best-effort */ }
   try {
     root.style.setProperty('--car-visible-left', '0px');
     root.style.setProperty('--car-visible-top', '0px');
