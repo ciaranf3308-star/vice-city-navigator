@@ -811,6 +811,14 @@ body.dashboard-mode #menu-panel .menu-head #menu-back,
 body.cluster-mode #menu-panel .menu-head #menu-back,
 body.dashboard-mode #menu-panel .menu-head #menu-close,
 body.cluster-mode #menu-panel .menu-head #menu-close{display:none}
+/* pin the bar to the viewport bottom even on short pages: the panel is a
+   flex column and the foot absorbs free space above it */
+body.dashboard-mode #menu-panel,
+body.cluster-mode #menu-panel{display:flex;flex-direction:column}
+body.dashboard-mode #menu-panel .menu-foot,
+body.cluster-mode #menu-panel .menu-foot{
+  margin-top:auto;
+}
 body.dashboard-mode #menu-panel .menu-foot,
 body.cluster-mode #menu-panel .menu-foot{
   display:flex;gap:24px;position:sticky;bottom:0;z-index:3;
@@ -875,6 +883,30 @@ body.cluster-mode.theme-gta-v #menu-panel .menu-foot button{
 }
 body.dashboard-mode.theme-gta-v #menu-panel .menu-foot button span,
 body.cluster-mode.theme-gta-v #menu-panel .menu-foot button span{color:#2ce68c}
+/* GTA V + RDR2: their display fonts map ‹ (U+2039) to a logo glyph, so the
+   back chevron is drawn in CSS rather than trusted to the font. */
+body.dashboard-mode.theme-gta-v #menu-panel .menu-foot #menu-back-foot,
+body.cluster-mode.theme-gta-v #menu-panel .menu-foot #menu-back-foot,
+body.dashboard-mode.theme-rdr2 #menu-panel .menu-foot #menu-back-foot,
+body.cluster-mode.theme-rdr2 #menu-panel .menu-foot #menu-back-foot{
+  display:inline-flex;align-items:center;justify-content:center;
+}
+body.dashboard-mode.theme-gta-v #menu-panel .menu-foot #menu-back-foot>span,
+body.cluster-mode.theme-gta-v #menu-panel .menu-foot #menu-back-foot>span,
+body.dashboard-mode.theme-rdr2 #menu-panel .menu-foot #menu-back-foot>span,
+body.cluster-mode.theme-rdr2 #menu-panel .menu-foot #menu-back-foot>span{display:none}
+body.dashboard-mode.theme-gta-v #menu-panel .menu-foot #menu-back-foot::before,
+body.cluster-mode.theme-gta-v #menu-panel .menu-foot #menu-back-foot::before{
+  content:"";width:15px;height:15px;flex:none;margin-right:24px;
+  border-left:3px solid #2ce68c;border-top:3px solid #2ce68c;
+  transform:rotate(-45deg);
+}
+body.dashboard-mode.theme-rdr2 #menu-panel .menu-foot #menu-back-foot::before,
+body.cluster-mode.theme-rdr2 #menu-panel .menu-foot #menu-back-foot::before{
+  content:"";width:16px;height:16px;flex:none;margin-right:24px;
+  border-left:4px solid #c9a227;border-top:4px solid #c9a227;
+  transform:rotate(-45deg);
+}
 /* ---- RDR2: brass frontier furniture, double-ruled ---- */
 body.dashboard-mode.theme-rdr2 #menu-panel .menu-foot,
 body.cluster-mode.theme-rdr2 #menu-panel .menu-foot{
