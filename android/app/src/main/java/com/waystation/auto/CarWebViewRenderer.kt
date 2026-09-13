@@ -192,11 +192,13 @@ class CarWebViewRenderer(private val carContext: CarContext) {
         cancelRetry()
         retryCount = 0
         errorPageShown = false // real page is up; a later failure may show the offline page again
+        CarDiagnostics.log(carContext, "page loaded")
         onPageLoadState?.invoke(true)
     }
 
     private fun notePageFailed(reason: String) {
         Log.w(TAG, "dashboard page failed: $reason")
+        CarDiagnostics.log(carContext, "page FAILED: $reason")
         loadFailed = true
         onPageLoadState?.invoke(false)
         showErrorPage()
@@ -286,6 +288,7 @@ class CarWebViewRenderer(private val carContext: CarContext) {
                 )
             )
             Log.i(TAG, "pipeline up: ${w}x${h}@${dpi}")
+            CarDiagnostics.log(carContext, "attach ok: ${w}x${h}@${dpi}")
             cancelRetry()
             retryCount = 0
             wv.loadUrl(DASH_URL)
@@ -294,6 +297,7 @@ class CarWebViewRenderer(private val carContext: CarContext) {
             // during WebView init must degrade to the retry path, never
             // escape the surface callback and kill the session.
             Log.e(TAG, "attach failed", t)
+            CarDiagnostics.log(carContext, "attach FAILED", t)
             detach()
         }
     }
@@ -314,6 +318,7 @@ class CarWebViewRenderer(private val carContext: CarContext) {
         try { virtualDisplay?.release() } catch (e: Exception) { }
         virtualDisplay = null
         handoffDone = false
+        CarDiagnostics.log(carContext, "detach")
     }
 
     private fun configureWebView(wv: WebView) {

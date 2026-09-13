@@ -117,6 +117,7 @@ class WayStationScreen(carContext: CarContext) : Screen(carContext) {
             }
         }
         refreshLocationState()
+        CarDiagnostics.log(carContext, "Screen created (locationGranted=$locationGranted)")
     }
 
     // ---------------- location permission ----------------
@@ -141,6 +142,7 @@ class WayStationScreen(carContext: CarContext) : Screen(carContext) {
                 OnRequestPermissionsListener { granted, _ ->
                     locationGranted = granted.contains(Manifest.permission.ACCESS_FINE_LOCATION) ||
                         granted.contains(Manifest.permission.ACCESS_COARSE_LOCATION)
+                    CarDiagnostics.log(carContext, "location permission result: granted=$locationGranted")
                 // Answer any held WebView geolocation callbacks with the real
                 // result, then reload for a clean page state.
                 renderer.onLocationPermissionResult()
@@ -154,6 +156,18 @@ class WayStationScreen(carContext: CarContext) : Screen(carContext) {
     }
 
     override fun onGetTemplate(): Template {
+        return try {
+            buildTemplate()
+        } catch (t: Throwable) {
+            // The host marshals this back over Binder and shows its generic
+            // error; the app process survives, so Play never logs it. Write
+            // the trace to our own diagnostics file before rethrowing.
+            CarDiagnostics.log(carContext, "onGetTemplate FAILED", t)
+            throw t
+        }
+    }
+
+    private fun buildTemplate(): Template {
         val builder = NavigationTemplate.Builder()
         // REQUIRED for the host to deliver SurfaceCallback touch events
         // (onClick/onScroll/onScale/onFling). On touchscreen hosts Android
