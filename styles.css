@@ -800,6 +800,39 @@ body.dashboard-mode .vc-title,
 body.cluster-mode .vc-title{font-size:52px;letter-spacing:4px}
 body.dashboard-mode #menu-close,
 body.cluster-mode #menu-close{width:68px;height:68px;font-size:28px;flex:none}
+/* ---------- car thumb-reach bar: back + done at the bottom ----------
+   The top of a head unit is a stretch from the driver's seat, so in the
+   car modes the head's back/close buttons move out of the way and this
+   sticky bottom bar carries them instead. One shared bar for dash and
+   cluster (same shared settings page). Phone never shows it. */
+.menu-foot{display:none}
+body.dashboard-mode #menu-panel .menu-head #menu-back,
+body.cluster-mode #menu-panel .menu-head #menu-back,
+body.dashboard-mode #menu-panel .menu-head #menu-close,
+body.cluster-mode #menu-panel .menu-head #menu-close{display:none}
+body.dashboard-mode #menu-panel .menu-foot,
+body.cluster-mode #menu-panel .menu-foot{
+  display:flex;gap:24px;position:sticky;bottom:0;z-index:3;
+  padding:24px 72px calc(24px + env(safe-area-inset-bottom));
+  background:rgba(4,6,8,.88);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  border-top:1px solid rgba(255,255,255,.14);
+}
+body.dashboard-mode #menu-panel .menu-foot button,
+body.cluster-mode #menu-panel .menu-foot button{
+  flex:1;min-height:104px;cursor:pointer;font-family:inherit;
+  font-size:34px;font-weight:700;letter-spacing:3px;color:#fff;
+  background:rgba(255,255,255,.05);
+  border:2px solid color-mix(in srgb, var(--tile-accent,#ff71ce) 55%, transparent);
+  border-radius:18px;-webkit-tap-highlight-color:transparent;
+}
+body.dashboard-mode #menu-panel .menu-foot button:active,
+body.cluster-mode #menu-panel .menu-foot button:active{transform:scale(.97)}
+body.dashboard-mode #menu-panel .menu-foot button span,
+body.cluster-mode #menu-panel .menu-foot button span{color:var(--tile-accent,#ff71ce)}
+/* no "back" on the tile home — it would go nowhere */
+body.dashboard-mode #menu-panel.menu-home .menu-foot #menu-back-foot,
+body.cluster-mode #menu-panel.menu-home .menu-foot #menu-back-foot{visibility:hidden}
 body.dashboard-mode .menu-section,
 body.cluster-mode .menu-section{margin-top:24px;padding:24px;border-radius:20px}
 body.dashboard-mode .menu-section h3,

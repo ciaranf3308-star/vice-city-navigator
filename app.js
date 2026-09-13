@@ -3456,6 +3456,9 @@ function wireControls() {
   // explore chrome
   $('menu-btn').addEventListener('click', toggleMenu);
   $('menu-close').addEventListener('click', closeMenu);
+  /* car thumb-reach bar (dash + cluster): same actions, bottom of the page */
+  $('menu-back-foot').addEventListener('click', showMenuHome);
+  $('menu-close-foot').addEventListener('click', closeMenu);
   /* car settings navigation: tiles open their detail page, ‹ goes home */
   document.querySelectorAll('.menu-tile').forEach(b =>
     b.addEventListener('click', () => showMenuPage(b.dataset.page)));
