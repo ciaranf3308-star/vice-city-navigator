@@ -361,6 +361,11 @@ function bindClusterTabs() {
   if (saMenu) saMenu.addEventListener('click', () => {
     if (clusterLayoutActive() && document.body.classList.contains('theme-san-andreas')) openMenu();
   });
+  /* SA cluster: visible gold settings control in the bottom control row */
+  const saSettings = document.getElementById('sa-cluster-settings');
+  if (saSettings) saSettings.addEventListener('click', () => {
+    if (clusterLayoutActive() && document.body.classList.contains('theme-san-andreas')) openMenu();
+  });
 }
 
 /* ---------------- maneuver arrows (original SVG) ---------------- */
@@ -3614,7 +3619,7 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
    enforces this). On boot, compare against the live network sw.js; on
    mismatch, ask the SW registration to update and reload once.
    sessionStorage gates it so a blocked network can never loop. */
-const WS_SHELL_VERSION = 'ws-shell-v78';
+const WS_SHELL_VERSION = 'ws-shell-v79';
 function healShellVersionSkew() {
   try {
     if (!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;

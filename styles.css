@@ -804,7 +804,8 @@ body.cluster-mode #menu-close{width:68px;height:68px;font-size:28px;flex:none}
    The top of a head unit is a stretch from the driver's seat, so in the
    car modes the head's back/close buttons move out of the way and this
    sticky bottom bar carries them instead. One shared bar for dash and
-   cluster (same shared settings page). Phone never shows it. */
+   cluster (same shared settings page); each theme skins it in its own
+   design language below. Phone never shows it. */
 .menu-foot{display:none}
 body.dashboard-mode #menu-panel .menu-head #menu-back,
 body.cluster-mode #menu-panel .menu-head #menu-back,
@@ -814,25 +815,82 @@ body.dashboard-mode #menu-panel .menu-foot,
 body.cluster-mode #menu-panel .menu-foot{
   display:flex;gap:24px;position:sticky;bottom:0;z-index:3;
   padding:24px 72px calc(24px + env(safe-area-inset-bottom));
-  background:rgba(4,6,8,.88);
   -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
-  border-top:1px solid rgba(255,255,255,.14);
 }
 body.dashboard-mode #menu-panel .menu-foot button,
 body.cluster-mode #menu-panel .menu-foot button{
-  flex:1;min-height:104px;cursor:pointer;font-family:inherit;
-  font-size:34px;font-weight:700;letter-spacing:3px;color:#fff;
-  background:rgba(255,255,255,.05);
-  border:2px solid color-mix(in srgb, var(--tile-accent,#ff71ce) 55%, transparent);
-  border-radius:18px;-webkit-tap-highlight-color:transparent;
+  flex:1;min-height:104px;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
 }
 body.dashboard-mode #menu-panel .menu-foot button:active,
 body.cluster-mode #menu-panel .menu-foot button:active{transform:scale(.97)}
-body.dashboard-mode #menu-panel .menu-foot button span,
-body.cluster-mode #menu-panel .menu-foot button span{color:var(--tile-accent,#ff71ce)}
 /* no "back" on the tile home — it would go nowhere */
 body.dashboard-mode #menu-panel.menu-home .menu-foot #menu-back-foot,
 body.cluster-mode #menu-panel.menu-home .menu-foot #menu-back-foot{visibility:hidden}
+/* ---- Vice City: neon-tube console ---- */
+body.dashboard-mode.theme-vice-city #menu-panel .menu-foot,
+body.cluster-mode.theme-vice-city #menu-panel .menu-foot{
+  background:rgba(10,4,20,.94);
+  border-top:2px solid rgba(255,45,149,.8);
+  box-shadow:0 -2px 18px rgba(255,45,149,.35);
+}
+body.dashboard-mode.theme-vice-city #menu-panel .menu-foot button,
+body.cluster-mode.theme-vice-city #menu-panel .menu-foot button{
+  font-family:'Pricedown','Arial Black',sans-serif;
+  font-size:42px;letter-spacing:4px;color:#ffd7ef;text-transform:uppercase;
+  background:rgba(255,45,149,.08);
+  border:2px solid rgba(255,45,149,.65);border-radius:12px;
+  box-shadow:0 0 14px rgba(255,45,149,.25), inset 0 0 12px rgba(255,45,149,.12);
+  text-shadow:0 0 10px rgba(255,113,206,.8);
+}
+body.dashboard-mode.theme-vice-city #menu-panel .menu-foot button span,
+body.cluster-mode.theme-vice-city #menu-panel .menu-foot button span{color:#ff71ce}
+/* ---- San Andreas: gold Grove-Street console, chamfered ---- */
+body.dashboard-mode.theme-san-andreas #menu-panel .menu-foot,
+body.cluster-mode.theme-san-andreas #menu-panel .menu-foot{
+  background:rgba(14,11,7,.94);
+  border-top:2px solid #c9a227;
+}
+body.dashboard-mode.theme-san-andreas #menu-panel .menu-foot button,
+body.cluster-mode.theme-san-andreas #menu-panel .menu-foot button{
+  font-family:'Bank Gothic','Arial Narrow',sans-serif;
+  font-size:30px;font-weight:500;letter-spacing:5px;color:#f6efdb;text-transform:uppercase;
+  background:linear-gradient(to bottom, rgba(201,162,39,.16), rgba(201,162,39,.05));
+  border:2px solid #c9a227;border-radius:6px;
+  text-shadow:0 2px 0 #000;
+}
+body.dashboard-mode.theme-san-andreas #menu-panel .menu-foot button span,
+body.cluster-mode.theme-san-andreas #menu-panel .menu-foot button span{color:#e8a33d}
+/* ---- GTA V: restrained near-black, hairline rules, sparse green ---- */
+body.dashboard-mode.theme-gta-v #menu-panel .menu-foot,
+body.cluster-mode.theme-gta-v #menu-panel .menu-foot{
+  background:rgba(10,13,15,.94);
+  border-top:1px solid rgba(255,255,255,.14);
+}
+body.dashboard-mode.theme-gta-v #menu-panel .menu-foot button,
+body.cluster-mode.theme-gta-v #menu-panel .menu-foot button{
+  font-family:'Chalet London','Chalet Comprime',sans-serif;
+  font-size:26px;letter-spacing:.34em;color:#e8ecec;text-transform:uppercase;
+  background:transparent;border:1px solid rgba(255,255,255,.22);border-radius:4px;
+}
+body.dashboard-mode.theme-gta-v #menu-panel .menu-foot button span,
+body.cluster-mode.theme-gta-v #menu-panel .menu-foot button span{color:#2ce68c}
+/* ---- RDR2: brass frontier furniture, double-ruled ---- */
+body.dashboard-mode.theme-rdr2 #menu-panel .menu-foot,
+body.cluster-mode.theme-rdr2 #menu-panel .menu-foot{
+  background:rgba(13,10,7,.94);
+  border-top:1px solid rgba(201,162,39,.45);
+}
+body.dashboard-mode.theme-rdr2 #menu-panel .menu-foot button,
+body.cluster-mode.theme-rdr2 #menu-panel .menu-foot button{
+  font-family:'RDR Lino',Georgia,serif;
+  font-size:34px;letter-spacing:3px;color:#f5ead0;
+  background:rgba(201,162,39,.07);
+  border:1px solid rgba(201,162,39,.6);border-radius:0;
+  box-shadow:inset 0 0 0 3px rgba(13,10,7,.9), inset 0 0 0 4px rgba(201,162,39,.35);
+}
+body.dashboard-mode.theme-rdr2 #menu-panel .menu-foot button span,
+body.cluster-mode.theme-rdr2 #menu-panel .menu-foot button span{color:#c9a227}
 body.dashboard-mode .menu-section,
 body.cluster-mode .menu-section{margin-top:24px;padding:24px;border-radius:20px}
 body.dashboard-mode .menu-section h3,

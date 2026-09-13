@@ -43,8 +43,8 @@
     },
     {
       "file": "themes/san-andreas/cluster.css",
-      "sha256": "c1c3a928cf50b593f10f2b75125ef8035eaead8b0687b00dff21b312f17256da",
-      "note": "SA cluster approved 2026-09-11 (user: 'BOOM THATS EXACTLY IT' 2026-09-10). Extracted from phone.css 2026-09-11; strictly cluster-scoped."
+      "sha256": "8a268f51b1a2e636ed3b2a8417b1fdf5879cd61e99e4af1c665108113f0cbf7d",
+      "note": "SA cluster approved 2026-09-11 (user: 'BOOM THATS EXACTLY IT' 2026-09-10). Extracted from phone.css 2026-09-11; strictly cluster-scoped. 2026-09-13: user-requested deliberate change — visible gold Grove-Street settings button (#sa-cluster-settings) added to the bottom control row beside exit/locate; the invisible logo hotspot (#sa-cluster-menu) is untouched. No other visual change."
     },
     {
       "file": "themes/san-andreas/spotify-cluster.css",
