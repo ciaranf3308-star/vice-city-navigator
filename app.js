@@ -2714,9 +2714,9 @@ window.WayStation.clusterActive = clusterLayoutActive;
      (--car-visible-*, --car-stable-*) so chrome can stay clear of any
      host overlay without redesigning the dashboard.
    - setSpotifyAuth: thin token handoff — the native shell performs the
-     Spotify PKCE flow once (Custom Tab on the phone) and hands the
-     {access_token, refresh_token, expires_at} JSON here; it lands in the
-     exact localStorage key the web auth flow uses, then the core reloads.
+     Spotify login once (SSO via the Spotify app, Custom Tab fallback) and
+     hands the {access_token, refresh_token, expires_at} JSON here; it lands
+     in the exact localStorage key the web auth flow uses, then the core reloads.
    - getState: nav/spotify/theme snapshot polled by the native shell so
      Android Auto knows a navigation session is active.
    - The native shell also injects window.WayStationCarNative (a

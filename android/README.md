@@ -34,9 +34,11 @@ Android Auto host Surface
   No native maneuver UI — the dashboard is the visual experience.
 - **Spotify:** the car WebView is a separate browser profile, so it can't
   share the phone's Chrome/TWA PKCE session. Thin bridge instead:
-  1. (Preferred) Tap **Connect Spotify** in the car UI → native PKCE via
-     Custom Tab **on the phone** → token exchanged natively → handed into
-     the page via `WayStationCar.setSpotifyAuth()` → lands in the exact
+  1. (Preferred) Tap **Connect Spotify** in the car UI → native login —
+     SSO via the installed **Spotify app** (one-tap approve, already
+     logged in even via Facebook), Custom Tab on the phone as fallback →
+     token exchanged natively → handed into the page via
+     `WayStationCar.setSpotifyAuth()` → lands in the exact
      `localStorage['vcn.spotify.auth']` key/shape the web flow uses →
      `SpotifyCore.reloadAuth()` picks it up. From there the existing web
      Spotify engine owns refresh/polling/playback — no second
@@ -104,7 +106,8 @@ AAB to Play Console → **Internal app sharing** / **Internal testing**
   audio; if TTS ducks oddly under Ioniq nav prompts, that's host audio
   focus, not the app.
 - **Spotify login:** do the native "Connect Spotify" flow while parked —
-  the Custom Tab opens on the phone, not the head unit.
+  the Spotify app (or a Custom Tab fallback) opens on the phone, not the
+  head unit.
 
 ## Files
 

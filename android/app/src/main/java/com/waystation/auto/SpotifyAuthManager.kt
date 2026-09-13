@@ -55,6 +55,9 @@ class SpotifyAuthManager(private val context: Context) {
             "user-read-playback-state",
             "user-modify-playback-state"
         )
+
+        /** Scopes for the auth SDK request (same list). */
+        val scopes: List<String> get() = SCOPES
     }
 
     private val prefs =
@@ -72,12 +75,7 @@ class SpotifyAuthManager(private val context: Context) {
 
     /** Launch the Spotify authorize page in a Custom Tab on the phone. */
     fun startAuth() {
-        val verifier = randomString(64)
-        val state = randomString(24)
-        prefs.edit()
-            .putString(KEY_VERIFIER, verifier)
-            .putString(KEY_STATE, state)
-            .apply()
+        val (verifier, state) = beginAuth()
 
         val authUri = Uri.parse("https://accounts.spotify.com/authorize")
             .buildUpon()
@@ -96,6 +94,74 @@ class SpotifyAuthManager(private val context: Context) {
         }
         context.startActivity(intent)
         Log.i(TAG, "Spotify PKCE authorize launched")
+    }
+
+    /** Fresh PKCE pair, persisted for the in-flight auth (SSO or Custom Tab). */
+    fun beginAuth(): Pair<String, String> {
+        val verifier = randomString(64)
+        val state = randomString(24)
+        prefs.edit()
+            .putString(KEY_VERIFIER, verifier)
+            .putString(KEY_STATE, state)
+            .apply()
+        return verifier to state
+    }
+
+    fun savedVerifier(): String? = prefs.getString(KEY_VERIFIER, null)
+    fun savedState(): String? = prefs.getString(KEY_STATE, null)
+    fun pkceChallengeFor(verifier: String): String = pkceChallenge(verifier)
+
+    /**
+     * App-SSO login: bounce to the installed Spotify app (already logged
+     * in, even via Facebook) for a one-tap approve instead of a web login.
+     * The trampoline activity runs the auth SDK; any failure falls back to
+     * the Custom Tab flow. Safe to call from a Service/CarContext — the
+     * trampoline carries FLAG_ACTIVITY_NEW_TASK.
+     */
+    fun startAuthViaApp(context: Context) {
+        beginAuth() // fresh pair; the trampoline reads them from prefs
+        CarDiagnostics.log(context, "spotify auth: launching app SSO")
+        val intent = Intent(context, SpotifySsoActivity::class.java)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+        Log.i(TAG, "Spotify app-SSO auth launched")
+    }
+
+    /**
+     * Called by [SpotifySsoActivity] with the authorization code from the
+     * Spotify app. Validates state, exchanges with the saved PKCE verifier,
+     * and falls back to the Custom Tab flow when anything looks wrong.
+     */
+    fun handleAppSsoCode(context: Context, code: String, state: String?) {
+        val savedState = prefs.getString(KEY_STATE, null)
+        if (savedState == null || savedState != state) {
+            Log.w(TAG, "Spotify SSO state mismatch; Custom Tab fallback")
+            CarDiagnostics.log(context, "spotify auth: SSO state mismatch, Custom Tab fallback")
+            startAuth()
+            return
+        }
+        val verifier = prefs.getString(KEY_VERIFIER, null)
+        if (verifier == null) {
+            Log.w(TAG, "Spotify SSO without verifier; Custom Tab fallback")
+            startAuth()
+            return
+        }
+        CarDiagnostics.log(context, "spotify auth: SSO code received, exchanging")
+        thread(name = "spotify-token-exchange") {
+            val ok = try {
+                exchangeCode(code, verifier)
+            } catch (e: Exception) {
+                Log.e(TAG, "Spotify SSO token exchange failed", e)
+                false
+            }
+            if (ok) {
+                CarDiagnostics.log(context, "spotify auth: SSO exchange ok")
+            } else {
+                Log.w(TAG, "Spotify SSO exchange failed; Custom Tab fallback")
+                CarDiagnostics.log(context, "spotify auth: SSO exchange failed, Custom Tab fallback")
+                try { startAuth() } catch (e: Exception) { }
+            }
+        }
     }
 
     /** Called by [SpotifyCallbackActivity] with the redirect URI data. */
@@ -126,7 +192,7 @@ class SpotifyAuthManager(private val context: Context) {
         }
     }
 
-    private fun exchangeCode(code: String, verifier: String) {
+    private fun exchangeCode(code: String, verifier: String): Boolean {
         val body = "grant_type=authorization_code" +
             "&code=${Uri.encode(code)}" +
             "&redirect_uri=${Uri.encode(REDIRECT_URI)}" +
@@ -148,7 +214,7 @@ class SpotifyAuthManager(private val context: Context) {
             .bufferedReader().readText()
         if (resCode !in 200..299) {
             Log.e(TAG, "Spotify token exchange HTTP $resCode: $text")
-            return
+            return false
         }
         val t = JSONObject(text)
         val auth = JSONObject().apply {
@@ -162,6 +228,7 @@ class SpotifyAuthManager(private val context: Context) {
             .remove(KEY_STATE)
             .apply()
         Log.i(TAG, "Spotify token stored; will hand off to car WebView on next poll")
+        return true
     }
 
     private fun randomString(len: Int): String {

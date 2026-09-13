@@ -61,5 +61,9 @@ dependencies {
     implementation 'androidx.car.app:app-projected:1.7.0'
     // Custom Tabs for the one-time Spotify PKCE login on the phone.
     implementation 'androidx.browser:browser:1.8.0'
+    // Spotify auth SDK: single-sign-on via the installed Spotify app
+    // (already logged in) instead of a web login. PKCE is injected via
+    // custom params; the existing token exchange is reused unchanged.
+    implementation 'com.spotify.android:auth:2.1.0'
     implementation 'androidx.core:core-ktx:1.13.1'
 }

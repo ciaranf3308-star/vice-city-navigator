@@ -68,5 +68,14 @@
                 <data android:scheme="waystation" android:host="spotify-callback" />
             </intent-filter>
         </activity>
+
+        <!-- Transparent trampoline for Spotify app-SSO: lets contexts with
+             no Activity (the car CarContext) run the auth SDK's
+             startActivityForResult flow. No UI of its own. -->
+        <activity
+            android:name=".SpotifySsoActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:exported="false"
+            android:excludeFromRecents="true" />
     </application>
 </manifest>

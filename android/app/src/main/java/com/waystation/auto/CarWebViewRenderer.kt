@@ -777,5 +777,17 @@ class CarWebViewRenderer(private val carContext: CarContext) {
                 Log.w(TAG, "onSpotifyAuthChanged failed", e)
             }
         }
+
+        /** Hand Spotify login to the Spotify app (SSO, one-tap approve)
+         *  instead of a web login inside the head-unit WebView. Falls back
+         *  to the Custom Tab flow when the app path can't complete. */
+        @JavascriptInterface
+        fun startSpotifyAuth() {
+            try {
+                spotifyAuth.startAuthViaApp(carContext)
+            } catch (e: Exception) {
+                Log.e(TAG, "startSpotifyAuth failed", e)
+            }
+        }
     }
 }

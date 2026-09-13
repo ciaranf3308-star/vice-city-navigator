@@ -63,6 +63,17 @@ class MainActivity : Activity() {
                 Log.w(TAG, "onSpotifyAuthChanged failed", e)
             }
         }
+
+        /** Same as the car bridge: SSO via the Spotify app instead of a
+         *  web login in a WebView that doesn't share the app's session. */
+        @JavascriptInterface
+        fun startSpotifyAuth() {
+            try {
+                spotifyAuth.startAuthViaApp(this@MainActivity)
+            } catch (e: Exception) {
+                Log.w(TAG, "startSpotifyAuth failed", e)
+            }
+        }
     }
     // Pending WebView geolocation callbacks. While the Android runtime
     // permission request is still in flight, the page may already ask for

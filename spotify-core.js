@@ -85,6 +85,18 @@
 
   async function connect() {
     if (beforeRedirectHook) { try { beforeRedirectHook(); } catch (e) {} }
+    // Native shell (car head unit or phone app): hand login to the Spotify
+    // app via SSO (one-tap approve — it's already logged in, even via
+    // Facebook) instead of a web login in a WebView that doesn't share the
+    // Spotify app's session. The token comes back through the native
+    // handoff (setSpotifyAuth / token mirror) — no redirect needed.
+    try {
+      var native = window.WayStationCarNative;
+      if (native && typeof native.startSpotifyAuth === 'function') {
+        native.startSpotifyAuth();
+        return;
+      }
+    } catch (e) {}
     const verifier = randString(64);
     const state = randString(16);
     try {
@@ -381,8 +393,9 @@
   }
 
   /* ---------------- car-mode token handoff ----------------
-     The Android Auto shell performs Spotify PKCE natively (Custom Tab on
-     the phone) and hands the resulting auth JSON here via
+     The Android Auto shell performs Spotify login natively (SSO via the
+     Spotify app when installed, Custom Tab on the phone as fallback) and
+     hands the resulting auth JSON here via
      window.WayStationCar.setSpotifyAuth(). Same storage key and shape as
      the web flow — no second Spotify implementation. */
   function reloadAuth() {
