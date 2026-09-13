@@ -240,6 +240,21 @@ ok(rdrPlace && rdrPlace.layout['text-letter-spacing'] === 0.18, 'RDR2 place labe
 const placesSrc = fs.readFileSync(path.join(REPO, 'places.js'), 'utf8');
 ok(placesSrc.includes('blipScale'), 'places.js honors pois.blipScale');
 ok(placesSrc.includes('ws-poi-marker'), 'places.js renders POIs as DOM markers');
+/* POI blips MUST stay absolutely positioned: MapLibre places each marker purely
+   with the translate() it writes on move/zoom, from a top:0;left:0 origin.
+   position:relative once laid blips out in flow below the canvas, shifting them
+   ~one map-height south (petrol stations rendered in the sea). The label still
+   anchors below the blip because absolute elements are positioned ancestors. */
+const poiRule = cssSrc.match(/\.ws-poi-marker\{([^}]*)\}/);
+ok(!!poiRule, '.ws-poi-marker rule exists in styles.css');
+ok(/position\s*:\s*absolute/.test(poiRule[1]), 'POI blips are absolutely positioned (never relative/static)');
+ok(/top\s*:\s*0/.test(poiRule[1]) && /left\s*:\s*0/.test(poiRule[1]), 'POI blips anchor at top:0;left:0 for MapLibre translate()');
+for (const tid of ['vice-city', 'san-andreas', 'gta-v', 'rdr2']) {
+  const dashCss = fs.readFileSync(path.join(REPO, 'themes', tid, 'dashboard.css'), 'utf8');
+  const ov = dashCss.match(/\.ws-poi-marker\{([^}]*)\}/);
+  ok(!ov || !/position\s*:\s*(relative|static|sticky|fixed)/.test(ov[1]),
+    `${tid} dashboard.css does not knock POI blips out of absolute positioning`);
+}
 ok(placesSrc.includes('markerPxForZoom'), 'places.js scales POI marker size by zoom');
 ok(!placesSrc.includes('POI_LAYER_ID'), 'places.js has no POI symbol layer');
 const impMatch = placesSrc.match(/const IMPORTANCE_BY_SEMANTIC = \{([\s\S]*?)\};/);

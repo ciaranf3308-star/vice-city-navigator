@@ -376,7 +376,14 @@ body.theme-rdr2 #search-bar span{opacity:.85}
 #poi-detail .poi-secondary{width:100%;margin-top:10px}
 /* Ambient POI DOM markers — plain <div><img> via maplibregl.Marker.
    Size is set inline per zoom; art must never stretch. */
-.ws-poi-marker{cursor:pointer;pointer-events:auto;line-height:0;position:relative}
+/* Ambient POI blips: MUST stay absolutely positioned at top:0;left:0 so they
+   stay out of flow — MapLibre positions each blip purely with the
+   translate() it writes on move/zoom. (position:relative here once laid every
+   blip out in flow below the canvas, shifting them ~one map-height south —
+   petrol stations rendered in the sea.) The label still anchors below the
+   blip: absolutely-positioned elements are containing blocks for their own
+   absolutely-positioned children. */
+.ws-poi-marker{position:absolute;top:0;left:0;cursor:pointer;pointer-events:auto;line-height:0}
 .ws-poi-marker img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}
 .ws-poi-label{position:absolute;top:100%;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:11px;line-height:1.2;font-weight:600;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.9),0 0 4px rgba(0,0,0,.9);pointer-events:none;margin-top:1px;max-width:120px;overflow:hidden;text-overflow:ellipsis}
 body.theme-vice-city .ws-poi-label{font-family:'Pricedown Bl','Arial Black',sans-serif;letter-spacing:.5px;font-size:12px}
