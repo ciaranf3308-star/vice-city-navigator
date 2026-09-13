@@ -15,6 +15,13 @@ android {
         // per upload: CI run number when available, 2 otherwise.
         versionCode (System.getenv('GITHUB_RUN_NUMBER')?.toInteger() ?: 2)
         versionName '1.1.0'
+        // Spotify auth SDK's LoginActivity declares its redirect intent-filter
+        // with these placeholders — must match REDIRECT_URI
+        // (waystation://spotify-callback) registered in the Spotify dashboard.
+        manifestPlaceholders = [
+            redirectSchemeName: 'waystation',
+            redirectHostName: 'spotify-callback'
+        ]
     }
 
     signingConfigs {
