@@ -351,6 +351,52 @@ class CarWebViewRenderer(private val carContext: CarContext) {
         }
         wv.webChromeClient = object : WebChromeClient() {
             /**
+             * JS dialogs (alert/confirm/prompt) need a real window token for
+             * the default dialog — the head-unit WebView has none, so the
+             * default implementation throws and kills the app (same class of
+             * crash as the native <select> popup, which car.js replaces).
+             * Auto-answer instead: alerts are acknowledged, confirms and
+             * prompts are declined. Destructive confirms (e.g. fog reset)
+             * stay available on the phone.
+             */
+            override fun onJsAlert(
+                view: WebView?,
+                url: String?,
+                message: String?,
+                result: android.webkit.JsResult
+            ): Boolean {
+                Log.i(TAG, "car WebView jsAlert suppressed: $message")
+                CarDiagnostics.log(carContext, "car webview: jsAlert suppressed")
+                result.confirm()
+                return true
+            }
+
+            override fun onJsConfirm(
+                view: WebView?,
+                url: String?,
+                message: String?,
+                result: android.webkit.JsResult
+            ): Boolean {
+                Log.i(TAG, "car WebView jsConfirm declined: $message")
+                CarDiagnostics.log(carContext, "car webview: jsConfirm declined")
+                result.cancel()
+                return true
+            }
+
+            override fun onJsPrompt(
+                view: WebView?,
+                url: String?,
+                message: String?,
+                defaultValue: String?,
+                result: android.webkit.JsPromptResult
+            ): Boolean {
+                Log.i(TAG, "car WebView jsPrompt declined: $message")
+                CarDiagnostics.log(carContext, "car webview: jsPrompt declined")
+                result.cancel()
+                return true
+            }
+
+            /**
              * Geolocation is granted ONLY to the WayStation origin and ONLY
              * after the Android location permission is actually granted.
              * Unknown origins are always denied. While a permission request

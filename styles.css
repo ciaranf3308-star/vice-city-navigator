@@ -1239,3 +1239,36 @@ body.dashboard-mode #mode-toggle{
 body.cluster-mode.theme-vice-city #mode-toggle{display:none}
 /* other clusters: JS docks this against the live stage rect; fallback top-left */
 body.cluster-mode:not(.theme-vice-city) #mode-toggle{top:24px;left:24px}
+
+/* ---------------------------------------------------------------------------
+   Car-mode <select> replacement (see car.js carifySelect). The head-unit
+   WebView has no window token for Chromium's native select popup — tapping
+   a real <select> throws and kills the app — so car mode swaps every
+   <select> for this in-page button list. Car-scale, dark, chunky.
+   --------------------------------------------------------------------------- */
+body.car-mode .car-select{position:relative;display:block;margin-top:8px}
+body.car-mode .car-select-btn{
+  display:flex;align-items:center;justify-content:space-between;
+  width:100%;min-height:72px;padding:0 24px;
+  font-size:26px;font-weight:600;color:#f2ede4;
+  background:#1c1a18;border:2px solid #4a4238;border-radius:12px;
+  cursor:pointer;text-align:left;
+}
+body.car-mode .car-select-btn::after{
+  content:"";flex:0 0 auto;width:18px;height:18px;margin-left:16px;
+  border-right:4px solid #c9a227;border-bottom:4px solid #c9a227;
+  transform:rotate(45deg) translateY(-4px);
+}
+body.car-mode .car-select-list{
+  position:absolute;z-index:50;left:0;right:0;top:calc(100% + 8px);
+  background:#141210;border:2px solid #4a4238;border-radius:12px;
+  overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.6);
+}
+body.car-mode .car-select-opt{
+  display:block;width:100%;min-height:68px;padding:0 24px;
+  font-size:24px;color:#f2ede4;background:transparent;border:0;
+  border-bottom:1px solid #2c2823;cursor:pointer;text-align:left;
+}
+body.car-mode .car-select-opt:last-child{border-bottom:0}
+body.car-mode .car-select-opt.active{color:#ffd75e;background:#2a241c}
+body.car-mode .car-select-opt:active{background:#3a3226}

@@ -1716,6 +1716,8 @@ const spCore = fs.readFileSync(path.join(REPO, 'spotify-core.js'), 'utf8');
 ok(/function reloadAuth\(\)/.test(spCore) && spCore.includes('reloadAuth,'),
   'car: SpotifyCore exposes reloadAuth for the native token handoff');
 ok(sw.includes("'car.js'"), 'car: service worker precaches car.js');
+ok(/carifySelect/.test(carJs) && carJs.includes('select:not([data-carified])'),
+  'car: native <select> swapped for in-page button list (head-unit WebView has no window token for the popup)');
 
 /* ---------- android/ car shell (personal/internal test build) ---------- */
 const AND = path.join(REPO, 'android');
