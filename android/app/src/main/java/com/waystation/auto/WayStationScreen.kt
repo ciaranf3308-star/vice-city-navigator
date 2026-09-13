@@ -87,8 +87,12 @@ class WayStationScreen(carContext: CarContext) : Screen(carContext) {
             main.post {
                 if (active == navActive) return@post
                 navActive = active
-                if (active) navManager.navigationStarted()
-                else navManager.navigationEnded()
+                try {
+                    if (active) navManager.navigationStarted()
+                    else navManager.navigationEnded()
+                } catch (e: Exception) {
+                    // host rejected the nav-state change — not fatal
+                }
             }
         }
         // Spotify connection state is no longer needed here — auth happens
@@ -127,21 +131,26 @@ class WayStationScreen(carContext: CarContext) : Screen(carContext) {
     }
 
     private fun requestLocationPermission() {
-        carContext.requestPermissions(
-            listOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ),
-            ContextCompat.getMainExecutor(carContext),
-            OnRequestPermissionsListener { granted, _ ->
-                locationGranted = granted.contains(Manifest.permission.ACCESS_FINE_LOCATION) ||
-                    granted.contains(Manifest.permission.ACCESS_COARSE_LOCATION)
+        try {
+            carContext.requestPermissions(
+                listOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ),
+                ContextCompat.getMainExecutor(carContext),
+                OnRequestPermissionsListener { granted, _ ->
+                    locationGranted = granted.contains(Manifest.permission.ACCESS_FINE_LOCATION) ||
+                        granted.contains(Manifest.permission.ACCESS_COARSE_LOCATION)
                 // Answer any held WebView geolocation callbacks with the real
                 // result, then reload for a clean page state.
                 renderer.onLocationPermissionResult()
                 invalidate() // show/hide the Enable location action
             }
         )
+        } catch (e: Exception) {
+            // permission request rejected (e.g. bad lifecycle moment) —
+            // the "Enable location" action stays so the user can retry
+        }
     }
 
     override fun onGetTemplate(): Template {
@@ -158,8 +167,15 @@ class WayStationScreen(carContext: CarContext) : Screen(carContext) {
         builder.setPanModeListener { _ ->
             // Pan-mode UI is the dashboard itself; nothing native to do.
         }
-        // Minimal host chrome. Native actions only for one-time setup the
-        // WebView cannot do itself.
+        // NOTE: No "Connect Spotify" action on the head unit. Spotify auth
+        // happens once in the phone app (which mirrors the token to native
+        // storage); the car WebView picks it up automatically via
+        // trySpotifyHandoff().
+        // NavigationTemplate.build() throws IllegalStateException unless an
+        // ActionStrip is set, and ActionStrip.build() throws if the strip is
+        // empty — so there must ALWAYS be at least one action. Reload is the
+        // permanent fallback: harmless when the page is healthy, and the
+        // manual escape hatch when it isn't.
         val actions = mutableListOf<Action>()
         if (!locationGranted) {
             actions.add(
@@ -169,11 +185,6 @@ class WayStationScreen(carContext: CarContext) : Screen(carContext) {
                     .build()
             )
         }
-        // NOTE: No "Connect Spotify" action on the head unit. Spotify auth
-        // happens once in the phone app (which mirrors the token to native
-        // storage); the car WebView picks it up automatically via
-        // trySpotifyHandoff(). The old Custom Tab flow was unreliable and
-        // is now redundant.
         if (pageFailed) {
             actions.add(
                 Action.Builder()
@@ -182,11 +193,17 @@ class WayStationScreen(carContext: CarContext) : Screen(carContext) {
                     .build()
             )
         }
-        if (actions.isNotEmpty()) {
-            val strip = ActionStrip.Builder()
-            actions.forEach { strip.addAction(it) }
-            builder.setActionStrip(strip.build())
+        if (actions.isEmpty()) {
+            actions.add(
+                Action.Builder()
+                    .setTitle("Reload")
+                    .setOnClickListener { renderer.reloadNow() }
+                    .build()
+            )
         }
+        val strip = ActionStrip.Builder()
+        actions.forEach { strip.addAction(it) }
+        builder.setActionStrip(strip.build())
         return builder.build()
     }
 }

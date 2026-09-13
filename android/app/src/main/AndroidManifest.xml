@@ -27,7 +27,7 @@
             android:resource="@xml/automotive_app_desc" />
         <meta-data
             android:name="androidx.car.app.minCarApiLevel"
-            android:value="1" />
+            android:value="2" />
 
         <!-- Phone launcher: one app, one install. The same APK that Android
              Auto picks up also opens the site on the phone (normal mode) —

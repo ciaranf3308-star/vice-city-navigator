@@ -289,8 +289,11 @@ class CarWebViewRenderer(private val carContext: CarContext) {
             cancelRetry()
             retryCount = 0
             wv.loadUrl(DASH_URL)
-        } catch (e: Exception) {
-            Log.e(TAG, "attach failed", e)
+        } catch (t: Throwable) {
+            // Throwable, not just Exception: an OOM or native-link failure
+            // during WebView init must degrade to the retry path, never
+            // escape the surface callback and kill the session.
+            Log.e(TAG, "attach failed", t)
             detach()
         }
     }
@@ -457,10 +460,20 @@ class CarWebViewRenderer(private val carContext: CarContext) {
 
     // ---------------- touch forwarding ----------------
 
+    /** Touch input arrives on the host's schedule — including mid-teardown.
+     *  A gesture that throws must never kill the car session. */
+    private inline fun safeTouch(block: () -> Unit) {
+        try {
+            block()
+        } catch (e: Exception) {
+            // drop the gesture
+        }
+    }
+
     /** Tap: down+up at the surface point. Drives every dashboard control
      *  (Spotify prev/play/next, radio toggle, recenter, tabs, search…). */
-    fun click(x: Float, y: Float) {
-        val wv = webView ?: return
+    fun click(x: Float, y: Float) = safeTouch {
+        val wv = webView ?: return@safeTouch
         val now = SystemClock.uptimeMillis()
         wv.dispatchTouchEvent(MotionEvent.obtain(now, now, MotionEvent.ACTION_DOWN, x, y, 0))
         wv.dispatchTouchEvent(MotionEvent.obtain(now, now, MotionEvent.ACTION_UP, x, y, 0))
@@ -468,16 +481,16 @@ class CarWebViewRenderer(private val carContext: CarContext) {
 
     /** Pan: the host reports per-event scroll distance; synthesize a short
      *  drag from the surface centre in the opposite direction. */
-    fun scroll(distanceX: Float, distanceY: Float) {
-        val wv = webView ?: return
+    fun scroll(distanceX: Float, distanceY: Float) = safeTouch {
+        val wv = webView ?: return@safeTouch
         val cx = wv.width / 2f
         val cy = wv.height / 2f
         drag(cx, cy, cx - distanceX * 6f, cy - distanceY * 6f)
     }
 
     /** Pinch zoom around the gesture focus. */
-    fun pinch(focusX: Float, focusY: Float, scaleFactor: Float) {
-        val wv = webView ?: return
+    fun pinch(focusX: Float, focusY: Float, scaleFactor: Float) = safeTouch {
+        val wv = webView ?: return@safeTouch
         val now = SystemClock.uptimeMillis()
         val spread = 160f
         val p0 = MotionEvent.PointerProperties().also {
@@ -527,8 +540,8 @@ class CarWebViewRenderer(private val carContext: CarContext) {
     }
 
     /** Fling: short fast drag along the fling vector. */
-    fun fling(velocityX: Float, velocityY: Float) {
-        val wv = webView ?: return
+    fun fling(velocityX: Float, velocityY: Float) = safeTouch {
+        val wv = webView ?: return@safeTouch
         val cx = wv.width / 2f
         val cy = wv.height / 2f
         drag(cx, cy, cx + velocityX * 0.12f, cy + velocityY * 0.12f)
@@ -564,14 +577,25 @@ class CarWebViewRenderer(private val carContext: CarContext) {
                 pollRunning = false
                 return
             }
-            wv.evaluateJavascript(
-                "(function(){try{var b=window.WayStationCar;" +
-                    "return b?JSON.stringify(b.getState()):'{}';}" +
-                    "catch(e){return '{}';}})()"
-            ) { raw ->
-                handleState(raw)
-                if (webView != null) main.postDelayed(this, POLL_MS)
-                else pollRunning = false
+            try {
+                wv.evaluateJavascript(
+                    "(function(){try{var b=window.WayStationCar;" +
+                        "return b?JSON.stringify(b.getState()):'{}';}" +
+                        "catch(e){return '{}';}})()"
+                ) { raw ->
+                    try {
+                        handleState(raw)
+                    } catch (e: Exception) {
+                        // never let a poll callback kill the car session
+                    }
+                    if (webView != null) main.postDelayed(this, POLL_MS)
+                    else pollRunning = false
+                }
+            } catch (e: Exception) {
+                // WebView native side gone (e.g. renderer crash) — stop
+                // polling instead of crashing the session; a surface
+                // re-attach will restart it.
+                pollRunning = false
             }
         }
     }
@@ -604,17 +628,21 @@ class CarWebViewRenderer(private val carContext: CarContext) {
         val wv = webView ?: return
         // Only mark done if the page actually received it — if the bridge
         // isn't ready yet (page still loading), retry on the next poll.
-        wv.evaluateJavascript(
-            "(function(){try{return window.WayStationCar&&" +
-                "WayStationCar.setSpotifyAuth(" +
-                JSONObject.quote(tokenJson) + ");}catch(e){return false;}})()",
-        ) { result ->
-            if (result == "true") {
-                handoffDone = true
-                Log.i(TAG, "Spotify token handed to car WebView")
-            } else {
-                Log.i(TAG, "Spotify handoff deferred — page not ready, will retry")
+        try {
+            wv.evaluateJavascript(
+                "(function(){try{return window.WayStationCar&&" +
+                    "WayStationCar.setSpotifyAuth(" +
+                    JSONObject.quote(tokenJson) + ");}catch(e){return false;}})()",
+            ) { result ->
+                if (result == "true") {
+                    handoffDone = true
+                    Log.i(TAG, "Spotify token handed to car WebView")
+                } else {
+                    Log.i(TAG, "Spotify handoff deferred — page not ready, will retry")
+                }
             }
+        } catch (e: Exception) {
+            // WebView gone mid-handoff — next poll retries; never crash.
         }
     }
 
