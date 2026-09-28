@@ -1942,6 +1942,9 @@ function startNav() {
   setUiMode('drive');
   setFollow(true);
   enableCompass(); // map follows the direction the user faces, not just GPS travel
+  /* Ask for arrival-notification permission from the Start Drive gesture —
+     a request outside a gesture is silently dropped, so this is the moment. */
+  try { if (window.VCNNotify) VCNNotify.ensurePermission(); } catch (e) {}
   updateBanner();
   const first = steps[0];
   // The opening announcement briefly waits for the persona voice (up to 5s)
@@ -2256,11 +2259,17 @@ function updateBanner(dMan) {
   syncClusterTurn(currentTurnData());
 }
 
-function maybeAnnounce(dMan) {
-  const nextIdx = Math.min(stepIdx + 1, steps.length - 1);
+/* Arrival notification: mirrors the "You have arrived" voice cue. The
+   module no-ops unless permission was already granted at nav start. */
+function notifyArrival() {
+  try {
+    if (window.VCNNotify) VCNNotify.arrivalNotice(dest && dest.label);
+  } catch (e) { /* notifications must never break navigation */ }
+}
+function maybeAnnounce(dMan) {  const nextIdx = Math.min(stepIdx + 1, steps.length - 1);
   const next = steps[nextIdx];
   if (next.maneuver.type === 'arrive') {
-    if (!arrived && dMan < 40) { arrived = true; speak('You have arrived.'); }
+    if (!arrived && dMan < 40) { arrived = true; speak('You have arrived.'); notifyArrival(); }
     return;
   }
   // Stable canonical texts ("In 300 meters, …") so themed-voice
@@ -3619,7 +3628,7 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
    enforces this). On boot, compare against the live network sw.js; on
    mismatch, ask the SW registration to update and reload once.
    sessionStorage gates it so a blocked network can never loop. */
-const WS_SHELL_VERSION = 'ws-shell-v80';
+const WS_SHELL_VERSION = 'ws-shell-v81';
 function healShellVersionSkew() {
   try {
     if (!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;

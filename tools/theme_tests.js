@@ -175,7 +175,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v80"), 'SW shell cache v76');
+ok(swSrc.includes("ws-shell-v81"), 'SW shell cache v76');
 ok(swSrc.includes("ws-theme-v217"), 'SW theme cache v215');
 /* Shell version skew guard: app.js bakes the shell version and
    self-heals a mixed old/new asset boot (2026-09-12: old openMenu +
@@ -2540,5 +2540,122 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
     'sandbox: native error surfaces with its code');
 }
 
-console.log(`\n${pass} passed, ${fail} failed`);
-process.exit(fail ? 1 : 0);
+/* ---------- arrival notifications (VCNNotify) ---------- */
+{
+  const notifySrc = fs.readFileSync(path.join(REPO, 'notify.js'), 'utf8');
+
+  // module shape
+  ok(notifySrc.includes('window.VCNNotify'), 'notify.js exposes window.VCNNotify');
+  for (const m of ['ensurePermission', 'arrivalNotice', 'supported', 'permission']) {
+    ok(new RegExp(m + '[:,\\s]').test(notifySrc), `VCNNotify exposes ${m}`);
+  }
+
+  // app.js wiring: permission asked at nav start, notice fired on arrival
+  ok(appSrc.includes('VCNNotify.ensurePermission()'), 'startNav requests notification permission');
+  ok(appSrc.includes('notifyArrival()'), 'arrival branch fires the notification');
+  ok(/function notifyArrival\(\)/.test(appSrc), 'app.js defines notifyArrival()');
+  ok(appSrc.includes('VCNNotify.arrivalNotice(dest && dest.label)'),
+    'arrival notice carries the destination label');
+
+  // wiring: script order + SW precache + tap-to-focus
+  ok(indexSrc.indexOf('notify.js') !== -1 && indexSrc.indexOf('notify.js') < indexSrc.indexOf('src="app.js"'),
+    'index.html loads notify.js before app.js');
+  ok(swSrc.includes("'notify.js'") || swSrc.includes('"notify.js"'),
+    'SW precaches notify.js');
+  ok(swSrc.includes("addEventListener('notificationclick'"), 'SW focuses the app on notification tap');
+
+  // live sandbox: permission + arrival flows
+  function notifySandbox(permissionState) {
+    const win = {};
+    let requested = false;
+    let vibrated = null;
+    const shown = [];
+    const MockNotification = function (t, o) { shown.push({ title: t, opts: o }); };
+    MockNotification.permission = permissionState;
+    MockNotification.requestPermission = () => {
+      requested = true;
+      MockNotification.permission = 'granted';
+      return Promise.resolve('granted');
+    };
+    win.Notification = MockNotification;
+    const sb = {
+      window: win,
+      Notification: MockNotification,
+      navigator: {
+        vibrate: p => { vibrated = p; return true; },
+        serviceWorker: {
+          ready: Promise.resolve({
+            showNotification: (t, o) => { shown.push({ title: t, opts: o }); return Promise.resolve(); },
+          }),
+        },
+      },
+      console, Promise,
+      __probe: () => ({ requested, vibrated, shown }),
+    };
+    vm.createContext(sb);
+    vm.runInContext(notifySrc, sb, { filename: 'notify.js' });
+    return { sb, N: sb.window.VCNNotify };
+  }
+
+  async function notifyAsyncTests() {
+    // permission default -> requested once, resolves granted
+    {
+      const { N, sb } = notifySandbox('default');
+      const p = await N.ensurePermission();
+      ok(p === 'granted', 'sandbox: ensurePermission resolves granted after request');
+      ok(sb.__probe().requested === true, 'sandbox: ensurePermission requests when default');
+    }
+    // already granted -> no second request
+    {
+      const { N, sb } = notifySandbox('granted');
+      await N.ensurePermission();
+      ok(sb.__probe().requested === false, 'sandbox: ensurePermission no-ops when already granted');
+    }
+    // denied -> arrival is a silent no-op
+    {
+      const { N, sb } = notifySandbox('denied');
+      const fired = await N.arrivalNotice('Somewhere');
+      ok(fired === false, 'sandbox: arrivalNotice no-ops when permission denied');
+      ok(sb.__probe().shown.length === 0, 'sandbox: nothing shown when permission denied');
+    }
+    // granted -> notification via SW with label, tag, buzz
+    {
+      const { N, sb } = notifySandbox('granted');
+      const fired = await N.arrivalNotice('Dublin Airport');
+      const probe = sb.__probe();
+      ok(fired === true, 'sandbox: arrivalNotice fires when granted');
+      ok(probe.shown.length === 1 && probe.shown[0].title === 'WayStation',
+        'sandbox: arrival notification titled WayStation');
+      ok(probe.shown[0].opts.body === 'You have arrived at Dublin Airport.',
+        'sandbox: arrival body names the destination');
+      ok(probe.shown[0].opts.tag === 'ws-arrival', 'sandbox: arrival notification is tag-deduped');
+      ok(Array.isArray(probe.vibrated) && probe.vibrated.length === 3,
+        'sandbox: arrival buzzes the phone');
+    }
+    // granted, no label -> generic body
+    {
+      const { N, sb } = notifySandbox('granted');
+      await N.arrivalNotice('');
+      ok(sb.__probe().shown[0].opts.body === 'You have arrived.',
+        'sandbox: arrival body is generic without a label');
+    }
+    // no Notification support -> everything no-ops, nothing throws
+    {
+      const sb = { window: {}, navigator: {}, console, Promise };
+      vm.createContext(sb);
+      vm.runInContext(notifySrc, sb, { filename: 'notify.js' });
+      const N = sb.window.VCNNotify;
+      ok(N.supported() === false, 'sandbox: unsupported browser reports not supported');
+      ok((await N.ensurePermission()) === 'denied',
+        'sandbox: ensurePermission degrades without Notification');
+      ok((await N.arrivalNotice('X')) === false,
+        'sandbox: arrivalNotice degrades without Notification');
+    }
+  }
+  var notifyTestsDone = notifyAsyncTests();
+}
+
+notifyTestsDone.then(() => {
+  console.log(`\n${pass} passed, ${fail} failed`);
+  process.exit(fail ? 1 : 0);
+});

@@ -10,14 +10,14 @@
      default Vice City set.
    Map tiles are cached on demand for offline use (cache-first, 7-day TTL).
    Routing and search always go to the network. */
-const CACHE = 'ws-shell-v80';
+const CACHE = 'ws-shell-v81';
 const THEME_CACHE = 'ws-theme-v217';
 const TILE_CACHE = 'ws-tiles-v1';
 const VC_BLIPS = ['airYard','barbers','burgerShot','cash','chicken','dateDisco','dateDrink',
   'dateFood','diner','fuel','girlfriend','gym','hostpital','modGarage','north','parking',
   'pizza','police','propertyG','qmark','race','runway','saveGame','school','spray','tattoo','waypoint'];
 const SHELL = [
-  './', 'index.html', 'styles.css', 'app.js', 'location.js', 'places.js', 'places-config.js',
+  './', 'index.html', 'styles.css', 'app.js', 'location.js', 'notify.js', 'places.js', 'places-config.js',
   'traffic.js', 'traffic-config.js',
   'discovery.js', 'voice.js', 'supabase-config.js',
   'themes/vice-city/dashboard.css',
@@ -101,6 +101,16 @@ self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(keys =>
     Promise.all(keys.filter(k => k !== CACHE && k !== THEME_CACHE).map(k => caches.delete(k)))
   ).then(() => self.clients.claim()));
+});
+/* Tapping the arrival notification brings WayStation back to the front. */
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  e.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clients => {
+      for (const c of clients) { if (c.focus) return c.focus(); }
+      if (self.clients.openWindow) return self.clients.openWindow('./');
+    })
+  );
 });
 function isShell(path) {
   if (path === '/' || path.endsWith('/vice-city-navigator/')) return true;
