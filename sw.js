@@ -99,7 +99,7 @@ self.addEventListener('install', e => {
 });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(keys =>
-    Promise.all(keys.filter(k => k !== CACHE && k !== THEME_CACHE).map(k => caches.delete(k)))
+    Promise.all(keys.filter(k => k !== CACHE && k !== THEME_CACHE && k !== TILE_CACHE).map(k => caches.delete(k)))
   ).then(() => self.clients.claim()));
 });
 /* Tapping the arrival notification brings WayStation back to the front. */
@@ -159,7 +159,10 @@ function cacheFirstTile(req) {
           const copy = res.clone();
           const headers = new Headers(res.headers);
           headers.set('sw-cached-at', Date.now().toString());
-          const cachedRes = new Response(res.body, {
+          /* The cached copy is built from the CLONE's stream: building it
+             from res.body would consume the original response's body and
+             the page would receive a disturbed, unreadable response. */
+          const cachedRes = new Response(copy.body, {
             status: res.status,
             statusText: res.statusText,
             headers: headers

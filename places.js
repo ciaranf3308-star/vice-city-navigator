@@ -245,8 +245,11 @@
      itself two ways:
        1. never refetch ground covered by a query in the last 24 h —
           those POIs are already in the cache, re-asking is pure waste
-       2. hard daily budget on refreshes (configurable) — the last
-          line of defence so usage can never run away */
+       2. hard daily budget on Google requests (configurable) — spent
+          per group call, since one refresh makes one billable call
+          per category group; counting a whole refresh as 1 would let
+          real spend run N× past the cap. The last line of defence so
+          usage can never run away */
   const LS_QUERIES_KEY = 'vcn-poi-queries-v2';
   const LS_BUDGET_KEY = 'vcn-poi-budget-v2';
   let queryHistory = []; // [{lng, lat, at}] — ground already fetched
@@ -303,36 +306,40 @@
     if (lastQueryCenter && haversine(lastQueryCenter, lnglat) < minMove) return;
     pruneQueryHistory();
     if (recentlyQueried(lnglat)) return; // cache already covers this ground
-    if (!budgetAllows()) {
-      const today = new Date().toISOString().slice(0, 10);
-      if (budgetWarnedFor !== today) {
-        budgetWarnedFor = today;
-        console.info('[vcn-pois] daily refresh budget reached — ambient POIs paused until tomorrow');
-      }
-      lastRefreshInfo = { at: Date.now(), total: 0, ok: false, error: 'daily budget reached' };
-      return;
-    }
     // Only advance the movement gate when we're actually about to fetch —
     // bailing above must not poison the gate with unfetched ground.
     lastQueryCenter = lnglat.slice();
     refreshInFlight = true;
     const info = { at: Date.now(), total: 0, ok: false, error: null };
     try {
-      let total = 0, ok = false;
+      let total = 0, ok = false, budgetHit = false;
       const errors = [];
       for (const group of POI_GROUPS) {
+        // Budget is spent per Google request, not per refresh.
+        if (!budgetAllows()) {
+          budgetHit = true;
+          const today = new Date().toISOString().slice(0, 10);
+          if (budgetWarnedFor !== today) {
+            budgetWarnedFor = today;
+            console.info('[vcn-pois] daily refresh budget reached — ambient POIs paused until tomorrow');
+          }
+          break;
+        }
         try { total += await searchGroup(group, lnglat); ok = true; }
         catch (e) { errors.push(group.id + ':' + e.message); console.warn('[vcn-pois] group failed:', group.id, e.message); }
       }
       info.total = total; info.ok = ok;
-      if (!ok) info.error = errors.join(' | ') || 'all groups failed';
-      if (ok) {
-        // Only mark ground as covered when Google actually answered.
-        // A failed refresh must stay retryable — recording it would
-        // poison the 24 h history and silently block every later pan.
+      if (budgetHit) info.error = 'daily budget reached';
+      else if (!ok) info.error = errors.join(' | ') || 'all groups failed';
+      else if (errors.length) info.error = 'partial: ' + errors.join(' | ');
+      if (ok && !errors.length && !budgetHit) {
+        // Only mark ground as covered when Google answered every group.
+        // A partial refresh must stay retryable — recording it would
+        // poison the 24 h history and silently block the failed groups.
+        // Successful groups' results are still kept (render/persist below).
         queryHistory.push({ lng: lnglat[0], lat: lnglat[1], at: Date.now() });
         saveQueryHistory();
-      } else {
+      } else if (!ok) {
         // Nothing answered (bad key, no network): back off a minute so a
         // broken setup can't hammer the API on every pan.
         failCooldownUntil = Date.now() + 60000;

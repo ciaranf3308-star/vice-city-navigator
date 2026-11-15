@@ -622,8 +622,8 @@ ok(appSrc.includes('if (spotVisible) mountSpotifySkin(wsThemeId());'),
   'cluster mounts the real Spotify skin (same widget as dashboard)');
 ok(appSrc.includes('pane.hidden = !spotVisible'), 'Spotify pane visible in cluster mode');
 ok(appSrc.includes('if (clu) refreshClusterLive();'), 'entering cluster mode refreshes every live region');
-ok(/if \(window\.VCNLocation\) \{\s*\n\s*if \(speedDisplayActive\(\)\) \{\s*\n\s*try \{ VCNLocation\.startWatch\(onPos, onPosErr\);/.test(appSrc),
-  'passive speed watch: single shared VCNLocation watch for dashboard + cluster');
+ok(/if \(window\.VCNLocation\) \{\s*\n\s*if \(speedDisplayActive\(\) \|\| navActive\) \{\s*\n\s*try \{ VCNLocation\.startWatch\(onPos, onPosErr\);/.test(appSrc),
+  'passive speed watch: single shared VCNLocation watch for dashboard + cluster, kept alive during nav');
 // no watcher is created inside the per-fix updaters
 for (const fn of ['updateSpeedo', 'updateClusterSpeed', 'maybeFetchSpeedLimit', 'syncClusterTurn', 'updateDriveForce']) {
   ok(!/watchPosition/.test(extractFn(appSrc, fn)), `no geolocation watcher inside ${fn}`);
@@ -2538,6 +2538,66 @@ ok(/appMode === 'cluster'\) \{\s*\n?\s*fitClusterStage/.test(appSrc),
   locSandbox.window.__wsLocError(1, 'denied');
   ok(VCL.getState().state === 'denied' && VCL.getState().lastError.code === 1,
     'sandbox: native error surfaces with its code');
+}
+
+/* ---------- production-readiness pass (2026-11-15): navigation ownership,
+   GPS lifecycle, car sync, back handling, cache truthfulness ---------- */
+{
+  const rerouteBody = appSrc.slice(appSrc.indexOf('async function reroute()'),
+    appSrc.indexOf('function drawRouteKeepView()'));
+  const announceBody = appSrc.slice(appSrc.indexOf('function maybeAnnounce('),
+    appSrc.indexOf('function setFollow('));
+  const mainActSrc = fs.readFileSync(path.join(REPO,
+    'android/app/src/main/java/com/waystation/auto/MainActivity.kt'), 'utf8');
+  const placesSrc = fs.readFileSync(path.join(REPO, 'places.js'), 'utf8');
+  const refreshBody = placesSrc.slice(placesSrc.indexOf('async function maybeRefresh('),
+    placesSrc.indexOf('/* ---------------- map rendering ----------------'));
+
+  // request ownership: stale search/route responses never overwrite newer ones
+  ok(appSrc.includes('let searchGen = 0, routeGen = 0'), 'request generation counters exist');
+  ok(appSrc.includes('if (gen !== searchGen) return'), 'stale search results are dropped');
+  ok(appSrc.includes('if (gen !== routeGen) return'), 'stale route results are dropped');
+  ok(appSrc.includes('const myDest = { label: dest.label'), 'planRoute snapshots the destination');
+  // no fabricated origin: Dublin is the map centre, never a navigation start
+  ok(!appSrc.includes('catch(() => DUBLIN)'), 'no Dublin fallback as a navigation origin');
+  ok(appSrc.includes('No location fix yet'), 'missing position is reported, not fabricated');
+  // route validation + reroute ownership
+  ok(appSrc.includes('function validateRoute(route)'), 'route responses are validated');
+  ok((appSrc.match(/validateRoute\(route\)/g) || []).length >= 2,
+    'planRoute and reroute both validate routes');
+  ok(rerouteBody.includes('publishNavSync()'), 'reroute republishes the route to the car');
+  ok(rerouteBody.includes('finally') && rerouteBody.includes('rerouting = false'),
+    'reroute always releases the rerouting flag');
+  ok(appSrc.includes('lastCarSyncTs'), 'car sync rejects stale snapshots');
+  // GPS lifecycle: navigation keeps the watch alive in every presentation mode
+  ok(appSrc.includes('speedDisplayActive() || navActive'), 'GPS watch survives mode switches during nav');
+  // step advancement: bounded loop, no recursion through the whole GPS pipeline
+  ok(!appSrc.includes('return onPos(pos)'), 'onPos never recurses');
+  ok(appSrc.includes('hops < steps.length'), 'step advancement is bounded');
+  // voice timing: the immediate cue wins inside both thresholds
+  ok(announceBody.indexOf('ann80') < announceBody.indexOf('ann300'),
+    'maybeAnnounce checks the 80 m cue before the 300 m cue');
+  // MapLibre CDN failure is a recoverable error, not a ReferenceError crash
+  ok(appSrc.includes("typeof window.maplibregl === 'undefined'"), 'missing MapLibre is guarded');
+  // stale speed limit becomes unknown on a completed lookup
+  ok(appSrc.includes('lookupCompleted'), 'speed-limit lookup completion is tracked');
+  ok(appSrc.includes('speedLimitKmh = null'), 'untagged road clears the previous limit');
+  // central back handling + native bridge
+  ok(appSrc.includes('function handleBack()'), 'central handleBack exists');
+  ok(appSrc.includes('window.WayStation.handleBack = handleBack'), 'handleBack is exposed to native');
+  ok(appSrc.includes('setBackIntercept'), 'back state is reported to the native shell');
+  ok(mainActSrc.includes('OnBackInvokedDispatcher') && mainActSrc.includes('fun setBackIntercept'),
+    'MainActivity handles Back via the invoked-callback dispatcher + JS flag');
+  // POI budget is spent per Google request; partial success stays retryable
+  ok(refreshBody.indexOf('budgetAllows()') > refreshBody.indexOf('for (const group of POI_GROUPS)'),
+    'POI budget is spent per group call');
+  ok(placesSrc.includes('ok && !errors.length'), 'ground is marked covered only on full success');
+  // service worker: tile cache survives activation; tile responses stay readable
+  ok(swSrc.includes('k !== TILE_CACHE'), 'SW activation retains the tile cache');
+  ok(swSrc.includes('new Response(copy.body'), 'cached tiles are built from the clone stream');
+  ok(!swSrc.includes('new Response(res.body'), 'tile responses are not body-consumed before return');
+  // saved-place rename is reachable from the UI
+  ok(appSrc.includes('renamePlace(p.id'), 'saved-place rename is wired to the menu list');
 }
 
 /* ---------- arrival notifications (VCNNotify) ---------- */

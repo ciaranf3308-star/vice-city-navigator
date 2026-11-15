@@ -353,6 +353,7 @@ body.theme-rdr2 #search-bar span{opacity:.85}
 .place-name{flex:1;background:none;border:none;color:inherit;font:inherit;text-align:left;cursor:pointer;padding:10px 6px;min-height:48px}
 .place-act{flex:0 0 auto;min-width:48px;min-height:48px;background:none;border:1px solid rgba(128,128,128,.35);border-radius:10px;color:inherit;font-size:18px;cursor:pointer}
 .place-act.danger{color:#ff6b6b;border-color:rgba(255,107,107,.4)}
+.place-rename{flex:1;min-width:0;background:rgba(128,128,128,.12);border:1px solid rgba(128,128,128,.45);border-radius:10px;color:inherit;font:inherit;padding:10px 8px;min-height:48px;box-sizing:border-box}
 #menu-set-home{margin-top:4px}
 .place-icon{width:34px;height:34px;flex:0 0 auto;object-fit:contain}
 /* Custom marker pins on the map */

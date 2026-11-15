@@ -33,6 +33,10 @@ let uiMode = 'explore';      // explore | planning | drive
 let discoveryOn = false;     // fog-of-war view (explore only — never while driving)
 let stepIdx = 0, lastCamMove = 0, lastPos = null;
 let offRouteSince = 0, arrived = false, rerouting = false;
+/* Request ownership: every async search/route belongs to one user action.
+   A newer action bumps the generation; an older response that lands late
+   must never overwrite the newer destination, route or result list. */
+let searchGen = 0, routeGen = 0;
 
 /* ---------------- helpers ---------------- */
 function toast(msg, ms = 3200) {
@@ -503,7 +507,18 @@ async function initMap() {
     mapBooting = false;
     return;
   }
-  const glOk = !window.maplibregl || typeof maplibregl.supported !== 'function' || maplibregl.supported();
+  /* The MapLibre CDN can fail (offline, blocked). Without the library,
+     instantiating the map throws a bare ReferenceError — show a
+     recoverable error instead and let the existing retry path re-run
+     the boot when connectivity returns (mapBootFailed). */
+  if (typeof window.maplibregl === 'undefined') {
+    mapEl.innerHTML = '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#ff71ce;font:16px sans-serif;text-align:center;padding:20px">Map library failed to load.<br>Check your connection — it will retry automatically.</div>';
+    toast('Map library failed to load — check your connection.');
+    mapBootFailed = true;
+    mapBooting = false;
+    return;
+  }
+  const glOk = typeof maplibregl.supported !== 'function' || maplibregl.supported();
   if (!glOk) {
     mapEl.innerHTML = '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#ff71ce;font:16px sans-serif;text-align:center;padding:20px">Map needs WebGL.<br>Try a browser with hardware acceleration enabled.</div>';
     toast('Map could not start: WebGL unavailable.');
@@ -1142,7 +1157,7 @@ async function maybeFetchSpeedLimit(lat, lon) {
     lon.toFixed(5) + ')[maxspeed];out tags center 1;';
   const hosts = ['https://overpass.kumi.systems/api/interpreter',
                  'https://overpass-api.de/api/interpreter'];
-  let best = null;
+  let best = null, lookupCompleted = false;
   for (const h of hosts) {
     try {
       const ctl = new AbortController();
@@ -1153,6 +1168,7 @@ async function maybeFetchSpeedLimit(lat, lon) {
       } finally { clearTimeout(to); }
       if (!r.ok) continue;
       const j = await r.json();
+      lookupCompleted = true; // a host answered: no-result now means "untagged"
       const ways = (j.elements || []).filter(e => e.tags && e.tags.maxspeed);
       if (!ways.length) break; // road simply untagged: stop, don't burn the fallback
       const cosLat = Math.cos(lat * Math.PI / 180);
@@ -1169,6 +1185,14 @@ async function maybeFetchSpeedLimit(lat, lon) {
   if (best) {
     speedLimitKmh = best;
     limitCache.set(key, best);
+    if (limitCache.size > 240) limitCache.delete(limitCache.keys().next().value);
+  } else if (lookupCompleted) {
+    /* The road genuinely has no usable limit: show unknown, not the
+       previous road's value. Cached as null so the lookup isn't
+       repeated for this ground. Network failures leave the old value
+       untouched — a failed lookup proves nothing about this road. */
+    speedLimitKmh = null;
+    limitCache.set(key, null);
     if (limitCache.size > 240) limitCache.delete(limitCache.keys().next().value);
   }
   limitPending = false;
@@ -1410,6 +1434,37 @@ function renderSavedLists() {
           toast('Home set: ' + p.label);
           renderSavedLists();
         });
+        const renameBtn = document.createElement('button');
+        renameBtn.className = 'place-act';
+        renameBtn.textContent = '✎';
+        renameBtn.title = 'Rename';
+        renameBtn.setAttribute('aria-label', 'Rename saved place');
+        renameBtn.addEventListener('click', ev => {
+          ev.stopPropagation();
+          /* Inline rename: the name becomes an editable field. Enter or
+             leaving the field saves (empty reverts); Escape cancels. */
+          const input = document.createElement('input');
+          input.className = 'place-rename';
+          input.type = 'text';
+          input.value = p.label;
+          input.maxLength = 60;
+          input.setAttribute('aria-label', 'New name');
+          name.replaceWith(input);
+          input.focus();
+          input.select();
+          let done = false;
+          const commit = save => {
+            if (done) return; done = true;
+            if (save) VCNSaved.renamePlace(p.id, input.value);
+            renderSavedLists();
+          };
+          input.addEventListener('keydown', e => {
+            if (e.key === 'Enter') commit(true);
+            else if (e.key === 'Escape') commit(false);
+            e.stopPropagation();
+          });
+          input.addEventListener('blur', () => commit(true));
+        });
         const delBtn = document.createElement('button');
         delBtn.className = 'place-act danger';
         delBtn.textContent = '✕';
@@ -1420,7 +1475,7 @@ function renderSavedLists() {
           VCNSaved.removePlace(p.id);
           renderSavedLists();
         });
-        li.append(name, homeBtn, delBtn);
+        li.append(name, renameBtn, homeBtn, delBtn);
         menuSavedList.appendChild(li);
       }
       menuSavedWrap.hidden = false;
@@ -1626,6 +1681,7 @@ function openMarkerSheet(lnglat, markerId) {
     grid.appendChild(b);
   }
   sheet.hidden = false;
+  syncBackState();
 }
 
 function closeMarkerSheet() {
@@ -1633,6 +1689,7 @@ function closeMarkerSheet() {
   if (sheet) sheet.hidden = true;
   pendingPin = null;
   editingMarkerId = null;
+  syncBackState();
 }
 
 function wireMarkerSheet() {
@@ -1710,7 +1767,7 @@ function wireSearch() {
   input.addEventListener('input', () => {
     clearTimeout(searchTimer);
     const q = input.value.trim();
-    if (q.length < 3) { list.hidden = true; renderRecents(); return; }
+    if (q.length < 3) { searchGen++; list.hidden = true; renderRecents(); return; }
     $('recent-wrap').hidden = true;
     searchTimer = setTimeout(() => runSearch(q), 450);
   });
@@ -1719,6 +1776,7 @@ function wireSearch() {
 async function runSearch(q) {
   const list = $('results');
   if (!q) return;
+  const gen = ++searchGen; // this request owns the results list until superseded
   try {
     // Bias results toward the user's area (viewbox boosts nearby ranking
     // without filtering out far-away matches entirely).
@@ -1731,6 +1789,7 @@ async function runSearch(q) {
     const url = `${NOMINATIM}?format=jsonv2&extratags=1&limit=6${vb}&accept-language=en&q=${encodeURIComponent(q)}`;
     const res = await fetch(url);
     const items = await res.json();
+    if (gen !== searchGen) return; // a newer search owns the list now
     list.innerHTML = '';
     if (!items.length) { list.hidden = true; toast('No places found.'); return; }
     for (const it of items) {
@@ -1746,6 +1805,7 @@ async function runSearch(q) {
       wrap.append(strong, small);
       li.append(img, wrap);
       li.addEventListener('click', () => {
+        searchGen++; // a late response for this query must not reappear
         dest = { label: name, lnglat: [parseFloat(it.lon), parseFloat(it.lat)], semantic };
         list.hidden = true; $('search').value = name;
         $('recent-wrap').hidden = true;
@@ -1755,7 +1815,10 @@ async function runSearch(q) {
       list.appendChild(li);
     }
     list.hidden = false;
-  } catch (e) { toast('Search failed — check your connection.'); }
+  } catch (e) {
+    if (gen !== searchGen) return; // superseded — the newer search owns the UI
+    toast('Search failed — check your connection.');
+  }
 }
 
 /* ---------------- voice search (speech-to-text) ----------------
@@ -1874,6 +1937,25 @@ function drawRoute() {
   routeCoords.forEach(c => b.extend(c));
   map.fitBounds(b, { padding: 60, duration: 800 });
 }
+/* A route response is not trusted until its geometry, legs and maneuver
+   locations are all present and finite. Both OSRM and the TomTom
+   conversion produce this shape; anything else throws before navigation
+   can touch it. */
+function validateRoute(route) {
+  const coords = route && route.geometry && route.geometry.coordinates;
+  if (!Array.isArray(coords) || coords.length < 2 ||
+      !coords.every(c => Array.isArray(c) && isFinite(c[0]) && isFinite(c[1])))
+    throw new Error('invalid route geometry');
+  const leg = route.legs && route.legs[0];
+  if (!leg || !Array.isArray(leg.steps) || !leg.steps.length)
+    throw new Error('invalid route legs');
+  for (const s of leg.steps) {
+    if (!s.maneuver || !Array.isArray(s.maneuver.location) ||
+        !isFinite(s.maneuver.location[0]) || !isFinite(s.maneuver.location[1]))
+      throw new Error('invalid maneuver');
+  }
+  return route;
+}
 function buildSteps(route) {
   const leg = route.legs[0];
   return leg.steps.map(s => ({
@@ -1887,25 +1969,46 @@ function buildSteps(route) {
 async function planRoute(opts) {
   if (!dest) return;
   const autostart = !!(opts && opts.autostart);
+  /* Snapshot the destination: this request routes to the place the user
+     picked when it started, even if they pick somewhere else mid-flight.
+     The generation guard below drops the result if that happens. */
+  const myDest = { label: dest.label, lnglat: dest.lnglat.slice(), semantic: dest.semantic || null };
+  const gen = ++routeGen;
   if (!autostart) toast('Finding the neon route…', 1500);
   try {
-    const from = userPos || await currentPosOnce().catch(() => DUBLIN);
+    /* Trustworthy origin only: the last verified fix, or a fresh one.
+       Dublin is the default map centre — never a navigation start point.
+       If no real position can be obtained, say so and route nothing. */
+    let from = userPos;
+    if (!from) {
+      try { from = await currentPosOnce(); } catch (e) { from = null; }
+      if (gen !== routeGen) return;
+    }
+    if (!from) {
+      $('route-card').hidden = true;
+      toast('No location fix yet — navigation needs your real position. Try outdoors with location on.', 5000);
+      return;
+    }
     // Live traffic routing when the toggle is ON and a TomTom key is set;
     // any TomTom failure falls back to OSRM silently for that request.
     let route = null, trafficDelayMin = 0;
     const trafficOn = !!(window.VCNTraffic && VCNTraffic.shouldRouteWithTraffic());
     if (trafficOn) {
-      try { route = await VCNTraffic.route(from, dest.lnglat); }
+      try { route = await VCNTraffic.route(from, myDest.lnglat); }
       catch (e) { console.warn('[ws] tomtom routing failed, OSRM fallback', e); }
+      if (gen !== routeGen) return;
     }
-    if (!route) route = await osrmRoute(from, dest.lnglat);
+    if (!route) route = await osrmRoute(from, myDest.lnglat);
+    if (gen !== routeGen) return;
+    route = validateRoute(route);
+    dest = myDest; // this request won: its destination is authoritative
     routeCoords = route.geometry.coordinates;
     steps = buildSteps(route);
     totalDist = route.distance; totalDur = route.duration;
     if (trafficOn && window.VCNTraffic) trafficDelayMin = Math.round((VCNTraffic.lastDelaySec() || 0) / 60);
     drawRoute();
     publishNavSync(); // the car mirrors the line via shared localStorage
-    saveRecent(dest);
+    saveRecent(myDest);
     if (autostart) { startNav(); return; }
     $('dest-label').textContent = (dest && dest.label) || 'Destination';
     $('route-dist').textContent = fmtDist(totalDist);
@@ -1916,6 +2019,7 @@ async function planRoute(opts) {
     const rc = $('route-card');
     if (rc && rc.scrollIntoView) rc.scrollIntoView({ block: 'nearest' });
   } catch (e) {
+    if (gen !== routeGen) return; // superseded — the newer request owns the UI
     $('route-card').hidden = true;
     toast('Could not find a route. Try again.');
   }
@@ -2002,7 +2106,7 @@ function endNav() {
    the car connected). The car only draws the line + destination pin — it
    never starts its own voice/watch; the phone owns guidance. */
 const NAV_SYNC_KEY = 'ws-nav-sync';
-let pendingCarNavSync = null, hasPendingCarNavSync = false;
+let pendingCarNavSync = null, hasPendingCarNavSync = false, lastCarSyncTs = 0;
 function publishNavSync() {
   if (window.__WAYSTATION_CAR) return; // the car never publishes
   try {
@@ -2017,6 +2121,13 @@ function publishNavSync() {
 }
 function applyCarNavSync(state) {
   try {
+    /* Staleness guard: the car never lets an old snapshot overwrite a
+       newer route (storage events can arrive out of order across the
+       two WebViews). A cleared route (null state) always applies. */
+    if (state && state.ts) {
+      if (state.ts < lastCarSyncTs) return;
+      lastCarSyncTs = state.ts;
+    }
     if (!map || !map.isStyleLoaded || !map.isStyleLoaded()) {
       pendingCarNavSync = state; hasPendingCarNavSync = true; // map/style not ready — flush on load
       return;
@@ -2172,15 +2283,26 @@ function onPos(pos) {
     else if (now - offRouteSince > 10000 && !rerouting) { reroute(); return; }
   } else offRouteSince = 0;
 
-  // step advancement: next maneuver is at steps[stepIdx+1] (step maneuver = start of step)
-  const nextIdx = Math.min(stepIdx + 1, steps.length - 1);
-  let dMan = haversine(p, steps[nextIdx].loc);
-  // jumped past the maneuver? skip ahead
-  if (nextIdx + 1 < steps.length && haversine(p, steps[nextIdx + 1].loc) < dMan - 30) {
-    stepIdx = nextIdx; return onPos(pos);
+  // step advancement: next maneuver is at steps[stepIdx+1] (step maneuver = start of step).
+  // Bounded loop, one pass per fix: maneuvers we've clearly driven past
+  // (closer to the one after by 30 m+) may chain-skip, but proximity
+  // alone advances at most one step per fix — close-together turns are
+  // never all consumed because their coordinates are near each other.
+  let dMan = 0, advanced = false;
+  for (let hops = 0; hops < steps.length; hops++) {
+    const nextIdx = Math.min(stepIdx + 1, steps.length - 1);
+    const dNext = haversine(p, steps[nextIdx].loc);
+    if (nextIdx + 1 < steps.length && haversine(p, steps[nextIdx + 1].loc) < dNext - 30) {
+      stepIdx = nextIdx; advanced = true; continue;
+    }
+    if (!advanced && nextIdx > stepIdx && dNext < 25) {
+      stepIdx = nextIdx; advanced = true;
+      dMan = haversine(p, steps[Math.min(stepIdx + 1, steps.length - 1)].loc);
+      break;
+    }
+    dMan = dNext;
+    break;
   }
-  if (nextIdx > stepIdx && dMan < 25) { stepIdx = nextIdx; }
-  else dMan = haversine(p, steps[Math.min(stepIdx + 1, steps.length - 1)].loc);
 
   updateBanner(dMan);
   maybeAnnounce(dMan);
@@ -2188,21 +2310,32 @@ function onPos(pos) {
 
 async function reroute() {
   if (!dest || !userPos || rerouting) return;
+  /* Snapshot origin + destination: the reroute belongs to this moment.
+     If the user picks a new destination mid-reroute, the generation guard
+     drops this result instead of overwriting the new route. */
+  const myDest = { label: dest.label, lnglat: dest.lnglat.slice() };
+  const from = userPos.slice();
+  const gen = ++routeGen;
   rerouting = true; speak('Rerouting.');
   toast('Rerouting…');
   try {
     let route = null;
     const trafficOn = !!(window.VCNTraffic && VCNTraffic.shouldRouteWithTraffic());
     if (trafficOn) {
-      try { route = await VCNTraffic.route(userPos, dest.lnglat); }
+      try { route = await VCNTraffic.route(from, myDest.lnglat); }
       catch (e) { console.warn('[ws] tomtom reroute failed, OSRM fallback', e); }
+      if (gen !== routeGen) return;
     }
-    if (!route) route = await osrmRoute(userPos, dest.lnglat);
+    if (!route) route = await osrmRoute(from, myDest.lnglat);
+    if (gen !== routeGen || !navActive) return; // superseded, or navigation ended
+    route = validateRoute(route);
+    dest = myDest;
     routeCoords = route.geometry.coordinates;
     steps = buildSteps(route);
     totalDist = route.distance; totalDur = route.duration;
     stepIdx = 0; offRouteSince = 0; arrived = false;
     drawRouteKeepView();
+    publishNavSync(); // the car must get the NEW line, not the stale one
     updateBanner();
     // Regenerate themed voice for the new route; drop stale audio.
     if (window.VCNVoice) {
@@ -2210,8 +2343,11 @@ async function reroute() {
       VCNVoice.pregenerate(upcomingManeuverTexts());
     }
     speak(`New route. ${instrText(steps[0])}.`, { awaitThemed: true });
-  } catch (e) { toast('Reroute failed — staying on current route.'); }
-  rerouting = false;
+  } catch (e) {
+    if (gen === routeGen) toast('Reroute failed — staying on current route.');
+  } finally {
+    rerouting = false;
+  }
 }
 function drawRouteKeepView() {
   ensureRouteLayers();
@@ -2273,9 +2409,11 @@ function maybeAnnounce(dMan) {  const nextIdx = Math.min(stepIdx + 1, steps.leng
     return;
   }
   // Stable canonical texts ("In 300 meters, …") so themed-voice
-  // pre-generation matches exactly what is spoken here.
-  if (!next.ann300 && dMan < 300) { next.ann300 = true; speak(`In 300 meters, ${instrText(next)}.`); }
-  else if (!next.ann80 && dMan < 80) { next.ann80 = true; speak(`${instrText(next)}.`); }
+  // pre-generation matches exactly what is spoken here. The immediate
+  // cue wins when the first fix already lands inside both thresholds —
+  // never a late "In 300 meters" for a turn that's 50 m away.
+  if (!next.ann80 && dMan < 80) { next.ann80 = true; next.ann300 = true; speak(`${instrText(next)}.`); }
+  else if (!next.ann300 && dMan < 300) { next.ann300 = true; speak(`In 300 meters, ${instrText(next)}.`); }
 }
 
 function setFollow(on) {
@@ -2307,6 +2445,7 @@ function openPlanning(view) {
   layoutDashDrawer(); // dock the drawer to the live stage rect in dashboard mode
   $('poi-detail').hidden = view !== 'poi';
   if (view !== 'route') $('route-card').hidden = true;
+  syncBackState();
   if (view === 'search') {
     // Synchronous focus inside the tap gesture so the mobile keyboard
     // opens immediately — a deferred focus won't.
@@ -2320,6 +2459,7 @@ function openPlanning(view) {
 function closeDrawer() {
   stopVoiceSearch();
   setUiMode(navActive ? 'drive' : 'explore');
+  syncBackState();
 }
 /* Car settings home/detail navigation (dash + cluster share one page):
    home = the widescreen tile grid; a tile opens its section as a detail
@@ -2372,10 +2512,54 @@ function openMenu() {
   menuClockT = setInterval(tickMenuClock, 10000);
   try { syncDiscoveryStats(); } catch (e) { /* menu must always open */ }
   try { renderSavedLists(); } catch (e) { /* menu must always open */ }
+  syncBackState();
 }
 function closeMenu() {
   $('menu-panel').hidden = true;
   if (menuClockT) { clearInterval(menuClockT); menuClockT = null; }
+  syncBackState();
+}
+
+/* ---------------- central Back handling ----------------
+   One predictable hierarchy for the Android Back button and any
+   in-app back affordance: dismiss the topmost layer first, never
+   dump the user into the wrong mode, never kill the app while a
+   layer could simply close. Returns true when a layer consumed it.
+   The native shell (MainActivity) asks this via WayStation.handleBack()
+   and only falls through to system back when it returns false. */
+function handleBack() {
+  const sheet = $('marker-sheet');
+  if (sheet && !sheet.hidden) { closeMarkerSheet(); return true; }
+  const panel = $('menu-panel');
+  if (panel && !panel.hidden) {
+    if (carSettingsMode() && !panel.classList.contains('menu-home')) showMenuHome();
+    else closeMenu();
+    return true;
+  }
+  if (uiMode === 'planning') {
+    const poi = $('poi-detail');
+    if (poi && !poi.hidden) { openPlanning('search'); return true; }
+    closeDrawer(); // planning over guidance returns to the drive HUD
+    return true;
+  }
+  return false;
+}
+/* Whether Back would be consumed right now — reported to the native
+   shell so it can decide synchronously whether to intercept the
+   system back press. Best-effort: no bridge, no report, no breakage. */
+function backWouldHandle() {
+  const sheet = $('marker-sheet');
+  if (sheet && !sheet.hidden) return true;
+  const panel = $('menu-panel');
+  if (panel && !panel.hidden) return true;
+  return uiMode === 'planning';
+}
+function syncBackState() {
+  try {
+    const bridge = window.WayStationCarNative;
+    if (bridge && typeof bridge.setBackIntercept === 'function')
+      bridge.setBackIntercept(backWouldHandle());
+  } catch (e) {}
 }
 
 /* ---------------- App mode: normal | dashboard | cluster ----------------
@@ -2741,9 +2925,12 @@ function applyAppMode() {
   /* One passive GPS watch serves the dashboard speedo and the cluster hero
      number alike (and heading/POIs outside nav). VCNLocation owns the single
      underlying watcher — native-direct in the app, geolocation fallback in
-     plain browsers. Never a second watcher. */
+     plain browsers. Never a second watcher.
+     Lifecycle contract: the watch stays alive while ANY consumer needs it —
+     active navigation OR a live speed display. Switching Dashboard →
+     Normal mid-route must not stop guidance. */
   if (window.VCNLocation) {
-    if (speedDisplayActive()) {
+    if (speedDisplayActive() || navActive) {
       try { VCNLocation.startWatch(onPos, onPosErr); } catch (e) {}
     } else {
       try { VCNLocation.stopWatch(); } catch (e) {}
@@ -2776,6 +2963,7 @@ function setAppMode(mode) {
 window.WayStation = window.WayStation || {};
 window.WayStation.setAppMode = setAppMode;
 window.WayStation.getAppMode = () => appMode;
+window.WayStation.handleBack = handleBack;
 window.WayStation.dashboardActive = dashboardLayoutActive;
 window.WayStation.clusterActive = clusterLayoutActive;
 

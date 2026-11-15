@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
@@ -17,6 +18,8 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.window.OnBackInvokedCallback
+import android.window.OnBackInvokedDispatcher
 import androidx.core.content.ContextCompat
 import android.app.Activity
 
@@ -44,6 +47,40 @@ class MainActivity : Activity() {
     // Native-direct location: the page calls window.WayStationLocation
     // instead of fighting WebView geolocation. See NativeLocationBridge.
     private var locationBridge: NativeLocationBridge? = null
+    // Back handling: the page reports whether an in-app layer (menu,
+    // drawer, marker sheet) would consume Back. The native side must
+    // decide synchronously, so the page pushes this flag via the bridge
+    // whenever overlay state changes (see syncBackState in app.js).
+    // targetSdk 36 defaults enableOnBackInvokedCallback=true, which
+    // bypasses the legacy onBackPressed() override on Android 13+ —
+    // so the callback is registered/unregistered dynamically: registered
+    // only while a layer is open, letting system back work normally
+    // otherwise. The legacy override stays for older devices.
+    @Volatile
+    private var jsBackIntercept = false
+    private var backCallbackRegistered = false
+    private val backCallback = OnBackInvokedCallback {
+        webView?.evaluateJavascript(
+            "window.WayStation && WayStation.handleBack && WayStation.handleBack()", null
+        )
+    }
+
+    private fun setBackInterceptRegistration(intercept: Boolean) {
+        if (Build.VERSION.SDK_INT < 33) return
+        if (intercept == backCallbackRegistered) return
+        backCallbackRegistered = intercept
+        try {
+            if (intercept) {
+                onBackInvokedDispatcher.registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT, backCallback
+                )
+            } else {
+                onBackInvokedDispatcher.unregisterOnBackInvokedCallback(backCallback)
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "back callback registration failed", e)
+        }
+    }
 
     /**
      * Web → native bridge (injected as `window.WayStationCarNative`).
@@ -73,6 +110,15 @@ class MainActivity : Activity() {
             } catch (e: Exception) {
                 Log.w(TAG, "startSpotifyAuth failed", e)
             }
+        }
+
+        /** The page reports whether Back would close an in-app layer.
+         *  Runs on the JavaBridge thread — hop to the UI thread before
+         *  touching the back dispatcher. */
+        @JavascriptInterface
+        fun setBackIntercept(intercept: Boolean) {
+            jsBackIntercept = intercept
+            runOnUiThread { setBackInterceptRegistration(intercept) }
         }
     }
     // Pending WebView geolocation callbacks. While the Android runtime
@@ -407,12 +453,24 @@ class MainActivity : Activity() {
     }
 
     override fun onBackPressed() {
+        // Legacy path (pre-Android 13, or if the invoked-callback default
+        // ever changes): an open in-app layer consumes Back first.
+        if (jsBackIntercept) {
+            webView?.evaluateJavascript(
+                "window.WayStation && WayStation.handleBack && WayStation.handleBack()", null
+            )
+            return
+        }
         val wv = webView
         if (wv != null && wv.canGoBack()) wv.goBack()
         else super.onBackPressed()
     }
 
     override fun onDestroy() {
+        if (backCallbackRegistered && Build.VERSION.SDK_INT >= 33) {
+            try { onBackInvokedDispatcher.unregisterOnBackInvokedCallback(backCallback) } catch (e: Exception) { /* ignore */ }
+            backCallbackRegistered = false
+        }
         retryRunnable?.let { webView?.removeCallbacks(it) }
         retryRunnable = null
         pendingGeoCallbacks.clear()
