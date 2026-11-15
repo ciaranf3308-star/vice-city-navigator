@@ -3713,7 +3713,7 @@ function wireControls() {
   function syncAppVersion() {
     if (!verEl) return;
     fetch('sw.js', { cache: 'no-store' }).then(r => r.text()).then(t => {
-      const m = t.match(/ws-theme-(v\d+)/);
+      const m = t.match(/ws-shell-(v\d+)/);
       verEl.textContent = m ? 'Version ' + m[1] : '—';
     }).catch(() => { verEl.textContent = '—'; });
   }
@@ -3816,7 +3816,7 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
    enforces this). On boot, compare against the live network sw.js; on
    mismatch, ask the SW registration to update and reload once.
    sessionStorage gates it so a blocked network can never loop. */
-const WS_SHELL_VERSION = 'ws-shell-v81';
+const WS_SHELL_VERSION = 'ws-shell-v82';
 function healShellVersionSkew() {
   try {
     if (!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;

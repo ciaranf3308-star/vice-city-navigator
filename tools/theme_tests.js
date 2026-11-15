@@ -175,7 +175,7 @@ ok(SW.isThemeAsset('/fonts/SignPainter/0-255.pbf'), 'isThemeAsset: SignPainter g
 ok(SW.isThemeAsset('/fonts/chalet-london.woff2'), 'isThemeAsset: Chalet woff2');
 ok(SW.isThemeAsset('/fonts/rdr-lino.woff2'), 'isThemeAsset: RDR Lino woff2');
 ok(!SW.isThemeAsset('/fonts/pricedown-bl.woff'), 'VC UI font stays shell, not theme-asset');
-ok(swSrc.includes("ws-shell-v81"), 'SW shell cache v76');
+ok(swSrc.includes("ws-shell-v82"), 'SW shell cache v76');
 ok(swSrc.includes("ws-theme-v217"), 'SW theme cache v215');
 /* Shell version skew guard: app.js bakes the shell version and
    self-heals a mixed old/new asset boot (2026-09-12: old openMenu +
@@ -187,6 +187,10 @@ const appVer = (appSrcSkew.match(/const WS_SHELL_VERSION = '(ws-shell-v\d+)'/) |
 ok(!!swVer && !!appVer && swVer === appVer, 'app.js WS_SHELL_VERSION matches sw.js CACHE (' + (appVer || '?') + ')');
 ok(/healShellVersionSkew\(\)/.test(appSrcSkew), 'shell skew guard runs at boot');
 ok(/ws-shell-healed/.test(appSrcSkew), 'skew guard has a reload loop gate');
+/* Settings version display tracks the shell version, not the theme
+   cache: code ships move the shell version, so the number the user
+   sees must move with it (2026-11-15: phone stuck showing v217). */
+ok(appSrcSkew.includes("t.match(/ws-shell-(v\\d+)/)"), 'settings version display reads the shell version from sw.js');
 /* VC dashboard view toggle is a chamfered console plate, not floating
    text (2026-09-12: user called the naked text labels lashed-in). */
 const vcToggle = fs.readFileSync('themes/vice-city/mode-toggle.css', 'utf8');

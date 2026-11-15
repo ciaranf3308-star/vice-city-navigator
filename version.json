@@ -1,12 +1,12 @@
 {
-  "build": "waystation-shell-v81-2026-11-15",
-  "shell": "ws-shell-v81",
+  "build": "waystation-shell-v82-2026-11-15",
+  "shell": "ws-shell-v82",
   "theme": "ws-theme-v217",
   "assets": {
     "index.html": "a21933916371fb9e",
     "styles.css": "c64eaf1d59121fc5",
-    "app.js": "6fedab57689e4da1",
-    "sw.js": "d12caaa9ff6b7e4e",
+    "app.js": "cc485a0aa90951b4",
+    "sw.js": "3210bfb579c05376",
     "themes/vice-city/spotify-skin.css": "541717ee14ca80e5",
     "themes/vice-city/phone.css": "87909b9d4538ba87",
     "themes/gta-v/dashboard.css": "ba3a45db1e1172e7",
